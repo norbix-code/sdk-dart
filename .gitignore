@@ -1,0 +1,8 @@
+.dart_tool/
+.packages
+build/
+dist/
+node_modules/
+pubspec.lock
+coverage/
+references/*.dtos.dart

@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdks/norbix-dart
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install x tool
+        run: dotnet tool install --global x
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Generate endpoints
+        run: python3 scripts/generate_endpoints.py
+
+      - name: Analyze
+        run: dart analyze
+
+      - name: Test
+        run: dart test
