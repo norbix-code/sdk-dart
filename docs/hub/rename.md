@@ -1,5 +1,5 @@
 # HUB rename module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `PUT` `/{version}/database/schemas/{Id}/rename` -> `renameDatabaseSchemaRequest`

@@ -1,5 +1,5 @@
 # HUB resend module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `GET` `/{version}/account/verify/resend` -> `resendAccountVerificationToken`

@@ -1,5 +1,5 @@
 # API unblock module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `PATCH` `/{version}/membership/users/unblock` -> `unblockUser`

@@ -1,6 +1,6 @@
 # HUB enable module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `PATCH` `/{version}/account/projects/{projectId}/enable` -> `enableProject`
 - `GET` `/{version}/membership/enable` -> `enableMembership`

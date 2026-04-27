@@ -1,5 +1,5 @@
 # HUB publish module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/database/schemas/{Id}/publish` -> `publishDatabaseSchemaRequest`

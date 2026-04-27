@@ -1,6 +1,6 @@
 # HUB disable module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `PATCH` `/{version}/account/projects/{projectId}/disable` -> `disableProject`
 - `GET` `/{version}/membership/disable` -> `disableMembership`

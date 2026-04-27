@@ -1,5 +1,5 @@
 # HUB rotate module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/webhooks/integration/secret/rotate` -> `rotateWebhookIntegrationSecretRequest`

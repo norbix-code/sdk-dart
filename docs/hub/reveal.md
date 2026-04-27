@@ -1,5 +1,5 @@
 # HUB reveal module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `GET` `/{version}/webhooks/integration/secret` -> `revealWebhookIntegrationSecretRequest`

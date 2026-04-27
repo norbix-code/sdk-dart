@@ -1,5 +1,5 @@
 # API invite module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/membership/users/invite` -> `inviteUser`

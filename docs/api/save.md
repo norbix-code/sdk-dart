@@ -1,6 +1,6 @@
 # API save module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/membership/users/register/service` -> `saveSystemUserWithPermissions`
 - `POST` `/{version}/membership/users/register/guest` -> `saveGuestUser`

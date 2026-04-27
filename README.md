@@ -44,27 +44,9 @@ final client = Norbix(apiKey: 'nbx_...');
 client.setBearerToken('eyJ...');
 ```
 
-## Generate references with ServiceStack `x dart`
+## SDK maintenance
 
-Install the tool:
-
-```bash
-dotnet tool install --global x
-```
-
-Generate references and endpoint wrappers:
-
-```bash
-make sync-types
-make generate
-```
-
-Update existing references:
-
-```bash
-make sync-types-update
-make generate
-```
+Endpoint wrappers and module docs are generated as part of the SDK maintenance workflow.
 
 ## Real-world examples
 

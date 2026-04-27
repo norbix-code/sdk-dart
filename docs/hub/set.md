@@ -1,6 +1,6 @@
 # HUB set module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `PUT` `/{version}/membership/integrations/{Id}/default` -> `setMembershipIntegrationAsDefaultRequest`
 - `PUT` `/{version}/database/integrations/{Id}/default` -> `setDatabaseIntegrationAsDefaultRequest`

@@ -1,5 +1,5 @@
 # HUB attach module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/notifications/email/templates/attachments` -> `attachFileToTemplateRequest`

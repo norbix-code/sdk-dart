@@ -1,6 +1,6 @@
 # HUB update module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `PUT` `/{version}/account/profile` -> `updateAccountProfile`
 - `PATCH` `/{version}/account/projects/{projectId}/settings/accent-color` -> `updateProjectAccentColor`

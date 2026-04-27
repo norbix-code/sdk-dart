@@ -1,6 +1,6 @@
 # HUB confirm module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/notifications/email/integrations/confirm-human-delivery` -> `confirmEmailIntegrationHumanDeliveryRequest`
 - `POST` `/{version}/notifications/push/integrations/confirm-human-delivery` -> `confirmPushIntegrationHumanDeliveryRequest`

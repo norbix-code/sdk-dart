@@ -1,6 +1,6 @@
 # HUB delete module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `DELETE` `/{version}/account/projects/{projectId}/notifications/settings/group` -> `deleteNotificationsGroup`
 - `DELETE` `/{version}/account/projects/{projectId}/notifications/settings/tag` -> `deleteNotificationsTag`

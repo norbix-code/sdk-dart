@@ -1,6 +1,6 @@
 # HUB save module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/account/projects/{projectId}/notifications/settings/group` -> `saveNotificationsGroup`
 - `POST` `/{version}/account/projects/{projectId}/notifications/settings/tag` -> `saveNotificationsTag`

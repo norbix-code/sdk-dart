@@ -1,5 +1,5 @@
 # API assign module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `PUT` `/{version}/membership/users/assign-roles` -> `assignRolePermissions`

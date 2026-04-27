@@ -1,6 +1,6 @@
 # HUB test module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/database/aggregates/test` -> `testDatabaseAggregateRequest`
 - `POST` `/{version}/notifications/email/integrations/test` -> `testEmailIntegration`

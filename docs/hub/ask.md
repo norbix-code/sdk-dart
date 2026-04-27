@@ -1,5 +1,5 @@
 # HUB ask module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/account/chat/complete` -> `askChatRequest`

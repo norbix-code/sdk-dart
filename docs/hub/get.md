@@ -1,6 +1,6 @@
 # HUB get module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `GET` `/{version}/account/profile` -> `getAccountProfile`
 - `GET` `/{version}/account/status` -> `getAccountStatus`

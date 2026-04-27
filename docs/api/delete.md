@@ -1,5 +1,5 @@
 # API delete module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `DELETE` `/{version}/membership/users` -> `deleteUser`

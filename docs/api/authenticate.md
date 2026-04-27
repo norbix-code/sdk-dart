@@ -1,6 +1,6 @@
 # API authenticate module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `GET` `/auth` -> `authenticate`
 - `GET` `/auth/{provider}` -> `authenticate`

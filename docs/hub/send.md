@@ -1,5 +1,5 @@
 # HUB send module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `POST` `/{version}/account/team/member/invite` -> `sendInviteToTeamMember`

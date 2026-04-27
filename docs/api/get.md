@@ -1,6 +1,6 @@
 # API get module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `GET` `/{version}/membership/users/{id}` -> `getUser`
 - `GET` `/{version}/membership/users` -> `getUsers`

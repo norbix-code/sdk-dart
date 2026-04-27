@@ -1,5 +1,5 @@
 # HUB internals module
 
-Generated from ServiceStack Dart DTO routes.
+Generated from Dart DTO route contracts.
 
 - `GET` `/internal/_typegen` -> `internalsTypeGen`

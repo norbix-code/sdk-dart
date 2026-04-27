@@ -207,7 +207,7 @@ def write_group_doc(host: str, group: str, endpoints: list[Endpoint]) -> None:
   doc_dir = DOCS / host
   doc_dir.mkdir(parents=True, exist_ok=True)
   lines = [f"# {host.upper()} {group} module", ""]
-  lines.append("Generated from ServiceStack Dart DTO routes.")
+  lines.append("Generated from Dart DTO route contracts.")
   lines.append("")
   for ep in endpoints:
     lines.append(f"- `{ep.method}` `{ep.route}` -> `{camel_case(ep.request)}`")
