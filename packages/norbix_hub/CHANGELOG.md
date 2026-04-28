@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.1
+## 1.1.0
 Green-field rewrite. **Breaking** vs. the old single-package `norbix_dart`:
 
 - Split out as a standalone package.

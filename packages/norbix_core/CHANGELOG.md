@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.1
+## 1.1.0
 Initial release. Shared transport, NorbixConfig (with `fromEnv` factory),
 typed error hierarchy (`NorbixAuthError`, `NorbixNotFoundError`,
 `NorbixRateLimitError`, `NorbixClientError`, `NorbixServerError`,

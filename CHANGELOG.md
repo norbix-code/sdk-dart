@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/norbix-code/sdk-dart/compare/v1.0.1...v1.1.0) (2026-04-28)
+
+
+### Features
+
+* support default project context in hub client ([5d2d60f](https://github.com/norbix-code/sdk-dart/commit/5d2d60fb207ef04e9025ca92be4daf730c7b57a5))
+
 ## [1.0.1](https://github.com/norbix-code/sdk-dart/compare/v1.0.0...v1.0.1) (2026-04-28)
 
 
