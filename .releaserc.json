@@ -14,14 +14,19 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "python3 -c \"from pathlib import Path; import re; p=Path('pubspec.yaml'); s=p.read_text(encoding='utf-8'); s=re.sub(r'^version:\\s*.+$', 'version: ${nextRelease.version}', s, flags=re.M); p.write_text(s, encoding='utf-8')\"",
-        "publishCmd": "dart pub publish --force"
+        "prepareCmd": "bash tool/bump_versions.sh ${nextRelease.version}",
+        "publishCmd": "bash tool/publish_packages.sh"
       }
     ],
     [
       "@semantic-release/git",
       {
-        "assets": ["CHANGELOG.md", "pubspec.yaml"],
+        "assets": [
+          "CHANGELOG.md",
+          "packages/norbix_core/pubspec.yaml",
+          "packages/norbix_api/pubspec.yaml",
+          "packages/norbix_hub/pubspec.yaml"
+        ],
         "message": "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}"
       }
     ],

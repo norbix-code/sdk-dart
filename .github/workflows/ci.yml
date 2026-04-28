@@ -8,21 +8,29 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sdks/norbix-dart
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace)
         run: dart pub get
 
       - name: Analyze
         run: dart analyze
 
-      - name: Test
+      - name: Test norbix_core
         run: dart test
+        working-directory: packages/norbix_core
+
+      - name: Test norbix_api
+        run: dart test
+        working-directory: packages/norbix_api
+
+      - name: Test norbix_hub
+        run: dart test
+        working-directory: packages/norbix_hub
