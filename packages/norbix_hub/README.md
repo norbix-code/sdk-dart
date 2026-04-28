@@ -14,6 +14,7 @@ import 'package:norbix_hub/norbix_hub.dart';
 Future<void> main() async {
   // Defaults to https://hub.norbix.ai
   final client = NorbixHub(
+    projectId: 'proj_123',
     config: NorbixConfig(
       baseUrl: kNorbixHubDefaultBaseUrl,
       bearerToken: 'eyJ...',
@@ -76,6 +77,12 @@ final client = NorbixHub.fromEnv();
 | `NORBIX_HUB_VERSION` | `v1` | API version segment |
 | `NORBIX_HUB_TIMEOUT_MS` | `30000` | HTTP timeout |
 | `NORBIX_HUB_MAX_RETRIES` | `0` | Retries on 5xx / 429 / network |
+| `NORBIX_HUB_PROJECT_ID` | — | Default `{projectId}` path parameter |
+
+When `projectId` is set on the client (constructor, `fromEnv`, or
+`client.setProjectId(...)`), methods like `client.projects.getProject()` can
+omit `projectId`. Passing `projectId` directly in a call still overrides the
+default for that request.
 
 ## Resources
 

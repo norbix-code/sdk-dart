@@ -8,7 +8,10 @@ class ProjectsResource extends Resource {
   ProjectsResource(super.transport);
 
   /// `POST /{version}/account/projects`
-  Future<Object?> createProject({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> createProject(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects',
       method: 'POST',
@@ -20,9 +23,14 @@ class ProjectsResource extends Resource {
   }
 
   /// `DELETE /{version}/account/projects/{projectId}/notifications/settings/group`
-  Future<Object?> deleteNotificationsGroup({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteNotificationsGroup(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/account/projects/{projectId}/notifications/settings/group',
+      route:
+          '/{version}/account/projects/{projectId}/notifications/settings/group',
       method: 'DELETE',
       query: query,
       body: body,
@@ -32,9 +40,14 @@ class ProjectsResource extends Resource {
   }
 
   /// `DELETE /{version}/account/projects/{projectId}/notifications/settings/tag`
-  Future<Object?> deleteNotificationsTag({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteNotificationsTag(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/account/projects/{projectId}/notifications/settings/tag',
+      route:
+          '/{version}/account/projects/{projectId}/notifications/settings/tag',
       method: 'DELETE',
       query: query,
       body: body,
@@ -44,7 +57,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `DELETE /{version}/account/projects/{projectId}`
-  Future<Object?> deleteProject({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteProject(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}',
       method: 'DELETE',
@@ -56,7 +73,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/disable`
-  Future<Object?> disableProject({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableProject(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/disable',
       method: 'PATCH',
@@ -68,7 +89,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/enable`
-  Future<Object?> enableProject({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableProject(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/enable',
       method: 'PATCH',
@@ -80,7 +105,10 @@ class ProjectsResource extends Resource {
   }
 
   /// `GET /{version}/account/projects/{projectId}`
-  Future<Object?> getProject({ required Object projectId, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getProject(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}',
       method: 'GET',
@@ -91,7 +119,10 @@ class ProjectsResource extends Resource {
   }
 
   /// `GET /{version}/account/projects/{projectId}/tokens`
-  Future<Object?> getProjectTokens({ required Object projectId, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getProjectTokens(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/tokens',
       method: 'GET',
@@ -102,7 +133,8 @@ class ProjectsResource extends Resource {
   }
 
   /// `GET /{version}/account/projects`
-  Future<Object?> getProjects({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getProjects(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects',
       method: 'GET',
@@ -113,9 +145,14 @@ class ProjectsResource extends Resource {
   }
 
   /// `DELETE /{version}/account/projects/{projectId}/notifications/settings/group/tag`
-  Future<Object?> removeTagFromNotificationsGroup({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> removeTagFromNotificationsGroup(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/account/projects/{projectId}/notifications/settings/group/tag',
+      route:
+          '/{version}/account/projects/{projectId}/notifications/settings/group/tag',
       method: 'DELETE',
       query: query,
       body: body,
@@ -125,9 +162,14 @@ class ProjectsResource extends Resource {
   }
 
   /// `POST /{version}/account/projects/{projectId}/notifications/settings/group`
-  Future<Object?> saveNotificationsGroup({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveNotificationsGroup(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/account/projects/{projectId}/notifications/settings/group',
+      route:
+          '/{version}/account/projects/{projectId}/notifications/settings/group',
       method: 'POST',
       query: query,
       body: body,
@@ -137,9 +179,14 @@ class ProjectsResource extends Resource {
   }
 
   /// `POST /{version}/account/projects/{projectId}/notifications/settings/tag`
-  Future<Object?> saveNotificationsTag({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveNotificationsTag(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/account/projects/{projectId}/notifications/settings/tag',
+      route:
+          '/{version}/account/projects/{projectId}/notifications/settings/tag',
       method: 'POST',
       query: query,
       body: body,
@@ -149,7 +196,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/accent-color`
-  Future<Object?> updateProjectAccentColor({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectAccentColor(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/accent-color',
       method: 'PATCH',
@@ -161,7 +212,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/origins`
-  Future<Object?> updateProjectAllowedOrigins({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectAllowedOrigins(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/origins',
       method: 'PATCH',
@@ -173,9 +228,14 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/default-language`
-  Future<Object?> updateProjectDefaultLanguage({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectDefaultLanguage(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/account/projects/{projectId}/settings/default-language',
+      route:
+          '/{version}/account/projects/{projectId}/settings/default-language',
       method: 'PATCH',
       query: query,
       body: body,
@@ -185,7 +245,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/description`
-  Future<Object?> updateProjectDescription({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectDescription(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/description',
       method: 'PATCH',
@@ -197,7 +261,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/icon`
-  Future<Object?> updateProjectIcon({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectIcon(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/icon',
       method: 'PATCH',
@@ -209,7 +277,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/languages`
-  Future<Object?> updateProjectLanguages({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectLanguages(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/languages',
       method: 'PATCH',
@@ -221,7 +293,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/logo`
-  Future<Object?> updateProjectLogo({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectLogo(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/logo',
       method: 'PATCH',
@@ -233,7 +309,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/main-color`
-  Future<Object?> updateProjectMainColor({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectMainColor(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/main-color',
       method: 'PATCH',
@@ -245,7 +325,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/name`
-  Future<Object?> updateProjectName({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectName(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/name',
       method: 'PATCH',
@@ -257,7 +341,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/regions`
-  Future<Object?> updateProjectRegions({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectRegions(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/regions',
       method: 'PATCH',
@@ -269,7 +357,11 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/url`
-  Future<Object?> updateProjectUrl({ required Object projectId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateProjectUrl(
+      {Object? projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/url',
       method: 'PATCH',

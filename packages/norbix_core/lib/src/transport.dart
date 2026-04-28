@@ -11,12 +11,15 @@ class Transport {
   Transport({
     required this.config,
     HttpDriver? driver,
-  }) : _driver = driver ?? HttpClientDriver();
+    Map<String, Object?>? defaultPathParams,
+  })  : _driver = driver ?? HttpClientDriver(),
+        defaultPathParams = {...?defaultPathParams};
 
   /// Mutable so credentials can be rotated at runtime via
   /// `client.setApiKey(...)` without rebuilding the Transport.
   NorbixConfig config;
   final HttpDriver _driver;
+  final Map<String, Object?> defaultPathParams;
 
   /// Send a request and return the parsed JSON body (Map, List, or null).
   ///
@@ -94,8 +97,12 @@ class Transport {
     Map<String, Object?>? pathParams,
   }) {
     var normalizedRoute = route;
-    if (pathParams != null) {
-      pathParams.forEach((k, v) {
+    final mergedPathParams = <String, Object?>{
+      ...defaultPathParams,
+      ...?pathParams,
+    };
+    if (mergedPathParams.isNotEmpty) {
+      mergedPathParams.forEach((k, v) {
         if (v == null) return;
         normalizedRoute = normalizedRoute.replaceAll(
           '{$k}',

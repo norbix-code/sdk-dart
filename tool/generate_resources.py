@@ -195,7 +195,11 @@ def emit_resource_file(
         path_params = extract_path_params(ep.route)
         params: list[str] = []
         for pp in path_params:
-            params.append(f"required Object {pp}")
+            if pp == "projectId":
+                # Allow projectId to come from client-level context.
+                params.append("Object? projectId")
+            else:
+                params.append(f"required Object {pp}")
         params.append("Map<String, Object?>? query")
         if ep.http_method != "GET":
             params.append("Object? body")
@@ -240,6 +244,30 @@ def emit_resource_file(
 
 def emit_client(pkg_dir: str, host_class: str, default_url_var: str, default_url: str,
                 env_vars: dict[str, str], resource_ids: list[str]) -> None:
+    io_import = "import 'dart:io' show Platform;\n\n" if host_class == "NorbixHub" else ""
+    ctor_project_param = ", Object? projectId" if host_class == "NorbixHub" else ""
+    ctor_project_default = "          defaultPathParams: {'projectId': projectId},\n" if host_class == "NorbixHub" else ""
+    env_project_doc = "  ///   NORBIX_HUB_PROJECT_ID\n" if host_class == "NorbixHub" else ""
+    env_project_read = (
+        "    final env = <String, String>{\n"
+        "      ...Platform.environment,\n"
+        "      ...?overrides,\n"
+        "    };\n"
+        "    final projectId = env['NORBIX_HUB_PROJECT_ID'];\n"
+        if host_class == "NorbixHub" else ""
+    )
+    env_project_arg = ", projectId: projectId" if host_class == "NorbixHub" else ""
+    project_helpers = (
+        "\n"
+        "  /// Project context used for routes that include `{projectId}`.\n"
+        "  /// Per-call parameters still override this default.\n"
+        "  Object? get projectId => _transport.defaultPathParams['projectId'];\n"
+        "\n"
+        "  /// Set or replace the default project context at runtime.\n"
+        "  void setProjectId(Object? projectId) =>\n"
+        "      _transport.defaultPathParams['projectId'] = projectId;\n"
+        if host_class == "NorbixHub" else ""
+    )
     imports = "\n".join(
         f"import 'resources/{RESOURCE_META[r][1]}.dart';" for r in resource_ids
     )
@@ -252,7 +280,7 @@ def emit_client(pkg_dir: str, host_class: str, default_url_var: str, default_url
     body = f"""// GENERATED FILE. Do not edit by hand.
 // Regenerate with: python3 tool/generate_resources.py
 
-import 'package:norbix_core/norbix_core.dart';
+{io_import}import 'package:norbix_core/norbix_core.dart';
 
 {imports}
 
@@ -278,10 +306,11 @@ class {host_class} {{
   ///   ),
   /// );
   /// ```
-  {host_class}({{NorbixConfig? config, HttpDriver? driver}})
+  {host_class}({{NorbixConfig? config, HttpDriver? driver{ctor_project_param}}})
       : _transport = Transport(
           config: config ?? NorbixConfig(baseUrl: {default_url_var}),
           driver: driver,
+{ctor_project_default}        
         );
 
   /// Build a client that reads its base URL and credentials from
@@ -295,10 +324,12 @@ class {host_class} {{
   ///   {env_vars['version']}        (default v1)
   ///   {env_vars['timeout']}
   ///   {env_vars['retries']}
+{env_project_doc}  
   factory {host_class}.fromEnv({{
     Map<String, String>? overrides,
     HttpDriver? driver,
   }}) {{
+{env_project_read}    
     final cfg = NorbixConfig.fromEnv(
       defaultBaseUrl: {default_url_var},
       baseUrlVar: '{env_vars['baseUrl']}',
@@ -309,7 +340,7 @@ class {host_class} {{
       maxRetriesVar: '{env_vars['retries']}',
       overrides: overrides,
     );
-    return {host_class}(config: cfg, driver: driver);
+    return {host_class}(config: cfg, driver: driver{env_project_arg});
   }}
 
   final Transport _transport;
@@ -329,6 +360,7 @@ class {host_class} {{
   /// Replace the entire configuration. Useful for switching environments
   /// (staging <-> production) at runtime.
   void setConfig(NorbixConfig config) => _transport.config = config;
+{project_helpers}
 
 {fields}
 

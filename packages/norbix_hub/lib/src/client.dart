@@ -1,6 +1,8 @@
 // GENERATED FILE. Do not edit by hand.
 // Regenerate with: python3 tool/generate_resources.py
 
+import 'dart:io' show Platform;
+
 import 'package:norbix_core/norbix_core.dart';
 
 import 'resources/accounts.dart';
@@ -45,10 +47,11 @@ class NorbixHub {
   ///   ),
   /// );
   /// ```
-  NorbixHub({NorbixConfig? config, HttpDriver? driver})
+  NorbixHub({NorbixConfig? config, HttpDriver? driver, Object? projectId})
       : _transport = Transport(
           config: config ?? NorbixConfig(baseUrl: kNorbixHubDefaultBaseUrl),
           driver: driver,
+          defaultPathParams: {'projectId': projectId},
         );
 
   /// Build a client that reads its base URL and credentials from
@@ -62,10 +65,16 @@ class NorbixHub {
   ///   NORBIX_HUB_VERSION        (default v1)
   ///   NORBIX_HUB_TIMEOUT_MS
   ///   NORBIX_HUB_MAX_RETRIES
+  ///   NORBIX_HUB_PROJECT_ID
   factory NorbixHub.fromEnv({
     Map<String, String>? overrides,
     HttpDriver? driver,
   }) {
+    final env = <String, String>{
+      ...Platform.environment,
+      ...?overrides,
+    };
+    final projectId = env['NORBIX_HUB_PROJECT_ID'];
     final cfg = NorbixConfig.fromEnv(
       defaultBaseUrl: kNorbixHubDefaultBaseUrl,
       baseUrlVar: 'NORBIX_HUB_BASE_URL',
@@ -76,7 +85,7 @@ class NorbixHub {
       maxRetriesVar: 'NORBIX_HUB_MAX_RETRIES',
       overrides: overrides,
     );
-    return NorbixHub(config: cfg, driver: driver);
+    return NorbixHub(config: cfg, driver: driver, projectId: projectId);
   }
 
   final Transport _transport;
@@ -97,24 +106,37 @@ class NorbixHub {
   /// (staging <-> production) at runtime.
   void setConfig(NorbixConfig config) => _transport.config = config;
 
+  /// Project context used for routes that include `{projectId}`.
+  /// Per-call parameters still override this default.
+  Object? get projectId => _transport.defaultPathParams['projectId'];
+
+  /// Set or replace the default project context at runtime.
+  void setProjectId(Object? projectId) =>
+      _transport.defaultPathParams['projectId'] = projectId;
+
   late final AccountsResource accounts = AccountsResource(_transport);
-  late final AiIntegrationsResource aiIntegrations = AiIntegrationsResource(_transport);
+  late final AiIntegrationsResource aiIntegrations =
+      AiIntegrationsResource(_transport);
   late final ApiKeysResource apiKeys = ApiKeysResource(_transport);
   late final AuthResource auth = AuthResource(_transport);
   late final DatabaseResource database = DatabaseResource(_transport);
   late final EchoResource echo = EchoResource(_transport);
-  late final EmailNotificationsResource emailNotifications = EmailNotificationsResource(_transport);
-  late final EmailUnsubscribeResource emailUnsubscribe = EmailUnsubscribeResource(_transport);
+  late final EmailNotificationsResource emailNotifications =
+      EmailNotificationsResource(_transport);
+  late final EmailUnsubscribeResource emailUnsubscribe =
+      EmailUnsubscribeResource(_transport);
   late final FilesResource files = FilesResource(_transport);
   late final InternalsResource internals = InternalsResource(_transport);
   late final LogsResource logs = LogsResource(_transport);
   late final MembershipResource membership = MembershipResource(_transport);
   late final PaymentsResource payments = PaymentsResource(_transport);
   late final ProjectsResource projects = ProjectsResource(_transport);
-  late final PushNotificationsResource pushNotifications = PushNotificationsResource(_transport);
+  late final PushNotificationsResource pushNotifications =
+      PushNotificationsResource(_transport);
   late final SchedulerResource scheduler = SchedulerResource(_transport);
   late final TriggersResource triggers = TriggersResource(_transport);
-  late final UserNotificationPreferencesResource userNotificationPreferences = UserNotificationPreferencesResource(_transport);
+  late final UserNotificationPreferencesResource userNotificationPreferences =
+      UserNotificationPreferencesResource(_transport);
   late final WebhooksResource webhooks = WebhooksResource(_transport);
 
   /// Closes the underlying HTTP client. Call when you are done.
