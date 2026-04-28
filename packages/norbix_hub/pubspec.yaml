@@ -1,6 +1,6 @@
 name: norbix_hub
 description: Official Dart SDK for the account-scoped Norbix Hub (hub.norbix.ai). Resource-style client with env-based config.
-version: 0.1.0
+version: 1.0.0
 homepage: https://norbix.ai
 repository: https://github.com/norbix-dev/norbix-dart
 resolution: workspace
