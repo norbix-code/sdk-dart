@@ -1,15 +1,12 @@
-name: norbix_dart
-description: Official Dart SDK for Norbix — one client for API and Hub.
+name: _norbix_dart_workspace
+publish_to: none
+description: Workspace root for the Norbix Dart SDKs (norbix_core, norbix_api, norbix_hub).
 version: 0.0.0
-homepage: https://norbix.dev
-repository: https://github.com/norbix-dev/norbix-dart
 
 environment:
-  sdk: ">=2.13.0 <4.0.0"
+  sdk: ">=3.6.0 <4.0.0"
 
-dependencies:
-  http: ^0.13.3
-
-dev_dependencies:
-  lints: ^1.0.1
-  test: ^1.17.12
+workspace:
+  - packages/norbix_core
+  - packages/norbix_api
+  - packages/norbix_hub

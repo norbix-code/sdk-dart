@@ -1,0 +1,17 @@
+name: norbix_core
+description: Shared core for Norbix Dart SDKs (transport, config, errors). Used by norbix_api and norbix_hub.
+version: 0.1.0
+homepage: https://norbix.ai
+repository: https://github.com/norbix-dev/norbix-dart
+resolution: workspace
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  http: ^1.2.0
+  meta: ^1.10.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.0

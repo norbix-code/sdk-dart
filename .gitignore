@@ -5,6 +5,4 @@ dist/
 node_modules/
 pubspec.lock
 coverage/
-references/*.dtos.dart
-scripts/sync_types.py
-scripts/generate_endpoints.py
+**/.dart_tool/
