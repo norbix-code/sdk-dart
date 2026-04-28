@@ -30,7 +30,7 @@ jobs:
           node-version: "22"
 
       - name: Install release tooling
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Install Dart dependencies (workspace)
         run: dart pub get
