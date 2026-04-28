@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/norbix-code/sdk-dart/compare/v1.0.0...v1.0.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* unblock package publishing in release pipeline ([2cf28ea](https://github.com/norbix-code/sdk-dart/commit/2cf28ead7bb295ea83d86e18a193538e9e62399b))
+
 # 1.0.0 (2026-04-28)
 
 
