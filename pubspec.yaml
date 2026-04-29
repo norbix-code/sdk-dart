@@ -1,6 +1,6 @@
 name: norbix
 description: Official Dart SDK for Norbix. Project-scoped data plane (api.norbix.ai) and account-scoped configuration plane (hub.norbix.ai), one package, two importable libraries.
-version: 0.1.0
+version: 1.1.1
 homepage: https://norbix.ai
 repository: https://github.com/norbix-dev/norbix-dart
 issue_tracker: https://github.com/norbix-dev/norbix-dart/issues

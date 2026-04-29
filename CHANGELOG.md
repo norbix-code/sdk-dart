@@ -1,3 +1,8 @@
+## 1.1.1
+### Bug Fixes
+
+* **release:** trigger package release after policy alignment ([94d9b8c](https://github.com/norbix-code/sdk-dart/commit/94d9b8c8792cce40cf834a26cff2058b8c0f8589))
+
 # [1.1.0](https://github.com/norbix-code/sdk-dart/compare/v1.0.1...v1.1.0) (2026-04-28)
 
 
