@@ -23,12 +23,7 @@
       {
         "assets": [
           "CHANGELOG.md",
-          "packages/norbix_core/CHANGELOG.md",
-          "packages/norbix_api/CHANGELOG.md",
-          "packages/norbix_hub/CHANGELOG.md",
-          "packages/norbix_core/pubspec.yaml",
-          "packages/norbix_api/pubspec.yaml",
-          "packages/norbix_hub/pubspec.yaml"
+          "pubspec.yaml"
         ],
         "message": "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}"
       }

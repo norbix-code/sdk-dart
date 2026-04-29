@@ -1,26 +1,39 @@
-# Norbix Dart SDKs
+# Norbix Dart SDK
 
-Two installable packages, one repo:
+One package, two importable libraries:
 
-| Package | What it talks to | Default URL |
+| Import | What it talks to | Default URL |
 |---|---|---|
-| [`norbix_api`](packages/norbix_api) | Project-scoped Norbix API | `https://api.norbix.ai` |
-| [`norbix_hub`](packages/norbix_hub) | Account-scoped Norbix Hub | `https://hub.norbix.ai` |
+| `package:norbix/norbix_api.dart` | Project-scoped Norbix API | `https://api.norbix.ai` |
+| `package:norbix/norbix_hub.dart` | Account-scoped Norbix Hub | `https://hub.norbix.ai` |
 
-A small shared package, [`norbix_core`](packages/norbix_core), holds the
-HTTP transport, config, and typed errors. Both SDKs depend on it.
+A single shared core (HTTP transport, config, typed errors) lives under
+`lib/src/core/` and is re-exported from both entry-point libraries — you
+never need to import it directly.
 
-## Why two packages?
-
-The two Norbix services are deployed to different hosts and used in
-different contexts. Apps that only call the project API should not pull
-in account-management code, and vice versa.
-
-You install only what you need:
+## Install
 
 ```bash
-dart pub add norbix_api          # for app / runtime use
-dart pub add norbix_hub          # for tooling / admin / dashboards
+dart pub add norbix
+```
+
+Import the gateway you use:
+
+```dart
+import 'package:norbix/norbix_api.dart';   // project-scoped API
+import 'package:norbix/norbix_hub.dart';   // account-scoped Hub
+```
+
+If you need both in the same file, import one with a prefix to avoid
+name collisions on resources that exist in both gateways (e.g. `auth`,
+`apiKeys`):
+
+```dart
+import 'package:norbix/norbix_api.dart';
+import 'package:norbix/norbix_hub.dart' as hub;
+
+final api = NorbixApi();
+final h   = hub.NorbixHub();
 ```
 
 ## Resource-style API (no namespace nesting)
@@ -69,59 +82,45 @@ final api = NorbixApi.fromEnv();   // reads NORBIX_API_*
 final hub = NorbixHub.fromEnv();   // reads NORBIX_HUB_*
 ```
 
-See each package README for the full list of variables.
-
 ## Repo layout
 
 ```
 norbix-dart/
-├── packages/
-│   ├── norbix_core/              # transport, config, errors
-│   │   ├── lib/
-│   │   │   ├── norbix_core.dart
-│   │   │   └── src/
-│   │   │       ├── config.dart
-│   │   │       ├── errors.dart
-│   │   │       ├── http_driver.dart
-│   │   │       ├── resource.dart
-│   │   │       └── transport.dart
-│   │   └── test/
-│   ├── norbix_api/               # resources for api.norbix.ai
-│   │   ├── lib/
-│   │   │   ├── norbix_api.dart
-│   │   │   └── src/
-│   │   │       ├── client.dart
-│   │   │       └── resources/
-│   │   │           ├── auth.dart
-│   │   │           ├── api_keys.dart
-│   │   │           └── users.dart
-│   │   └── test/
-│   └── norbix_hub/               # resources for hub.norbix.ai
-│       ├── lib/
-│       │   ├── norbix_hub.dart
-│       │   └── src/
-│       │       ├── client.dart
-│       │       └── resources/    # accounts, projects, database, emails, ...
-│       └── test/
+├── lib/
+│   ├── norbix_api.dart           # API entry point (re-exports core + api client + resources)
+│   ├── norbix_hub.dart           # Hub entry point (re-exports core + hub client + resources)
+│   └── src/
+│       ├── core/                 # handwritten: transport, config, errors
+│       ├── api/                  # GENERATED — gitignored
+│       └── hub/                  # GENERATED — gitignored
+├── test/
+│   ├── _fake_driver.dart
+│   ├── core/                     # core tests
+│   ├── api/                      # API client tests
+│   └── hub/                      # Hub client tests
 ├── tool/
-│   └── generate_resources.py     # codegen for resource modules
-├── pubspec.yaml                  # Dart workspace root
+│   └── generate_resources.py     # codegen for resource modules (dev-task, never runs in CI)
+├── pubspec.yaml                  # single `norbix` package
 └── Makefile                      # gen / lint / test
 ```
 
 ## Development
 
 ```bash
-dart pub get                      # resolves all 3 packages via the workspace
-make gen                          # regenerate resource modules
-make test                         # run all package tests
+dart pub get                      # install deps
+make gen                          # regenerate resource modules (dev-only)
+make test                         # run all tests
 make lint                         # dart analyze
 ```
 
+CI never runs `make gen`. The generated files under `lib/src/api/` and
+`lib/src/hub/` are gitignored. The dev runs the gen script locally and
+ships the SDK with the generated artifacts produced from the canonical
+route files.
+
 ## Releases
 
-`norbix_core`, `norbix_api`, and `norbix_hub` are versioned together.
-Conventional Commits + `semantic-release` drive the version bump:
+Versioned with Conventional Commits + `semantic-release`:
 
 - `feat:` — minor
 - `fix:` — patch

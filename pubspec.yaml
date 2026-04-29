@@ -1,14 +1,17 @@
 name: norbix
-description: Workspace root for the Norbix Dart SDKs (norbix_core, norbix_api, norbix_hub).
+description: Official Dart SDK for Norbix. Project-scoped data plane (api.norbix.ai) and account-scoped configuration plane (hub.norbix.ai), one package, two importable libraries.
 version: 0.1.0
 homepage: https://norbix.ai
-repository: https://github.com/norbix-code/sdk-dart
-issue_tracker: https://github.com/norbix-code/sdk-dart/issues
+repository: https://github.com/norbix-dev/norbix-dart
+issue_tracker: https://github.com/norbix-dev/norbix-dart/issues
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
 
-workspace:
-  - packages/norbix_core
-  - packages/norbix_api
-  - packages/norbix_hub
+dependencies:
+  http: ^1.2.0
+  meta: ^1.10.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.0

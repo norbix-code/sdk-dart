@@ -6,3 +6,9 @@ node_modules/
 pubspec.lock
 coverage/
 **/.dart_tool/
+
+# Generation script is dev-only — not shipped with the SDK. Generated
+# outputs (lib/src/api/, lib/src/hub/, lib/norbix_api.dart, lib/norbix_hub.dart)
+# ARE committed and used by CI and consumers.
+tool/generate_resources.py
+tool/__pycache__/

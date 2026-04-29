@@ -9,9 +9,7 @@ lint:
 	dart analyze
 
 test:
-	dart test packages/norbix_core
-	dart test packages/norbix_api
-	dart test packages/norbix_hub
+	dart test
 
 build:
 	dart pub get
