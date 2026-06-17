@@ -3,17 +3,17 @@
 
 import '../../core/resource.dart';
 
-/// RFC-8058 one-click unsubscribe endpoint.
-class EmailUnsubscribeResource extends Resource {
-  EmailUnsubscribeResource(super.transport);
+/// AI chat completions for the current project.
+class ChatResource extends Resource {
+  ChatResource(super.transport);
 
-  /// `POST /{version}/email/one-click-unsubscribe`
-  Future<Object?> oneClickUnsubscribe(
+  /// `POST /{version}/chat/complete`
+  Future<Object?> askChat(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/email/one-click-unsubscribe',
+      route: '/{version}/chat/complete',
       method: 'POST',
       query: query,
       body: body,

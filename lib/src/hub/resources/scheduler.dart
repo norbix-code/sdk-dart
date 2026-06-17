@@ -8,7 +8,11 @@ class SchedulerResource extends Resource {
   SchedulerResource(super.transport);
 
   /// `DELETE /{version}/scheduler/tasks/{id}`
-  Future<Object?> deleteSchedulerTask({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteSchedulerTask(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/tasks/{id}',
       method: 'DELETE',
@@ -20,7 +24,8 @@ class SchedulerResource extends Resource {
   }
 
   /// `GET /{version}/scheduler/disable`
-  Future<Object?> disableScheduler({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> disableScheduler(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/disable',
       method: 'GET',
@@ -31,7 +36,11 @@ class SchedulerResource extends Resource {
   }
 
   /// `PUT /{version}/scheduler/tasks/{id}/disable`
-  Future<Object?> disableSchedulerTask({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableSchedulerTask(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/tasks/{id}/disable',
       method: 'PUT',
@@ -43,7 +52,8 @@ class SchedulerResource extends Resource {
   }
 
   /// `GET /{version}/scheduler/enable`
-  Future<Object?> enableScheduler({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> enableScheduler(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/enable',
       method: 'GET',
@@ -54,7 +64,11 @@ class SchedulerResource extends Resource {
   }
 
   /// `PUT /{version}/scheduler/tasks/{id}/enable`
-  Future<Object?> enableSchedulerTask({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableSchedulerTask(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/tasks/{id}/enable',
       method: 'PUT',
@@ -66,7 +80,10 @@ class SchedulerResource extends Resource {
   }
 
   /// `GET /{version}/scheduler/tasks/{id}`
-  Future<Object?> getSchedulerTask({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getSchedulerTask(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/tasks/{id}',
       method: 'GET',
@@ -77,7 +94,8 @@ class SchedulerResource extends Resource {
   }
 
   /// `GET /{version}/scheduler/tasks`
-  Future<Object?> getSchedulerTasks({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getSchedulerTasks(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/tasks',
       method: 'GET',
@@ -88,7 +106,10 @@ class SchedulerResource extends Resource {
   }
 
   /// `POST /{version}/scheduler/tasks`
-  Future<Object?> saveSchedulerTask({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveSchedulerTask(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/tasks',
       method: 'POST',

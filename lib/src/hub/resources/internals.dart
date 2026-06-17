@@ -8,7 +8,8 @@ class InternalsResource extends Resource {
   InternalsResource(super.transport);
 
   /// `GET /internal/_typegen`
-  Future<Object?> internalsTypeGen({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> internalsTypeGen(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/internal/_typegen',
       method: 'GET',

@@ -8,7 +8,10 @@ class MembershipResource extends Resource {
   MembershipResource(super.transport);
 
   /// `POST /{version}/membership/policies`
-  Future<Object?> createPolicy({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> createPolicy(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/policies',
       method: 'POST',
@@ -20,7 +23,10 @@ class MembershipResource extends Resource {
   }
 
   /// `POST /{version}/membership/roles`
-  Future<Object?> createRole({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> createRole(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/roles',
       method: 'POST',
@@ -32,7 +38,11 @@ class MembershipResource extends Resource {
   }
 
   /// `DELETE /{version}/membership/integrations/{id}`
-  Future<Object?> deleteMembershipIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteMembershipIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/integrations/{id}',
       method: 'DELETE',
@@ -44,7 +54,11 @@ class MembershipResource extends Resource {
   }
 
   /// `DELETE /{version}/membership/triggers/{triggerId}`
-  Future<Object?> deleteMembershipTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteMembershipTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/triggers/{triggerId}',
       method: 'DELETE',
@@ -56,7 +70,10 @@ class MembershipResource extends Resource {
   }
 
   /// `DELETE /{version}/membership/policies`
-  Future<Object?> deletePolicy({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deletePolicy(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/policies',
       method: 'DELETE',
@@ -68,7 +85,10 @@ class MembershipResource extends Resource {
   }
 
   /// `DELETE /{version}/membership/roles`
-  Future<Object?> deleteRole({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteRole(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/roles',
       method: 'DELETE',
@@ -80,7 +100,8 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/disable`
-  Future<Object?> disableMembership({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> disableMembership(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/disable',
       method: 'GET',
@@ -91,7 +112,11 @@ class MembershipResource extends Resource {
   }
 
   /// `PUT /{version}/membership/integrations/{id}/disable`
-  Future<Object?> disableMembershipIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableMembershipIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/integrations/{id}/disable',
       method: 'PUT',
@@ -103,7 +128,11 @@ class MembershipResource extends Resource {
   }
 
   /// `PATCH /{version}/membership/triggers/{triggerId}/disable`
-  Future<Object?> disableMembershipTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableMembershipTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/triggers/{triggerId}/disable',
       method: 'PATCH',
@@ -115,7 +144,8 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/enable`
-  Future<Object?> enableMembership({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> enableMembership(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/enable',
       method: 'GET',
@@ -126,7 +156,11 @@ class MembershipResource extends Resource {
   }
 
   /// `PUT /{version}/membership/integrations/{id}/enable`
-  Future<Object?> enableMembershipIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableMembershipIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/integrations/{id}/enable',
       method: 'PUT',
@@ -138,7 +172,11 @@ class MembershipResource extends Resource {
   }
 
   /// `PATCH /{version}/membership/triggers/{triggerId}/enable`
-  Future<Object?> enableMembershipTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableMembershipTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/triggers/{triggerId}/enable',
       method: 'PATCH',
@@ -150,7 +188,10 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/integrations/{id}`
-  Future<Object?> getMembershipIntegration({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getMembershipIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/integrations/{id}',
       method: 'GET',
@@ -161,7 +202,8 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/integrations`
-  Future<Object?> getMembershipIntegrations({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getMembershipIntegrations(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/integrations',
       method: 'GET',
@@ -172,7 +214,10 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/triggers/{id}`
-  Future<Object?> getMembershipTrigger({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getMembershipTrigger(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/triggers/{id}',
       method: 'GET',
@@ -183,7 +228,8 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/triggers`
-  Future<Object?> getMembershipTriggers({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getMembershipTriggers(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/triggers',
       method: 'GET',
@@ -193,8 +239,21 @@ class MembershipResource extends Resource {
     );
   }
 
+  /// `GET /{version}/membership/passkey/settings`
+  Future<Object?> getPasskeySettings(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/passkey/settings',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/membership/policies`
-  Future<Object?> getPolicies({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getPolicies(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/policies',
       method: 'GET',
@@ -205,7 +264,10 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/policies/{id}`
-  Future<Object?> getPolicy({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getPolicy(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/policies/{id}',
       method: 'GET',
@@ -215,8 +277,23 @@ class MembershipResource extends Resource {
     );
   }
 
+  /// `GET /{version}/membership/policies/new/options`
+  Future<Object?> getPolicyOptions(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/policies/new/options',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/membership/roles/{id}`
-  Future<Object?> getRole({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getRole(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/roles/{id}',
       method: 'GET',
@@ -227,7 +304,8 @@ class MembershipResource extends Resource {
   }
 
   /// `GET /{version}/membership/roles`
-  Future<Object?> getRoles({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getRoles(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/roles',
       method: 'GET',
@@ -238,7 +316,10 @@ class MembershipResource extends Resource {
   }
 
   /// `POST /{version}/membership/integrations`
-  Future<Object?> saveMembershipIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveMembershipIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/integrations',
       method: 'POST',
@@ -250,7 +331,10 @@ class MembershipResource extends Resource {
   }
 
   /// `POST /{version}/membership/triggers`
-  Future<Object?> saveMembershipTrigger({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveMembershipTrigger(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/triggers',
       method: 'POST',
@@ -261,8 +345,27 @@ class MembershipResource extends Resource {
     );
   }
 
+  /// `POST /{version}/membership/passkey/settings`
+  Future<Object?> savePasskeySettings(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/passkey/settings',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `PUT /{version}/membership/integrations/{id}/default`
-  Future<Object?> setMembershipIntegrationAsDefault({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> setMembershipIntegrationAsDefault(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/integrations/{id}/default',
       method: 'PUT',
@@ -274,7 +377,10 @@ class MembershipResource extends Resource {
   }
 
   /// `PUT /{version}/membership/policies`
-  Future<Object?> updatePolicy({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updatePolicy(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/policies',
       method: 'PUT',
@@ -286,7 +392,10 @@ class MembershipResource extends Resource {
   }
 
   /// `PATCH /{version}/membership/roles`
-  Future<Object?> updateRolePolicies({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateRolePolicies(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/roles',
       method: 'PATCH',

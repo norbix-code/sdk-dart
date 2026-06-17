@@ -8,7 +8,8 @@ class AuthResource extends Resource {
   AuthResource(super.transport);
 
   /// `GET /auth`
-  Future<Object?> authenticate({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> authenticate(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/auth',
       method: 'GET',
@@ -19,7 +20,10 @@ class AuthResource extends Resource {
   }
 
   /// `GET /auth/{provider}`
-  Future<Object?> authenticate2({ required Object provider, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> authenticate2(
+      {required Object provider,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/auth/{provider}',
       method: 'GET',
@@ -30,7 +34,10 @@ class AuthResource extends Resource {
   }
 
   /// `POST /v3/auth`
-  Future<Object?> authenticate3({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> authenticate3(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/v3/auth',
       method: 'POST',
@@ -42,7 +49,11 @@ class AuthResource extends Resource {
   }
 
   /// `POST /v3/auth/{provider}`
-  Future<Object?> authenticate4({ required Object provider, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> authenticate4(
+      {required Object provider,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/v3/auth/{provider}',
       method: 'POST',
@@ -54,7 +65,8 @@ class AuthResource extends Resource {
   }
 
   /// `GET /access-token`
-  Future<Object?> getAccessToken({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getAccessToken(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/access-token',
       method: 'GET',

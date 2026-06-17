@@ -8,7 +8,11 @@ class AiIntegrationsResource extends Resource {
   AiIntegrationsResource(super.transport);
 
   /// `DELETE /{version}/ai/integrations/llms/{id}`
-  Future<Object?> deleteLlmIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteLlmIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/llms/{id}',
       method: 'DELETE',
@@ -20,7 +24,11 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `DELETE /{version}/ai/integrations/mcp/{id}`
-  Future<Object?> deleteMcpIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteMcpIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/mcp/{id}',
       method: 'DELETE',
@@ -32,7 +40,11 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `PUT /{version}/ai/integrations/llms/{id}/disable`
-  Future<Object?> disableLlmIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableLlmIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/llms/{id}/disable',
       method: 'PUT',
@@ -44,7 +56,11 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `PUT /{version}/ai/integrations/mcp/{id}/disable`
-  Future<Object?> disableMcpIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableMcpIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/mcp/{id}/disable',
       method: 'PUT',
@@ -56,7 +72,11 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `PUT /{version}/ai/integrations/llms/{id}/enable`
-  Future<Object?> enableLlmIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableLlmIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/llms/{id}/enable',
       method: 'PUT',
@@ -68,7 +88,11 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `PUT /{version}/ai/integrations/mcp/{id}/enable`
-  Future<Object?> enableMcpIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableMcpIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/mcp/{id}/enable',
       method: 'PUT',
@@ -80,7 +104,10 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `GET /{version}/ai/integrations/llms/{id}`
-  Future<Object?> getLlmIntegration({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getLlmIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/llms/{id}',
       method: 'GET',
@@ -91,7 +118,8 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `GET /{version}/ai/integrations/llms/integrations`
-  Future<Object?> getLlmIntegrations({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getLlmIntegrations(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/llms/integrations',
       method: 'GET',
@@ -102,7 +130,10 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `GET /{version}/ai/integrations/mcp/{id}`
-  Future<Object?> getMcpIntegration({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getMcpIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/mcp/{id}',
       method: 'GET',
@@ -113,7 +144,8 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `GET /{version}/ai/integrations/mcp/integrations`
-  Future<Object?> getMcpIntegrations({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getMcpIntegrations(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/mcp/integrations',
       method: 'GET',
@@ -124,7 +156,10 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `POST /{version}/ai/integrations/llms/`
-  Future<Object?> saveLlmIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveLlmIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/llms/',
       method: 'POST',
@@ -136,7 +171,10 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `POST /{version}/ai/integrations/mcp/`
-  Future<Object?> saveMcpIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveMcpIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/mcp/',
       method: 'POST',
@@ -148,7 +186,10 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `POST /{version}/ai/integrations/llms/test`
-  Future<Object?> testLlmIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> testLlmIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/llms/test',
       method: 'POST',
@@ -160,7 +201,10 @@ class AiIntegrationsResource extends Resource {
   }
 
   /// `POST /{version}/ai/integrations/mcp/test`
-  Future<Object?> testMcpIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> testMcpIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/ai/integrations/mcp/test',
       method: 'POST',

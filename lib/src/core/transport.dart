@@ -32,9 +32,11 @@ class Transport {
     Object? body,
     Map<String, String>? headers,
     Map<String, Object?>? pathParams,
+    String? env,
+    String? region,
   }) async {
     final url = _resolveUrl(route: route, query: query, pathParams: pathParams);
-    final allHeaders = _buildHeaders(headers);
+    final allHeaders = _buildHeaders(headers, env, region);
     final encodedBody = (body == null || method.toUpperCase() == 'GET')
         ? null
         : jsonEncode(body);
@@ -113,7 +115,13 @@ class Transport {
     normalizedRoute =
         normalizedRoute.replaceAll('{version}', config.apiVersion);
 
-    final base = config.baseUrl;
+    // Regional routing: when the client has a region AND the base URL is an
+    // SDK default host, requests go to the regional host. A custom base URL
+    // is never rewritten, and per-call region overrides only set the header.
+    final clientRegion = config.region;
+    final base = clientRegion == null
+        ? config.baseUrl
+        : composeRegionalBaseUrl(config.baseUrl, clientRegion);
     final fullUrl = normalizedRoute.startsWith('/')
         ? '$base$normalizedRoute'
         : '$base/$normalizedRoute';
@@ -132,7 +140,8 @@ class Transport {
     });
   }
 
-  Map<String, String> _buildHeaders(Map<String, String>? extra) {
+  Map<String, String> _buildHeaders(Map<String, String>? extra,
+      [String? env, String? region]) {
     final out = <String, String>{
       'content-type': 'application/json',
       'accept': 'application/json',
@@ -142,6 +151,18 @@ class Transport {
       out['authorization'] = 'Bearer ${config.bearerToken}';
     } else if (config.apiKey != null && config.apiKey!.isNotEmpty) {
       out['x-api-key'] = config.apiKey!;
+    }
+    // Environment selector: per-call override wins over the client default.
+    // 'PROD' is the backend default, so the header is omitted for it.
+    final resolvedEnv = env ?? config.env;
+    if (resolvedEnv.isNotEmpty && resolvedEnv != 'PROD') {
+      out['norbix-env'] = resolvedEnv;
+    }
+    // Region selector: per-call override wins over the client default. There
+    // is no default region — the header is sent only when one is resolved.
+    final resolvedRegion = region ?? config.region;
+    if (resolvedRegion != null && resolvedRegion.isNotEmpty) {
+      out['nb-region'] = resolvedRegion;
     }
     if (extra != null) out.addAll(extra);
     return out;

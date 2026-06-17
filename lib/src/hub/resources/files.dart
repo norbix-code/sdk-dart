@@ -8,7 +8,11 @@ class FilesResource extends Resource {
   FilesResource(super.transport);
 
   /// `DELETE /{version}/files/integrations/{id}`
-  Future<Object?> deleteFilesIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteFilesIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/integrations/{id}',
       method: 'DELETE',
@@ -20,7 +24,11 @@ class FilesResource extends Resource {
   }
 
   /// `DELETE /{version}/files/triggers/{triggerId}`
-  Future<Object?> deleteFilesTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteFilesTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/triggers/{triggerId}',
       method: 'DELETE',
@@ -32,7 +40,8 @@ class FilesResource extends Resource {
   }
 
   /// `GET /{version}/files/disable`
-  Future<Object?> disableFiles({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> disableFiles(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/disable',
       method: 'GET',
@@ -43,7 +52,11 @@ class FilesResource extends Resource {
   }
 
   /// `PUT /{version}/files/integrations/{id}/disable`
-  Future<Object?> disableFilesIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableFilesIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/integrations/{id}/disable',
       method: 'PUT',
@@ -55,7 +68,11 @@ class FilesResource extends Resource {
   }
 
   /// `PATCH /{version}/files/triggers/{triggerId}/disable`
-  Future<Object?> disableFilesTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableFilesTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/triggers/{triggerId}/disable',
       method: 'PATCH',
@@ -67,7 +84,8 @@ class FilesResource extends Resource {
   }
 
   /// `GET /{version}/files/enable`
-  Future<Object?> enableFiles({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> enableFiles(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/enable',
       method: 'GET',
@@ -78,7 +96,11 @@ class FilesResource extends Resource {
   }
 
   /// `PUT /{version}/files/integrations/{id}/enable`
-  Future<Object?> enableFilesIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableFilesIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/integrations/{id}/enable',
       method: 'PUT',
@@ -90,7 +112,11 @@ class FilesResource extends Resource {
   }
 
   /// `PATCH /{version}/files/triggers/{triggerId}/enable`
-  Future<Object?> enableFilesTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableFilesTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/triggers/{triggerId}/enable',
       method: 'PATCH',
@@ -101,8 +127,23 @@ class FilesResource extends Resource {
     );
   }
 
+  /// `GET /{version}/files/item`
+  Future<Object?> getFile(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/item',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/files/integrations/{id}`
-  Future<Object?> getFilesIntegration({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getFilesIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/integrations/{id}',
       method: 'GET',
@@ -113,7 +154,8 @@ class FilesResource extends Resource {
   }
 
   /// `GET /{version}/files/integrations`
-  Future<Object?> getFilesIntegrations({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getFilesIntegrations(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/integrations',
       method: 'GET',
@@ -124,7 +166,10 @@ class FilesResource extends Resource {
   }
 
   /// `GET /{version}/files/triggers/{id}`
-  Future<Object?> getFilesTrigger({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getFilesTrigger(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/triggers/{id}',
       method: 'GET',
@@ -135,7 +180,8 @@ class FilesResource extends Resource {
   }
 
   /// `GET /{version}/files/triggers`
-  Future<Object?> getFilesTriggers({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getFilesTriggers(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/triggers',
       method: 'GET',
@@ -145,8 +191,23 @@ class FilesResource extends Resource {
     );
   }
 
+  /// `GET /{version}/files/folder`
+  Future<Object?> getFolderFiles(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/folder',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `POST /{version}/files/integrations`
-  Future<Object?> saveFilesIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveFilesIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/integrations',
       method: 'POST',
@@ -158,7 +219,10 @@ class FilesResource extends Resource {
   }
 
   /// `POST /{version}/files/triggers`
-  Future<Object?> saveFilesTrigger({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveFilesTrigger(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/triggers',
       method: 'POST',
@@ -170,7 +234,11 @@ class FilesResource extends Resource {
   }
 
   /// `PUT /{version}/files/integrations/{id}/default`
-  Future<Object?> setFilesIntegrationAsDefault({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> setFilesIntegrationAsDefault(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/integrations/{id}/default',
       method: 'PUT',

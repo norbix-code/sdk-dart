@@ -19,4 +19,8 @@ export 'src/core/transport.dart';
 export 'src/api/client.dart' show NorbixApi, kNorbixApiDefaultBaseUrl;
 export 'src/api/resources/api_keys.dart';
 export 'src/api/resources/auth.dart';
+export 'src/api/resources/chat.dart';
+export 'src/api/resources/database.dart';
+export 'src/api/resources/files.dart';
+export 'src/api/resources/user_auth.dart';
 export 'src/api/resources/users.dart';

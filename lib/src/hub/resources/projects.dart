@@ -8,6 +8,10 @@ class ProjectsResource extends Resource {
   ProjectsResource(super.transport);
 
   /// `POST /{version}/account/projects`
+  ///
+  /// The [body] may optionally carry `primaryRegion` and `additionalRegions`
+  /// (Norbix region code strings, e.g. "nb-eu-germany") to place the new
+  /// project in specific regions.
   Future<Object?> createProject(
       {Map<String, Object?>? query,
       Object? body,
@@ -341,11 +345,16 @@ class ProjectsResource extends Resource {
   }
 
   /// `PATCH /{version}/account/projects/{projectId}/settings/regions`
+  ///
+  /// Updates the project's regions. The [body] may contain `primaryRegion`
+  /// (a region code, e.g. "nb-eu-germany") and/or `additionalRegions` (a
+  /// list of region codes). The response is empty.
   Future<Object?> updateProjectRegions(
       {Object? projectId,
       Map<String, Object?>? query,
       Object? body,
-      Map<String, String>? headers}) {
+      Map<String, String>? headers,
+      String? region}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/regions',
       method: 'PATCH',
@@ -353,6 +362,7 @@ class ProjectsResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'projectId': projectId},
+      region: region,
     );
   }
 

@@ -3,18 +3,18 @@
 
 import '../../core/resource.dart';
 
-/// Push templates, integrations, devices.
-class PushNotificationsResource extends Resource {
-  PushNotificationsResource(super.transport);
+/// SMS notifications: integrations, templates and campaigns.
+class SmsNotificationsResource extends Resource {
+  SmsNotificationsResource(super.transport);
 
-  /// `PUT /{version}/notifications/push/templates/{id}/archive`
-  Future<Object?> archivePushTemplate(
+  /// `PUT /{version}/notifications/sms/templates/{id}/archive`
+  Future<Object?> archiveSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates/{id}/archive',
+      route: '/{version}/notifications/sms/templates/{id}/archive',
       method: 'PUT',
       query: query,
       body: body,
@@ -23,29 +23,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/integrations/app/check`
-  Future<Object?> checkIntegrationAvailability(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/notifications/push/integrations/app/check',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
-  /// `POST /{version}/notifications/push/templates/{id}/clone`
-  Future<Object?> clonePushTemplate(
+  /// `POST /{version}/notifications/sms/templates/{id}/clone`
+  Future<Object?> cloneSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates/{id}/clone',
+      route: '/{version}/notifications/sms/templates/{id}/clone',
       method: 'POST',
       query: query,
       body: body,
@@ -54,14 +39,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/integrations/confirm-human-delivery`
-  Future<Object?> confirmPushIntegrationHumanDelivery(
+  /// `POST /{version}/notifications/sms/integrations/confirm-human-delivery`
+  Future<Object?> confirmSmsIntegrationHumanDelivery(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route:
-          '/{version}/notifications/push/integrations/confirm-human-delivery',
+      route: '/{version}/notifications/sms/integrations/confirm-human-delivery',
       method: 'POST',
       query: query,
       body: body,
@@ -70,13 +54,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/campaigns`
-  Future<Object?> createPushCampaign(
+  /// `POST /{version}/notifications/sms/campaigns`
+  Future<Object?> createSmsCampaign(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns',
+      route: '/{version}/notifications/sms/campaigns',
       method: 'POST',
       query: query,
       body: body,
@@ -85,13 +69,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/templates`
-  Future<Object?> createPushTemplate(
+  /// `POST /{version}/notifications/sms/templates`
+  Future<Object?> createSmsTemplate(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates',
+      route: '/{version}/notifications/sms/templates',
       method: 'POST',
       query: query,
       body: body,
@@ -100,14 +84,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `DELETE /{version}/notifications/push/campaigns/{id}`
-  Future<Object?> deletePushCampaign(
+  /// `DELETE /{version}/notifications/sms/campaigns/{id}`
+  Future<Object?> deleteSmsCampaign(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns/{id}',
+      route: '/{version}/notifications/sms/campaigns/{id}',
       method: 'DELETE',
       query: query,
       body: body,
@@ -116,14 +100,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `DELETE /{version}/notifications/push/integrations/{id}`
-  Future<Object?> deletePushIntegration(
+  /// `DELETE /{version}/notifications/sms/integrations/{id}`
+  Future<Object?> deleteSmsIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/{id}',
+      route: '/{version}/notifications/sms/integrations/{id}',
       method: 'DELETE',
       query: query,
       body: body,
@@ -132,14 +116,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `DELETE /{version}/notifications/push/templates/{id}`
-  Future<Object?> deletePushTemplate(
+  /// `DELETE /{version}/notifications/sms/templates/{id}`
+  Future<Object?> deleteSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates/{id}',
+      route: '/{version}/notifications/sms/templates/{id}',
       method: 'DELETE',
       query: query,
       body: body,
@@ -148,11 +132,11 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/disable`
-  Future<Object?> disablePush(
+  /// `GET /{version}/notifications/sms/disable`
+  Future<Object?> disableSms(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/disable',
+      route: '/{version}/notifications/sms/disable',
       method: 'GET',
       query: query,
       headers: headers,
@@ -160,14 +144,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/push/integrations/{id}/disable`
-  Future<Object?> disablePushIntegration(
+  /// `PUT /{version}/notifications/sms/integrations/{id}/disable`
+  Future<Object?> disableSmsIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/{id}/disable',
+      route: '/{version}/notifications/sms/integrations/{id}/disable',
       method: 'PUT',
       query: query,
       body: body,
@@ -176,11 +160,11 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/enable`
-  Future<Object?> enablePush(
+  /// `GET /{version}/notifications/sms/enable`
+  Future<Object?> enableSms(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/enable',
+      route: '/{version}/notifications/sms/enable',
       method: 'GET',
       query: query,
       headers: headers,
@@ -188,14 +172,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/push/integrations/{id}/enable`
-  Future<Object?> enablePushIntegration(
+  /// `PUT /{version}/notifications/sms/integrations/{id}/enable`
+  Future<Object?> enableSmsIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/{id}/enable',
+      route: '/{version}/notifications/sms/integrations/{id}/enable',
       method: 'PUT',
       query: query,
       body: body,
@@ -204,13 +188,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{id}`
-  Future<Object?> getPushCampaign(
+  /// `GET /{version}/notifications/sms/campaigns/{id}`
+  Future<Object?> getSmsCampaign(
       {required Object id,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns/{id}',
+      route: '/{version}/notifications/sms/campaigns/{id}',
       method: 'GET',
       query: query,
       headers: headers,
@@ -218,8 +202,8 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{id}/batches/{batchId}/{notificationId}`
-  Future<Object?> getPushCampaignBatchNotification(
+  /// `GET /{version}/notifications/sms/campaigns/{id}/batches/{batchId}/{notificationId}`
+  Future<Object?> getSmsCampaignBatchNotification(
       {required Object id,
       required Object batchId,
       required Object notificationId,
@@ -227,7 +211,7 @@ class PushNotificationsResource extends Resource {
       Map<String, String>? headers}) {
     return transport.send(
       route:
-          '/{version}/notifications/push/campaigns/{id}/batches/{batchId}/{notificationId}',
+          '/{version}/notifications/sms/campaigns/{id}/batches/{batchId}/{notificationId}',
       method: 'GET',
       query: query,
       headers: headers,
@@ -239,14 +223,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{id}/batches/{batchId}`
-  Future<Object?> getPushCampaignBatchNotifications(
+  /// `GET /{version}/notifications/sms/campaigns/{id}/batches/{batchId}`
+  Future<Object?> getSmsCampaignBatchNotifications(
       {required Object id,
       required Object batchId,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns/{id}/batches/{batchId}',
+      route: '/{version}/notifications/sms/campaigns/{id}/batches/{batchId}',
       method: 'GET',
       query: query,
       headers: headers,
@@ -254,13 +238,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{id}/batches`
-  Future<Object?> getPushCampaignBatches(
+  /// `GET /{version}/notifications/sms/campaigns/{id}/batches`
+  Future<Object?> getSmsCampaignBatches(
       {required Object id,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns/{id}/batches',
+      route: '/{version}/notifications/sms/campaigns/{id}/batches',
       method: 'GET',
       query: query,
       headers: headers,
@@ -268,15 +252,15 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{campaignId}/messages/{id}`
-  Future<Object?> getPushCampaignMessage(
+  /// `GET /{version}/notifications/sms/campaigns/{campaignId}/messages/{id}`
+  Future<Object?> getSmsCampaignMessage(
       {required Object campaignId,
       required Object id,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
       route:
-          '/{version}/notifications/push/campaigns/{campaignId}/messages/{id}',
+          '/{version}/notifications/sms/campaigns/{campaignId}/messages/{id}',
       method: 'GET',
       query: query,
       headers: headers,
@@ -284,13 +268,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{campaignId}/messages`
-  Future<Object?> getPushCampaignMessages(
+  /// `GET /{version}/notifications/sms/campaigns/{campaignId}/messages`
+  Future<Object?> getSmsCampaignMessages(
       {required Object campaignId,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns/{campaignId}/messages',
+      route: '/{version}/notifications/sms/campaigns/{campaignId}/messages',
       method: 'GET',
       query: query,
       headers: headers,
@@ -298,13 +282,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{id}/stats`
-  Future<Object?> getPushCampaignStatistics(
+  /// `GET /{version}/notifications/sms/campaigns/{id}/stats`
+  Future<Object?> getSmsCampaignStatistics(
       {required Object id,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns/{id}/stats',
+      route: '/{version}/notifications/sms/campaigns/{id}/stats',
       method: 'GET',
       query: query,
       headers: headers,
@@ -312,11 +296,11 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns`
-  Future<Object?> getPushCampaigns(
+  /// `GET /{version}/notifications/sms/campaigns`
+  Future<Object?> getSmsCampaigns(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/campaigns',
+      route: '/{version}/notifications/sms/campaigns',
       method: 'GET',
       query: query,
       headers: headers,
@@ -324,13 +308,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/integrations/{id}`
-  Future<Object?> getPushIntegration(
+  /// `GET /{version}/notifications/sms/integrations/{id}`
+  Future<Object?> getSmsIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/{id}',
+      route: '/{version}/notifications/sms/integrations/{id}',
       method: 'GET',
       query: query,
       headers: headers,
@@ -338,11 +322,11 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/integrations`
-  Future<Object?> getPushIntegrations(
+  /// `GET /{version}/notifications/sms/integrations`
+  Future<Object?> getSmsIntegrations(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations',
+      route: '/{version}/notifications/sms/integrations',
       method: 'GET',
       query: query,
       headers: headers,
@@ -350,13 +334,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/templates/{id}/tokens`
-  Future<Object?> getPushMessageContentTokens(
+  /// `GET /{version}/notifications/sms/templates/{id}/tokens`
+  Future<Object?> getSmsMessageContentTokens(
       {required Object id,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates/{id}/tokens',
+      route: '/{version}/notifications/sms/templates/{id}/tokens',
       method: 'GET',
       query: query,
       headers: headers,
@@ -364,11 +348,11 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/settings`
-  Future<Object?> getPushSettings(
+  /// `GET /{version}/notifications/sms/settings`
+  Future<Object?> getSmsSettings(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/settings',
+      route: '/{version}/notifications/sms/settings',
       method: 'GET',
       query: query,
       headers: headers,
@@ -376,13 +360,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/templates/{id}`
-  Future<Object?> getPushTemplate(
+  /// `GET /{version}/notifications/sms/templates/{id}`
+  Future<Object?> getSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates/{id}',
+      route: '/{version}/notifications/sms/templates/{id}',
       method: 'GET',
       query: query,
       headers: headers,
@@ -390,11 +374,11 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/templates`
-  Future<Object?> getPushTemplates(
+  /// `GET /{version}/notifications/sms/templates`
+  Future<Object?> getSmsTemplates(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates',
+      route: '/{version}/notifications/sms/templates',
       method: 'GET',
       query: query,
       headers: headers,
@@ -402,13 +386,25 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/integrations/app/request`
-  Future<Object?> registerCodeMashAppPushIntegration(
+  /// `GET /{version}/notifications/sms/preview`
+  Future<Object?> previewSmsNotification(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/sms/preview',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/notifications/sms/integrations`
+  Future<Object?> saveSmsIntegration(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/app/request',
+      route: '/{version}/notifications/sms/integrations',
       method: 'POST',
       query: query,
       body: body,
@@ -417,44 +413,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/devices`
-  Future<Object?> registerDevice(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/notifications/push/devices',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
-  /// `POST /{version}/notifications/push/integrations`
-  Future<Object?> savePushIntegration(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/notifications/push/integrations',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
-  /// `PUT /{version}/notifications/push/integrations/{id}/default`
-  Future<Object?> setPushIntegrationAsDefault(
+  /// `PUT /{version}/notifications/sms/integrations/{id}/default`
+  Future<Object?> setSmsIntegrationAsDefault(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/{id}/default',
+      route: '/{version}/notifications/sms/integrations/{id}/default',
       method: 'PUT',
       query: query,
       body: body,
@@ -463,13 +429,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/integrations/test/codemash-app`
-  Future<Object?> testCodeMashIosAppIntegration(
+  /// `POST /{version}/notifications/sms/templates/razor-syntax-check`
+  Future<Object?> smsRazorSyntaxCheck(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/test/codemash-app',
+      route: '/{version}/notifications/sms/templates/razor-syntax-check',
       method: 'POST',
       query: query,
       body: body,
@@ -478,13 +444,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/integrations/test`
-  Future<Object?> testPushIntegration(
+  /// `POST /{version}/notifications/sms/integrations/test`
+  Future<Object?> testSmsIntegration(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/integrations/test',
+      route: '/{version}/notifications/sms/integrations/test',
       method: 'POST',
       query: query,
       body: body,
@@ -493,14 +459,14 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/push/templates/{id}/unarchive`
-  Future<Object?> unArchivePushTemplate(
+  /// `PUT /{version}/notifications/sms/templates/{id}/unarchive`
+  Future<Object?> unArchiveSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates/{id}/unarchive',
+      route: '/{version}/notifications/sms/templates/{id}/unarchive',
       method: 'PUT',
       query: query,
       body: body,
@@ -509,13 +475,13 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/push/templates`
-  Future<Object?> updatePushTemplate(
+  /// `PUT /{version}/notifications/sms/templates`
+  Future<Object?> updateSmsTemplate(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/push/templates',
+      route: '/{version}/notifications/sms/templates',
       method: 'PUT',
       query: query,
       body: body,

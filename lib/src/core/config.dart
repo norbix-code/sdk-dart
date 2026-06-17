@@ -54,6 +54,20 @@ class NorbixConfig {
   /// Extra headers added to every request.
   final Map<String, String> defaultHeaders;
 
+  /// Project environment every request targets, sent as the `norbix-env`
+  /// header. `PROD` (the default) sends no header; a non-PROD env (e.g.
+  /// `TEST`, `STAGING`) scopes every read and write to that environment's
+  /// integrations. There is no cross-env fallback.
+  final String env;
+
+  /// Norbix region every request targets (a region code such as
+  /// `nb-eu-germany`), sent as the `nb-region` header. Unlike [env] there is
+  /// NO default region: when null (the default) no header is sent. When set
+  /// and [baseUrl] is an SDK default host, requests are routed to the
+  /// regional host (`https://{region}.api.norbix.ai`); a user-supplied
+  /// custom [baseUrl] is never rewritten.
+  final String? region;
+
   NorbixConfig({
     required String baseUrl,
     this.apiVersion = 'v1',
@@ -62,7 +76,10 @@ class NorbixConfig {
     this.timeout = const Duration(seconds: 30),
     this.maxRetries = 0,
     Map<String, String>? defaultHeaders,
+    this.env = 'PROD',
+    String? region,
   })  : baseUrl = _stripTrailingSlash(baseUrl),
+        region = _normalizeRegion(region),
         defaultHeaders = Map.unmodifiable(defaultHeaders ?? const {});
 
   /// Build a config from environment variables. Falls back to [defaultBaseUrl]
@@ -78,6 +95,8 @@ class NorbixConfig {
     String bearerTokenVar = 'NORBIX_BEARER_TOKEN',
     String timeoutMsVar = 'NORBIX_TIMEOUT_MS',
     String maxRetriesVar = 'NORBIX_MAX_RETRIES',
+    String envVar = 'NORBIX_ENV',
+    String regionVar = 'NORBIX_REGION',
     Map<String, String>? overrides,
   }) {
     final env = <String, String>{
@@ -100,11 +119,16 @@ class NorbixConfig {
       bearerToken: read(bearerTokenVar),
       timeout: Duration(milliseconds: timeoutMs ?? 30000),
       maxRetries: retries ?? 0,
+      env: read(envVar) ?? 'PROD',
+      region: read(regionVar),
     );
   }
 
   /// Returns a copy with selected fields replaced. Useful for runtime token
   /// rotation without mutating shared state.
+  ///
+  /// Pass an empty string for [region] to clear it (null keeps the current
+  /// value, like every other field).
   NorbixConfig copyWith({
     String? baseUrl,
     String? apiVersion,
@@ -113,6 +137,8 @@ class NorbixConfig {
     Duration? timeout,
     int? maxRetries,
     Map<String, String>? defaultHeaders,
+    String? env,
+    String? region,
   }) {
     return NorbixConfig(
       baseUrl: baseUrl ?? this.baseUrl,
@@ -122,10 +148,34 @@ class NorbixConfig {
       timeout: timeout ?? this.timeout,
       maxRetries: maxRetries ?? this.maxRetries,
       defaultHeaders: defaultHeaders ?? this.defaultHeaders,
+      env: env ?? this.env,
+      region: region ?? this.region,
     );
   }
 
   static String _stripTrailingSlash(String url) {
     return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
   }
+
+  static String? _normalizeRegion(String? region) {
+    return (region == null || region.isEmpty) ? null : region;
+  }
+}
+
+/// SDK default hosts eligible for regional base-URL composition. A region
+/// only rewrites these well-known hosts (`kNorbixApiDefaultBaseUrl`,
+/// `kNorbixHubDefaultBaseUrl`); user-supplied base URLs are never touched.
+const Set<String> kNorbixRegionalDefaultBaseUrls = {
+  'https://api.norbix.ai',
+  'https://hub.norbix.ai',
+};
+
+/// Compose the regional base URL for [baseUrl]: when [baseUrl] is one of the
+/// SDK defaults the [region] code becomes a subdomain prefix (e.g.
+/// `https://nb-eu-germany.api.norbix.ai`); any other base URL is returned
+/// unchanged.
+String composeRegionalBaseUrl(String baseUrl, String region) {
+  if (!kNorbixRegionalDefaultBaseUrls.contains(baseUrl)) return baseUrl;
+  final uri = Uri.parse(baseUrl);
+  return '${uri.scheme}://$region.${uri.host}';
 }

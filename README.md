@@ -82,6 +82,79 @@ final api = NorbixApi.fromEnv();   // reads NORBIX_API_*
 final hub = NorbixHub.fromEnv();   // reads NORBIX_HUB_*
 ```
 
+### Regions
+
+Pin a client to a Norbix region (a region code such as `nb-eu-germany`).
+**There is no default region**: when none is set, no region header is
+sent and requests go to the plain host — existing and self-hosted setups
+are unaffected.
+
+```dart
+// 1) At construction
+final hub = NorbixHub(region: 'nb-eu-germany');
+final api = NorbixApi(region: 'nb-eu-germany');
+
+// 2) From environment variables
+final hub = NorbixHub.fromEnv();   // reads NORBIX_HUB_REGION
+final api = NorbixApi.fromEnv();   // reads NORBIX_API_REGION
+
+// 3) At runtime
+hub.setRegion('nb-us-east');       // subsequent requests target nb-us-east
+print(hub.region);                 // 'nb-us-east'
+hub.setRegion(null);               // clear — no header, default host
+```
+
+(`NorbixConfig.fromEnv` also takes a `regionVar:` name, default
+`NORBIX_REGION`; the per-host factories above set it for you.)
+
+Every request with a resolved region carries the `nb-region` header.
+When the client's base URL is one of the SDK defaults
+(`https://api.norbix.ai`, `https://hub.norbix.ai` —
+`kNorbixRegionalDefaultBaseUrls`), the client region also routes the
+request to the regional host:
+
+```
+https://hub.norbix.ai  +  region nb-eu-germany  →  https://nb-eu-germany.hub.norbix.ai
+```
+
+A custom base URL (self-hosted, localhost) is **never rewritten** — the
+region then only adds the `nb-region` header.
+
+The two region-aware endpoints also accept a per-call `region:` argument
+that overrides the client region for that single request. A per-call
+override sets the **header only**; the URL is not recomposed:
+
+```dart
+await hub.accounts.getAccountRegions(region: 'nb-us-east');
+```
+
+### Regions endpoints
+
+Regions live on the existing `accounts` and `projects` resources — there
+is no separate `hub.regions` module:
+
+```dart
+// GET /{version}/account/regions — regions available to the account.
+// Response: {'items': [{'id': 'nb-eu-germany', 'continent': ..., 'name': ...}, ...]}
+// 'id' is the region code; 'continent' and 'name' are optional.
+final regions = await hub.accounts.getAccountRegions();
+
+// PATCH /{version}/account/projects/{projectId}/settings/regions
+// Body takes 'primaryRegion' (a region code) and/or 'additionalRegions'
+// (a list of region codes). The response is empty.
+await hub.projects.updateProjectRegions(
+  projectId: 'p1',
+  body: {
+    'primaryRegion': 'nb-eu-germany',
+    'additionalRegions': ['nb-us-east'],
+  },
+);
+```
+
+`hub.projects.createProject` also accepts optional `primaryRegion` /
+`additionalRegions` keys in its `body` to place a new project in
+specific regions at creation time.
+
 ## Repo layout
 
 ```

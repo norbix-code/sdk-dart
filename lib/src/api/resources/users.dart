@@ -8,7 +8,10 @@ class UsersResource extends Resource {
   UsersResource(super.transport);
 
   /// `PUT /{version}/membership/users/assign-roles`
-  Future<Object?> assignRolePermissions({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> assignRolePermissions(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/assign-roles',
       method: 'PUT',
@@ -20,7 +23,10 @@ class UsersResource extends Resource {
   }
 
   /// `PATCH /{version}/membership/users/block`
-  Future<Object?> blockUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> blockUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/block',
       method: 'PATCH',
@@ -32,7 +38,10 @@ class UsersResource extends Resource {
   }
 
   /// `DELETE /{version}/membership/users`
-  Future<Object?> deleteUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users',
       method: 'DELETE',
@@ -44,7 +53,10 @@ class UsersResource extends Resource {
   }
 
   /// `GET /{version}/membership/users/{id}`
-  Future<Object?> getUser({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getUser(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/{id}',
       method: 'GET',
@@ -54,8 +66,23 @@ class UsersResource extends Resource {
     );
   }
 
+  /// `GET /{version}/membership/users/{id}/preferences`
+  Future<Object?> getUserPreferences(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/users/{id}/preferences',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
+    );
+  }
+
   /// `GET /{version}/membership/users`
-  Future<Object?> getUsers({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getUsers(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users',
       method: 'GET',
@@ -66,7 +93,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/invite`
-  Future<Object?> inviteUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> inviteUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/invite',
       method: 'POST',
@@ -77,8 +107,27 @@ class UsersResource extends Resource {
     );
   }
 
+  /// `POST /{version}/membership/users/{userId}/link-identity`
+  Future<Object?> linkIdentity(
+      {required Object userId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/users/{userId}/link-identity',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'userId': userId},
+    );
+  }
+
   /// `POST /{version}/membership/users/register/email`
-  Future<Object?> saveEmailUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveEmailUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/email',
       method: 'POST',
@@ -90,7 +139,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/register/email-with-permissions`
-  Future<Object?> saveEmailUserNameWithPermissions({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveEmailUserNameWithPermissions(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/email-with-permissions',
       method: 'POST',
@@ -102,7 +154,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/register/guest`
-  Future<Object?> saveGuestUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveGuestUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/guest',
       method: 'POST',
@@ -114,7 +169,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/register/phone`
-  Future<Object?> savePhoneUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> savePhoneUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/phone',
       method: 'POST',
@@ -126,7 +184,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/register/phone-with-permissions`
-  Future<Object?> savePhoneUserNameWithPermissions({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> savePhoneUserNameWithPermissions(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/phone-with-permissions',
       method: 'POST',
@@ -138,7 +199,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/register/service`
-  Future<Object?> saveSystemUserWithPermissions({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveSystemUserWithPermissions(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/service',
       method: 'POST',
@@ -150,7 +214,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/register/user-name`
-  Future<Object?> saveUserNameUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveUserNameUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/user-name',
       method: 'POST',
@@ -162,7 +229,10 @@ class UsersResource extends Resource {
   }
 
   /// `POST /{version}/membership/users/register/user-name-with-permissions`
-  Future<Object?> saveUserNameWithPermissions({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveUserNameWithPermissions(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/register/user-name-with-permissions',
       method: 'POST',
@@ -174,7 +244,10 @@ class UsersResource extends Resource {
   }
 
   /// `PATCH /{version}/membership/users/unblock`
-  Future<Object?> unblockUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> unblockUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users/unblock',
       method: 'PATCH',
@@ -186,7 +259,10 @@ class UsersResource extends Resource {
   }
 
   /// `PUT /{version}/membership/users`
-  Future<Object?> updateUser({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/users',
       method: 'PUT',
@@ -194,6 +270,22 @@ class UsersResource extends Resource {
       body: body,
       headers: headers,
       pathParams: null,
+    );
+  }
+
+  /// `PUT /{version}/membership/users/{id}/preferences`
+  Future<Object?> updateUserPreferences(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/users/{id}/preferences',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
     );
   }
 }

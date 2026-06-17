@@ -8,7 +8,10 @@ class PaymentsResource extends Resource {
   PaymentsResource(super.transport);
 
   /// `POST /{version}/payments/integrations/confirm-human-delivery`
-  Future<Object?> confirmPaymentsIntegrationHumanDelivery({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> confirmPaymentsIntegrationHumanDelivery(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations/confirm-human-delivery',
       method: 'POST',
@@ -20,7 +23,11 @@ class PaymentsResource extends Resource {
   }
 
   /// `DELETE /{version}/payments/integrations/{id}`
-  Future<Object?> deletePaymentsIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deletePaymentsIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations/{id}',
       method: 'DELETE',
@@ -32,7 +39,11 @@ class PaymentsResource extends Resource {
   }
 
   /// `DELETE /{version}/payments/triggers/{triggerId}`
-  Future<Object?> deletePaymentsTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deletePaymentsTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/triggers/{triggerId}',
       method: 'DELETE',
@@ -44,7 +55,8 @@ class PaymentsResource extends Resource {
   }
 
   /// `GET /{version}/payments/disable`
-  Future<Object?> disablePayments({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> disablePayments(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/disable',
       method: 'GET',
@@ -55,7 +67,11 @@ class PaymentsResource extends Resource {
   }
 
   /// `PUT /{version}/payments/integrations/{id}/disable`
-  Future<Object?> disablePaymentsIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disablePaymentsIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations/{id}/disable',
       method: 'PUT',
@@ -67,7 +83,11 @@ class PaymentsResource extends Resource {
   }
 
   /// `PATCH /{version}/payments/triggers/{triggerId}/disable`
-  Future<Object?> disablePaymentsTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disablePaymentsTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/triggers/{triggerId}/disable',
       method: 'PATCH',
@@ -79,7 +99,8 @@ class PaymentsResource extends Resource {
   }
 
   /// `GET /{version}/payments/enable`
-  Future<Object?> enablePayments({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> enablePayments(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/enable',
       method: 'GET',
@@ -90,7 +111,11 @@ class PaymentsResource extends Resource {
   }
 
   /// `PUT /{version}/payments/integrations/{id}/enable`
-  Future<Object?> enablePaymentsIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enablePaymentsIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations/{id}/enable',
       method: 'PUT',
@@ -102,7 +127,11 @@ class PaymentsResource extends Resource {
   }
 
   /// `PATCH /{version}/payments/triggers/{triggerId}/enable`
-  Future<Object?> enablePaymentsTrigger({ required Object triggerId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enablePaymentsTrigger(
+      {required Object triggerId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/triggers/{triggerId}/enable',
       method: 'PATCH',
@@ -114,7 +143,10 @@ class PaymentsResource extends Resource {
   }
 
   /// `GET /{version}/payments/integrations/{id}`
-  Future<Object?> getPaymentsIntegration({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getPaymentsIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations/{id}',
       method: 'GET',
@@ -125,7 +157,8 @@ class PaymentsResource extends Resource {
   }
 
   /// `GET /{version}/payments/integrations`
-  Future<Object?> getPaymentsIntegrations({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getPaymentsIntegrations(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations',
       method: 'GET',
@@ -136,7 +169,10 @@ class PaymentsResource extends Resource {
   }
 
   /// `GET /{version}/payments/triggers/{id}`
-  Future<Object?> getPaymentsTrigger({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getPaymentsTrigger(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/triggers/{id}',
       method: 'GET',
@@ -147,7 +183,8 @@ class PaymentsResource extends Resource {
   }
 
   /// `GET /{version}/payments/triggers`
-  Future<Object?> getPaymentsTriggers({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getPaymentsTriggers(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/triggers',
       method: 'GET',
@@ -158,7 +195,10 @@ class PaymentsResource extends Resource {
   }
 
   /// `POST /{version}/payments/integrations`
-  Future<Object?> savePaymentsIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> savePaymentsIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations',
       method: 'POST',
@@ -170,7 +210,10 @@ class PaymentsResource extends Resource {
   }
 
   /// `POST /{version}/payments/triggers`
-  Future<Object?> savePaymentsTrigger({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> savePaymentsTrigger(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/triggers',
       method: 'POST',
@@ -182,7 +225,10 @@ class PaymentsResource extends Resource {
   }
 
   /// `POST /{version}/payments/integrations/test`
-  Future<Object?> testPaymentsIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> testPaymentsIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/integrations/test',
       method: 'POST',

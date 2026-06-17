@@ -8,7 +8,8 @@ class ApiKeysResource extends Resource {
   ApiKeysResource(super.transport);
 
   /// `GET /apikeys`
-  Future<Object?> getApiKeys({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getApiKeys(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/apikeys',
       method: 'GET',
@@ -19,7 +20,10 @@ class ApiKeysResource extends Resource {
   }
 
   /// `GET /apikeys/{environment}`
-  Future<Object?> getApiKeys2({ required Object environment, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getApiKeys2(
+      {required Object environment,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/apikeys/{environment}',
       method: 'GET',
@@ -30,7 +34,8 @@ class ApiKeysResource extends Resource {
   }
 
   /// `GET /apikeys/regenerate`
-  Future<Object?> regenerateApiKeys({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> regenerateApiKeys(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/apikeys/regenerate',
       method: 'GET',
@@ -41,7 +46,10 @@ class ApiKeysResource extends Resource {
   }
 
   /// `GET /apikeys/regenerate/{environment}`
-  Future<Object?> regenerateApiKeys2({ required Object environment, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> regenerateApiKeys2(
+      {required Object environment,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/apikeys/regenerate/{environment}',
       method: 'GET',

@@ -8,7 +8,11 @@ class WebhooksResource extends Resource {
   WebhooksResource(super.transport);
 
   /// `PUT /{version}/webhooks/destinations/{destinationId}/disable`
-  Future<Object?> disableWebhookDestination({ required Object destinationId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableWebhookDestination(
+      {required Object destinationId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/destinations/{destinationId}/disable',
       method: 'PUT',
@@ -20,7 +24,11 @@ class WebhooksResource extends Resource {
   }
 
   /// `PUT /{version}/webhooks/destinations/{destinationId}/enable`
-  Future<Object?> enableWebhookDestination({ required Object destinationId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableWebhookDestination(
+      {required Object destinationId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/destinations/{destinationId}/enable',
       method: 'PUT',
@@ -32,7 +40,8 @@ class WebhooksResource extends Resource {
   }
 
   /// `GET /{version}/webhooks/integration`
-  Future<Object?> getWebhookIntegration({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getWebhookIntegration(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/integration',
       method: 'GET',
@@ -42,8 +51,32 @@ class WebhooksResource extends Resource {
     );
   }
 
+  /// `POST /{version}/webhooks/{source}/{integrationInstanceId}`
+  Future<Object?> receiveWebhook(
+      {required Object source,
+      required Object integrationInstanceId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/webhooks/{source}/{integrationInstanceId}',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{
+        'source': source,
+        'integrationInstanceId': integrationInstanceId
+      },
+    );
+  }
+
   /// `DELETE /{version}/webhooks/destinations/{destinationId}`
-  Future<Object?> removeWebhookDestination({ required Object destinationId, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> removeWebhookDestination(
+      {required Object destinationId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/destinations/{destinationId}',
       method: 'DELETE',
@@ -55,7 +88,8 @@ class WebhooksResource extends Resource {
   }
 
   /// `GET /{version}/webhooks/integration/secret`
-  Future<Object?> revealWebhookIntegrationSecret({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> revealWebhookIntegrationSecret(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/integration/secret',
       method: 'GET',
@@ -66,7 +100,10 @@ class WebhooksResource extends Resource {
   }
 
   /// `POST /{version}/webhooks/integration/secret/rotate`
-  Future<Object?> rotateWebhookIntegrationSecret({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> rotateWebhookIntegrationSecret(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/integration/secret/rotate',
       method: 'POST',
@@ -78,7 +115,10 @@ class WebhooksResource extends Resource {
   }
 
   /// `POST /{version}/webhooks/destinations`
-  Future<Object?> saveWebhookDestination({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveWebhookDestination(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/destinations',
       method: 'POST',
@@ -90,7 +130,10 @@ class WebhooksResource extends Resource {
   }
 
   /// `PUT /{version}/webhooks/integration/extra-headers`
-  Future<Object?> updateWebhookIntegrationExtraHeaders({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateWebhookIntegrationExtraHeaders(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/webhooks/integration/extra-headers',
       method: 'PUT',

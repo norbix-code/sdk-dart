@@ -8,7 +8,8 @@ class UserNotificationPreferencesResource extends Resource {
   UserNotificationPreferencesResource(super.transport);
 
   /// `GET /{version}/notifications/user/preferences`
-  Future<Object?> getUserNotificationPreferences({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getUserNotificationPreferences(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/user/preferences',
       method: 'GET',
@@ -19,7 +20,10 @@ class UserNotificationPreferencesResource extends Resource {
   }
 
   /// `PUT /{version}/notifications/user/preferences`
-  Future<Object?> updateUserNotificationsPreferences({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateUserNotificationsPreferences(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/user/preferences',
       method: 'PUT',

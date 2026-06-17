@@ -8,7 +8,10 @@ class AccountsResource extends Resource {
   AccountsResource(super.transport);
 
   /// `POST /{version}/account/chat/complete`
-  Future<Object?> askChat({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> askChat(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/chat/complete',
       method: 'POST',
@@ -20,7 +23,10 @@ class AccountsResource extends Resource {
   }
 
   /// `POST /{version}/account`
-  Future<Object?> createAccount({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> createAccount(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account',
       method: 'POST',
@@ -32,7 +38,10 @@ class AccountsResource extends Resource {
   }
 
   /// `POST /{version}/account/stripe/create-checkout-session`
-  Future<Object?> createStripeCheckoutSession({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> createStripeCheckoutSession(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/stripe/create-checkout-session',
       method: 'POST',
@@ -44,7 +53,10 @@ class AccountsResource extends Resource {
   }
 
   /// `POST /{version}/account/team/member`
-  Future<Object?> createTeamMemberFromInvitation({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> createTeamMemberFromInvitation(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/team/member',
       method: 'POST',
@@ -56,7 +68,8 @@ class AccountsResource extends Resource {
   }
 
   /// `GET /{version}/account/collaborators`
-  Future<Object?> getAccountCollaborators({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getAccountCollaborators(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/collaborators',
       method: 'GET',
@@ -67,7 +80,8 @@ class AccountsResource extends Resource {
   }
 
   /// `GET /{version}/account/profile`
-  Future<Object?> getAccountProfile({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getAccountProfile(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/profile',
       method: 'GET',
@@ -78,18 +92,31 @@ class AccountsResource extends Resource {
   }
 
   /// `GET /{version}/account/regions`
-  Future<Object?> getAccountRegions({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  ///
+  /// Lists the Norbix regions available to the account. The response carries
+  /// `items`, each with `id` (the region code, e.g. "nb-eu-germany") and
+  /// optional `continent` and `name`.
+  ///
+  /// To make requests *target* a given region, set `region` on the client
+  /// (`NorbixHub(region: 'nb-eu-germany')` or `client.setRegion(...)`) or per
+  /// call (the `region` argument), which sends the `nb-region` header.
+  Future<Object?> getAccountRegions(
+      {Map<String, Object?>? query,
+      Map<String, String>? headers,
+      String? region}) {
     return transport.send(
       route: '/{version}/account/regions',
       method: 'GET',
       query: query,
       headers: headers,
       pathParams: null,
+      region: region,
     );
   }
 
   /// `GET /{version}/account/status`
-  Future<Object?> getAccountStatus({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getAccountStatus(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/status',
       method: 'GET',
@@ -100,7 +127,8 @@ class AccountsResource extends Resource {
   }
 
   /// `GET /{version}/account/licenses`
-  Future<Object?> getLicenses({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getLicenses(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/licenses',
       method: 'GET',
@@ -111,7 +139,10 @@ class AccountsResource extends Resource {
   }
 
   /// `POST /{version}/account/stripe/get-portal-url`
-  Future<Object?> getStripeBillingPortalUrl({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> getStripeBillingPortalUrl(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/stripe/get-portal-url',
       method: 'POST',
@@ -122,8 +153,24 @@ class AccountsResource extends Resource {
     );
   }
 
+  /// `POST /{version}/account/payments/stripe/webhook`
+  Future<Object?> receiveStripeWebHook(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/payments/stripe/webhook',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/account/verify/resend`
-  Future<Object?> resendAccountVerificationToken({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> resendAccountVerificationToken(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/verify/resend',
       method: 'GET',
@@ -134,7 +181,10 @@ class AccountsResource extends Resource {
   }
 
   /// `POST /{version}/account/team/member/invite`
-  Future<Object?> sendInviteToTeamMember({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> sendInviteToTeamMember(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/team/member/invite',
       method: 'POST',
@@ -146,7 +196,10 @@ class AccountsResource extends Resource {
   }
 
   /// `PUT /{version}/account/profile`
-  Future<Object?> updateAccountProfile({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> updateAccountProfile(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/profile',
       method: 'PUT',
@@ -158,7 +211,8 @@ class AccountsResource extends Resource {
   }
 
   /// `GET /{version}/account/verify`
-  Future<Object?> verifyAccount({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> verifyAccount(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/verify',
       method: 'GET',

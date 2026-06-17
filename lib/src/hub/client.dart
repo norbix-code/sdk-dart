@@ -11,10 +11,12 @@ import 'resources/accounts.dart';
 import 'resources/ai_integrations.dart';
 import 'resources/api_keys.dart';
 import 'resources/auth.dart';
+import 'resources/contacts.dart';
 import 'resources/database.dart';
 import 'resources/echo.dart';
 import 'resources/email_notifications.dart';
 import 'resources/email_unsubscribe.dart';
+import 'resources/environments.dart';
 import 'resources/files.dart';
 import 'resources/internals.dart';
 import 'resources/logs.dart';
@@ -22,8 +24,9 @@ import 'resources/membership.dart';
 import 'resources/payments.dart';
 import 'resources/projects.dart';
 import 'resources/push_notifications.dart';
+import 'resources/resources.dart';
 import 'resources/scheduler.dart';
-import 'resources/triggers.dart';
+import 'resources/sms_notifications.dart';
 import 'resources/user_notification_preferences.dart';
 import 'resources/webhooks.dart';
 
@@ -54,11 +57,31 @@ class NorbixHub {
     HttpDriver? driver,
     Object? projectId,
     Object? accountId,
+    String? env,
+    String? region,
   }) : _transport = Transport(
-          config: config ?? NorbixConfig(baseUrl: kNorbixHubDefaultBaseUrl),
+          config: _withRegion(
+            _withEnv(
+              config ?? NorbixConfig(baseUrl: kNorbixHubDefaultBaseUrl),
+              env,
+            ),
+            region,
+          ),
           driver: driver,
           defaultPathParams: {'projectId': projectId, 'accountId': accountId},
         );
+
+  /// Apply an optional `env` override on top of a config without losing its
+  /// other fields. When `env` is null the config's own value (default `PROD`)
+  /// is kept.
+  static NorbixConfig _withEnv(NorbixConfig config, String? env) =>
+      env == null ? config : config.copyWith(env: env);
+
+  /// Apply an optional `region` override on top of a config without losing
+  /// its other fields. When `region` is null the config's own value (default
+  /// none) is kept.
+  static NorbixConfig _withRegion(NorbixConfig config, String? region) =>
+      region == null ? config : config.copyWith(region: region);
 
   /// Build a client that reads its base URL and credentials from
   /// environment variables. Falls back to the public host when the
@@ -73,6 +96,7 @@ class NorbixHub {
   ///   NORBIX_HUB_MAX_RETRIES
   ///   NORBIX_HUB_PROJECT_ID
   ///   NORBIX_HUB_ACCOUNT_ID
+  ///   NORBIX_HUB_REGION
   factory NorbixHub.fromEnv({
     Map<String, String>? overrides,
     HttpDriver? driver,
@@ -91,6 +115,8 @@ class NorbixHub {
       apiVersionVar: 'NORBIX_HUB_VERSION',
       timeoutMsVar: 'NORBIX_HUB_TIMEOUT_MS',
       maxRetriesVar: 'NORBIX_HUB_MAX_RETRIES',
+      envVar: 'NORBIX_HUB_ENV',
+      regionVar: 'NORBIX_HUB_REGION',
       overrides: overrides,
     );
     return NorbixHub(
@@ -119,6 +145,29 @@ class NorbixHub {
   /// (staging <-> production) at runtime.
   void setConfig(NorbixConfig config) => _transport.config = config;
 
+  /// Project environment all requests target (sent as the `norbix-env`
+  /// header). Defaults to `PROD`.
+  String get env => _transport.config.env;
+
+  /// Switch the project environment for subsequent requests. Pass `'PROD'`
+  /// (or `null`) to return to production. Per-call `env` arguments still
+  /// override this for individual requests.
+  void setEnv(String? env) =>
+      _transport.config = _transport.config.copyWith(env: env ?? 'PROD');
+
+  /// Norbix region all requests target (sent as the `nb-region` header and —
+  /// when the base URL is the SDK default — used to route to the regional
+  /// host). Null (the default) means no region: no header is sent.
+  String? get region => _transport.config.region;
+
+  /// Switch the Norbix region for subsequent requests. Pass `null` to clear
+  /// it (no header, default host). When the base URL is the SDK default the
+  /// regional host (`https://{region}.hub.norbix.ai`) is used; a custom base
+  /// URL is never rewritten. Per-call `region` arguments still override this
+  /// for individual requests (header only).
+  void setRegion(String? region) =>
+      _transport.config = _transport.config.copyWith(region: region ?? '');
+
   /// Project context used for routes that include `{projectId}`.
   /// Per-call parameters still override this default.
   Object? get projectId => _transport.defaultPathParams['projectId'];
@@ -140,12 +189,15 @@ class NorbixHub {
       AiIntegrationsResource(_transport);
   late final ApiKeysResource apiKeys = ApiKeysResource(_transport);
   late final AuthResource auth = AuthResource(_transport);
+  late final ContactsResource contacts = ContactsResource(_transport);
   late final DatabaseResource database = DatabaseResource(_transport);
   late final EchoResource echo = EchoResource(_transport);
   late final EmailNotificationsResource emailNotifications =
       EmailNotificationsResource(_transport);
   late final EmailUnsubscribeResource emailUnsubscribe =
       EmailUnsubscribeResource(_transport);
+  late final EnvironmentsResource environments =
+      EnvironmentsResource(_transport);
   late final FilesResource files = FilesResource(_transport);
   late final InternalsResource internals = InternalsResource(_transport);
   late final LogsResource logs = LogsResource(_transport);
@@ -154,8 +206,10 @@ class NorbixHub {
   late final ProjectsResource projects = ProjectsResource(_transport);
   late final PushNotificationsResource pushNotifications =
       PushNotificationsResource(_transport);
+  late final ResourcesResource resources = ResourcesResource(_transport);
   late final SchedulerResource scheduler = SchedulerResource(_transport);
-  late final TriggersResource triggers = TriggersResource(_transport);
+  late final SmsNotificationsResource smsNotifications =
+      SmsNotificationsResource(_transport);
   late final UserNotificationPreferencesResource userNotificationPreferences =
       UserNotificationPreferencesResource(_transport);
   late final WebhooksResource webhooks = WebhooksResource(_transport);

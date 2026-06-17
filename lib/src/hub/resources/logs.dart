@@ -8,7 +8,11 @@ class LogsResource extends Resource {
   LogsResource(super.transport);
 
   /// `DELETE /{version}/logs/integrations/{id}`
-  Future<Object?> deleteLoggingIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> deleteLoggingIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/integrations/{id}',
       method: 'DELETE',
@@ -20,7 +24,8 @@ class LogsResource extends Resource {
   }
 
   /// `GET /{version}/logs/disable`
-  Future<Object?> disableLogging({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> disableLogging(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/disable',
       method: 'GET',
@@ -31,7 +36,11 @@ class LogsResource extends Resource {
   }
 
   /// `PUT /{version}/logs/integrations/{id}/disable`
-  Future<Object?> disableLoggingIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> disableLoggingIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/integrations/{id}/disable',
       method: 'PUT',
@@ -43,7 +52,8 @@ class LogsResource extends Resource {
   }
 
   /// `GET /{version}/logs/enable`
-  Future<Object?> enableLogging({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> enableLogging(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/enable',
       method: 'GET',
@@ -54,7 +64,11 @@ class LogsResource extends Resource {
   }
 
   /// `PUT /{version}/logs/integrations/{id}/enable`
-  Future<Object?> enableLoggingIntegration({ required Object id, Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> enableLoggingIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/integrations/{id}/enable',
       method: 'PUT',
@@ -66,7 +80,10 @@ class LogsResource extends Resource {
   }
 
   /// `GET /{version}/logs/integrations/{id}`
-  Future<Object?> getLoggingIntegration({ required Object id, Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getLoggingIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/integrations/{id}',
       method: 'GET',
@@ -77,7 +94,8 @@ class LogsResource extends Resource {
   }
 
   /// `GET /{version}/logs/integrations`
-  Future<Object?> getLoggingIntegrations({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> getLoggingIntegrations(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/integrations',
       method: 'GET',
@@ -87,8 +105,23 @@ class LogsResource extends Resource {
     );
   }
 
+  /// `GET /{version}/logs/audit`
+  Future<Object?> getLogsByCorrelationId(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/logs/audit',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `POST /{version}/logs/integrations`
-  Future<Object?> saveLoggingIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> saveLoggingIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/integrations',
       method: 'POST',
@@ -100,7 +133,10 @@ class LogsResource extends Resource {
   }
 
   /// `POST /{version}/logs/integrations/test`
-  Future<Object?> testLoggingIntegration({ Map<String, Object?>? query, Object? body, Map<String, String>? headers }) {
+  Future<Object?> testLoggingIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/integrations/test',
       method: 'POST',

@@ -23,8 +23,7 @@ void main() {
       client.close();
     });
 
-    test('exposes resources directly on the client (no api.* indirection)',
-        () {
+    test('exposes resources directly on the client (no api.* indirection)', () {
       final client = NorbixApi();
       expect(client.users, isNotNull);
       expect(client.auth, isNotNull);

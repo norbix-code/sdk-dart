@@ -8,7 +8,8 @@ class EchoResource extends Resource {
   EchoResource(super.transport);
 
   /// `GET /{version}/echo`
-  Future<Object?> echo({ Map<String, Object?>? query, Map<String, String>? headers }) {
+  Future<Object?> echo(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/echo',
       method: 'GET',

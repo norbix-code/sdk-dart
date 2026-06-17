@@ -33,7 +33,8 @@ void main() {
 
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://api.norbix.ai/v1/membership/users/usr_123?take=20&skip=0'),
+        equals(
+            'https://api.norbix.ai/v1/membership/users/usr_123?take=20&skip=0'),
       );
       expect(driver.lastRequest!.method, equals('GET'));
     });
