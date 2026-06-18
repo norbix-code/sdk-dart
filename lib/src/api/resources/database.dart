@@ -185,6 +185,32 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `GET /{version}/database/taxonomies/{taxonomyName}/terms/tree`
+  Future<Object?> findTermTree(
+      {required Object taxonomyName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/taxonomies/{taxonomyName}/terms/tree',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'taxonomyName': taxonomyName},
+    );
+  }
+
+  /// `GET /{version}/database/taxonomies/tree`
+  Future<Object?> findTaxonomyTree(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/taxonomies/tree',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/database/schemas/{id}`
   Future<Object?> getDatabaseSchema(
       {required Object id,
