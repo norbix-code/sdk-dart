@@ -405,4 +405,34 @@ class MembershipResource extends Resource {
       pathParams: null,
     );
   }
+
+  /// `PUT /{version}/membership/authentication`
+  Future<Object?> updateAuthenticationSettings(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/authentication',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `PUT /{version}/membership/authorization/password-complexity`
+  Future<Object?> updatePasswordComplexity(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/authorization/password-complexity',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
 }

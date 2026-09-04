@@ -3,18 +3,18 @@
 
 import '../../core/resource.dart';
 
-/// Notification contacts: identities, merge and marketing consent.
+/// Membership contacts: identities, merge and marketing consent.
 class ContactsResource extends Resource {
   ContactsResource(super.transport);
 
-  /// `POST /{version}/notifications/contacts/{contactId}/identities`
+  /// `POST /{version}/membership/users/{contactId}/identities`
   Future<Object?> addContactIdentity(
       {required Object contactId,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/contacts/{contactId}/identities',
+      route: '/{version}/membership/users/{contactId}/identities',
       method: 'POST',
       query: query,
       body: body,
@@ -23,13 +23,13 @@ class ContactsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/contacts`
+  /// `POST /{version}/membership/users`
   Future<Object?> createContact(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/contacts',
+      route: '/{version}/membership/users',
       method: 'POST',
       query: query,
       body: body,
@@ -38,14 +38,14 @@ class ContactsResource extends Resource {
     );
   }
 
-  /// `DELETE /{version}/notifications/contacts/{contactId}`
+  /// `DELETE /{version}/membership/users/{contactId}`
   Future<Object?> deleteContact(
       {required Object contactId,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/contacts/{contactId}',
+      route: '/{version}/membership/users/{contactId}',
       method: 'DELETE',
       query: query,
       body: body,
@@ -54,11 +54,11 @@ class ContactsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/contacts`
+  /// `GET /{version}/membership/users`
   Future<Object?> getAllContacts(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/contacts',
+      route: '/{version}/membership/users',
       method: 'GET',
       query: query,
       headers: headers,
@@ -66,13 +66,13 @@ class ContactsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/contacts/{contactId}`
+  /// `GET /{version}/membership/users/{contactId}`
   Future<Object?> getContact(
       {required Object contactId,
       Map<String, Object?>? query,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/contacts/{contactId}',
+      route: '/{version}/membership/users/{contactId}',
       method: 'GET',
       query: query,
       headers: headers,
@@ -80,31 +80,13 @@ class ContactsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/contacts/{contactId}/marketing-state/{channel}/consent`
-  Future<Object?> grantContactConsent(
-      {required Object contactId,
-      required Object channel,
-      Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route:
-          '/{version}/notifications/contacts/{contactId}/marketing-state/{channel}/consent',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: <String, Object?>{'contactId': contactId, 'channel': channel},
-    );
-  }
-
-  /// `POST /{version}/notifications/contacts/merge`
+  /// `POST /{version}/membership/users/merge`
   Future<Object?> mergeContacts(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/contacts/merge',
+      route: '/{version}/membership/users/merge',
       method: 'POST',
       query: query,
       body: body,
@@ -113,63 +95,38 @@ class ContactsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/contacts/{contactId}/identities/{identityId}/promote`
+  /// `POST /{version}/membership/users/{contactId}/identities/{authId}/promote`
   Future<Object?> promoteContactIdentity(
       {required Object contactId,
-      required Object identityId,
+      required Object authId,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
       route:
-          '/{version}/notifications/contacts/{contactId}/identities/{identityId}/promote',
+          '/{version}/membership/users/{contactId}/identities/{authId}/promote',
       method: 'POST',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{
-        'contactId': contactId,
-        'identityId': identityId
-      },
+      pathParams: <String, Object?>{'contactId': contactId, 'authId': authId},
     );
   }
 
-  /// `DELETE /{version}/notifications/contacts/{contactId}/identities/{identityId}`
+  /// `DELETE /{version}/membership/users/{contactId}/identities/{authId}`
   Future<Object?> removeContactIdentity(
       {required Object contactId,
-      required Object identityId,
+      required Object authId,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route:
-          '/{version}/notifications/contacts/{contactId}/identities/{identityId}',
+      route: '/{version}/membership/users/{contactId}/identities/{authId}',
       method: 'DELETE',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{
-        'contactId': contactId,
-        'identityId': identityId
-      },
-    );
-  }
-
-  /// `POST /{version}/notifications/contacts/{contactId}/marketing-state/{channel}/unsubscribe`
-  Future<Object?> unsubscribeContact(
-      {required Object contactId,
-      required Object channel,
-      Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route:
-          '/{version}/notifications/contacts/{contactId}/marketing-state/{channel}/unsubscribe',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: <String, Object?>{'contactId': contactId, 'channel': channel},
+      pathParams: <String, Object?>{'contactId': contactId, 'authId': authId},
     );
   }
 }
