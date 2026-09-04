@@ -230,4 +230,49 @@ class UserAuthResource extends Resource {
       pathParams: null,
     );
   }
+
+  /// `POST /{version}/membership/userauth/password/change`
+  Future<Object?> changePassword(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/userauth/password/change',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/membership/userauth/password/reset/request`
+  Future<Object?> requestPasswordReset(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/userauth/password/reset/request',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/membership/userauth/password/reset/confirm`
+  Future<Object?> confirmPasswordReset(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/userauth/password/reset/confirm',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
 }
