@@ -25,6 +25,12 @@ class Transport {
   ///
   /// Throws a typed [NorbixError] subclass on non-2xx responses or transport
   /// failures.
+  ///
+  /// Set [authenticated] to false for the handful of endpoints that must go
+  /// out with no credentials at all — the public file link is the only one in
+  /// the Files module. A public link has to work in an e-mail or in a browser
+  /// on a stranger's phone, so sending a key would be wrong, not merely
+  /// unnecessary.
   Future<Object?> send({
     required String route,
     String method = 'GET',
@@ -34,9 +40,78 @@ class Transport {
     Map<String, Object?>? pathParams,
     String? env,
     String? region,
+    bool authenticated = true,
+  }) async {
+    final response = await _execute(
+      route: route,
+      method: method,
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: pathParams,
+      env: env,
+      region: region,
+      authenticated: authenticated,
+    );
+    return _parseResponse(response);
+  }
+
+  /// Send a request and return the raw response body.
+  ///
+  /// Same pipeline as [send] — same retries, same typed errors — but the
+  /// success body is handed back untouched instead of being parsed as JSON.
+  /// Use it for file content: a PDF or a PNG put through [jsonDecode] is
+  /// either an exception or silently corrupt text.
+  Future<List<int>> sendBytes({
+    required String route,
+    String method = 'GET',
+    Map<String, Object?>? query,
+    Object? body,
+    Map<String, String>? headers,
+    Map<String, Object?>? pathParams,
+    String? env,
+    String? region,
+    bool authenticated = true,
+  }) async {
+    final response = await _execute(
+      route: route,
+      method: method,
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: pathParams,
+      env: env,
+      region: region,
+      authenticated: authenticated,
+      accept: '*/*',
+    );
+    if (response.statusCode >= 400) {
+      // Reuse the error mapping; on a failure the body is JSON, not a file.
+      _parseResponse(response);
+    }
+    return response.bytes ?? utf8.encode(response.body);
+  }
+
+  Future<HttpDriverResponse> _execute({
+    required String route,
+    required String method,
+    Map<String, Object?>? query,
+    Object? body,
+    Map<String, String>? headers,
+    Map<String, Object?>? pathParams,
+    String? env,
+    String? region,
+    bool authenticated = true,
+    String? accept,
   }) async {
     final url = _resolveUrl(route: route, query: query, pathParams: pathParams);
-    final allHeaders = _buildHeaders(headers, env, region);
+    final allHeaders = _buildHeaders(
+      headers,
+      env,
+      region,
+      authenticated: authenticated,
+      accept: accept,
+    );
     final encodedBody = (body == null || method.toUpperCase() == 'GET')
         ? null
         : jsonEncode(body);
@@ -59,7 +134,7 @@ class Transport {
             continue;
           }
         }
-        return _parseResponse(response);
+        return response;
       } on NorbixError {
         rethrow;
       } on SocketException catch (e) {
@@ -106,6 +181,14 @@ class Transport {
     if (mergedPathParams.isNotEmpty) {
       mergedPathParams.forEach((k, v) {
         if (v == null) return;
+        // A wildcard token — `{name*}` in the gateway's own spelling — is the
+        // rest of the path, so its slashes have to stay slashes.
+        // encodeComponent would turn them into %2F and the route would stop
+        // matching. Every other segment is encoded as before.
+        normalizedRoute = normalizedRoute.replaceAll(
+          '{$k*}',
+          '$v'.split('/').map(Uri.encodeComponent).join('/'),
+        );
         normalizedRoute = normalizedRoute.replaceAll(
           '{$k}',
           Uri.encodeComponent('$v'),
@@ -140,14 +223,24 @@ class Transport {
     });
   }
 
-  Map<String, String> _buildHeaders(Map<String, String>? extra,
-      [String? env, String? region]) {
+  Map<String, String> _buildHeaders(
+    Map<String, String>? extra,
+    String? env,
+    String? region, {
+    bool authenticated = true,
+    String? accept,
+  }) {
     final out = <String, String>{
       'content-type': 'application/json',
-      'accept': 'application/json',
+      'accept': accept ?? 'application/json',
       ...config.defaultHeaders,
     };
-    if (config.bearerToken != null && config.bearerToken!.isNotEmpty) {
+    if (!authenticated) {
+      // An unauthenticated call must not inherit credentials from the
+      // client, not even ones a caller put in defaultHeaders.
+      out.remove('authorization');
+      out.remove('x-api-key');
+    } else if (config.bearerToken != null && config.bearerToken!.isNotEmpty) {
       out['authorization'] = 'Bearer ${config.bearerToken}';
     } else if (config.apiKey != null && config.apiKey!.isNotEmpty) {
       out['x-api-key'] = config.apiKey!;
