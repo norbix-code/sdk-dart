@@ -29,10 +29,16 @@ class HttpDriverResponse {
   final Map<String, String> headers;
   final String body;
 
+  /// Raw response body. Set by drivers that can supply it; when a driver
+  /// leaves it null the transport falls back to the UTF-8 bytes of [body].
+  /// Only the file-download calls read it — everything else parses [body].
+  final List<int>? bytes;
+
   const HttpDriverResponse({
     required this.statusCode,
     required this.headers,
     required this.body,
+    this.bytes,
   });
 }
 
@@ -53,6 +59,7 @@ class HttpClientDriver implements HttpDriver {
       statusCode: response.statusCode,
       headers: response.headers,
       body: response.body,
+      bytes: response.bodyBytes,
     );
   }
 

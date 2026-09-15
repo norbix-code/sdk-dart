@@ -7,19 +7,19 @@ import '../../core/resource.dart';
 class FilesResource extends Resource {
   FilesResource(super.transport);
 
-  /// `DELETE /{version}/files/integrations/{id}`
+  /// `DELETE /{version}/files/integrations/{Id}`
   Future<Object?> deleteFilesIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/files/integrations/{id}',
+      route: '/{version}/files/integrations/{Id}',
       method: 'DELETE',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -51,19 +51,19 @@ class FilesResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/files/integrations/{id}/disable`
+  /// `PUT /{version}/files/integrations/{Id}/disable`
   Future<Object?> disableFilesIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/files/integrations/{id}/disable',
+      route: '/{version}/files/integrations/{Id}/disable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -95,19 +95,19 @@ class FilesResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/files/integrations/{id}/enable`
+  /// `PUT /{version}/files/integrations/{Id}/enable`
   Future<Object?> enableFilesIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/files/integrations/{id}/enable',
+      route: '/{version}/files/integrations/{Id}/enable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -233,19 +233,112 @@ class FilesResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/files/integrations/{id}/default`
+  /// `PUT /{version}/files/integrations/{Id}/default`
   Future<Object?> setFilesIntegrationAsDefault(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/files/integrations/{id}/default',
+      route: '/{version}/files/integrations/{Id}/default',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
+
+  /// `POST /{version}/files/integrations/test`
+  ///
+  /// Tries the credentials of a files integration against the storage
+  /// provider and answers whether they work. Nothing is saved — call it
+  /// before [saveFilesIntegration] to tell a bad key from a bad bucket.
+  Future<Object?> testFilesIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/integrations/test',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/files/item/public`
+  ///
+  /// Makes one file readable by anyone holding its link. Answers with the
+  /// `nbpf_…` public id; the link itself arrives on the file's `publicUrl`
+  /// the next time you read the file. Send `filesIntegrationId` and `path`
+  /// in [body].
+  Future<Object?> makeFilePublic(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/item/public',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/files/item/private`
+  ///
+  /// Takes a file's public link away. It is refused while a folder above the
+  /// file is public — switch the folder off with [makeFolderPrivate] instead.
+  Future<Object?> makeFilePrivate(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/item/private',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/files/folder/public`
+  ///
+  /// Publishes a whole folder prefix — one record, however many files sit
+  /// under it, at any depth. The root cannot be published.
+  Future<Object?> makeFolderPublic(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/folder/public',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/files/folder/private`
+  ///
+  /// Takes back every link inside the folder, including per-file ones.
+  Future<Object?> makeFolderPrivate(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/folder/private',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
 }
