@@ -69,7 +69,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://api.norbix.ai/v1/membership/users?take=10'),
+        equals('https://api.norbix.ai/v1/membership/auth?take=10'),
       );
       expect(driver.lastRequest!.headers['x-api-key'], equals('nbx_test'));
     });
@@ -83,7 +83,7 @@ void main() {
       await client.users.getUser(id: 'usr_42');
       expect(
         driver.lastRequest!.url.toString(),
-        equals('http://localhost:5000/v1/membership/users/usr_42'),
+        equals('http://localhost:5000/v1/membership/auth/usr_42'),
       );
     });
 
