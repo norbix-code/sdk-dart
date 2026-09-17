@@ -3,4 +3,8 @@ include: package:lints/recommended.yaml
 analyzer:
   exclude:
     - tool/**
+    # Raw ServiceStack DTO dumps kept for reference (they import
+    # package:servicestack, which this package does not depend on). Nothing in
+    # lib/ imports them; analysing them produced ~24k errors and failed CI.
+    - references/**
     - "**/.dart_tool/**"
