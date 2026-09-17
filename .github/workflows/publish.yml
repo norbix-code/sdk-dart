@@ -1,0 +1,82 @@
+name: Publish to pub.dev
+
+# Publishes the `norbix` package for one release tag, using pub.dev automated
+# publishing (OIDC from GitHub Actions) — no stored credential.
+#
+# Started by release.yml via `gh workflow run publish.yml --ref vX.Y.Z` after
+# semantic-release creates the tag. It can also be run by hand from the Actions
+# tab: pick the tag (not a branch) in "Use workflow from" to (re)publish that
+# version.
+#
+# One-time setup on pub.dev (package `norbix` → Admin → Automated publishing):
+#   - Enable publishing from GitHub Actions
+#   - Repository: norbix-code/sdk-dart
+#   - Tag pattern: v{{version}}
+#   - Enable "publishing with workflow_dispatch events"
+
+on:
+  workflow_dispatch:
+  push:
+    # A tag pushed by a person (not by release.yml's GITHUB_TOKEN) also publishes.
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # pub.dev OIDC
+
+jobs:
+  publish:
+    name: dart pub publish
+    runs-on: ubuntu-24.04
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout the tag
+        uses: actions/checkout@v7
+
+      - name: Setup Dart
+        # With id-token: write, setup-dart configures pub.dev's OIDC credentials.
+        uses: dart-lang/setup-dart@v1.8.1
+        with:
+          sdk: stable
+
+      - name: Skip if already on pub.dev
+        id: check
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          if curl -fsS "https://pub.dev/api/packages/norbix/versions/${VERSION}" >/dev/null 2>&1; then
+            echo "norbix ${VERSION} is already on pub.dev"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stamp version and changelog
+        if: steps.check.outputs.published != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" --json body --jq .body > release-notes.md 2>/dev/null || : > release-notes.md
+          bash tool/stamp_release.sh "${{ steps.check.outputs.version }}" release-notes.md
+          rm -f release-notes.md
+
+      - name: Install dependencies
+        if: steps.check.outputs.published != 'true'
+        run: dart pub get
+
+      - name: Publish (dry run)
+        if: steps.check.outputs.published != 'true'
+        # The stamp leaves pubspec.yaml / CHANGELOG.md modified, which pub
+        # reports as a warning, so only a hard error fails this step.
+        run: |
+          set +e
+          dart pub publish --dry-run
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ] && [ "$status" -ne 65 ]; then exit "$status"; fi
+
+      - name: Publish
+        if: steps.check.outputs.published != 'true'
+        run: dart pub publish --force

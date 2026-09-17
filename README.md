@@ -521,3 +521,11 @@ Versioned with Conventional Commits + `semantic-release`:
 - `feat!` / `BREAKING CHANGE:` — major
 
 Channels: `main` → stable, `next` → `-rc.*`, `beta` → `-beta.*`.
+
+On a push to `main`, `release.yml` runs analyze + tests, and semantic-release
+creates the `vX.Y.Z` tag and GitHub Release. It then starts `publish.yml` on
+that tag, which publishes to pub.dev with automated publishing (OIDC) — no
+stored credential. `main` is protected, so nothing is committed back:
+`pubspec.yaml` and `CHANGELOG.md` are stamped with the version only inside the
+publish job. To re-publish a tag, run **Publish to pub.dev** from the Actions
+tab with that tag selected.
