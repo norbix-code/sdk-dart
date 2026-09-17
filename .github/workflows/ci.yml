@@ -5,17 +5,26 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Dart ${{ matrix.sdk }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # The pubspec minimum (sdk: >=3.6.0) and the current stable release.
+        sdk: ['3.6.0', 'stable']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+        uses: dart-lang/setup-dart@v1.8.1
         with:
-          sdk: stable
+          sdk: ${{ matrix.sdk }}
 
       # Note: SDK generation (tool/generate_resources.py) is a developer
       # task run locally. CI never regenerates — generated SDK outputs are
@@ -28,3 +37,19 @@ jobs:
 
       - name: Test
         run: dart test
+
+  package:
+    name: pub publish --dry-run
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1.8.1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Package contents
+        run: |
+          dart pub publish --dry-run | tee publish.log || true
+          if grep -qE '^(├|└)── (references|tool|package\.json|package-lock\.json|node_modules)' publish.log; then
+            echo "::error::repository-only files are in the pub.dev package (check .pubignore)"; exit 1
+          fi

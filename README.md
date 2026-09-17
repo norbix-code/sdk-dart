@@ -424,6 +424,58 @@ Now each taxonomy node's `terms` holds that taxonomy's full term tree (same shap
 
 > Every term-reading call also accepts an optional `databaseIntegrationId` to target a non-default database.
 
+## Files
+
+### Public file links
+
+A file or a whole folder can be made readable by anyone holding its link.
+Publishing is a Hub action and needs your key; *reading* the link needs
+nothing at all.
+
+```dart
+final hub = NorbixHub(config: NorbixConfig(baseUrl: 'https://hub.norbix.ai', apiKey: 'k'));
+
+// Publish one file, or a whole folder prefix (one record, however many
+// files sit under it, at any depth — the root cannot be published).
+await hub.files.makeFilePublic(
+  body: {'filesIntegrationId': 'nbin_1', 'path': 'docs/invoice.pdf'},
+);
+await hub.files.makeFolderPublic(
+  body: {'filesIntegrationId': 'nbin_1', 'path': 'docs'},
+);
+
+// Take it back. makeFilePrivate is refused while a folder above the file
+// is public — switch the folder off instead.
+await hub.files.makeFilePrivate(
+  body: {'filesIntegrationId': 'nbin_1', 'path': 'docs/invoice.pdf'},
+);
+await hub.files.makeFolderPrivate(
+  body: {'filesIntegrationId': 'nbin_1', 'path': 'docs'},
+);
+```
+
+Reading a published file is the one call in this SDK that goes out with **no**
+credentials — the link has to work in an e-mail, in an `<img src>`, or in a
+browser on a stranger's phone. It answers with the raw bytes:
+
+```dart
+final api = NorbixApi();
+final bytes = await api.files.getPublicFile(
+  publicId: 'nbpf_abc',
+  name: '2026/q1/report.pdf', // slashes stay slashes for a folder link
+);
+```
+
+Every miss — unknown id, wrong name, made private again, file gone — is the
+same plain `404`, on purpose: a more precise answer would tell a stranger that
+the file exists.
+
+### Testing an integration before you save it
+
+`hub.files.testFilesIntegration` tries the credentials against the storage
+provider and answers whether they work. Nothing is saved — use it before
+`saveFilesIntegration` to tell a bad key from a bad bucket.
+
 ## Repo layout
 
 ```
@@ -469,3 +521,11 @@ Versioned with Conventional Commits + `semantic-release`:
 - `feat!` / `BREAKING CHANGE:` — major
 
 Channels: `main` → stable, `next` → `-rc.*`, `beta` → `-beta.*`.
+
+On a push to `main`, `release.yml` runs analyze + tests, and semantic-release
+creates the `vX.Y.Z` tag and GitHub Release. It then starts `publish.yml` on
+that tag, which publishes to pub.dev with automated publishing (OIDC) — no
+stored credential. `main` is protected, so nothing is committed back:
+`pubspec.yaml` and `CHANGELOG.md` are stamped with the version only inside the
+publish job. To re-publish a tag, run **Publish to pub.dev** from the Actions
+tab with that tag selected.

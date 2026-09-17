@@ -1,36 +1,58 @@
 name: Release
 
+# Versions `norbix` with semantic-release on every push to `main` (and prerelease
+# branches `next` / `beta`), from conventional commits since the last `v*` tag:
+# `feat:` → minor, `fix:` → patch, `feat!:` / `BREAKING CHANGE:` → major.
+#
+# semantic-release creates the `vX.Y.Z` tag and the GitHub Release, then starts
+# publish.yml on that tag. Publishing uses pub.dev automated publishing (OIDC)
+# — no stored credential. A tag pushed with GITHUB_TOKEN does not trigger other
+# workflows, but a workflow_dispatch does, which pub.dev accepts when
+# "publishing with workflow_dispatch events" is enabled for the package.
+#
+# `main` is protected (changes only through pull requests), so nothing is
+# committed back; publish.yml stamps the version into pubspec.yaml and
+# CHANGELOG.md in its own checkout of the tag.
+
 on:
   push:
     branches: [main, next, beta]
   workflow_dispatch:
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   issues: write
   pull-requests: write
+  actions: write # start publish.yml
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    name: semantic-release
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
+
+      - name: Sync branch tip
+        # A run checks out its triggering SHA. When several merges land close
+        # together that SHA is already behind origin and semantic-release
+        # refuses to release; release from the remote tip instead.
+        run: |
+          git fetch origin "${GITHUB_REF_NAME}"
+          git checkout "${GITHUB_REF_NAME}"
+          git reset --hard "origin/${GITHUB_REF_NAME}"
 
       - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+        uses: dart-lang/setup-dart@v1.8.1
         with:
           sdk: stable
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install release tooling
-        run: npm install --no-audit --no-fund
 
       - name: Install Dart dependencies
         run: dart pub get
@@ -41,8 +63,17 @@ jobs:
       - name: Test
         run: dart test
 
+      - name: Setup Node (release tooling)
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install release tooling
+        run: npm ci --no-audit --no-fund
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUB_CREDENTIALS: ${{ secrets.PUB_CREDENTIALS }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release

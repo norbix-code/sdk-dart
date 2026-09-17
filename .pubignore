@@ -1,0 +1,30 @@
+# Files excluded from the pub.dev package. When present, .pubignore replaces
+# .gitignore for `dart pub publish`, so the .gitignore rules are repeated here.
+
+# --- from .gitignore ---
+.dart_tool/
+.packages
+build/
+dist/
+node_modules/
+pubspec.lock
+coverage/
+**/.dart_tool/
+
+# Generation script is dev-only — not shipped with the SDK. Generated
+# outputs (lib/src/api/, lib/src/hub/, lib/norbix_api.dart, lib/norbix_hub.dart)
+# ARE committed and used by CI and consumers.
+tool/generate_resources.py
+tool/__pycache__/
+
+# --- repository-only files ---
+# Raw ServiceStack DTO dumps kept for reference; not part of the library.
+references/
+# Release tooling (semantic-release) and maintenance scripts.
+package.json
+package-lock.json
+node_modules/
+tool/
+Makefile
+.releaserc.json
+.github/
