@@ -476,6 +476,22 @@ the file exists.
 provider and answers whether they work. Nothing is saved — use it before
 `saveFilesIntegration` to tell a bad key from a bad bucket.
 
+### Testing a saved integration from the API
+
+`api.files.testFilesIntegration` runs a live probe against an integration that
+is already saved: it uploads a small file, reads it, lists the folder and
+deletes the file again. It answers one entry per step. Because it writes to the
+storage, the API key needs the `files:create` permission.
+
+```dart
+final api = NorbixApi(config: NorbixConfig(baseUrl: 'https://api.norbix.ai', apiKey: 'k'));
+final res = await api.files.testFilesIntegration(filesIntegrationId: 'nbin_1')
+    as Map<String, dynamic>;
+for (final step in res['items'] as List) {
+  print('${step['operation']}: ${step['result']}'); // UploadFile: OK, GetFile: OK, ...
+}
+```
+
 ## Repo layout
 
 ```
