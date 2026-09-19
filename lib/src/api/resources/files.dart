@@ -131,15 +131,18 @@ class FilesResource extends Resource {
   ///
   /// Runs a live probe against a files integration that is already saved:
   /// it uploads a small file, reads it, lists the folder and deletes the file
-  /// again. The answer has one entry per step in `items` — each with
-  /// `operation`, `result` (`"OK"` or `"Failed"`) and `errors`.
+  /// again. The answer has one entry per step in `items` — `UploadFile`,
+  /// `GetFile`, `GetAllFiles`, `DeleteFile`, in that order — each with
+  /// `operation`, `result` (`"OK"`, `"FAILED"`, or `"NOT_TESTED"` once an
+  /// earlier step failed) and `errors`.
   ///
   /// Because the probe writes to the storage, the API key needs the
   /// `files:create` permission, not only `files:read`.
   ///
   /// This is the API-side twin of the Hub's `hub.files.testFilesIntegration`
-  /// (`POST /{version}/files/integrations/test`), which tries credentials
-  /// *before* they are saved. Same name, different client, different route.
+  /// (`POST /{version}/files/integrations/test`, id in the body). Both probe an
+  /// integration that is already saved, using its stored credentials. Same
+  /// name, different client, different route.
   Future<Object?> testFilesIntegration(
       {required Object filesIntegrationId,
       Map<String, Object?>? query,

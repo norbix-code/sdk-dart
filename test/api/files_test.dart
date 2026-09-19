@@ -176,14 +176,14 @@ void main() {
     test('returns the per-step items parsed', () async {
       final driver = jsonDriver(jsonEncode({
         'items': [
-          {'operation': 'Upload', 'result': 'OK', 'errors': null},
-          {'operation': 'Read', 'result': 'OK', 'errors': null},
-          {'operation': 'List', 'result': 'OK', 'errors': null},
+          {'operation': 'UploadFile', 'result': 'OK', 'errors': null},
           {
-            'operation': 'Delete',
-            'result': 'Failed',
+            'operation': 'GetFile',
+            'result': 'FAILED',
             'errors': ['AccessDenied'],
           },
+          {'operation': 'GetAllFiles', 'result': 'NOT_TESTED', 'errors': null},
+          {'operation': 'DeleteFile', 'result': 'NOT_TESTED', 'errors': null},
         ],
         'responseStatus': {'isSuccess': true},
       }));
@@ -196,11 +196,11 @@ void main() {
       expect(items, hasLength(4));
       expect(
         items.map((i) => (i as Map)['operation']),
-        equals(['Upload', 'Read', 'List', 'Delete']),
+        equals(['UploadFile', 'GetFile', 'GetAllFiles', 'DeleteFile']),
       );
       expect((items.first as Map)['result'], equals('OK'));
-      expect((items.last as Map)['result'], equals('Failed'));
-      expect((items.last as Map)['errors'], equals(['AccessDenied']));
+      expect((items[1] as Map)['result'], equals('FAILED'));
+      expect((items[1] as Map)['errors'], equals(['AccessDenied']));
     });
 
     test('an error ResponseStatus surfaces as a typed NorbixError', () async {

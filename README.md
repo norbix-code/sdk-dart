@@ -488,7 +488,7 @@ final api = NorbixApi(config: NorbixConfig(baseUrl: 'https://api.norbix.ai', api
 final res = await api.files.testFilesIntegration(filesIntegrationId: 'nbin_1')
     as Map<String, dynamic>;
 for (final step in res['items'] as List) {
-  print('${step['operation']}: ${step['result']}'); // Upload: OK, Read: OK, ...
+  print('${step['operation']}: ${step['result']}'); // UploadFile: OK, GetFile: OK, ...
 }
 ```
 
