@@ -115,4 +115,119 @@ void main() {
       expect(bytes, equals(png));
     });
   });
+
+  group('api.files.testFilesIntegration', () {
+    FakeHttpDriver jsonDriver(String body, {int status = 200}) =>
+        FakeHttpDriver(
+          (_) => HttpDriverResponse(
+            statusCode: status,
+            headers: const {'content-type': 'application/json'},
+            body: body,
+          ),
+        );
+
+    test('posts to /{version}/files/{id}/test with the id substituted',
+        () async {
+      final driver = jsonDriver('{"items":[]}');
+      await _client(driver).files.testFilesIntegration(
+            filesIntegrationId: 'nbin_1',
+          );
+
+      final request = driver.lastRequest!;
+      expect(request.method, equals('POST'));
+      expect(
+        request.url.toString(),
+        equals('https://api.norbix.ai/v1/files/nbin_1/test'),
+      );
+      // Not the Hub route — that one is /files/integrations/test.
+      expect(request.url.path, isNot(contains('/integrations/')));
+    });
+
+    test('is project-scoped: sends the API key and the environment', () async {
+      final driver = jsonDriver('{"items":[]}');
+      final client = NorbixApi(
+        config: NorbixConfig(
+          baseUrl: 'https://api.norbix.ai',
+          apiKey: 'nbx_test',
+          env: 'DEV',
+        ),
+        driver: driver,
+      );
+
+      await client.files.testFilesIntegration(filesIntegrationId: 'nbin_1');
+
+      final headers = driver.lastRequest!.headers;
+      expect(headers['x-api-key'], equals('nbx_test'));
+      expect(headers['norbix-env'], equals('DEV'));
+    });
+
+    test('an id with a slash is encoded as one path segment', () async {
+      final driver = jsonDriver('{"items":[]}');
+      await _client(driver).files.testFilesIntegration(
+            filesIntegrationId: 'a/b',
+          );
+
+      expect(
+        driver.lastRequest!.url.toString(),
+        endsWith('/v1/files/a%2Fb/test'),
+      );
+    });
+
+    test('returns the per-step items parsed', () async {
+      final driver = jsonDriver(jsonEncode({
+        'items': [
+          {'operation': 'UploadFile', 'result': 'OK', 'errors': null},
+          {
+            'operation': 'GetFile',
+            'result': 'FAILED',
+            'errors': ['AccessDenied'],
+          },
+          {'operation': 'GetAllFiles', 'result': 'NOT_TESTED', 'errors': null},
+          {'operation': 'DeleteFile', 'result': 'NOT_TESTED', 'errors': null},
+        ],
+        'responseStatus': {'isSuccess': true},
+      }));
+
+      final res = await _client(driver).files.testFilesIntegration(
+            filesIntegrationId: 'nbin_1',
+          ) as Map<String, dynamic>;
+
+      final items = res['items'] as List<dynamic>;
+      expect(items, hasLength(4));
+      expect(
+        items.map((i) => (i as Map)['operation']),
+        equals(['UploadFile', 'GetFile', 'GetAllFiles', 'DeleteFile']),
+      );
+      expect((items.first as Map)['result'], equals('OK'));
+      expect((items[1] as Map)['result'], equals('FAILED'));
+      expect((items[1] as Map)['errors'], equals(['AccessDenied']));
+    });
+
+    test('an error ResponseStatus surfaces as a typed NorbixError', () async {
+      final driver = jsonDriver(
+        jsonEncode({
+          'responseStatus': {
+            'errorCode': 'NotFound',
+            'message': 'Files integration not found',
+          },
+        }),
+        status: 404,
+      );
+
+      await expectLater(
+        _client(driver).files.testFilesIntegration(
+              filesIntegrationId: 'nbin_missing',
+            ),
+        throwsA(
+          isA<NorbixNotFoundError>()
+              .having((e) => e.status, 'status', 404)
+              .having(
+                (e) => e.details['responseStatus'],
+                'details.responseStatus',
+                containsPair('errorCode', 'NotFound'),
+              ),
+        ),
+      );
+    });
+  });
 }

@@ -127,6 +127,37 @@ class FilesResource extends Resource {
     );
   }
 
+  /// `POST /{version}/files/{filesIntegrationId}/test`
+  ///
+  /// Runs a live probe against a files integration that is already saved:
+  /// it uploads a small file, reads it, lists the folder and deletes the file
+  /// again. The answer has one entry per step in `items` — `UploadFile`,
+  /// `GetFile`, `GetAllFiles`, `DeleteFile`, in that order — each with
+  /// `operation`, `result` (`"OK"`, `"FAILED"`, or `"NOT_TESTED"` once an
+  /// earlier step failed) and `errors`.
+  ///
+  /// Because the probe writes to the storage, the API key needs the
+  /// `files:create` permission, not only `files:read`.
+  ///
+  /// This is the API-side twin of the Hub's `hub.files.testFilesIntegration`
+  /// (`POST /{version}/files/integrations/test`, id in the body). Both probe an
+  /// integration that is already saved, using its stored credentials. Same
+  /// name, different client, different route.
+  Future<Object?> testFilesIntegration(
+      {required Object filesIntegrationId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/{filesIntegrationId}/test',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'filesIntegrationId': filesIntegrationId},
+    );
+  }
+
   /// `GET /{version}/files/public/{PublicId}/{Name*}`
   ///
   /// Reads a file somebody made public from the Hub side ([makeFilePublic] /
