@@ -279,26 +279,22 @@ class Transport {
     }
 
     if (response.statusCode >= 400) {
-      String message = 'Request failed';
-      String code = 'NORBIX_HTTP_ERROR';
-      Map<String, dynamic> details = <String, dynamic>{
-        'status': response.statusCode,
-      };
-      if (parsed is Map<String, dynamic>) {
-        message = (parsed['message'] ?? parsed['error'] ?? message).toString();
-        code = (parsed['code'] ?? code).toString();
-        details = {...parsed, 'status': response.statusCode};
-      } else if (parsed != null) {
-        details = {'body': parsed, 'status': response.statusCode};
-      }
       final retryAfter = response.headers['retry-after'];
-      if (retryAfter != null) details['retryAfter'] = retryAfter;
-      throw NorbixError.fromHttp(
+      throw NorbixError.fromBody(
         status: response.statusCode,
-        message: message,
-        code: code,
-        details: details,
+        body: parsed,
+        extraDetails: {
+          if (retryAfter != null) 'retryAfter': retryAfter,
+        },
       );
+    }
+
+    // A 2xx does not mean the call worked: the gateway answers a business
+    // refusal with HTTP 200 and responseStatus.isSuccess = false, and that is
+    // a failure the caller must see (10b-files, issue #67). File content goes
+    // through sendBytes, which never reaches this line on a success.
+    if (norbixBodySaysItFailed(parsed)) {
+      throw NorbixError.fromBody(status: response.statusCode, body: parsed);
     }
 
     return parsed;

@@ -155,6 +155,43 @@ await hub.projects.updateProjectRegions(
 `additionalRegions` keys in its `body` to place a new project in
 specific regions at creation time.
 
+## Errors
+
+```dart
+try {
+  await api.files.getFileInfo(integrationId, path: 'a/b.txt');
+} on NorbixError catch (e) {
+  // httpStatus / errorCode are the names every Norbix SDK uses.
+  // status / code are the same values, kept for older code.
+  print('${e.httpStatus} ${e.errorCode}: ${e.message}');
+  for (final item in e.errors) {
+    print('${item.errorCode} ${item.fieldName}: ${item.message}');
+  }
+  print(e.body); // the answer exactly as it arrived
+}
+```
+
+`message` and `errorCode` are the gateway's own. The gateway puts them inside
+`responseStatus.errors[]`, so the SDK reads that list first, takes the first
+entry for the message and the code, and keeps every entry in `errors`. Only
+when the body has no `responseStatus` are the top-level `message` and
+`errorCode` read. `Request failed (HTTP N)` with the code `NORBIX_HTTP_ERROR`
+is the last fallback, used when the body says nothing — a 500 page that is not
+JSON, say.
+
+### Breaking change — a refused call now throws
+
+The gateway answers a business refusal (an unknown id, a rule that says no)
+with **HTTP 200** and `responseStatus.isSuccess = false`. The SDK used to hand
+that answer back as a normal value, so code carried on as if the call had
+worked. It now throws a `NorbixError` with `httpStatus` 200 and the gateway's
+message and error code.
+
+If your code checked `result['responseStatus']['isSuccess']` itself, move that
+check into a `try / catch`. Endpoints that answer with raw bytes rather than a
+document (`sendBytes` — file download, the public file link) are not JSON and
+are unchanged.
+
 ## Working with terms
 
 A **taxonomy** is a named tree of **terms** (labels). A term can have one parent (a clean hierarchy) or several parents (the same item under many categories). Pick the call that matches what you want:
