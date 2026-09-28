@@ -529,6 +529,27 @@ for (final step in res['items'] as List) {
 }
 ```
 
+## Notifications
+
+### Preview a notification with its signed link (no sign-in)
+
+The push, email and SMS preview routes open with the signed link (`hash`)
+alone — no API key or bearer token needed. When the client does have a
+credential it is still sent; without one the SDK sends no credential header
+and does not throw.
+
+```dart
+final hub = NorbixHub(); // no apiKey, no bearerToken
+final preview = await hub.emailNotifications.previewEmailNotification(
+  query: {'hash': signedLink},
+);
+// also: hub.pushNotifications.previewPushNotification(...),
+//       hub.smsNotifications.previewSmsNotification(...)
+```
+
+A signed-in member can pass `projectId` + `notificationId` in `query`
+instead of `hash`. A bad or expired link throws `NorbixAuthError` (401).
+
 ## Repo layout
 
 ```

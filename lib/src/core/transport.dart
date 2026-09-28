@@ -31,6 +31,11 @@ class Transport {
   /// the Files module. A public link has to work in an e-mail or in a browser
   /// on a stranger's phone, so sending a key would be wrong, not merely
   /// unnecessary.
+  ///
+  /// With [authenticated] true (the default) auth is sent when the client has
+  /// a token, never required: a client with no key and no bearer token sends
+  /// no credential header and does not throw — the gateway decides. The
+  /// signed notification preview links rely on this.
   Future<Object?> send({
     required String route,
     String method = 'GET',
