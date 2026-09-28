@@ -3,24 +3,9 @@
 
 import '../../core/resource.dart';
 
-/// Account profile, team, licenses, regions, status, Stripe billing, AI chat.
+/// Account profile, team, licenses, regions, status, Stripe billing.
 class AccountsResource extends Resource {
   AccountsResource(super.transport);
-
-  /// `POST /{version}/account/chat/complete`
-  Future<Object?> askChat(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/account/chat/complete',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
 
   /// `POST /{version}/account`
   Future<Object?> createAccount(
