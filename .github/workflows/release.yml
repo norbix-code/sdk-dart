@@ -2,7 +2,8 @@ name: Release
 
 # Versions `norbix` with semantic-release on every push to `main` (and prerelease
 # branches `next` / `beta`), from conventional commits since the last `v*` tag:
-# `feat:` → minor, `fix:` → patch, `feat!:` / `BREAKING CHANGE:` → major.
+# `feat:` → minor, `fix:` → patch. Breaking changes → minor too until the
+# public launch (major frozen; see README "Versioning").
 #
 # semantic-release creates the `vX.Y.Z` tag and the GitHub Release, then starts
 # publish.yml on that tag. Publishing uses pub.dev automated publishing (OIDC)
