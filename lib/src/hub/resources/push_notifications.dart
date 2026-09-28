@@ -402,6 +402,23 @@ class PushNotificationsResource extends Resource {
     );
   }
 
+  /// `GET /{version}/notifications/push/preview`
+  ///
+  /// Opens with the signed preview link alone: pass `query: {'hash': link}`
+  /// and no credentials are needed — auth is sent when the client has a
+  /// token, never required. A signed-in member can pass `projectId` +
+  /// `notificationId` instead.
+  Future<Object?> previewPushNotification(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/push/preview',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `POST /{version}/notifications/push/integrations/app/request`
   Future<Object?> registerCodeMashAppPushIntegration(
       {Map<String, Object?>? query,

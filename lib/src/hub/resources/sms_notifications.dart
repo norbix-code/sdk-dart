@@ -387,6 +387,11 @@ class SmsNotificationsResource extends Resource {
   }
 
   /// `GET /{version}/notifications/sms/preview`
+  ///
+  /// Opens with the signed preview link alone: pass `query: {'hash': link}`
+  /// and no credentials are needed — auth is sent when the client has a
+  /// token, never required. A signed-in member can pass `projectId` +
+  /// `notificationId` instead.
   Future<Object?> previewSmsNotification(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
