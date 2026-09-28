@@ -1,6 +1,6 @@
 /* Options:
-Date: 2026-09-04 14:55:41
-Version: 10.08
+Date: 2026-09-28 20:34:13
+Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
 
@@ -655,150 +655,27 @@ enum FilesTriggerType
     OnFileDeleted,
 }
 
-// @DataContract
-class FileChecksumDto implements IConvertible
-{
-    // @DataMember(Order=1)
-    String algorithm = "";
-
-    // @DataMember(Order=2)
-    String hash = "";
-
-    FileChecksumDto({this.algorithm="",this.hash=""});
-    FileChecksumDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        algorithm = json['algorithm'] ?? "";
-        hash = json['hash'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'algorithm': algorithm,
-        'hash': hash
-    };
-
-    getTypeName() => "FileChecksumDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class FileResourceDto implements IConvertible
-{
-    // @DataMember(Order=1)
-    String id = "";
-
-    // @DataMember(Order=2)
-    String originalFileName = "";
-
-    // @DataMember(Order=3)
-    String Extension = "";
-
-    // @DataMember(Order=4)
-    String storedFileName = "";
-
-    // @DataMember(Order=5)
-    int? sizeBytes;
-
-    // @DataMember(Order=6)
-    FileChecksumDto? checksum;
-
-    FileResourceDto({this.id="",this.originalFileName="",this.Extension="",this.storedFileName="",this.sizeBytes,this.checksum});
-    FileResourceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        originalFileName = json['originalFileName'] ?? "";
-        Extension = json['extension'] ?? "";
-        storedFileName = json['storedFileName'] ?? "";
-        sizeBytes = json['sizeBytes'];
-        checksum = JsonConverters.fromJson(json['checksum'],'FileChecksumDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'originalFileName': originalFileName,
-        'extension': Extension,
-        'storedFileName': storedFileName,
-        'sizeBytes': sizeBytes,
-        'checksum': JsonConverters.toJson(checksum,'FileChecksumDto',context!)
-    };
-
-    getTypeName() => "FileResourceDto";
-    TypeContext? context = _ctx;
-}
-
-enum FileProvider
-{
-    Local,
-    AwsS3,
-    AzureBlobStorage,
-    GoogleCloudStorage,
-    Ftp,
-    AppleICloud,
-    DropBox,
-    GoogleDrive,
-}
-
-// @DataContract
-class FileResourceRefDto implements IConvertible
-{
-    // @DataMember(Order=1)
-    FileResourceDto? resource;
-
-    // @DataMember(Order=2)
-    String integrationId = "";
-
-    // @DataMember(Order=3)
-    FileProvider? provider;
-
-    // @DataMember(Order=4)
-    String path = "";
-
-    FileResourceRefDto({this.resource,this.integrationId="",this.provider,this.path=""});
-    FileResourceRefDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        resource = JsonConverters.fromJson(json['resource'],'FileResourceDto',context!);
-        integrationId = json['integrationId'] ?? "";
-        provider = JsonConverters.fromJson(json['provider'],'FileProvider',context!);
-        path = json['path'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'resource': JsonConverters.toJson(resource,'FileResourceDto',context!),
-        'integrationId': integrationId,
-        'provider': JsonConverters.toJson(provider,'FileProvider',context!),
-        'path': path
-    };
-
-    getTypeName() => "FileResourceRefDto";
-    TypeContext? context = _ctx;
-}
-
 class FilesTriggerRequest extends SaveTriggerRequest implements IConvertible
 {
     TriggerType? type;
     FilesTriggerType? when;
-    FileResourceRefDto? fileRef;
+    String? folder;
 
-    FilesTriggerRequest({this.type,this.when,this.fileRef});
+    FilesTriggerRequest({this.type,this.when,this.folder});
     FilesTriggerRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         type = JsonConverters.fromJson(json['type'],'TriggerType',context!);
         when = JsonConverters.fromJson(json['when'],'FilesTriggerType',context!);
-        fileRef = JsonConverters.fromJson(json['fileRef'],'FileResourceRefDto',context!);
+        folder = json['folder'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'type': JsonConverters.toJson(type,'TriggerType',context!),
         'when': JsonConverters.toJson(when,'FilesTriggerType',context!),
-        'fileRef': JsonConverters.toJson(fileRef,'FileResourceRefDto',context!)
+        'folder': folder
     });
 
     getTypeName() => "FilesTriggerRequest";
@@ -926,6 +803,18 @@ class MongoDbAtlasFlexManagedDatabaseIntegrationRequest extends DatabaseIntegrat
 
     getTypeName() => "MongoDbAtlasFlexManagedDatabaseIntegrationRequest";
     TypeContext? context = _ctx;
+}
+
+enum FileProvider
+{
+    Local,
+    AwsS3,
+    AzureBlobStorage,
+    GoogleCloudStorage,
+    Ftp,
+    AppleICloud,
+    DropBox,
+    GoogleDrive,
 }
 
 abstract class FilesIntegrationRequest
@@ -3477,6 +3366,127 @@ class EmailBodyDto implements IHasRazorTemplateCode, IConvertible
 }
 
 // @DataContract
+class FileChecksumDto implements IConvertible
+{
+    // @DataMember(Order=1)
+    String algorithm = "";
+
+    // @DataMember(Order=2)
+    String hash = "";
+
+    FileChecksumDto({this.algorithm="",this.hash=""});
+    FileChecksumDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        algorithm = json['algorithm'] ?? "";
+        hash = json['hash'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'algorithm': algorithm,
+        'hash': hash
+    };
+
+    getTypeName() => "FileChecksumDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class FileResourceDto implements IConvertible
+{
+    // @DataMember(Order=1)
+    String id = "";
+
+    // @DataMember(Order=2)
+    String originalFileName = "";
+
+    // @DataMember(Order=3)
+    String Extension = "";
+
+    // @DataMember(Order=4)
+    String storedFileName = "";
+
+    // @DataMember(Order=5)
+    int? sizeBytes;
+
+    // @DataMember(Order=6)
+    FileChecksumDto? checksum;
+
+    FileResourceDto({this.id="",this.originalFileName="",this.Extension="",this.storedFileName="",this.sizeBytes,this.checksum});
+    FileResourceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        originalFileName = json['originalFileName'] ?? "";
+        Extension = json['extension'] ?? "";
+        storedFileName = json['storedFileName'] ?? "";
+        sizeBytes = json['sizeBytes'];
+        checksum = JsonConverters.fromJson(json['checksum'],'FileChecksumDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'originalFileName': originalFileName,
+        'extension': Extension,
+        'storedFileName': storedFileName,
+        'sizeBytes': sizeBytes,
+        'checksum': JsonConverters.toJson(checksum,'FileChecksumDto',context!)
+    };
+
+    getTypeName() => "FileResourceDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class FileResourceRefDto implements IConvertible
+{
+    // @DataMember(Order=1)
+    FileResourceDto? resource;
+
+    // @DataMember(Order=2)
+    String integrationId = "";
+
+    // @DataMember(Order=3)
+    FileProvider? provider;
+
+    // @DataMember(Order=4)
+    String path = "";
+
+    // @DataMember(Order=5)
+    String? publicUrl;
+
+    // @DataMember(Order=6)
+    bool? isPublic;
+
+    FileResourceRefDto({this.resource,this.integrationId="",this.provider,this.path="",this.publicUrl,this.isPublic});
+    FileResourceRefDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        resource = JsonConverters.fromJson(json['resource'],'FileResourceDto',context!);
+        integrationId = json['integrationId'] ?? "";
+        provider = JsonConverters.fromJson(json['provider'],'FileProvider',context!);
+        path = json['path'] ?? "";
+        publicUrl = json['publicUrl'];
+        isPublic = json['isPublic'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'resource': JsonConverters.toJson(resource,'FileResourceDto',context!),
+        'integrationId': integrationId,
+        'provider': JsonConverters.toJson(provider,'FileProvider',context!),
+        'path': path,
+        'publicUrl': publicUrl,
+        'isPublic': isPublic
+    };
+
+    getTypeName() => "FileResourceRefDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class EmailMessageContentDto implements IHasRazorTemplateCode, IConvertible
 {
     // @DataMember
@@ -4273,81 +4283,6 @@ class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCor
     TypeContext? context = _ctx;
 }
 
-class Env implements IConvertible
-{
-    String value = "";
-    bool? isProd;
-
-    Env({this.value="",this.isProd});
-    Env.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        isProd = json['isProd'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value,
-        'isProd': isProd
-    };
-
-    getTypeName() => "Env";
-    TypeContext? context = _ctx;
-}
-
-class CursorArgs implements ICursorArgs, IConvertible
-{
-    String field = "";
-    int order = 0;
-
-    CursorArgs({this.field="",this.order=0});
-    CursorArgs.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        field = json['field'] ?? "";
-        order = json['order'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'field': field,
-        'order': order
-    };
-
-    getTypeName() => "CursorArgs";
-    TypeContext? context = _ctx;
-}
-
-class PagingArgs implements IConvertible
-{
-    CursorArgs? cursorArgs;
-    int? pageSize;
-    String? startingAfter;
-    String? endingBefore;
-
-    PagingArgs({this.cursorArgs,this.pageSize,this.startingAfter,this.endingBefore});
-    PagingArgs.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        cursorArgs = JsonConverters.fromJson(json['cursorArgs'],'CursorArgs',context!);
-        pageSize = json['pageSize'];
-        startingAfter = json['startingAfter'];
-        endingBefore = json['endingBefore'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'cursorArgs': JsonConverters.toJson(cursorArgs,'CursorArgs',context!),
-        'pageSize': pageSize,
-        'startingAfter': startingAfter,
-        'endingBefore': endingBefore
-    };
-
-    getTypeName() => "PagingArgs";
-    TypeContext? context = _ctx;
-}
-
 class CodeMashListPaginationRequestBase extends RequestBase implements IHasProjectId, IHasEnv, IConvertible
 {
     /**
@@ -4364,7 +4299,6 @@ class CodeMashListPaginationRequestBase extends RequestBase implements IHasProje
     // @ApiMember(DataType="string", Description="Target environment for this request (e.g. TEST, STAGING). Optional — when omitted the request runs against PROD. Can be passed in a header as norbix-env.", Name="norbix-env", ParameterType="header")
     String? env;
 
-    Env? resolvedEnv;
     /**
     * Cursor token — fetch the page AFTER this item.
     */
@@ -4386,35 +4320,25 @@ class CodeMashListPaginationRequestBase extends RequestBase implements IHasProje
     // @ApiMember(DataType="integer", Description="Amount of records to return.", Format="int32", Name="pageSize", ParameterType="query")
     int? pageSize;
 
-    /**
-    * Paging
-    */
-    // @ApiMember(DataType="object", Description="Paging", Name="paging", ParameterType="body")
-    PagingArgs? paging;
-
-    CodeMashListPaginationRequestBase({this.projectId="",this.env,this.resolvedEnv,this.startingAfter,this.endingBefore,this.pageSize,this.paging});
+    CodeMashListPaginationRequestBase({this.projectId="",this.env,this.startingAfter,this.endingBefore,this.pageSize});
     CodeMashListPaginationRequestBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         projectId = json['projectId'] ?? "";
         env = json['env'];
-        resolvedEnv = JsonConverters.fromJson(json['resolvedEnv'],'Env',context!);
         startingAfter = json['startingAfter'];
         endingBefore = json['endingBefore'];
         pageSize = json['pageSize'];
-        paging = JsonConverters.fromJson(json['paging'],'PagingArgs',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'projectId': projectId,
         'env': env,
-        'resolvedEnv': JsonConverters.toJson(resolvedEnv,'Env',context!),
         'startingAfter': startingAfter,
         'endingBefore': endingBefore,
-        'pageSize': pageSize,
-        'paging': JsonConverters.toJson(paging,'PagingArgs',context!)
+        'pageSize': pageSize
     });
 
     getTypeName() => "CodeMashListPaginationRequestBase";
@@ -4835,16 +4759,38 @@ class PushToCollectionRecordsDeliverySettingsDto extends PushCampaignDeliverySet
     TypeContext? context = _ctx;
 }
 
+enum PushDeviceDeliveryFamily
+{
+    Ios,
+    Android,
+    Chrome,
+    Safari,
+    Expo,
+}
+
 // @DataContract
 class PushDeviceDeliveryTokenDto implements IConvertible
 {
-    PushDeviceDeliveryTokenDto();
-    PushDeviceDeliveryTokenDto.fromJson(Map<String, dynamic> json) : super();
+    // @DataMember
+    String pushDeviceToken = "";
+
+    // @DataMember
+    PushDeviceDeliveryFamily? deliveryFamily;
+
+    PushDeviceDeliveryTokenDto({this.pushDeviceToken="",this.deliveryFamily});
+    PushDeviceDeliveryTokenDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
+        pushDeviceToken = json['pushDeviceToken'] ?? "";
+        deliveryFamily = JsonConverters.fromJson(json['deliveryFamily'],'PushDeviceDeliveryFamily',context!);
         return this;
     }
 
-    Map<String, dynamic> toJson() => {};
+    Map<String, dynamic> toJson() => {
+        'pushDeviceToken': pushDeviceToken,
+        'deliveryFamily': JsonConverters.toJson(deliveryFamily,'PushDeviceDeliveryFamily',context!)
+    };
+
     getTypeName() => "PushDeviceDeliveryTokenDto";
     TypeContext? context = _ctx;
 }
@@ -6934,6 +6880,20 @@ class VonageSmsIntegrationDto extends SmsIntegrationDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class FakeSmsIntegrationDto extends SmsIntegrationDto implements IConvertible
+{
+    FakeSmsIntegrationDto();
+    FakeSmsIntegrationDto.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "FakeSmsIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
 class PushIntegrationDto extends IntegrationDto implements IConvertible
 {
     PushProvider? provider;
@@ -7123,6 +7083,20 @@ class SafariPushIntegrationDto extends PushIntegrationDto implements IConvertibl
     TypeContext? context = _ctx;
 }
 
+class FakePushIntegrationDto extends PushIntegrationDto implements IConvertible
+{
+    FakePushIntegrationDto();
+    FakePushIntegrationDto.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "FakePushIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
 class EmailIntegrationDto extends IntegrationDto implements IConvertible
 {
     EmailProvider? provider;
@@ -7274,6 +7248,20 @@ class SmtpEmailIntegrationDto extends EmailIntegrationDto implements IConvertibl
     });
 
     getTypeName() => "SmtpEmailIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
+class FakeEmailIntegrationDto extends EmailIntegrationDto implements IConvertible
+{
+    FakeEmailIntegrationDto();
+    FakeEmailIntegrationDto.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "FakeEmailIntegrationDto";
     TypeContext? context = _ctx;
 }
 
@@ -8927,1366 +8915,92 @@ class TagDefinitionDto extends TagDefinitionBaseDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class EmailAddress implements IConvertible
+class CursorArgs implements ICursorArgs, IConvertible
 {
-    String address = "";
+    String field = "";
+    int order = 0;
 
-    EmailAddress({this.address=""});
-    EmailAddress.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    CursorArgs({this.field="",this.order=0});
+    CursorArgs.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        address = json['address'] ?? "";
+        field = json['field'] ?? "";
+        order = json['order'] ?? 0;
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'address': address
+        'field': field,
+        'order': order
     };
 
-    getTypeName() => "EmailAddress";
+    getTypeName() => "CursorArgs";
     TypeContext? context = _ctx;
 }
 
-abstract class AggregateId
+class PagingArgs implements IConvertible
 {
-    String value = "";
+    CursorArgs? cursorArgs;
+    int? pageSize;
+    String? startingAfter;
+    String? endingBefore;
 
-    AggregateId({this.value=""});
-    AggregateId.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    PagingArgs({this.cursorArgs,this.pageSize,this.startingAfter,this.endingBefore});
+    PagingArgs.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
+        cursorArgs = JsonConverters.fromJson(json['cursorArgs'],'CursorArgs',context!);
+        pageSize = json['pageSize'];
+        startingAfter = json['startingAfter'];
+        endingBefore = json['endingBefore'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'value': value
+        'cursorArgs': JsonConverters.toJson(cursorArgs,'CursorArgs',context!),
+        'pageSize': pageSize,
+        'startingAfter': startingAfter,
+        'endingBefore': endingBefore
     };
 
-    getTypeName() => "AggregateId";
-    TypeContext? context = _ctx;
-}
-
-class AccountId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    AccountId();
-    AccountId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "AccountId";
-    TypeContext? context = _ctx;
-}
-
-class UtcDateTime implements IConvertible
-{
-    UtcDateTime();
-    UtcDateTime.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "UtcDateTime";
-    TypeContext? context = _ctx;
-}
-
-enum TimeUnit
-{
-    Ticks,
-    Milliseconds,
-    Seconds,
-    Minutes,
-    Hours,
-}
-
-class ExpirationToken implements IConvertible
-{
-    int items = 0;
-    TimeUnit? unit;
-    int value = 0;
-
-    ExpirationToken({this.items=0,this.unit,this.value=0});
-    ExpirationToken.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        items = json['items'] ?? 0;
-        unit = JsonConverters.fromJson(json['unit'],'TimeUnit',context!);
-        value = json['value'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'items': items,
-        'unit': JsonConverters.toJson(unit,'TimeUnit',context!),
-        'value': value
-    };
-
-    getTypeName() => "ExpirationToken";
-    TypeContext? context = _ctx;
-}
-
-class CodeMashSubscriptionId extends AggregateId implements IConvertible
-{
-    CodeMashSubscriptionId();
-    CodeMashSubscriptionId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "CodeMashSubscriptionId";
-    TypeContext? context = _ctx;
-}
-
-class ProjectId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    ProjectId();
-    ProjectId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "ProjectId";
-    TypeContext? context = _ctx;
-}
-
-class IntegrationId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    IntegrationId();
-    IntegrationId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "IntegrationId";
-    TypeContext? context = _ctx;
-}
-
-enum ResourceRefKind
-{
-    Contact,
-    Document,
-    File,
-    PaymentCustomer,
-    Order,
-    Payment,
-    Product,
-    Integration,
-}
-
-abstract class ResourceRef
-{
-    ProjectId? projectId;
-    IntegrationId? integrationId;
-    ResourceRefKind? kind;
-
-    ResourceRef({this.projectId,this.integrationId,this.kind});
-    ResourceRef.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        kind = JsonConverters.fromJson(json['kind'],'ResourceRefKind',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'kind': JsonConverters.toJson(kind,'ResourceRefKind',context!)
-    };
-
-    getTypeName() => "ResourceRef";
-    TypeContext? context = _ctx;
-}
-
-enum ResourceSource
-{
-    Norbix,
-    Stripe,
-    Shopify,
-    PayPal,
-    Adyen,
-    Mollie,
-    Paddle,
-    LemonSqueezy,
-    AppleInApp,
-    GoogleInApp,
-    AuthorizeNet,
-    Braintree,
-    CheckOutCom,
-    WooCommerce,
-    Magento,
-    Worldpay,
-}
-
-class PaymentCustomerRef extends ResourceRef implements IConvertible
-{
-    ResourceRefKind? kind;
-    ResourceSource? source;
-    String externalId = "";
-
-    PaymentCustomerRef({this.kind,this.source,this.externalId=""});
-    PaymentCustomerRef.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        kind = JsonConverters.fromJson(json['kind'],'ResourceRefKind',context!);
-        source = JsonConverters.fromJson(json['source'],'ResourceSource',context!);
-        externalId = json['externalId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'kind': JsonConverters.toJson(kind,'ResourceRefKind',context!),
-        'source': JsonConverters.toJson(source,'ResourceSource',context!),
-        'externalId': externalId
-    });
-
-    getTypeName() => "PaymentCustomerRef";
-    TypeContext? context = _ctx;
-}
-
-class Quantity implements IConvertible
-{
-    int value = 0;
-
-    Quantity({this.value=0});
-    Quantity.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "Quantity";
-    TypeContext? context = _ctx;
-}
-
-class CodeMashManagedServiceSubscription implements IConvertible
-{
-    CodeMashSubscriptionId? subscriptionId;
-    PaymentCustomerRef? paymentCustomerRef;
-    String refSubscriptionId = "";
-    UtcDateTime? issuedOn;
-    UtcDateTime? willExpireOn;
-    Quantity? projectCap;
-    bool? isTrial;
-
-    CodeMashManagedServiceSubscription({this.subscriptionId,this.paymentCustomerRef,this.refSubscriptionId="",this.issuedOn,this.willExpireOn,this.projectCap,this.isTrial});
-    CodeMashManagedServiceSubscription.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        subscriptionId = JsonConverters.fromJson(json['subscriptionId'],'CodeMashSubscriptionId',context!);
-        paymentCustomerRef = JsonConverters.fromJson(json['paymentCustomerRef'],'PaymentCustomerRef',context!);
-        refSubscriptionId = json['refSubscriptionId'] ?? "";
-        issuedOn = JsonConverters.fromJson(json['issuedOn'],'UtcDateTime',context!);
-        willExpireOn = JsonConverters.fromJson(json['willExpireOn'],'UtcDateTime',context!);
-        projectCap = JsonConverters.fromJson(json['projectCap'],'Quantity',context!);
-        isTrial = json['isTrial'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'subscriptionId': JsonConverters.toJson(subscriptionId,'CodeMashSubscriptionId',context!),
-        'paymentCustomerRef': JsonConverters.toJson(paymentCustomerRef,'PaymentCustomerRef',context!),
-        'refSubscriptionId': refSubscriptionId,
-        'issuedOn': JsonConverters.toJson(issuedOn,'UtcDateTime',context!),
-        'willExpireOn': JsonConverters.toJson(willExpireOn,'UtcDateTime',context!),
-        'projectCap': JsonConverters.toJson(projectCap,'Quantity',context!),
-        'isTrial': isTrial
-    };
-
-    getTypeName() => "CodeMashManagedServiceSubscription";
-    TypeContext? context = _ctx;
-}
-
-class DomainUrl implements IConvertible
-{
-    Uri? value;
-
-    DomainUrl({this.value});
-    DomainUrl.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = JsonConverters.fromJson(json['value'],'Uri',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': JsonConverters.toJson(value,'Uri',context!)
-    };
-
-    getTypeName() => "DomainUrl";
-    TypeContext? context = _ctx;
-}
-
-class CodeMashLicense extends CodeMashManagedServiceSubscription implements IConvertible
-{
-    DomainUrl? domain;
-    AccountId? accountId;
-    bool? isEnterprise;
-
-    CodeMashLicense({this.domain,this.accountId,this.isEnterprise});
-    CodeMashLicense.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        domain = JsonConverters.fromJson(json['domain'],'DomainUrl',context!);
-        accountId = JsonConverters.fromJson(json['accountId'],'AccountId',context!);
-        isEnterprise = json['isEnterprise'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'domain': JsonConverters.toJson(domain,'DomainUrl',context!),
-        'accountId': JsonConverters.toJson(accountId,'AccountId',context!),
-        'isEnterprise': isEnterprise
-    });
-
-    getTypeName() => "CodeMashLicense";
+    getTypeName() => "PagingArgs";
     TypeContext? context = _ctx;
 }
 
 // @DataContract
-class ProjectName implements IConvertible
+class AiScopeDto implements IConvertible
 {
     // @DataMember
-    String name = "";
+    String reach = "";
 
     // @DataMember
-    String uniqueName = "";
-
-    ProjectName({this.name="",this.uniqueName=""});
-    ProjectName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        name = json['name'] ?? "";
-        uniqueName = json['uniqueName'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'name': name,
-        'uniqueName': uniqueName
-    };
-
-    getTypeName() => "ProjectName";
-    TypeContext? context = _ctx;
-}
-
-class NorbixRegion implements IConvertible
-{
-    String code = "";
-
-    NorbixRegion({this.code=""});
-    NorbixRegion.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        code = json['code'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'code': code
-    };
-
-    getTypeName() => "NorbixRegion";
-    TypeContext? context = _ctx;
-}
-
-enum Continent
-{
-    Africa,
-    Antarctica,
-    Asia,
-    Europe,
-    NorthAmerica,
-    Oceania,
-    SouthAmerica,
-}
-
-// @DataContract
-class ProjectRegion implements IConvertible
-{
-    // @DataMember
-    NorbixRegion? region;
+    String? projectId;
 
     // @DataMember
-    String? name;
+    String rights = "";
 
     // @DataMember
-    Continent? continent;
+    List<String> envs = [];
 
-    ProjectRegion({this.region,this.name,this.continent});
-    ProjectRegion.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    AiScopeDto({this.reach="",this.projectId,this.rights="",this.envs=const []});
+    AiScopeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        region = JsonConverters.fromJson(json['region'],'NorbixRegion',context!);
-        name = json['name'];
-        continent = JsonConverters.fromJson(json['continent'],'Continent',context!);
+        reach = json['reach'] ?? "";
+        projectId = json['projectId'];
+        rights = json['rights'] ?? "";
+        envs = JsonConverters.fromJson(json['envs'],'List<String>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'region': JsonConverters.toJson(region,'NorbixRegion',context!),
-        'name': name,
-        'continent': JsonConverters.toJson(continent,'Continent',context!)
+        'reach': reach,
+        'projectId': projectId,
+        'rights': rights,
+        'envs': JsonConverters.toJson(envs,'List<String>',context!)
     };
 
-    getTypeName() => "ProjectRegion";
-    TypeContext? context = _ctx;
-}
-
-class ProjectLegalDocuments implements IConvertible
-{
-    String? termsMarkdown;
-    String? privacyMarkdown;
-
-    ProjectLegalDocuments({this.termsMarkdown,this.privacyMarkdown});
-    ProjectLegalDocuments.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        termsMarkdown = json['termsMarkdown'];
-        privacyMarkdown = json['privacyMarkdown'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'termsMarkdown': termsMarkdown,
-        'privacyMarkdown': privacyMarkdown
-    };
-
-    getTypeName() => "ProjectLegalDocuments";
-    TypeContext? context = _ctx;
-}
-
-class AuthId implements IHasDomainEntityId, IConvertible
-{
-    String value = "";
-
-    AuthId({this.value=""});
-    AuthId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "AuthId";
-    TypeContext? context = _ctx;
-}
-
-class Language implements IConvertible
-{
-    String code = "";
-    String name = "";
-
-    Language({this.code="",this.name=""});
-    Language.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        code = json['code'] ?? "";
-        name = json['name'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'code': code,
-        'name': name
-    };
-
-    getTypeName() => "Language";
-    TypeContext? context = _ctx;
-}
-
-class FileResourceId implements IConvertible
-{
-    String value = "";
-
-    FileResourceId({this.value=""});
-    FileResourceId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "FileResourceId";
-    TypeContext? context = _ctx;
-}
-
-class FileChecksum implements IConvertible
-{
-    String algorithm = "";
-    String hash = "";
-
-    FileChecksum({this.algorithm="",this.hash=""});
-    FileChecksum.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        algorithm = json['algorithm'] ?? "";
-        hash = json['hash'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'algorithm': algorithm,
-        'hash': hash
-    };
-
-    getTypeName() => "FileChecksum";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class FileResource implements IConvertible
-{
-    // @DataMember
-    FileResourceId? id;
-
-    // @DataMember
-    String originalFileName = "";
-
-    // @DataMember
-    String Extension = "";
-
-    // @DataMember
-    int? sizeBytes;
-
-    // @DataMember
-    FileChecksum? checksum;
-
-    // @DataMember
-    String storedFileName = "";
-
-    FileResource({this.id,this.originalFileName="",this.Extension="",this.sizeBytes,this.checksum,this.storedFileName=""});
-    FileResource.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'FileResourceId',context!);
-        originalFileName = json['originalFileName'] ?? "";
-        Extension = json['extension'] ?? "";
-        sizeBytes = json['sizeBytes'];
-        checksum = JsonConverters.fromJson(json['checksum'],'FileChecksum',context!);
-        storedFileName = json['storedFileName'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'FileResourceId',context!),
-        'originalFileName': originalFileName,
-        'extension': Extension,
-        'sizeBytes': sizeBytes,
-        'checksum': JsonConverters.toJson(checksum,'FileChecksum',context!),
-        'storedFileName': storedFileName
-    };
-
-    getTypeName() => "FileResource";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class FileResourceRef implements IConvertible
-{
-    // @DataMember(Order=1)
-    FileResource? resource;
-
-    // @DataMember(Order=2)
-    IntegrationId? integrationId;
-
-    // @DataMember(Order=3)
-    FileProvider? provider;
-
-    // @DataMember(Order=4)
-    String path = "";
-
-    FileResourceRef({this.resource,this.integrationId,this.provider,this.path=""});
-    FileResourceRef.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        resource = JsonConverters.fromJson(json['resource'],'FileResource',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        provider = JsonConverters.fromJson(json['provider'],'FileProvider',context!);
-        path = json['path'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'resource': JsonConverters.toJson(resource,'FileResource',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'provider': JsonConverters.toJson(provider,'FileProvider',context!),
-        'path': path
-    };
-
-    getTypeName() => "FileResourceRef";
-    TypeContext? context = _ctx;
-}
-
-class ProjectLogo implements IConvertible
-{
-    FileResourceRef? fileResource;
-    String publicUrl = "";
-
-    ProjectLogo({this.fileResource,this.publicUrl=""});
-    ProjectLogo.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        fileResource = JsonConverters.fromJson(json['fileResource'],'FileResourceRef',context!);
-        publicUrl = json['publicUrl'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'fileResource': JsonConverters.toJson(fileResource,'FileResourceRef',context!),
-        'publicUrl': publicUrl
-    };
-
-    getTypeName() => "ProjectLogo";
-    TypeContext? context = _ctx;
-}
-
-class ProjectIcon implements IConvertible
-{
-    FileResourceRef? fileResource;
-    String publicUrl = "";
-
-    ProjectIcon({this.fileResource,this.publicUrl=""});
-    ProjectIcon.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        fileResource = JsonConverters.fromJson(json['fileResource'],'FileResourceRef',context!);
-        publicUrl = json['publicUrl'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'fileResource': JsonConverters.toJson(fileResource,'FileResourceRef',context!),
-        'publicUrl': publicUrl
-    };
-
-    getTypeName() => "ProjectIcon";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class BrandColor implements IConvertible
-{
-    // @DataMember
-    String value = "";
-
-    BrandColor({this.value=""});
-    BrandColor.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "BrandColor";
-    TypeContext? context = _ctx;
-}
-
-class Tag implements IConvertible
-{
-    Tag();
-    Tag.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "Tag";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class GroupTags implements IConvertible
-{
-    // @DataMember
-    Tag? group;
-
-    // @DataMember
-    List<Tag> tags = [];
-
-    GroupTags({this.group,this.tags=const []});
-    GroupTags.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        group = JsonConverters.fromJson(json['group'],'Tag',context!);
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'group': JsonConverters.toJson(group,'Tag',context!),
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!)
-    };
-
-    getTypeName() => "GroupTags";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class ProjectCommunicationChannel implements IConvertible
-{
-    // @DataMember
-    CommunicationChannel? channel;
-
-    // @DataMember
-    List<GroupTags> groups = [];
-
-    ProjectCommunicationChannel({this.channel,this.groups=const []});
-    ProjectCommunicationChannel.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        groups = JsonConverters.fromJson(json['groups'],'List<GroupTags>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'groups': JsonConverters.toJson(groups,'List<GroupTags>',context!)
-    };
-
-    getTypeName() => "ProjectCommunicationChannel";
-    TypeContext? context = _ctx;
-}
-
-class TagDescription implements IConvertible
-{
-    DisplayName? displayName;
-    String? description;
-
-    TagDescription({this.displayName,this.description});
-    TagDescription.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        description = json['description'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'description': description
-    };
-
-    getTypeName() => "TagDescription";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class MessageTranslation<TContent> implements IConvertible
-{
-    MessageTranslation();
-    MessageTranslation.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "MessageTranslation<$TContent>";
-    TypeContext? context = _ctx;
-}
-
-class TagTranslation extends MessageTranslation<TagDescription> implements IConvertible
-{
-    TagTranslation();
-    TagTranslation.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "TagTranslation";
-    TypeContext? context = _ctx;
-}
-
-abstract class BaseTagDefinition
-{
-    Tag? tag;
-    List<TagTranslation> translations = [];
-
-    BaseTagDefinition({this.tag,this.translations=const []});
-    BaseTagDefinition.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        tag = JsonConverters.fromJson(json['tag'],'Tag',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<TagTranslation>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'tag': JsonConverters.toJson(tag,'Tag',context!),
-        'translations': JsonConverters.toJson(translations,'List<TagTranslation>',context!)
-    };
-
-    getTypeName() => "BaseTagDefinition";
-    TypeContext? context = _ctx;
-}
-
-class GroupDefinition extends BaseTagDefinition implements IConvertible
-{
-    GroupDefinition();
-    GroupDefinition.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "GroupDefinition";
-    TypeContext? context = _ctx;
-}
-
-class TagDefinition extends BaseTagDefinition implements IConvertible
-{
-    Map<DeliveryChannel,bool?> defaultDelivery = {};
-
-    TagDefinition({this.defaultDelivery=const {}});
-    TagDefinition.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        defaultDelivery = JsonConverters.fromJson(json['defaultDelivery'],'Map<DeliveryChannel,bool?>',context!) ?? {};
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'defaultDelivery': JsonConverters.toJson(defaultDelivery,'Map<DeliveryChannel,bool?>',context!)
-    });
-
-    getTypeName() => "TagDefinition";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class ProjectCommunication implements IConvertible
-{
-    // @DataMember
-    List<ProjectCommunicationChannel> channels = [];
-
-    // @DataMember
-    List<GroupDefinition> groups = [];
-
-    // @DataMember
-    List<TagDefinition> tags = [];
-
-    ProjectCommunication({this.channels=const [],this.groups=const [],this.tags=const []});
-    ProjectCommunication.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        channels = JsonConverters.fromJson(json['channels'],'List<ProjectCommunicationChannel>',context!) ?? [];
-        groups = JsonConverters.fromJson(json['groups'],'List<GroupDefinition>',context!) ?? [];
-        tags = JsonConverters.fromJson(json['tags'],'List<TagDefinition>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'channels': JsonConverters.toJson(channels,'List<ProjectCommunicationChannel>',context!),
-        'groups': JsonConverters.toJson(groups,'List<GroupDefinition>',context!),
-        'tags': JsonConverters.toJson(tags,'List<TagDefinition>',context!)
-    };
-
-    getTypeName() => "ProjectCommunication";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class TimeZone implements IConvertible
-{
-    // @DataMember
-    String zoneId = "";
-
-    TimeZone({this.zoneId=""});
-    TimeZone.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        zoneId = json['zoneId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'zoneId': zoneId
-    };
-
-    getTypeName() => "TimeZone";
-    TypeContext? context = _ctx;
-}
-
-abstract class PolicyId
-{
-    String template = "";
-    String tenancyScopeViewId = "";
-    String viewId = "";
-    bool? isSystem;
-
-    PolicyId({this.template="",this.tenancyScopeViewId="",this.viewId="",this.isSystem});
-    PolicyId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        template = json['template'] ?? "";
-        tenancyScopeViewId = json['tenancyScopeViewId'] ?? "";
-        viewId = json['viewId'] ?? "";
-        isSystem = json['isSystem'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'template': template,
-        'tenancyScopeViewId': tenancyScopeViewId,
-        'viewId': viewId,
-        'isSystem': isSystem
-    };
-
-    getTypeName() => "PolicyId";
-    TypeContext? context = _ctx;
-}
-
-enum PermissionEffect
-{
-    Allow,
-    Deny,
-}
-
-// @flags()
-class ApplicationModule
-{
-    static const ApplicationModule Account = const ApplicationModule._(0);
-    static const ApplicationModule Membership = const ApplicationModule._(1);
-    static const ApplicationModule Database = const ApplicationModule._(2);
-    static const ApplicationModule Files = const ApplicationModule._(4);
-    static const ApplicationModule Code = const ApplicationModule._(8);
-    static const ApplicationModule Email = const ApplicationModule._(16);
-    static const ApplicationModule Push = const ApplicationModule._(32);
-    static const ApplicationModule Payment = const ApplicationModule._(64);
-    static const ApplicationModule Scheduler = const ApplicationModule._(128);
-    static const ApplicationModule Logging = const ApplicationModule._(256);
-    static const ApplicationModule ServerEvents = const ApplicationModule._(512);
-    static const ApplicationModule Ai = const ApplicationModule._(1024);
-    static const ApplicationModule Sms = const ApplicationModule._(2048);
-    static const ApplicationModule Project = const ApplicationModule._(4096);
-    static const ApplicationModule Compliance = const ApplicationModule._(8192);
-    static const ApplicationModule Contacts = const ApplicationModule._(16384);
-    static const ApplicationModule Marketplace = const ApplicationModule._(32768);
-
-    final int _value;
-    const ApplicationModule._(this._value);
-    int get value => _value;
-    static List<ApplicationModule> get values => const [Account,Membership,Database,Files,Code,Email,Push,Payment,Scheduler,Logging,ServerEvents,Ai,Sms,Project,Compliance,Contacts,Marketplace];
-}
-
-class PermissionAction implements IConvertible
-{
-    ApplicationModule? module;
-    String? operation;
-    bool? isModuleWildcard;
-    bool? isOperationWildcard;
-    bool? isConcrete;
-    int specificity = 0;
-
-    PermissionAction({this.module,this.operation,this.isModuleWildcard,this.isOperationWildcard,this.isConcrete,this.specificity=0});
-    PermissionAction.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        module = JsonConverters.fromJson(json['module'],'ApplicationModule',context!);
-        operation = json['operation'];
-        isModuleWildcard = json['isModuleWildcard'];
-        isOperationWildcard = json['isOperationWildcard'];
-        isConcrete = json['isConcrete'];
-        specificity = json['specificity'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'module': JsonConverters.toJson(module,'ApplicationModule',context!),
-        'operation': operation,
-        'isModuleWildcard': isModuleWildcard,
-        'isOperationWildcard': isOperationWildcard,
-        'isConcrete': isConcrete,
-        'specificity': specificity
-    };
-
-    getTypeName() => "PermissionAction";
-    TypeContext? context = _ctx;
-}
-
-class ResourceKind implements IConvertible
-{
-    String name = "";
-
-    ResourceKind({this.name=""});
-    ResourceKind.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        name = json['name'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'name': name
-    };
-
-    getTypeName() => "ResourceKind";
-    TypeContext? context = _ctx;
-}
-
-class ResourceIdentifier implements IConvertible
-{
-    String value = "";
-
-    ResourceIdentifier({this.value=""});
-    ResourceIdentifier.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "ResourceIdentifier";
-    TypeContext? context = _ctx;
-}
-
-class ResourcePattern implements IConvertible
-{
-    AccountId? account;
-    ProjectId? project;
-    ApplicationModule? module;
-    ResourceKind? kind;
-    ResourceIdentifier? id;
-    bool? isAccountWildcard;
-    bool? isProjectWildcard;
-    bool? isModuleWildcard;
-    bool? isKindWildcard;
-    bool? isIdWildcard;
-    bool? isConcrete;
-    bool? isFullWildcard;
-    int specificity = 0;
-
-    ResourcePattern({this.account,this.project,this.module,this.kind,this.id,this.isAccountWildcard,this.isProjectWildcard,this.isModuleWildcard,this.isKindWildcard,this.isIdWildcard,this.isConcrete,this.isFullWildcard,this.specificity=0});
-    ResourcePattern.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        account = JsonConverters.fromJson(json['account'],'AccountId',context!);
-        project = JsonConverters.fromJson(json['project'],'ProjectId',context!);
-        module = JsonConverters.fromJson(json['module'],'ApplicationModule',context!);
-        kind = JsonConverters.fromJson(json['kind'],'ResourceKind',context!);
-        id = JsonConverters.fromJson(json['id'],'ResourceIdentifier',context!);
-        isAccountWildcard = json['isAccountWildcard'];
-        isProjectWildcard = json['isProjectWildcard'];
-        isModuleWildcard = json['isModuleWildcard'];
-        isKindWildcard = json['isKindWildcard'];
-        isIdWildcard = json['isIdWildcard'];
-        isConcrete = json['isConcrete'];
-        isFullWildcard = json['isFullWildcard'];
-        specificity = json['specificity'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'account': JsonConverters.toJson(account,'AccountId',context!),
-        'project': JsonConverters.toJson(project,'ProjectId',context!),
-        'module': JsonConverters.toJson(module,'ApplicationModule',context!),
-        'kind': JsonConverters.toJson(kind,'ResourceKind',context!),
-        'id': JsonConverters.toJson(id,'ResourceIdentifier',context!),
-        'isAccountWildcard': isAccountWildcard,
-        'isProjectWildcard': isProjectWildcard,
-        'isModuleWildcard': isModuleWildcard,
-        'isKindWildcard': isKindWildcard,
-        'isIdWildcard': isIdWildcard,
-        'isConcrete': isConcrete,
-        'isFullWildcard': isFullWildcard,
-        'specificity': specificity
-    };
-
-    getTypeName() => "ResourcePattern";
-    TypeContext? context = _ctx;
-}
-
-class Permission implements IConvertible
-{
-    String? sid;
-    PermissionEffect? effect;
-    List<PermissionAction> actions = [];
-    List<ResourcePattern> resources = [];
-
-    Permission({this.sid,this.effect,this.actions=const [],this.resources=const []});
-    Permission.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        sid = json['sid'];
-        effect = JsonConverters.fromJson(json['effect'],'PermissionEffect',context!);
-        actions = JsonConverters.fromJson(json['actions'],'List<PermissionAction>',context!) ?? [];
-        resources = JsonConverters.fromJson(json['resources'],'List<ResourcePattern>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'sid': sid,
-        'effect': JsonConverters.toJson(effect,'PermissionEffect',context!),
-        'actions': JsonConverters.toJson(actions,'List<PermissionAction>',context!),
-        'resources': JsonConverters.toJson(resources,'List<ResourcePattern>',context!)
-    };
-
-    getTypeName() => "Permission";
-    TypeContext? context = _ctx;
-}
-
-class MembershipPolicy implements IConvertible
-{
-    PolicyId? id;
-    DisplayName? name;
-    String? description;
-    List<Permission> permissions = [];
-    bool? disabled;
-    bool? isSystem;
-
-    MembershipPolicy({this.id,this.name,this.description,this.permissions=const [],this.disabled,this.isSystem});
-    MembershipPolicy.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'PolicyId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        description = json['description'];
-        permissions = JsonConverters.fromJson(json['permissions'],'List<Permission>',context!) ?? [];
-        disabled = json['disabled'];
-        isSystem = json['isSystem'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'PolicyId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'description': description,
-        'permissions': JsonConverters.toJson(permissions,'List<Permission>',context!),
-        'disabled': disabled,
-        'isSystem': isSystem
-    };
-
-    getTypeName() => "MembershipPolicy";
-    TypeContext? context = _ctx;
-}
-
-abstract class RoleId
-{
-    String template = "";
-    String tenancyScopeViewId = "";
-    String viewId = "";
-    bool? isSystem;
-
-    RoleId({this.template="",this.tenancyScopeViewId="",this.viewId="",this.isSystem});
-    RoleId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        template = json['template'] ?? "";
-        tenancyScopeViewId = json['tenancyScopeViewId'] ?? "";
-        viewId = json['viewId'] ?? "";
-        isSystem = json['isSystem'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'template': template,
-        'tenancyScopeViewId': tenancyScopeViewId,
-        'viewId': viewId,
-        'isSystem': isSystem
-    };
-
-    getTypeName() => "RoleId";
-    TypeContext? context = _ctx;
-}
-
-class MembershipRole implements IConvertible
-{
-    RoleId? id;
-    DisplayName? name;
-    String? description;
-    List<PolicyId> attachedPolicies = [];
-    bool? disabled;
-    bool? isSystem;
-
-    MembershipRole({this.id,this.name,this.description,this.attachedPolicies=const [],this.disabled,this.isSystem});
-    MembershipRole.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'RoleId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        description = json['description'];
-        attachedPolicies = JsonConverters.fromJson(json['attachedPolicies'],'List<PolicyId>',context!) ?? [];
-        disabled = json['disabled'];
-        isSystem = json['isSystem'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'RoleId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'description': description,
-        'attachedPolicies': JsonConverters.toJson(attachedPolicies,'List<PolicyId>',context!),
-        'disabled': disabled,
-        'isSystem': isSystem
-    };
-
-    getTypeName() => "MembershipRole";
-    TypeContext? context = _ctx;
-}
-
-class BillingPeriod implements IConvertible
-{
-    int year = 0;
-    int month = 0;
-    DateTime? startUtc;
-    DateTime? endExclusiveUtc;
-    DateTime? lastInstantUtc;
-
-    BillingPeriod({this.year=0,this.month=0,this.startUtc,this.endExclusiveUtc,this.lastInstantUtc});
-    BillingPeriod.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        year = json['year'] ?? 0;
-        month = json['month'] ?? 0;
-        startUtc = JsonConverters.fromJson(json['startUtc'],'DateTime',context!) ?? DateTime(0);
-        endExclusiveUtc = JsonConverters.fromJson(json['endExclusiveUtc'],'DateTime',context!) ?? DateTime(0);
-        lastInstantUtc = JsonConverters.fromJson(json['lastInstantUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'year': year,
-        'month': month,
-        'startUtc': JsonConverters.toJson(startUtc,'DateTime',context!),
-        'endExclusiveUtc': JsonConverters.toJson(endExclusiveUtc,'DateTime',context!),
-        'lastInstantUtc': JsonConverters.toJson(lastInstantUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "BillingPeriod";
-    TypeContext? context = _ctx;
-}
-
-class AtlasClusterChargeRecord implements IConvertible
-{
-    String atlasProjectId = "";
-    String atlasClusterName = "";
-    int cents = 0;
-
-    AtlasClusterChargeRecord({this.atlasProjectId="",this.atlasClusterName="",this.cents=0});
-    AtlasClusterChargeRecord.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        atlasProjectId = json['atlasProjectId'] ?? "";
-        atlasClusterName = json['atlasClusterName'] ?? "";
-        cents = json['cents'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'atlasProjectId': atlasProjectId,
-        'atlasClusterName': atlasClusterName,
-        'cents': cents
-    };
-
-    getTypeName() => "AtlasClusterChargeRecord";
-    TypeContext? context = _ctx;
-}
-
-class AtlasUsageRecord implements IConvertible
-{
-    BillingPeriod? period;
-    int totalCents = 0;
-    IReadOnlyList<AtlasClusterChargeRecord>? perCluster;
-    UtcDateTime? recordedAtUtc;
-
-    AtlasUsageRecord({this.period,this.totalCents=0,this.perCluster,this.recordedAtUtc});
-    AtlasUsageRecord.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        period = JsonConverters.fromJson(json['period'],'BillingPeriod',context!);
-        totalCents = json['totalCents'] ?? 0;
-        perCluster = JsonConverters.fromJson(json['perCluster'],'IReadOnlyList<AtlasClusterChargeRecord>',context!);
-        recordedAtUtc = JsonConverters.fromJson(json['recordedAtUtc'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'period': JsonConverters.toJson(period,'BillingPeriod',context!),
-        'totalCents': totalCents,
-        'perCluster': JsonConverters.toJson(perCluster,'IReadOnlyList<AtlasClusterChargeRecord>',context!),
-        'recordedAtUtc': JsonConverters.toJson(recordedAtUtc,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "AtlasUsageRecord";
-    TypeContext? context = _ctx;
-}
-
-enum UsageIngestionFailureReason
-{
-    UnknownCustomer,
-    MeterNotFound,
-    ValidationFailed,
-    ImportSetFailed,
-}
-
-class UsageIngestionFailure implements IConvertible
-{
-    UsageIngestionFailureReason? reason;
-    BillingPeriod? period;
-    String stripeEventId = "";
-    String message = "";
-    UtcDateTime? reportedAtUtc;
-
-    UsageIngestionFailure({this.reason,this.period,this.stripeEventId="",this.message="",this.reportedAtUtc});
-    UsageIngestionFailure.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        reason = JsonConverters.fromJson(json['reason'],'UsageIngestionFailureReason',context!);
-        period = JsonConverters.fromJson(json['period'],'BillingPeriod',context!);
-        stripeEventId = json['stripeEventId'] ?? "";
-        message = json['message'] ?? "";
-        reportedAtUtc = JsonConverters.fromJson(json['reportedAtUtc'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'reason': JsonConverters.toJson(reason,'UsageIngestionFailureReason',context!),
-        'period': JsonConverters.toJson(period,'BillingPeriod',context!),
-        'stripeEventId': stripeEventId,
-        'message': message,
-        'reportedAtUtc': JsonConverters.toJson(reportedAtUtc,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "UsageIngestionFailure";
+    getTypeName() => "AiScopeDto";
     TypeContext? context = _ctx;
 }
 
@@ -10459,213 +9173,6 @@ class CredentialsSettingsModeDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-abstract class Integration implements IIntegrationIdentification, IHasDomainEntityId
-{
-    IntegrationId? integrationId;
-    Env? env;
-    String capability = "";
-    bool? isSystemOwned;
-    DisplayName? integrationName;
-    bool? isEnabled;
-    bool? isConfigured;
-    DateTime? lastIntegrationTestAtUtc;
-    bool? lastIntegrationTestSucceeded;
-    IReadOnlyList<String>? lastIntegrationTestErrorMessages;
-    DateTime? humanDeliveryConfirmedAtUtc;
-    bool? isApprovedThatItWorks;
-
-    Integration({this.integrationId,this.env,this.capability="",this.isSystemOwned,this.integrationName,this.isEnabled,this.isConfigured,this.lastIntegrationTestAtUtc,this.lastIntegrationTestSucceeded,this.lastIntegrationTestErrorMessages,this.humanDeliveryConfirmedAtUtc,this.isApprovedThatItWorks});
-    Integration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        capability = JsonConverters.fromJson(json['capability'],'String',context!) ?? "";
-        isSystemOwned = json['isSystemOwned'];
-        integrationName = JsonConverters.fromJson(json['integrationName'],'DisplayName',context!);
-        isEnabled = json['isEnabled'];
-        isConfigured = json['isConfigured'];
-        lastIntegrationTestAtUtc = JsonConverters.fromJson(json['lastIntegrationTestAtUtc'],'DateTime',context!);
-        lastIntegrationTestSucceeded = json['lastIntegrationTestSucceeded'];
-        lastIntegrationTestErrorMessages = JsonConverters.fromJson(json['lastIntegrationTestErrorMessages'],'IReadOnlyList<String>',context!);
-        humanDeliveryConfirmedAtUtc = JsonConverters.fromJson(json['humanDeliveryConfirmedAtUtc'],'DateTime',context!);
-        isApprovedThatItWorks = json['isApprovedThatItWorks'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'capability': JsonConverters.toJson(capability,'String',context!),
-        'isSystemOwned': isSystemOwned,
-        'integrationName': JsonConverters.toJson(integrationName,'DisplayName',context!),
-        'isEnabled': isEnabled,
-        'isConfigured': isConfigured,
-        'lastIntegrationTestAtUtc': JsonConverters.toJson(lastIntegrationTestAtUtc,'DateTime',context!),
-        'lastIntegrationTestSucceeded': lastIntegrationTestSucceeded,
-        'lastIntegrationTestErrorMessages': JsonConverters.toJson(lastIntegrationTestErrorMessages,'IReadOnlyList<String>',context!),
-        'humanDeliveryConfirmedAtUtc': JsonConverters.toJson(humanDeliveryConfirmedAtUtc,'DateTime',context!),
-        'isApprovedThatItWorks': isApprovedThatItWorks
-    };
-
-    getTypeName() => "Integration";
-    TypeContext? context = _ctx;
-}
-
-abstract class MembershipIntegration extends Integration
-{
-    MembershipProvider? provider;
-
-    MembershipIntegration({this.provider});
-    MembershipIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'MembershipProvider',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'MembershipProvider',context!)
-    });
-
-    getTypeName() => "MembershipIntegration";
-    TypeContext? context = _ctx;
-}
-
-class TriggerId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    TriggerId();
-    TriggerId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "TriggerId";
-    TypeContext? context = _ctx;
-}
-
-abstract class TriggerAction
-{
-    TriggerActionType? type;
-    IntegrationId? integrationId;
-
-    TriggerAction({this.type,this.integrationId});
-    TriggerAction.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        type = JsonConverters.fromJson(json['type'],'TriggerActionType',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'type': JsonConverters.toJson(type,'TriggerActionType',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!)
-    };
-
-    getTypeName() => "TriggerAction";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class TemplateCode implements IConvertible
-{
-    TemplateCode();
-    TemplateCode.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "TemplateCode";
-    TypeContext? context = _ctx;
-}
-
-abstract class Trigger implements IHasDomainEntityId
-{
-    TriggerId? triggerId;
-    DisplayName? name;
-    TriggerAction? triggerAction;
-    TemplateCode? activationCode;
-    String? description;
-    bool? isEnabled;
-    Env? env;
-    IntegrationId? integrationId;
-
-    Trigger({this.triggerId,this.name,this.triggerAction,this.activationCode,this.description,this.isEnabled,this.env,this.integrationId});
-    Trigger.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        triggerId = JsonConverters.fromJson(json['triggerId'],'TriggerId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        triggerAction = JsonConverters.fromJson(json['triggerAction'],'TriggerAction',context!);
-        activationCode = JsonConverters.fromJson(json['activationCode'],'TemplateCode',context!);
-        description = json['description'];
-        isEnabled = json['isEnabled'];
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'triggerId': JsonConverters.toJson(triggerId,'TriggerId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'triggerAction': JsonConverters.toJson(triggerAction,'TriggerAction',context!),
-        'activationCode': JsonConverters.toJson(activationCode,'TemplateCode',context!),
-        'description': description,
-        'isEnabled': isEnabled,
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!)
-    };
-
-    getTypeName() => "Trigger";
-    TypeContext? context = _ctx;
-}
-
-class MembershipTrigger extends Trigger implements IConvertible
-{
-    MembershipTriggerType? when;
-
-    MembershipTrigger({this.when});
-    MembershipTrigger.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        when = JsonConverters.fromJson(json['when'],'MembershipTriggerType',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'when': JsonConverters.toJson(when,'MembershipTriggerType',context!)
-    });
-
-    getTypeName() => "MembershipTrigger";
-    TypeContext? context = _ctx;
-}
-
-abstract class TriggerByIdEventBase
-{
-    TriggerId? triggerId;
-
-    TriggerByIdEventBase({this.triggerId});
-    TriggerByIdEventBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        triggerId = JsonConverters.fromJson(json['triggerId'],'TriggerId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'triggerId': JsonConverters.toJson(triggerId,'TriggerId',context!)
-    };
-
-    getTypeName() => "TriggerByIdEventBase";
-    TypeContext? context = _ctx;
-}
-
 class SchemaSettingsDto implements IConvertible
 {
     // @DataMember
@@ -10806,1363 +9313,6 @@ class ImportColumnMappingDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class MongoDbAggregateId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    MongoDbAggregateId();
-    MongoDbAggregateId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "MongoDbAggregateId";
-    TypeContext? context = _ctx;
-}
-
-class MongoDbAggregateQuery implements IConvertible
-{
-    String value = "";
-
-    MongoDbAggregateQuery({this.value=""});
-    MongoDbAggregateQuery.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "MongoDbAggregateQuery";
-    TypeContext? context = _ctx;
-}
-
-class SchemaId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    SchemaId();
-    SchemaId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "SchemaId";
-    TypeContext? context = _ctx;
-}
-
-class MongoDbAggregate implements IConvertible
-{
-    MongoDbAggregateId? id;
-    DisplayName? displayName;
-    String? description;
-    MongoDbAggregateQuery? query;
-    SchemaId? schemaId;
-
-    MongoDbAggregate({this.id,this.displayName,this.description,this.query,this.schemaId});
-    MongoDbAggregate.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'MongoDbAggregateId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        description = json['description'];
-        query = JsonConverters.fromJson(json['query'],'MongoDbAggregateQuery',context!);
-        schemaId = JsonConverters.fromJson(json['schemaId'],'SchemaId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'MongoDbAggregateId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'description': description,
-        'query': JsonConverters.toJson(query,'MongoDbAggregateQuery',context!),
-        'schemaId': JsonConverters.toJson(schemaId,'SchemaId',context!)
-    };
-
-    getTypeName() => "MongoDbAggregate";
-    TypeContext? context = _ctx;
-}
-
-abstract class DatabaseIntegration extends Integration
-{
-    DatabaseProvider? provider;
-    IntegrationStatus? status;
-    String? atlasProjectId;
-    String? atlasClusterName;
-    String? failureReason;
-
-    DatabaseIntegration({this.provider,this.status,this.atlasProjectId,this.atlasClusterName,this.failureReason});
-    DatabaseIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'DatabaseProvider',context!);
-        status = JsonConverters.fromJson(json['status'],'IntegrationStatus',context!);
-        atlasProjectId = json['atlasProjectId'];
-        atlasClusterName = json['atlasClusterName'];
-        failureReason = json['failureReason'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'DatabaseProvider',context!),
-        'status': JsonConverters.toJson(status,'IntegrationStatus',context!),
-        'atlasProjectId': atlasProjectId,
-        'atlasClusterName': atlasClusterName,
-        'failureReason': failureReason
-    });
-
-    getTypeName() => "DatabaseIntegration";
-    TypeContext? context = _ctx;
-}
-
-enum ProjectStatus
-{
-    Active,
-    Provisioning,
-    ProvisioningFailed,
-    NoDatabase,
-    Disabled,
-    Suspended,
-    Removed,
-}
-
-class SchemaName implements IConvertible
-{
-    String value = "";
-    String title = "";
-
-    SchemaName({this.value="",this.title=""});
-    SchemaName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        title = json['title'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value,
-        'title': title
-    };
-
-    getTypeName() => "SchemaName";
-    TypeContext? context = _ctx;
-}
-
-class JsonSchemaFieldName implements IConvertible
-{
-    String fieldName = "";
-
-    JsonSchemaFieldName({this.fieldName=""});
-    JsonSchemaFieldName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        fieldName = json['fieldName'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'fieldName': fieldName
-    };
-
-    getTypeName() => "JsonSchemaFieldName";
-    TypeContext? context = _ctx;
-}
-
-abstract class JsonSchemaField
-{
-    JsonSchemaFieldName? fieldName;
-
-    JsonSchemaField({this.fieldName});
-    JsonSchemaField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        fieldName = JsonConverters.fromJson(json['fieldName'],'JsonSchemaFieldName',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'fieldName': JsonConverters.toJson(fieldName,'JsonSchemaFieldName',context!)
-    };
-
-    getTypeName() => "JsonSchemaField";
-    TypeContext? context = _ctx;
-}
-
-class DataSchema implements IConvertible
-{
-    String rawJson = "";
-    List<JsonSchemaField> fields = [];
-
-    DataSchema({this.rawJson="",this.fields=const []});
-    DataSchema.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        rawJson = json['rawJson'] ?? "";
-        fields = JsonConverters.fromJson(json['fields'],'List<JsonSchemaField>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'rawJson': rawJson,
-        'fields': JsonConverters.toJson(fields,'List<JsonSchemaField>',context!)
-    };
-
-    getTypeName() => "DataSchema";
-    TypeContext? context = _ctx;
-}
-
-class VisualSchema implements IConvertible
-{
-    String rawJson = "";
-
-    VisualSchema({this.rawJson=""});
-    VisualSchema.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        rawJson = json['rawJson'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'rawJson': rawJson
-    };
-
-    getTypeName() => "VisualSchema";
-    TypeContext? context = _ctx;
-}
-
-class SchemaDraft implements IConvertible
-{
-    DataSchema? dataSchema;
-    VisualSchema? visualSchema;
-    DateTime? updatedAt;
-
-    SchemaDraft({this.dataSchema,this.visualSchema,this.updatedAt});
-    SchemaDraft.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        dataSchema = JsonConverters.fromJson(json['dataSchema'],'DataSchema',context!);
-        visualSchema = JsonConverters.fromJson(json['visualSchema'],'VisualSchema',context!);
-        updatedAt = JsonConverters.fromJson(json['updatedAt'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'dataSchema': JsonConverters.toJson(dataSchema,'DataSchema',context!),
-        'visualSchema': JsonConverters.toJson(visualSchema,'VisualSchema',context!),
-        'updatedAt': JsonConverters.toJson(updatedAt,'DateTime',context!)
-    };
-
-    getTypeName() => "SchemaDraft";
-    TypeContext? context = _ctx;
-}
-
-class SchemaVersion implements IConvertible
-{
-    int value = 0;
-
-    SchemaVersion({this.value=0});
-    SchemaVersion.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "SchemaVersion";
-    TypeContext? context = _ctx;
-}
-
-class MetaSchemaVersion implements IConvertible
-{
-    int value = 0;
-
-    MetaSchemaVersion({this.value=0});
-    MetaSchemaVersion.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "MetaSchemaVersion";
-    TypeContext? context = _ctx;
-}
-
-class PublishedSchemaVersion implements IConvertible
-{
-    SchemaVersion? version;
-    DataSchema? dataSchema;
-    VisualSchema? visualSchema;
-    MetaSchemaVersion? metaSchemaVersion;
-    DateTime? publishedAt;
-
-    PublishedSchemaVersion({this.version,this.dataSchema,this.visualSchema,this.metaSchemaVersion,this.publishedAt});
-    PublishedSchemaVersion.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        version = JsonConverters.fromJson(json['version'],'SchemaVersion',context!);
-        dataSchema = JsonConverters.fromJson(json['dataSchema'],'DataSchema',context!);
-        visualSchema = JsonConverters.fromJson(json['visualSchema'],'VisualSchema',context!);
-        metaSchemaVersion = JsonConverters.fromJson(json['metaSchemaVersion'],'MetaSchemaVersion',context!);
-        publishedAt = JsonConverters.fromJson(json['publishedAt'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'version': JsonConverters.toJson(version,'SchemaVersion',context!),
-        'dataSchema': JsonConverters.toJson(dataSchema,'DataSchema',context!),
-        'visualSchema': JsonConverters.toJson(visualSchema,'VisualSchema',context!),
-        'metaSchemaVersion': JsonConverters.toJson(metaSchemaVersion,'MetaSchemaVersion',context!),
-        'publishedAt': JsonConverters.toJson(publishedAt,'DateTime',context!)
-    };
-
-    getTypeName() => "PublishedSchemaVersion";
-    TypeContext? context = _ctx;
-}
-
-class SchemaSettings implements IConvertible
-{
-    bool? softDelete;
-    bool? hasRecordOwner;
-    String? description;
-
-    SchemaSettings({this.softDelete,this.hasRecordOwner,this.description});
-    SchemaSettings.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        softDelete = json['softDelete'];
-        hasRecordOwner = json['hasRecordOwner'];
-        description = json['description'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'softDelete': softDelete,
-        'hasRecordOwner': hasRecordOwner,
-        'description': description
-    };
-
-    getTypeName() => "SchemaSettings";
-    TypeContext? context = _ctx;
-}
-
-class Schema implements IHasDomainEntityId, IConvertible
-{
-    SchemaName? schemaName;
-    SchemaId? id;
-    Env? env;
-    SchemaDraft? draft;
-    IReadOnlyList<PublishedSchemaVersion>? publishedVersions;
-    List<Trigger>? triggers;
-    SchemaSettings? settings;
-
-    Schema({this.schemaName,this.id,this.env,this.draft,this.publishedVersions,this.triggers,this.settings});
-    Schema.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        id = JsonConverters.fromJson(json['id'],'SchemaId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        draft = JsonConverters.fromJson(json['draft'],'SchemaDraft',context!);
-        publishedVersions = JsonConverters.fromJson(json['publishedVersions'],'IReadOnlyList<PublishedSchemaVersion>',context!);
-        triggers = JsonConverters.fromJson(json['triggers'],'List<Trigger>',context!);
-        settings = JsonConverters.fromJson(json['settings'],'SchemaSettings',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'id': JsonConverters.toJson(id,'SchemaId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'draft': JsonConverters.toJson(draft,'SchemaDraft',context!),
-        'publishedVersions': JsonConverters.toJson(publishedVersions,'IReadOnlyList<PublishedSchemaVersion>',context!),
-        'triggers': JsonConverters.toJson(triggers,'List<Trigger>',context!),
-        'settings': JsonConverters.toJson(settings,'SchemaSettings',context!)
-    };
-
-    getTypeName() => "Schema";
-    TypeContext? context = _ctx;
-}
-
-class SchemaDiff implements IConvertible
-{
-    IReadOnlyList<String>? addedFields;
-    IReadOnlyList<String>? removedFields;
-    IReadOnlyList<String>? typeChangedFields;
-    IReadOnlyList<String>? validatorTightenedFields;
-    bool? isEmpty;
-
-    SchemaDiff({this.addedFields,this.removedFields,this.typeChangedFields,this.validatorTightenedFields,this.isEmpty});
-    SchemaDiff.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        addedFields = JsonConverters.fromJson(json['addedFields'],'IReadOnlyList<String>',context!);
-        removedFields = JsonConverters.fromJson(json['removedFields'],'IReadOnlyList<String>',context!);
-        typeChangedFields = JsonConverters.fromJson(json['typeChangedFields'],'IReadOnlyList<String>',context!);
-        validatorTightenedFields = JsonConverters.fromJson(json['validatorTightenedFields'],'IReadOnlyList<String>',context!);
-        isEmpty = json['isEmpty'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'addedFields': JsonConverters.toJson(addedFields,'IReadOnlyList<String>',context!),
-        'removedFields': JsonConverters.toJson(removedFields,'IReadOnlyList<String>',context!),
-        'typeChangedFields': JsonConverters.toJson(typeChangedFields,'IReadOnlyList<String>',context!),
-        'validatorTightenedFields': JsonConverters.toJson(validatorTightenedFields,'IReadOnlyList<String>',context!),
-        'isEmpty': isEmpty
-    };
-
-    getTypeName() => "SchemaDiff";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomyId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    TaxonomyId();
-    TaxonomyId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "TaxonomyId";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomyName implements IConvertible
-{
-    String value = "";
-    String title = "";
-
-    TaxonomyName({this.value="",this.title=""});
-    TaxonomyName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        title = json['title'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value,
-        'title': title
-    };
-
-    getTypeName() => "TaxonomyName";
-    TypeContext? context = _ctx;
-}
-
-class RecordId implements IConvertible
-{
-    String id = "";
-
-    RecordId({this.id=""});
-    RecordId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id
-    };
-
-    getTypeName() => "RecordId";
-    TypeContext? context = _ctx;
-}
-
-class Taxonomy implements IHasDomainEntityId, IConvertible
-{
-    TaxonomyId? parentId;
-    TaxonomyId? id;
-    TaxonomyName? name;
-    String? description;
-    VisualSchema? termsMetaVisualSchema;
-    DataSchema? termsMetaDataSchema;
-    List<TaxonomyId>? dependencies;
-    RecordId? recordId;
-
-    Taxonomy({this.parentId,this.id,this.name,this.description,this.termsMetaVisualSchema,this.termsMetaDataSchema,this.dependencies,this.recordId});
-    Taxonomy.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        parentId = JsonConverters.fromJson(json['parentId'],'TaxonomyId',context!);
-        id = JsonConverters.fromJson(json['id'],'TaxonomyId',context!);
-        name = JsonConverters.fromJson(json['name'],'TaxonomyName',context!);
-        description = json['description'];
-        termsMetaVisualSchema = JsonConverters.fromJson(json['termsMetaVisualSchema'],'VisualSchema',context!);
-        termsMetaDataSchema = JsonConverters.fromJson(json['termsMetaDataSchema'],'DataSchema',context!);
-        dependencies = JsonConverters.fromJson(json['dependencies'],'List<TaxonomyId>',context!);
-        recordId = JsonConverters.fromJson(json['recordId'],'RecordId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'parentId': JsonConverters.toJson(parentId,'TaxonomyId',context!),
-        'id': JsonConverters.toJson(id,'TaxonomyId',context!),
-        'name': JsonConverters.toJson(name,'TaxonomyName',context!),
-        'description': description,
-        'termsMetaVisualSchema': JsonConverters.toJson(termsMetaVisualSchema,'VisualSchema',context!),
-        'termsMetaDataSchema': JsonConverters.toJson(termsMetaDataSchema,'DataSchema',context!),
-        'dependencies': JsonConverters.toJson(dependencies,'List<TaxonomyId>',context!),
-        'recordId': JsonConverters.toJson(recordId,'RecordId',context!)
-    };
-
-    getTypeName() => "Taxonomy";
-    TypeContext? context = _ctx;
-}
-
-class SchemaTrigger extends Trigger implements IConvertible
-{
-    SchemaId? schemaId;
-    SchemaTriggerType? when;
-    TemplateCode? configuration;
-
-    SchemaTrigger({this.schemaId,this.when,this.configuration});
-    SchemaTrigger.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        schemaId = JsonConverters.fromJson(json['schemaId'],'SchemaId',context!);
-        when = JsonConverters.fromJson(json['when'],'SchemaTriggerType',context!);
-        configuration = JsonConverters.fromJson(json['configuration'],'TemplateCode',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'schemaId': JsonConverters.toJson(schemaId,'SchemaId',context!),
-        'when': JsonConverters.toJson(when,'SchemaTriggerType',context!),
-        'configuration': JsonConverters.toJson(configuration,'TemplateCode',context!)
-    });
-
-    getTypeName() => "SchemaTrigger";
-    TypeContext? context = _ctx;
-}
-
-abstract class IPasskeyMessage
-{
-}
-
-class AuthUserName implements IConvertible
-{
-    String value = "";
-
-    AuthUserName({this.value=""});
-    AuthUserName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "AuthUserName";
-    TypeContext? context = _ctx;
-}
-
-enum AuthType
-{
-    Service,
-    Email,
-    UserName,
-    Phone,
-    Guest,
-    Social,
-}
-
-class IpAddress implements IConvertible
-{
-    String ip = "";
-
-    IpAddress({this.ip=""});
-    IpAddress.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        ip = json['ip'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'ip': ip
-    };
-
-    getTypeName() => "IpAddress";
-    TypeContext? context = _ctx;
-}
-
-class AccessInformation implements IConvertible
-{
-    IpAddress? ip;
-    UtcDateTime? date;
-    TimeZone? zone;
-
-    AccessInformation({this.ip,this.date,this.zone});
-    AccessInformation.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        ip = JsonConverters.fromJson(json['ip'],'IpAddress',context!);
-        date = JsonConverters.fromJson(json['date'],'UtcDateTime',context!);
-        zone = JsonConverters.fromJson(json['zone'],'TimeZone',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'ip': JsonConverters.toJson(ip,'IpAddress',context!),
-        'date': JsonConverters.toJson(date,'UtcDateTime',context!),
-        'zone': JsonConverters.toJson(zone,'TimeZone',context!)
-    };
-
-    getTypeName() => "AccessInformation";
-    TypeContext? context = _ctx;
-}
-
-class Registration implements IConvertible
-{
-    AccessInformation? registrationInformation;
-
-    Registration({this.registrationInformation});
-    Registration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        registrationInformation = JsonConverters.fromJson(json['registrationInformation'],'AccessInformation',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'registrationInformation': JsonConverters.toJson(registrationInformation,'AccessInformation',context!)
-    };
-
-    getTypeName() => "Registration";
-    TypeContext? context = _ctx;
-}
-
-class Login implements IConvertible
-{
-    bool? needChangePasswordOnNextLogin;
-    AccessInformation? lastAccessInformation;
-
-    Login({this.needChangePasswordOnNextLogin,this.lastAccessInformation});
-    Login.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        needChangePasswordOnNextLogin = json['needChangePasswordOnNextLogin'];
-        lastAccessInformation = JsonConverters.fromJson(json['lastAccessInformation'],'AccessInformation',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'needChangePasswordOnNextLogin': needChangePasswordOnNextLogin,
-        'lastAccessInformation': JsonConverters.toJson(lastAccessInformation,'AccessInformation',context!)
-    };
-
-    getTypeName() => "Login";
-    TypeContext? context = _ctx;
-}
-
-class Phone implements IConvertible
-{
-    String value = "";
-
-    Phone({this.value=""});
-    Phone.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "Phone";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class FirstName implements IConvertible
-{
-    // @DataMember
-    String value = "";
-
-    FirstName({this.value=""});
-    FirstName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "FirstName";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class LastName implements IConvertible
-{
-    // @DataMember
-    String value = "";
-
-    LastName({this.value=""});
-    LastName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "LastName";
-    TypeContext? context = _ctx;
-}
-
-class MidName implements IConvertible
-{
-    String value = "";
-
-    MidName({this.value=""});
-    MidName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "MidName";
-    TypeContext? context = _ctx;
-}
-
-class FullName implements IConvertible
-{
-    FirstName? firstName;
-    MidName? midName;
-    LastName? lastName;
-    String? title;
-
-    FullName({this.firstName,this.midName,this.lastName,this.title});
-    FullName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        firstName = JsonConverters.fromJson(json['firstName'],'FirstName',context!);
-        midName = JsonConverters.fromJson(json['midName'],'MidName',context!);
-        lastName = JsonConverters.fromJson(json['lastName'],'LastName',context!);
-        title = json['title'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'firstName': JsonConverters.toJson(firstName,'FirstName',context!),
-        'midName': JsonConverters.toJson(midName,'MidName',context!),
-        'lastName': JsonConverters.toJson(lastName,'LastName',context!),
-        'title': title
-    };
-
-    getTypeName() => "FullName";
-    TypeContext? context = _ctx;
-}
-
-class City implements IConvertible
-{
-    String value = "";
-
-    City({this.value=""});
-    City.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "City";
-    TypeContext? context = _ctx;
-}
-
-class Country implements IConvertible
-{
-    String code = "";
-    String name = "";
-
-    Country({this.code="",this.name=""});
-    Country.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        code = json['code'] ?? "";
-        name = json['name'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'code': code,
-        'name': name
-    };
-
-    getTypeName() => "Country";
-    TypeContext? context = _ctx;
-}
-
-class AddressLine implements IConvertible
-{
-    String value = "";
-
-    AddressLine({this.value=""});
-    AddressLine.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "AddressLine";
-    TypeContext? context = _ctx;
-}
-
-class PostalCode implements IConvertible
-{
-    String value = "";
-
-    PostalCode({this.value=""});
-    PostalCode.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "PostalCode";
-    TypeContext? context = _ctx;
-}
-
-class CountryState implements IConvertible
-{
-    String value = "";
-
-    CountryState({this.value=""});
-    CountryState.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "CountryState";
-    TypeContext? context = _ctx;
-}
-
-class Address implements IConvertible
-{
-    City? city;
-    Country? country;
-    AddressLine? addressLine1;
-    AddressLine? addressLine2;
-    PostalCode? postalCode;
-    CountryState? state;
-
-    Address({this.city,this.country,this.addressLine1,this.addressLine2,this.postalCode,this.state});
-    Address.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        city = JsonConverters.fromJson(json['city'],'City',context!);
-        country = JsonConverters.fromJson(json['country'],'Country',context!);
-        addressLine1 = JsonConverters.fromJson(json['addressLine1'],'AddressLine',context!);
-        addressLine2 = JsonConverters.fromJson(json['addressLine2'],'AddressLine',context!);
-        postalCode = JsonConverters.fromJson(json['postalCode'],'PostalCode',context!);
-        state = JsonConverters.fromJson(json['state'],'CountryState',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'city': JsonConverters.toJson(city,'City',context!),
-        'country': JsonConverters.toJson(country,'Country',context!),
-        'addressLine1': JsonConverters.toJson(addressLine1,'AddressLine',context!),
-        'addressLine2': JsonConverters.toJson(addressLine2,'AddressLine',context!),
-        'postalCode': JsonConverters.toJson(postalCode,'PostalCode',context!),
-        'state': JsonConverters.toJson(state,'CountryState',context!)
-    };
-
-    getTypeName() => "Address";
-    TypeContext? context = _ctx;
-}
-
-enum Gender
-{
-    Male,
-    Female,
-    Other,
-}
-
-enum MarketingBlockReason
-{
-    Unspecified,
-    Unsubscribed,
-    Complaint,
-    HardBounce,
-    InvalidEmail,
-    AdminBlock,
-}
-
-class UserMarketingPreferences implements IConvertible
-{
-    bool? blockAllMarketingMessages;
-    Map<DeliveryChannel,Set<Tag>?>? blockedTags;
-    List<MarketingBlockReason>? blockReasons;
-
-    UserMarketingPreferences({this.blockAllMarketingMessages,this.blockedTags,this.blockReasons});
-    UserMarketingPreferences.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        blockAllMarketingMessages = json['blockAllMarketingMessages'];
-        blockedTags = JsonConverters.fromJson(json['blockedTags'],'Map<DeliveryChannel,Set<Tag>?>',context!);
-        blockReasons = JsonConverters.fromJson(json['blockReasons'],'List<MarketingBlockReason>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'blockAllMarketingMessages': blockAllMarketingMessages,
-        'blockedTags': JsonConverters.toJson(blockedTags,'Map<DeliveryChannel,Set<Tag>?>',context!),
-        'blockReasons': JsonConverters.toJson(blockReasons,'List<MarketingBlockReason>',context!)
-    };
-
-    getTypeName() => "UserMarketingPreferences";
-    TypeContext? context = _ctx;
-}
-
-class UserGeneralInfo implements IBindableContract, IConvertible
-{
-    Phone? phone;
-    EmailAddress? primaryEmail;
-    DisplayName? displayName;
-    FirstName? firstName;
-    LastName? lastName;
-    FullName? fullName;
-    Address? address;
-    String? company;
-    Gender? gender;
-    UtcDateTime? birthDate;
-    TimeZone? timeZone;
-    Language? language;
-    UserMarketingPreferences? marketingPreferences;
-    String? notes;
-    String? extraMetadata;
-
-    UserGeneralInfo({this.phone,this.primaryEmail,this.displayName,this.firstName,this.lastName,this.fullName,this.address,this.company,this.gender,this.birthDate,this.timeZone,this.language,this.marketingPreferences,this.notes,this.extraMetadata});
-    UserGeneralInfo.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        phone = JsonConverters.fromJson(json['phone'],'Phone',context!);
-        primaryEmail = JsonConverters.fromJson(json['primaryEmail'],'EmailAddress',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        firstName = JsonConverters.fromJson(json['firstName'],'FirstName',context!);
-        lastName = JsonConverters.fromJson(json['lastName'],'LastName',context!);
-        fullName = JsonConverters.fromJson(json['fullName'],'FullName',context!);
-        address = JsonConverters.fromJson(json['address'],'Address',context!);
-        company = json['company'];
-        gender = JsonConverters.fromJson(json['gender'],'Gender',context!);
-        birthDate = JsonConverters.fromJson(json['birthDate'],'UtcDateTime',context!);
-        timeZone = JsonConverters.fromJson(json['timeZone'],'TimeZone',context!);
-        language = JsonConverters.fromJson(json['language'],'Language',context!);
-        marketingPreferences = JsonConverters.fromJson(json['marketingPreferences'],'UserMarketingPreferences',context!);
-        notes = json['notes'];
-        extraMetadata = json['extraMetadata'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'phone': JsonConverters.toJson(phone,'Phone',context!),
-        'primaryEmail': JsonConverters.toJson(primaryEmail,'EmailAddress',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'firstName': JsonConverters.toJson(firstName,'FirstName',context!),
-        'lastName': JsonConverters.toJson(lastName,'LastName',context!),
-        'fullName': JsonConverters.toJson(fullName,'FullName',context!),
-        'address': JsonConverters.toJson(address,'Address',context!),
-        'company': company,
-        'gender': JsonConverters.toJson(gender,'Gender',context!),
-        'birthDate': JsonConverters.toJson(birthDate,'UtcDateTime',context!),
-        'timeZone': JsonConverters.toJson(timeZone,'TimeZone',context!),
-        'language': JsonConverters.toJson(language,'Language',context!),
-        'marketingPreferences': JsonConverters.toJson(marketingPreferences,'UserMarketingPreferences',context!),
-        'notes': notes,
-        'extraMetadata': extraMetadata
-    };
-
-    getTypeName() => "UserGeneralInfo";
-    TypeContext? context = _ctx;
-}
-
-enum AuthStatus
-{
-    Registered,
-    PendingValidation,
-    Active,
-    Unregistered,
-    Suspended,
-    InActive,
-    Blocked,
-}
-
-class DeviceId implements IConvertible
-{
-    String id = "";
-
-    DeviceId({this.id=""});
-    DeviceId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id
-    };
-
-    getTypeName() => "DeviceId";
-    TypeContext? context = _ctx;
-}
-
-enum DeviceType
-{
-    Unknown,
-    Phone,
-    Tablet,
-    Desktop,
-    Tv,
-}
-
-class PushDeviceToken implements IConvertible
-{
-    String token = "";
-
-    PushDeviceToken({this.token=""});
-    PushDeviceToken.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        token = json['token'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'token': token
-    };
-
-    getTypeName() => "PushDeviceToken";
-    TypeContext? context = _ctx;
-}
-
-enum PushDeviceDeliveryFamily
-{
-    Ios,
-    Android,
-    Chrome,
-    Safari,
-    Expo,
-}
-
-// @DataContract
-class PushDeviceDeliveryToken implements IConvertible
-{
-    // @DataMember
-    PushDeviceToken? pushDeviceToken;
-
-    // @DataMember
-    PushDeviceDeliveryFamily? deliveryFamily;
-
-    PushDeviceDeliveryToken({this.pushDeviceToken,this.deliveryFamily});
-    PushDeviceDeliveryToken.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        pushDeviceToken = JsonConverters.fromJson(json['pushDeviceToken'],'PushDeviceToken',context!);
-        deliveryFamily = JsonConverters.fromJson(json['deliveryFamily'],'PushDeviceDeliveryFamily',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'pushDeviceToken': JsonConverters.toJson(pushDeviceToken,'PushDeviceToken',context!),
-        'deliveryFamily': JsonConverters.toJson(deliveryFamily,'PushDeviceDeliveryFamily',context!)
-    };
-
-    getTypeName() => "PushDeviceDeliveryToken";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushDevice implements IConvertible
-{
-    // @DataMember
-    DeviceId? id;
-
-    // @DataMember
-    String? brand;
-
-    // @DataMember
-    String? manufacturer;
-
-    // @DataMember
-    String? modelName;
-
-    // @DataMember
-    String? deviceName;
-
-    // @DataMember
-    DeviceType? deviceType;
-
-    // @DataMember
-    String? osName;
-
-    // @DataMember
-    String? osVersion;
-
-    // @DataMember
-    int? platformApiLevel;
-
-    // @DataMember
-    PushDeviceDeliveryToken? token;
-
-    PushDevice({this.id,this.brand,this.manufacturer,this.modelName,this.deviceName,this.deviceType,this.osName,this.osVersion,this.platformApiLevel,this.token});
-    PushDevice.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'DeviceId',context!);
-        brand = json['brand'];
-        manufacturer = json['manufacturer'];
-        modelName = json['modelName'];
-        deviceName = json['deviceName'];
-        deviceType = JsonConverters.fromJson(json['deviceType'],'DeviceType',context!);
-        osName = json['osName'];
-        osVersion = json['osVersion'];
-        platformApiLevel = json['platformApiLevel'];
-        token = JsonConverters.fromJson(json['token'],'PushDeviceDeliveryToken',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'DeviceId',context!),
-        'brand': brand,
-        'manufacturer': manufacturer,
-        'modelName': modelName,
-        'deviceName': deviceName,
-        'deviceType': JsonConverters.toJson(deviceType,'DeviceType',context!),
-        'osName': osName,
-        'osVersion': osVersion,
-        'platformApiLevel': platformApiLevel,
-        'token': JsonConverters.toJson(token,'PushDeviceDeliveryToken',context!)
-    };
-
-    getTypeName() => "PushDevice";
-    TypeContext? context = _ctx;
-}
-
-class PushDevices extends ListBase<PushDevice> implements IConvertible
-{
-    final List<PushDevice> l = [];
-    set length(int newLength) { l.length = newLength; }
-    int get length => l.length;
-    PushDevice operator [](int index) => l[index];
-    void operator []=(int index, PushDevice value) { l[index] = value; }
-    PushDevices();
-    PushDevices.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "PushDevices";
-    TypeContext? context = _ctx;
-}
-
-class UserId implements IHasDomainEntityId, IConvertible
-{
-    String value = "";
-
-    UserId({this.value=""});
-    UserId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "UserId";
-    TypeContext? context = _ctx;
-}
-
-class UserRef extends ResourceRef implements IConvertible
-{
-    ResourceRefKind? kind;
-    UserId? userId;
-
-    UserRef({this.kind,this.userId});
-    UserRef.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        kind = JsonConverters.fromJson(json['kind'],'ResourceRefKind',context!);
-        userId = JsonConverters.fromJson(json['userId'],'UserId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'kind': JsonConverters.toJson(kind,'ResourceRefKind',context!),
-        'userId': JsonConverters.toJson(userId,'UserId',context!)
-    });
-
-    getTypeName() => "UserRef";
-    TypeContext? context = _ctx;
-}
-
-class Auth implements IBindableContract, IConvertible
-{
-    AuthId? id;
-    List<RoleName>? roles;
-    EmailAddress? email;
-    AuthUserName? userName;
-    AuthType? type;
-    Registration? registration;
-    Login? login;
-    UserGeneralInfo? generalInfo;
-    AuthStatus? status;
-    UtcDateTime? createdOn;
-    UtcDateTime? modifiedOn;
-    PushDevices? pushDevices;
-    List<Tag>? tags;
-    UserRef? userRef;
-
-    Auth({this.id,this.roles,this.email,this.userName,this.type,this.registration,this.login,this.generalInfo,this.status,this.createdOn,this.modifiedOn,this.pushDevices,this.tags,this.userRef});
-    Auth.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'AuthId',context!);
-        roles = JsonConverters.fromJson(json['roles'],'List<RoleName>',context!);
-        email = JsonConverters.fromJson(json['email'],'EmailAddress',context!);
-        userName = JsonConverters.fromJson(json['userName'],'AuthUserName',context!);
-        type = JsonConverters.fromJson(json['type'],'AuthType',context!);
-        registration = JsonConverters.fromJson(json['registration'],'Registration',context!);
-        login = JsonConverters.fromJson(json['login'],'Login',context!);
-        generalInfo = JsonConverters.fromJson(json['generalInfo'],'UserGeneralInfo',context!);
-        status = JsonConverters.fromJson(json['status'],'AuthStatus',context!);
-        createdOn = JsonConverters.fromJson(json['createdOn'],'UtcDateTime',context!);
-        modifiedOn = JsonConverters.fromJson(json['modifiedOn'],'UtcDateTime',context!);
-        pushDevices = JsonConverters.fromJson(json['pushDevices'],'PushDevices',context!);
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        userRef = JsonConverters.fromJson(json['userRef'],'UserRef',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'AuthId',context!),
-        'roles': JsonConverters.toJson(roles,'List<RoleName>',context!),
-        'email': JsonConverters.toJson(email,'EmailAddress',context!),
-        'userName': JsonConverters.toJson(userName,'AuthUserName',context!),
-        'type': JsonConverters.toJson(type,'AuthType',context!),
-        'registration': JsonConverters.toJson(registration,'Registration',context!),
-        'login': JsonConverters.toJson(login,'Login',context!),
-        'generalInfo': JsonConverters.toJson(generalInfo,'UserGeneralInfo',context!),
-        'status': JsonConverters.toJson(status,'AuthStatus',context!),
-        'createdOn': JsonConverters.toJson(createdOn,'UtcDateTime',context!),
-        'modifiedOn': JsonConverters.toJson(modifiedOn,'UtcDateTime',context!),
-        'pushDevices': JsonConverters.toJson(pushDevices,'PushDevices',context!),
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'userRef': JsonConverters.toJson(userRef,'UserRef',context!)
-    };
-
-    getTypeName() => "Auth";
-    TypeContext? context = _ctx;
-}
-
-abstract class FileIntegration extends Integration
-{
-    FileProvider? provider;
-
-    FileIntegration({this.provider});
-    FileIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'FileProvider',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'FileProvider',context!)
-    });
-
-    getTypeName() => "FileIntegration";
-    TypeContext? context = _ctx;
-}
-
-class FileTrigger extends Trigger implements IConvertible
-{
-    FilesTriggerType? when;
-    FileResourceRef? fileResourceRef;
-
-    FileTrigger({this.when,this.fileResourceRef});
-    FileTrigger.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        when = JsonConverters.fromJson(json['when'],'FilesTriggerType',context!);
-        fileResourceRef = JsonConverters.fromJson(json['fileResourceRef'],'FileResourceRef',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'when': JsonConverters.toJson(when,'FilesTriggerType',context!),
-        'fileResourceRef': JsonConverters.toJson(fileResourceRef,'FileResourceRef',context!)
-    });
-
-    getTypeName() => "FileTrigger";
-    TypeContext? context = _ctx;
-}
-
 // @DataContract
 enum EmailValidationProvider
 {
@@ -12294,421 +9444,6 @@ class TranslationDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class EmailFooterId implements IConvertible
-{
-    String value = "";
-
-    EmailFooterId({this.value=""});
-    EmailFooterId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "EmailFooterId";
-    TypeContext? context = _ctx;
-}
-
-class EmailFooter implements IConvertible
-{
-    EmailFooterId? id;
-    DisplayName? displayName;
-    List<MessageTranslation<TemplateCode>> translations = [];
-    Env? env;
-
-    EmailFooter({this.id,this.displayName,this.translations=const [],this.env});
-    EmailFooter.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'EmailFooterId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<TemplateCode>>',context!) ?? [];
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'EmailFooterId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<TemplateCode>>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailFooter";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailSenderName implements IConvertible
-{
-    EmailSenderName();
-    EmailSenderName.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "EmailSenderName";
-    TypeContext? context = _ctx;
-}
-
-abstract class EmailIntegration extends Integration
-{
-    EmailProvider? provider;
-    EmailAddress? emailAddress;
-    EmailSenderName? emailSenderName;
-
-    EmailIntegration({this.provider,this.emailAddress,this.emailSenderName});
-    EmailIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'EmailProvider',context!);
-        emailAddress = JsonConverters.fromJson(json['emailAddress'],'EmailAddress',context!);
-        emailSenderName = JsonConverters.fromJson(json['emailSenderName'],'EmailSenderName',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'EmailProvider',context!),
-        'emailAddress': JsonConverters.toJson(emailAddress,'EmailAddress',context!),
-        'emailSenderName': JsonConverters.toJson(emailSenderName,'EmailSenderName',context!)
-    });
-
-    getTypeName() => "EmailIntegration";
-    TypeContext? context = _ctx;
-}
-
-class EmailSignatureId implements IConvertible
-{
-    String value = "";
-
-    EmailSignatureId({this.value=""});
-    EmailSignatureId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "EmailSignatureId";
-    TypeContext? context = _ctx;
-}
-
-class EmailSignature implements IConvertible
-{
-    EmailSignatureId? id;
-    DisplayName? displayName;
-    List<MessageTranslation<TemplateCode>> translations = [];
-    Env? env;
-
-    EmailSignature({this.id,this.displayName,this.translations=const [],this.env});
-    EmailSignature.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'EmailSignatureId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<TemplateCode>>',context!) ?? [];
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'EmailSignatureId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<TemplateCode>>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailSignature";
-    TypeContext? context = _ctx;
-}
-
-class TemplateId implements IConvertible
-{
-    String value = "";
-
-    TemplateId({this.value=""});
-    TemplateId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "TemplateId";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-abstract class Template<TMessageContent> implements IBindableContract
-{
-    // @DataMember
-    TemplateId? templateId;
-
-    // @DataMember
-    DisplayName? templateName;
-
-    // @DataMember
-    List<MessageTranslation<TMessageContent>> translations = [];
-
-    // @DataMember
-    CommunicationChannel? communicationChannel;
-
-    // @DataMember
-    bool? isActive;
-
-    // @DataMember
-    String? description;
-
-    // @DataMember
-    List<Tag>? tags;
-
-    // @DataMember
-    IntegrationId? fileIntegrationId;
-
-    // @DataMember
-    Env? env;
-
-    Template({this.templateId,this.templateName,this.translations=const [],this.communicationChannel,this.isActive,this.description,this.tags,this.fileIntegrationId,this.env});
-    Template.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        templateName = JsonConverters.fromJson(json['templateName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<TMessageContent>>',context!) ?? [];
-        communicationChannel = JsonConverters.fromJson(json['communicationChannel'],'CommunicationChannel',context!);
-        isActive = json['isActive'];
-        description = json['description'];
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        fileIntegrationId = JsonConverters.fromJson(json['fileIntegrationId'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'templateName': JsonConverters.toJson(templateName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<TMessageContent>>',context!),
-        'communicationChannel': JsonConverters.toJson(communicationChannel,'CommunicationChannel',context!),
-        'isActive': isActive,
-        'description': description,
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'fileIntegrationId': JsonConverters.toJson(fileIntegrationId,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "Template<$TMessageContent>";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailSubject implements IConvertible
-{
-    EmailSubject();
-    EmailSubject.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "EmailSubject";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailBody implements IConvertible
-{
-    // @DataMember
-    TemplateCode? code;
-
-    // @DataMember
-    String? structure;
-
-    // @DataMember
-    EmailTemplateEngine? emailTemplateEngine;
-
-    EmailBody({this.code,this.structure,this.emailTemplateEngine});
-    EmailBody.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        code = JsonConverters.fromJson(json['code'],'TemplateCode',context!);
-        structure = json['structure'];
-        emailTemplateEngine = JsonConverters.fromJson(json['emailTemplateEngine'],'EmailTemplateEngine',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'code': JsonConverters.toJson(code,'TemplateCode',context!),
-        'structure': structure,
-        'emailTemplateEngine': JsonConverters.toJson(emailTemplateEngine,'EmailTemplateEngine',context!)
-    };
-
-    getTypeName() => "EmailBody";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailMessageContent implements IConvertible
-{
-    // @DataMember(Order=1)
-    EmailSubject? subject;
-
-    // @DataMember(Order=2)
-    EmailBody? body;
-
-    // @DataMember(Order=3)
-    List<FileResourceRef>? staticAttachments;
-
-    EmailMessageContent({this.subject,this.body,this.staticAttachments});
-    EmailMessageContent.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        subject = JsonConverters.fromJson(json['subject'],'EmailSubject',context!);
-        body = JsonConverters.fromJson(json['body'],'EmailBody',context!);
-        staticAttachments = JsonConverters.fromJson(json['staticAttachments'],'List<FileResourceRef>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'subject': JsonConverters.toJson(subject,'EmailSubject',context!),
-        'body': JsonConverters.toJson(body,'EmailBody',context!),
-        'staticAttachments': JsonConverters.toJson(staticAttachments,'List<FileResourceRef>',context!)
-    };
-
-    getTypeName() => "EmailMessageContent";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailTemplate extends Template<EmailMessageContent> implements IConvertible
-{
-    // @DataMember
-    List<FileResourceRef>? staticAttachments;
-
-    EmailTemplate({this.staticAttachments});
-    EmailTemplate.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        staticAttachments = JsonConverters.fromJson(json['staticAttachments'],'List<FileResourceRef>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'staticAttachments': JsonConverters.toJson(staticAttachments,'List<FileResourceRef>',context!)
-    });
-
-    getTypeName() => "EmailTemplate";
-    TypeContext? context = _ctx;
-}
-
-abstract class EmailValidationIntegration extends Integration
-{
-    EmailValidationProvider? provider;
-
-    EmailValidationIntegration({this.provider});
-    EmailValidationIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'EmailValidationProvider',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'EmailValidationProvider',context!)
-    });
-
-    getTypeName() => "EmailValidationIntegration";
-    TypeContext? context = _ctx;
-}
-
-class CampaignId implements IConvertible
-{
-    String id = "";
-
-    CampaignId({this.id=""});
-    CampaignId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id
-    };
-
-    getTypeName() => "CampaignId";
-    TypeContext? context = _ctx;
-}
-
-class CampaignBatchId implements IConvertible
-{
-    String id = "";
-
-    CampaignBatchId({this.id=""});
-    CampaignBatchId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id
-    };
-
-    getTypeName() => "CampaignBatchId";
-    TypeContext? context = _ctx;
-}
-
-class NotificationId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    NotificationId();
-    NotificationId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "NotificationId";
-    TypeContext? context = _ctx;
-}
-
-enum CampaignStopReason
-{
-    UserRequested,
-    ModuleDisabled,
-}
-
-enum EmailDeliveryEventType
-{
-    Unknown,
-    Delivered,
-    Open,
-    Click,
-    SoftBounce,
-    HardBounce,
-    Complaint,
-    Unsubscribed,
-}
-
 class SaveSmsTemplate extends CodeMashRequestBase implements IConvertible
 {
     /**
@@ -12795,318 +9530,6 @@ abstract class SmsIntegrationRequest
     TypeContext? context = _ctx;
 }
 
-abstract class SmsIntegration extends Integration
-{
-    SmsProvider? provider;
-
-    SmsIntegration({this.provider});
-    SmsIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'SmsProvider',context!)
-    });
-
-    getTypeName() => "SmsIntegration";
-    TypeContext? context = _ctx;
-}
-
-class SmsTitle implements IConvertible
-{
-    TemplateCode? value;
-
-    SmsTitle({this.value});
-    SmsTitle.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = JsonConverters.fromJson(json['value'],'TemplateCode',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': JsonConverters.toJson(value,'TemplateCode',context!)
-    };
-
-    getTypeName() => "SmsTitle";
-    TypeContext? context = _ctx;
-}
-
-class SmsBody implements IConvertible
-{
-    TemplateCode? value;
-
-    SmsBody({this.value});
-    SmsBody.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = JsonConverters.fromJson(json['value'],'TemplateCode',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': JsonConverters.toJson(value,'TemplateCode',context!)
-    };
-
-    getTypeName() => "SmsBody";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class SmsMessageContent implements IConvertible
-{
-    // @DataMember(Order=1)
-    SmsTitle? title;
-
-    // @DataMember(Order=2)
-    SmsBody? body;
-
-    SmsMessageContent({this.title,this.body});
-    SmsMessageContent.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        title = JsonConverters.fromJson(json['title'],'SmsTitle',context!);
-        body = JsonConverters.fromJson(json['body'],'SmsBody',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'title': JsonConverters.toJson(title,'SmsTitle',context!),
-        'body': JsonConverters.toJson(body,'SmsBody',context!)
-    };
-
-    getTypeName() => "SmsMessageContent";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class SmsTemplate extends Template<SmsMessageContent> implements IConvertible
-{
-    SmsTemplate();
-    SmsTemplate.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "SmsTemplate";
-    TypeContext? context = _ctx;
-}
-
-abstract class CodeIntegration extends Integration
-{
-    CodeProvider? provider;
-
-    CodeIntegration({this.provider});
-    CodeIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'CodeProvider',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'CodeProvider',context!)
-    });
-
-    getTypeName() => "CodeIntegration";
-    TypeContext? context = _ctx;
-}
-
-enum MarketplaceIntegrationTransport
-{
-    Mcp,
-    Rest,
-    Code,
-    Internal,
-    Sdk,
-}
-
-enum MarketplaceIntegrationCategory
-{
-    Other,
-    Crm,
-    Erp,
-    Marketing,
-    Communication,
-    Productivity,
-    Storage,
-    Analytics,
-    Identity,
-    Payments,
-    DevTools,
-    Ai,
-    Files,
-    Database,
-    Calendar,
-}
-
-enum MarketplaceTokenResolver
-{
-    Static,
-    Request,
-    Project,
-    Initiator,
-    Custom,
-    IntegrationConfig,
-    IntegrationSecret,
-}
-
-enum SecretValueFormat
-{
-    Raw,
-    Bearer,
-    Basic,
-    Prefixed,
-}
-
-class MarketplaceTokenMapping implements IConvertible
-{
-    String token = "";
-    MarketplaceTokenResolver? resolver;
-    String? value;
-    IReadOnlyList<String>? secretKeys;
-    SecretValueFormat? format;
-
-    MarketplaceTokenMapping({this.token="",this.resolver,this.value,this.secretKeys,this.format});
-    MarketplaceTokenMapping.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        token = json['token'] ?? "";
-        resolver = JsonConverters.fromJson(json['resolver'],'MarketplaceTokenResolver',context!);
-        value = json['value'];
-        secretKeys = JsonConverters.fromJson(json['secretKeys'],'IReadOnlyList<String>',context!);
-        format = JsonConverters.fromJson(json['format'],'SecretValueFormat',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'token': token,
-        'resolver': JsonConverters.toJson(resolver,'MarketplaceTokenResolver',context!),
-        'value': value,
-        'secretKeys': JsonConverters.toJson(secretKeys,'IReadOnlyList<String>',context!),
-        'format': JsonConverters.toJson(format,'SecretValueFormat',context!)
-    };
-
-    getTypeName() => "MarketplaceTokenMapping";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegration extends Integration implements IConvertible
-{
-    String capability = "";
-    String listingViewId = "";
-    MarketplaceIntegrationTransport? transport;
-    String vendor = "";
-    MarketplaceIntegrationCategory? category;
-    String? description;
-    IReadOnlyDictionary<String,String>? config;
-    IReadOnlyList<MarketplaceTokenMapping>? tokenMappings;
-
-    MarketplaceIntegration({this.capability="",this.listingViewId="",this.transport,this.vendor="",this.category,this.description,this.config,this.tokenMappings});
-    MarketplaceIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        capability = JsonConverters.fromJson(json['capability'],'String',context!) ?? "";
-        listingViewId = json['listingViewId'] ?? "";
-        transport = JsonConverters.fromJson(json['transport'],'MarketplaceIntegrationTransport',context!);
-        vendor = json['vendor'] ?? "";
-        category = JsonConverters.fromJson(json['category'],'MarketplaceIntegrationCategory',context!);
-        description = json['description'];
-        config = JsonConverters.fromJson(json['config'],'IReadOnlyDictionary<String,String>',context!);
-        tokenMappings = JsonConverters.fromJson(json['tokenMappings'],'IReadOnlyList<MarketplaceTokenMapping>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'capability': JsonConverters.toJson(capability,'String',context!),
-        'listingViewId': listingViewId,
-        'transport': JsonConverters.toJson(transport,'MarketplaceIntegrationTransport',context!),
-        'vendor': vendor,
-        'category': JsonConverters.toJson(category,'MarketplaceIntegrationCategory',context!),
-        'description': description,
-        'config': JsonConverters.toJson(config,'IReadOnlyDictionary<String,String>',context!),
-        'tokenMappings': JsonConverters.toJson(tokenMappings,'IReadOnlyList<MarketplaceTokenMapping>',context!)
-    });
-
-    getTypeName() => "MarketplaceIntegration";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceFunctionId implements IHasDomainEntityId, IConvertible
-{
-    String value = "";
-
-    MarketplaceFunctionId({this.value=""});
-    MarketplaceFunctionId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "MarketplaceFunctionId";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceFunction implements IHasDomainEntityId, IConvertible
-{
-    MarketplaceFunctionId? functionId;
-    IntegrationId? integrationId;
-    Env? env;
-    String functionKey = "";
-    DisplayName? displayName;
-    String? description;
-    bool? isEnabled;
-    String requestTemplate = "";
-    IReadOnlyList<MarketplaceTokenMapping>? mappedTokens;
-    String viewId = "";
-
-    MarketplaceFunction({this.functionId,this.integrationId,this.env,this.functionKey="",this.displayName,this.description,this.isEnabled,this.requestTemplate="",this.mappedTokens,this.viewId=""});
-    MarketplaceFunction.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        functionId = JsonConverters.fromJson(json['functionId'],'MarketplaceFunctionId',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        functionKey = json['functionKey'] ?? "";
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        description = json['description'];
-        isEnabled = json['isEnabled'];
-        requestTemplate = json['requestTemplate'] ?? "";
-        mappedTokens = JsonConverters.fromJson(json['mappedTokens'],'IReadOnlyList<MarketplaceTokenMapping>',context!);
-        viewId = json['viewId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'functionId': JsonConverters.toJson(functionId,'MarketplaceFunctionId',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'functionKey': functionKey,
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'description': description,
-        'isEnabled': isEnabled,
-        'requestTemplate': requestTemplate,
-        'mappedTokens': JsonConverters.toJson(mappedTokens,'IReadOnlyList<MarketplaceTokenMapping>',context!),
-        'viewId': viewId
-    };
-
-    getTypeName() => "MarketplaceFunction";
-    TypeContext? context = _ctx;
-}
-
 class SavePushTemplate extends CodeMashRequestBase implements IConvertible
 {
     /**
@@ -13164,9 +9587,13 @@ class SavePushTemplate extends CodeMashRequestBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
-abstract class IHasAccountId
+enum DeviceType
 {
-    String accountId = "";
+    Unknown,
+    Phone,
+    Tablet,
+    Desktop,
+    Tv,
 }
 
 // @DataContract
@@ -13285,185 +9712,6 @@ abstract class PushCampaignRequest
     TypeContext? context = _ctx;
 }
 
-abstract class PushIntegration extends Integration
-{
-    PushProvider? provider;
-
-    PushIntegration({this.provider});
-    PushIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'PushProvider',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'PushProvider',context!)
-    });
-
-    getTypeName() => "PushIntegration";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushTitle implements IConvertible
-{
-    // @DataMember
-    TemplateCode? value;
-
-    PushTitle({this.value});
-    PushTitle.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = JsonConverters.fromJson(json['value'],'TemplateCode',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': JsonConverters.toJson(value,'TemplateCode',context!)
-    };
-
-    getTypeName() => "PushTitle";
-    TypeContext? context = _ctx;
-}
-
-class PushBody implements IConvertible
-{
-    TemplateCode? value;
-
-    PushBody({this.value});
-    PushBody.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = JsonConverters.fromJson(json['value'],'TemplateCode',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': JsonConverters.toJson(value,'TemplateCode',context!)
-    };
-
-    getTypeName() => "PushBody";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushMessageContent implements IConvertible
-{
-    // @DataMember(Order=1)
-    PushTitle? title;
-
-    // @DataMember(Order=1)
-    PushTitle? subTitle;
-
-    // @DataMember(Order=2)
-    PushBody? body;
-
-    PushMessageContent({this.title,this.subTitle,this.body});
-    PushMessageContent.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        title = JsonConverters.fromJson(json['title'],'PushTitle',context!);
-        subTitle = JsonConverters.fromJson(json['subTitle'],'PushTitle',context!);
-        body = JsonConverters.fromJson(json['body'],'PushBody',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'title': JsonConverters.toJson(title,'PushTitle',context!),
-        'subTitle': JsonConverters.toJson(subTitle,'PushTitle',context!),
-        'body': JsonConverters.toJson(body,'PushBody',context!)
-    };
-
-    getTypeName() => "PushMessageContent";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushTemplate extends Template<PushMessageContent> implements IConvertible
-{
-    PushTemplate();
-    PushTemplate.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "PushTemplate";
-    TypeContext? context = _ctx;
-}
-
-abstract class PaymentIntegration extends Integration
-{
-    PaymentGatewayPlatform? provider;
-
-    PaymentIntegration({this.provider});
-    PaymentIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'PaymentGatewayPlatform',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'PaymentGatewayPlatform',context!)
-    });
-
-    getTypeName() => "PaymentIntegration";
-    TypeContext? context = _ctx;
-}
-
-class PaymentTrigger extends Trigger implements IConvertible
-{
-    PaymentTriggerType? when;
-    List<IntegrationId>? integrations;
-    List<String>? events;
-
-    PaymentTrigger({this.when,this.integrations,this.events});
-    PaymentTrigger.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        when = JsonConverters.fromJson(json['when'],'PaymentTriggerType',context!);
-        integrations = JsonConverters.fromJson(json['integrations'],'List<IntegrationId>',context!);
-        events = JsonConverters.fromJson(json['events'],'List<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'when': JsonConverters.toJson(when,'PaymentTriggerType',context!),
-        'integrations': JsonConverters.toJson(integrations,'List<IntegrationId>',context!),
-        'events': JsonConverters.toJson(events,'List<String>',context!)
-    });
-
-    getTypeName() => "PaymentTrigger";
-    TypeContext? context = _ctx;
-}
-
-abstract class LoggingIntegration extends Integration
-{
-    LoggingProvider? provider;
-
-    LoggingIntegration({this.provider});
-    LoggingIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'LoggingProvider',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'LoggingProvider',context!)
-    });
-
-    getTypeName() => "LoggingIntegration";
-    TypeContext? context = _ctx;
-}
-
 abstract class ChatScreenContextDto
 {
     String kind = "";
@@ -13487,153 +9735,6 @@ abstract class ChatScreenContextDto
     TypeContext? context = _ctx;
 }
 
-abstract class LlmIntegration extends Integration
-{
-    LlmProvider? provider;
-    String defaultModel = "";
-
-    LlmIntegration({this.provider,this.defaultModel=""});
-    LlmIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'LlmProvider',context!);
-        defaultModel = json['defaultModel'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'LlmProvider',context!),
-        'defaultModel': defaultModel
-    });
-
-    getTypeName() => "LlmIntegration";
-    TypeContext? context = _ctx;
-}
-
-abstract class McpIntegration extends Integration
-{
-    McpProvider? provider;
-    McpTransport? transport;
-    McpMetadata? metadata;
-
-    McpIntegration({this.provider,this.transport,this.metadata});
-    McpIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        provider = JsonConverters.fromJson(json['provider'],'McpProvider',context!);
-        transport = JsonConverters.fromJson(json['transport'],'McpTransport',context!);
-        metadata = JsonConverters.fromJson(json['metadata'],'McpMetadata',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'McpProvider',context!),
-        'transport': JsonConverters.toJson(transport,'McpTransport',context!),
-        'metadata': JsonConverters.toJson(metadata,'McpMetadata',context!)
-    });
-
-    getTypeName() => "McpIntegration";
-    TypeContext? context = _ctx;
-}
-
-class WebhookDestinationId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    WebhookDestinationId();
-    WebhookDestinationId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "WebhookDestinationId";
-    TypeContext? context = _ctx;
-}
-
-abstract class TriggerEventName
-{
-    String value = "";
-
-    TriggerEventName({this.value=""});
-    TriggerEventName.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "TriggerEventName";
-    TypeContext? context = _ctx;
-}
-
-class WebhookDestination implements IConvertible
-{
-    WebhookDestinationId? destinationId;
-    DisplayName? destinationName;
-    DomainUrl? endpointUrl;
-    List<TriggerEventName> selectedEvents = [];
-    IReadOnlyDictionary<String,String>? extraHeaders;
-    bool? isEnabled;
-
-    WebhookDestination({this.destinationId,this.destinationName,this.endpointUrl,this.selectedEvents=const [],this.extraHeaders,this.isEnabled});
-    WebhookDestination.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        destinationId = JsonConverters.fromJson(json['destinationId'],'WebhookDestinationId',context!);
-        destinationName = JsonConverters.fromJson(json['destinationName'],'DisplayName',context!);
-        endpointUrl = JsonConverters.fromJson(json['endpointUrl'],'DomainUrl',context!);
-        selectedEvents = JsonConverters.fromJson(json['selectedEvents'],'List<TriggerEventName>',context!) ?? [];
-        extraHeaders = JsonConverters.fromJson(json['extraHeaders'],'IReadOnlyDictionary<String,String>',context!);
-        isEnabled = json['isEnabled'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'destinationId': JsonConverters.toJson(destinationId,'WebhookDestinationId',context!),
-        'destinationName': JsonConverters.toJson(destinationName,'DisplayName',context!),
-        'endpointUrl': JsonConverters.toJson(endpointUrl,'DomainUrl',context!),
-        'selectedEvents': JsonConverters.toJson(selectedEvents,'List<TriggerEventName>',context!),
-        'extraHeaders': JsonConverters.toJson(extraHeaders,'IReadOnlyDictionary<String,String>',context!),
-        'isEnabled': isEnabled
-    };
-
-    getTypeName() => "WebhookDestination";
-    TypeContext? context = _ctx;
-}
-
-class WebhookIntegration extends Integration implements IConvertible
-{
-    String capability = "";
-    List<WebhookDestination> destinations = [];
-    IReadOnlyDictionary<String,String>? extraHeaders;
-
-    WebhookIntegration({this.capability="",this.destinations=const [],this.extraHeaders});
-    WebhookIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        capability = JsonConverters.fromJson(json['capability'],'String',context!) ?? "";
-        destinations = JsonConverters.fromJson(json['destinations'],'List<WebhookDestination>',context!) ?? [];
-        extraHeaders = JsonConverters.fromJson(json['extraHeaders'],'IReadOnlyDictionary<String,String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'capability': JsonConverters.toJson(capability,'String',context!),
-        'destinations': JsonConverters.toJson(destinations,'List<WebhookDestination>',context!),
-        'extraHeaders': JsonConverters.toJson(extraHeaders,'IReadOnlyDictionary<String,String>',context!)
-    });
-
-    getTypeName() => "WebhookIntegration";
-    TypeContext? context = _ctx;
-}
-
 abstract class SchedulerTaskRequest
 {
     SchedulerTaskType? type;
@@ -13651,77 +9752,6 @@ abstract class SchedulerTaskRequest
     };
 
     getTypeName() => "SchedulerTaskRequest";
-    TypeContext? context = _ctx;
-}
-
-class TaskId extends AggregateId implements IConvertible
-{
-    TaskId();
-    TaskId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "TaskId";
-    TypeContext? context = _ctx;
-}
-
-class CronExpression implements IConvertible
-{
-    CronExpression();
-    CronExpression.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "CronExpression";
-    TypeContext? context = _ctx;
-}
-
-class SchedulerTask implements IHasDomainEntityId, IConvertible
-{
-    TaskId? id;
-    SchedulerTaskType? type;
-    DisplayName? name;
-    String? description;
-    CronExpression? cron;
-    String payloadJson = "";
-    AuthId? initiatorId;
-    bool? isEnabled;
-    bool? stopOnError;
-
-    SchedulerTask({this.id,this.type,this.name,this.description,this.cron,this.payloadJson="",this.initiatorId,this.isEnabled,this.stopOnError});
-    SchedulerTask.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'TaskId',context!);
-        type = JsonConverters.fromJson(json['type'],'SchedulerTaskType',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        description = json['description'];
-        cron = JsonConverters.fromJson(json['cron'],'CronExpression',context!);
-        payloadJson = json['payloadJson'] ?? "";
-        initiatorId = JsonConverters.fromJson(json['initiatorId'],'AuthId',context!);
-        isEnabled = json['isEnabled'];
-        stopOnError = json['stopOnError'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'TaskId',context!),
-        'type': JsonConverters.toJson(type,'SchedulerTaskType',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'description': description,
-        'cron': JsonConverters.toJson(cron,'CronExpression',context!),
-        'payloadJson': payloadJson,
-        'initiatorId': JsonConverters.toJson(initiatorId,'AuthId',context!),
-        'isEnabled': isEnabled,
-        'stopOnError': stopOnError
-    };
-
-    getTypeName() => "SchedulerTask";
     TypeContext? context = _ctx;
 }
 
@@ -13819,152 +9849,6 @@ class CaseResolutionDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class SupportCaseId extends AggregateId implements IConvertible
-{
-    String viewId = "";
-
-    SupportCaseId({this.viewId=""});
-    SupportCaseId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        viewId = json['viewId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'viewId': viewId
-    });
-
-    getTypeName() => "SupportCaseId";
-    TypeContext? context = _ctx;
-}
-
-enum SupportCaseKind
-{
-    Question,
-    Bug,
-    Incident,
-    Billing,
-    Security,
-    FeatureRequest,
-}
-
-enum SupportCaseSeverity
-{
-    S1,
-    S2,
-    S3,
-    S4,
-}
-
-enum DeploymentMode
-{
-    Managed,
-    SelfHosted,
-    Enterprise,
-}
-
-enum SupportMessageAuthorKind
-{
-    Customer,
-    Staff,
-    Ai,
-    System,
-}
-
-class SupportMessageRef implements IConvertible
-{
-    String messageId = "";
-    SupportMessageAuthorKind? authorKind;
-    String? authorId;
-    UtcDateTime? sentOn;
-
-    SupportMessageRef({this.messageId="",this.authorKind,this.authorId,this.sentOn});
-    SupportMessageRef.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        messageId = json['messageId'] ?? "";
-        authorKind = JsonConverters.fromJson(json['authorKind'],'SupportMessageAuthorKind',context!);
-        authorId = json['authorId'];
-        sentOn = JsonConverters.fromJson(json['sentOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'messageId': messageId,
-        'authorKind': JsonConverters.toJson(authorKind,'SupportMessageAuthorKind',context!),
-        'authorId': authorId,
-        'sentOn': JsonConverters.toJson(sentOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportMessageRef";
-    TypeContext? context = _ctx;
-}
-
-enum SupportCaseStatus
-{
-    Open,
-    Triaged,
-    InProgress,
-    WaitingOnCustomer,
-    Resolved,
-    Closed,
-}
-
-class CaseResolution implements IConvertible
-{
-    String problem = "";
-    IReadOnlyList<String>? symptoms;
-    String rootCause = "";
-    CaseResolutionFixKind? fix;
-    String? fixDetail;
-    String? module;
-    SupportCaseKind? kind;
-    SupportCaseSeverity? severity;
-    IReadOnlyList<String>? affectedVersions;
-    String? resolvedBy;
-
-    CaseResolution({this.problem="",this.symptoms,this.rootCause="",this.fix,this.fixDetail,this.module,this.kind,this.severity,this.affectedVersions,this.resolvedBy});
-    CaseResolution.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        problem = json['problem'] ?? "";
-        symptoms = JsonConverters.fromJson(json['symptoms'],'IReadOnlyList<String>',context!);
-        rootCause = json['rootCause'] ?? "";
-        fix = JsonConverters.fromJson(json['fix'],'CaseResolutionFixKind',context!);
-        fixDetail = json['fixDetail'];
-        module = json['module'];
-        kind = JsonConverters.fromJson(json['kind'],'SupportCaseKind',context!);
-        severity = JsonConverters.fromJson(json['severity'],'SupportCaseSeverity',context!);
-        affectedVersions = JsonConverters.fromJson(json['affectedVersions'],'IReadOnlyList<String>',context!);
-        resolvedBy = json['resolvedBy'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'problem': problem,
-        'symptoms': JsonConverters.toJson(symptoms,'IReadOnlyList<String>',context!),
-        'rootCause': rootCause,
-        'fix': JsonConverters.toJson(fix,'CaseResolutionFixKind',context!),
-        'fixDetail': fixDetail,
-        'module': module,
-        'kind': JsonConverters.toJson(kind,'SupportCaseKind',context!),
-        'severity': JsonConverters.toJson(severity,'SupportCaseSeverity',context!),
-        'affectedVersions': JsonConverters.toJson(affectedVersions,'IReadOnlyList<String>',context!),
-        'resolvedBy': resolvedBy
-    };
-
-    getTypeName() => "CaseResolution";
-    TypeContext? context = _ctx;
-}
-
-enum SupportCaseCloseReason
-{
-    Manual,
-    AutoClosedAfterResolve,
-}
-
 // @DataContract
 enum CodeMashRelease
 {
@@ -14060,6 +9944,38 @@ class EchoRegionDto implements IConvertible
     };
 
     getTypeName() => "EchoRegionDto";
+    TypeContext? context = _ctx;
+}
+
+class EchoAgentDto implements IConvertible
+{
+    String mcpUrl = "";
+    String? oAuthMetadataUrl;
+    String installationType = "";
+    String onboardingDocsUrl = "";
+    String toolsUrl = "";
+
+    EchoAgentDto({this.mcpUrl="",this.oAuthMetadataUrl,this.installationType="",this.onboardingDocsUrl="",this.toolsUrl=""});
+    EchoAgentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        mcpUrl = json['mcpUrl'] ?? "";
+        oAuthMetadataUrl = json['oAuthMetadataUrl'];
+        installationType = json['installationType'] ?? "";
+        onboardingDocsUrl = json['onboardingDocsUrl'] ?? "";
+        toolsUrl = json['toolsUrl'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'mcpUrl': mcpUrl,
+        'oAuthMetadataUrl': oAuthMetadataUrl,
+        'installationType': installationType,
+        'onboardingDocsUrl': onboardingDocsUrl,
+        'toolsUrl': toolsUrl
+    };
+
+    getTypeName() => "EchoAgentDto";
     TypeContext? context = _ctx;
 }
 
@@ -14573,6 +10489,28 @@ class ProjectEnvironmentsDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+enum ProjectStatus
+{
+    Active,
+    Provisioning,
+    ProvisioningFailed,
+    NoDatabase,
+    Disabled,
+    Suspended,
+    Removed,
+}
+
+enum Continent
+{
+    Africa,
+    Antarctica,
+    Asia,
+    Europe,
+    NorthAmerica,
+    Oceania,
+    SouthAmerica,
+}
+
 class ProjectRegionDto implements IConvertible
 {
     String id = "";
@@ -14816,7 +10754,10 @@ class TriggerDto implements IHasViewId, IConvertible
     // @DataMember
     String? activationCode;
 
-    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode});
+    // @DataMember
+    String? savedByAuthId;
+
+    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId});
     TriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14827,6 +10768,7 @@ class TriggerDto implements IHasViewId, IConvertible
         description = json['description'];
         isEnabled = json['isEnabled'];
         activationCode = json['activationCode'];
+        savedByAuthId = json['savedByAuthId'];
         return this;
     }
 
@@ -14837,7 +10779,8 @@ class TriggerDto implements IHasViewId, IConvertible
         'thenAction': JsonConverters.toJson(thenAction,'TriggerActionDto',context!),
         'description': description,
         'isEnabled': isEnabled,
-        'activationCode': activationCode
+        'activationCode': activationCode,
+        'savedByAuthId': savedByAuthId
     };
 
     getTypeName() => "TriggerDto";
@@ -15019,6 +10962,12 @@ class RoleItemDto implements IConvertible
 
     getTypeName() => "RoleItemDto";
     TypeContext? context = _ctx;
+}
+
+enum PermissionEffect
+{
+    Allow,
+    Deny,
 }
 
 class PermissionDto implements IConvertible
@@ -15297,17 +11246,22 @@ class FilesTriggerDto extends TriggerDto implements IConvertible
     // @DataMember
     FilesTriggerType? when;
 
-    FilesTriggerDto({this.when});
+    // @DataMember
+    String? folder;
+
+    FilesTriggerDto({this.when,this.folder});
     FilesTriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         when = JsonConverters.fromJson(json['when'],'FilesTriggerType',context!);
+        folder = json['folder'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'when': JsonConverters.toJson(when,'FilesTriggerType',context!)
+        'when': JsonConverters.toJson(when,'FilesTriggerType',context!),
+        'folder': folder
     });
 
     getTypeName() => "FilesTriggerDto";
@@ -15814,6 +11768,16 @@ class PaginatedResponse<TViewModelProjection> implements IConvertible
     TypeContext? context = _ctx;
 }
 
+enum AuthType
+{
+    Service,
+    Email,
+    UserName,
+    Phone,
+    Guest,
+    Social,
+}
+
 class AccessInformationDto implements IConvertible
 {
     String? ip;
@@ -15881,6 +11845,23 @@ class LoginDto implements IConvertible
 
     getTypeName() => "LoginDto";
     TypeContext? context = _ctx;
+}
+
+enum Gender
+{
+    Male,
+    Female,
+    Other,
+}
+
+enum MarketingBlockReason
+{
+    Unspecified,
+    Unsubscribed,
+    Complaint,
+    HardBounce,
+    InvalidEmail,
+    AdminBlock,
 }
 
 class UserGeneralInfoDto implements IConvertible
@@ -15964,6 +11945,17 @@ class UserGeneralInfoDto implements IConvertible
 
     getTypeName() => "UserGeneralInfoDto";
     TypeContext? context = _ctx;
+}
+
+enum AuthStatus
+{
+    Registered,
+    PendingValidation,
+    Active,
+    Unregistered,
+    Suspended,
+    InActive,
+    Blocked,
 }
 
 class AuthDto implements IBindableContract, IConvertible
@@ -16519,6 +12511,80 @@ class InstallationLicenseStatusDto implements IConvertible
     };
 
     getTypeName() => "InstallationLicenseStatusDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class AiServiceUserKeyDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String hint = "";
+
+    // @DataMember
+    DateTime? issuedAt;
+
+    AiServiceUserKeyDto({this.id="",this.hint="",this.issuedAt});
+    AiServiceUserKeyDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        hint = json['hint'] ?? "";
+        issuedAt = JsonConverters.fromJson(json['issuedAt'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'hint': hint,
+        'issuedAt': JsonConverters.toJson(issuedAt,'DateTime',context!)
+    };
+
+    getTypeName() => "AiServiceUserKeyDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class AiServiceUserDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    AiScopeDto? scope;
+
+    // @DataMember
+    DateTime? createdAt;
+
+    // @DataMember
+    List<AiServiceUserKeyDto> keys = [];
+
+    AiServiceUserDto({this.id="",this.name="",this.scope,this.createdAt,this.keys=const []});
+    AiServiceUserDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        scope = JsonConverters.fromJson(json['scope'],'AiScopeDto',context!);
+        createdAt = JsonConverters.fromJson(json['createdAt'],'DateTime',context!) ?? DateTime(0);
+        keys = JsonConverters.fromJson(json['keys'],'List<AiServiceUserKeyDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'scope': JsonConverters.toJson(scope,'AiScopeDto',context!),
+        'createdAt': JsonConverters.toJson(createdAt,'DateTime',context!),
+        'keys': JsonConverters.toJson(keys,'List<AiServiceUserKeyDto>',context!)
+    };
+
+    getTypeName() => "AiServiceUserDto";
     TypeContext? context = _ctx;
 }
 
@@ -18313,17 +14379,22 @@ class FilesTriggerProjectionList extends TriggerProjectionList implements IConve
     // @DataMember
     FilesTriggerType? type;
 
-    FilesTriggerProjectionList({this.type});
+    // @DataMember
+    String? folder;
+
+    FilesTriggerProjectionList({this.type,this.folder});
     FilesTriggerProjectionList.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         type = JsonConverters.fromJson(json['type'],'FilesTriggerType',context!);
+        folder = json['folder'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'type': JsonConverters.toJson(type,'FilesTriggerType',context!)
+        'type': JsonConverters.toJson(type,'FilesTriggerType',context!),
+        'folder': folder
     });
 
     getTypeName() => "FilesTriggerProjectionList";
@@ -18349,6 +14420,43 @@ class FilesIntegrationListProjection extends IntegrationListProjection implement
     });
 
     getTypeName() => "FilesIntegrationListProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PublicFolderDto implements IConvertible
+{
+    // @DataMember(Order=1)
+    String path = "";
+
+    // @DataMember(Order=2)
+    String publicId = "";
+
+    // @DataMember(Order=3)
+    String? publicUrl;
+
+    // @DataMember(Order=4)
+    bool? inherited;
+
+    PublicFolderDto({this.path="",this.publicId="",this.publicUrl,this.inherited});
+    PublicFolderDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        path = json['path'] ?? "";
+        publicId = json['publicId'] ?? "";
+        publicUrl = json['publicUrl'];
+        inherited = json['inherited'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'path': path,
+        'publicId': publicId,
+        'publicUrl': publicUrl,
+        'inherited': inherited
+    };
+
+    getTypeName() => "PublicFolderDto";
     TypeContext? context = _ctx;
 }
 
@@ -19833,6 +15941,83 @@ class PushIntegrationListProjection extends IntegrationListProjection implements
 }
 
 // @DataContract
+class PushDeviceListProjection implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String deviceOs = "";
+
+    // @DataMember
+    String token = "";
+
+    // @DataMember
+    String? brand;
+
+    // @DataMember
+    String? manufacturer;
+
+    // @DataMember
+    String? modelName;
+
+    // @DataMember
+    String? deviceName;
+
+    // @DataMember
+    String? deviceType;
+
+    // @DataMember
+    String? osName;
+
+    // @DataMember
+    String? osVersion;
+
+    // @DataMember
+    int? platformApiLevel;
+
+    PushDeviceListProjection({this.id="",this.userId="",this.deviceOs="",this.token="",this.brand,this.manufacturer,this.modelName,this.deviceName,this.deviceType,this.osName,this.osVersion,this.platformApiLevel});
+    PushDeviceListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        userId = json['userId'] ?? "";
+        deviceOs = json['deviceOs'] ?? "";
+        token = json['token'] ?? "";
+        brand = json['brand'];
+        manufacturer = json['manufacturer'];
+        modelName = json['modelName'];
+        deviceName = json['deviceName'];
+        deviceType = json['deviceType'];
+        osName = json['osName'];
+        osVersion = json['osVersion'];
+        platformApiLevel = json['platformApiLevel'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'userId': userId,
+        'deviceOs': deviceOs,
+        'token': token,
+        'brand': brand,
+        'manufacturer': manufacturer,
+        'modelName': modelName,
+        'deviceName': deviceName,
+        'deviceType': deviceType,
+        'osName': osName,
+        'osVersion': osVersion,
+        'platformApiLevel': platformApiLevel
+    };
+
+    getTypeName() => "PushDeviceListProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class PushCampaignDto extends CampaignDto implements IConvertible
 {
     // @DataMember
@@ -20174,6 +16359,29 @@ class TenantLogEntryDto implements IConvertible
     };
 
     getTypeName() => "TenantLogEntryDto";
+    TypeContext? context = _ctx;
+}
+
+class AgentOnboardingSnippet implements IConvertible
+{
+    String client = "";
+    String config = "";
+
+    AgentOnboardingSnippet({this.client="",this.config=""});
+    AgentOnboardingSnippet.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        client = json['client'] ?? "";
+        config = json['config'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'client': client,
+        'config': config
+    };
+
+    getTypeName() => "AgentOnboardingSnippet";
     TypeContext? context = _ctx;
 }
 
@@ -21649,12 +17857,47 @@ class AccountComplianceDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+enum SupportCaseKind
+{
+    Question,
+    Bug,
+    Incident,
+    Billing,
+    Security,
+    FeatureRequest,
+}
+
+enum SupportCaseSeverity
+{
+    S1,
+    S2,
+    S3,
+    S4,
+}
+
+enum SupportCaseStatus
+{
+    Open,
+    Triaged,
+    InProgress,
+    WaitingOnCustomer,
+    Resolved,
+    Closed,
+}
+
 enum SupportCustomerStatus
 {
     Pending,
     Open,
     Solved,
     Closed,
+}
+
+enum DeploymentMode
+{
+    Managed,
+    SelfHosted,
+    Enterprise,
 }
 
 // @DataContract
@@ -21777,6 +18020,14 @@ class SupportCaseDto implements IHasViewId, IConvertible
 
     getTypeName() => "SupportCaseDto";
     TypeContext? context = _ctx;
+}
+
+enum SupportMessageAuthorKind
+{
+    Customer,
+    Staff,
+    Ai,
+    System,
 }
 
 // @DataContract
@@ -22404,41 +18655,6 @@ abstract class IHasRazorTemplateCode
 {
 }
 
-abstract class IHasDomainEntityId
-{
-    String viewId = "";
-}
-
-abstract class IIntegrationIdentification
-{
-    IntegrationId? integrationId;
-    String capability = "";
-    bool? isSystemOwned;
-}
-
-class CronExpression implements IConvertible
-{
-    String value = "";
-    CronExpression? parsed;
-
-    CronExpression({this.value="",this.parsed});
-    CronExpression.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        parsed = JsonConverters.fromJson(json['parsed'],'CronExpression',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value,
-        'parsed': JsonConverters.toJson(parsed,'CronExpression',context!)
-    };
-
-    getTypeName() => "CronExpression";
-    TypeContext? context = _ctx;
-}
-
 abstract class IHasResponsibleUserId
 {
     String userId = "";
@@ -22448,322 +18664,6 @@ abstract class ICursorArgs
 {
     String field = "";
     int order = 0;
-}
-
-class StringField extends JsonSchemaField implements IConvertible
-{
-    String? format;
-    String? pattern;
-    int? minLength;
-    int? maxLength;
-    IReadOnlyDictionary<String,String>? translateOptions;
-
-    StringField({this.format,this.pattern,this.minLength,this.maxLength,this.translateOptions});
-    StringField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        format = json['format'];
-        pattern = json['pattern'];
-        minLength = json['minLength'];
-        maxLength = json['maxLength'];
-        translateOptions = JsonConverters.fromJson(json['translateOptions'],'IReadOnlyDictionary<String,String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'format': format,
-        'pattern': pattern,
-        'minLength': minLength,
-        'maxLength': maxLength,
-        'translateOptions': JsonConverters.toJson(translateOptions,'IReadOnlyDictionary<String,String>',context!)
-    });
-
-    getTypeName() => "StringField";
-    TypeContext? context = _ctx;
-}
-
-class DecimalField extends JsonSchemaField implements IConvertible
-{
-    double? minimum;
-    double? maximum;
-    double? multipleOf;
-
-    DecimalField({this.minimum,this.maximum,this.multipleOf});
-    DecimalField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        minimum = JsonConverters.toDouble(json['minimum']);
-        maximum = JsonConverters.toDouble(json['maximum']);
-        multipleOf = JsonConverters.toDouble(json['multipleOf']);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'minimum': minimum,
-        'maximum': maximum,
-        'multipleOf': multipleOf
-    });
-
-    getTypeName() => "DecimalField";
-    TypeContext? context = _ctx;
-}
-
-class CurrencyField extends JsonSchemaField implements IConvertible
-{
-    IReadOnlyList<String>? allowedCurrencies;
-
-    CurrencyField({this.allowedCurrencies});
-    CurrencyField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        allowedCurrencies = JsonConverters.fromJson(json['allowedCurrencies'],'IReadOnlyList<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'allowedCurrencies': JsonConverters.toJson(allowedCurrencies,'IReadOnlyList<String>',context!)
-    });
-
-    getTypeName() => "CurrencyField";
-    TypeContext? context = _ctx;
-}
-
-class BooleanField extends JsonSchemaField implements IConvertible
-{
-    BooleanField();
-    BooleanField.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "BooleanField";
-    TypeContext? context = _ctx;
-}
-
-class DateField extends JsonSchemaField implements IConvertible
-{
-    int? minimum;
-    int? maximum;
-
-    DateField({this.minimum,this.maximum});
-    DateField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        minimum = json['minimum'];
-        maximum = json['maximum'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'minimum': minimum,
-        'maximum': maximum
-    });
-
-    getTypeName() => "DateField";
-    TypeContext? context = _ctx;
-}
-
-class IntegerField extends JsonSchemaField implements IConvertible
-{
-    int? minimum;
-    int? maximum;
-
-    IntegerField({this.minimum,this.maximum});
-    IntegerField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        minimum = json['minimum'];
-        maximum = json['maximum'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'minimum': minimum,
-        'maximum': maximum
-    });
-
-    getTypeName() => "IntegerField";
-    TypeContext? context = _ctx;
-}
-
-class GeolocationField extends JsonSchemaField implements IConvertible
-{
-    IReadOnlyList<String>? allowedTypes;
-
-    GeolocationField({this.allowedTypes});
-    GeolocationField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        allowedTypes = JsonConverters.fromJson(json['allowedTypes'],'IReadOnlyList<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'allowedTypes': JsonConverters.toJson(allowedTypes,'IReadOnlyList<String>',context!)
-    });
-
-    getTypeName() => "GeolocationField";
-    TypeContext? context = _ctx;
-}
-
-class TagsField extends JsonSchemaField implements IConvertible
-{
-    TagsField();
-    TagsField.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "TagsField";
-    TypeContext? context = _ctx;
-}
-
-class FileField extends JsonSchemaField implements IConvertible
-{
-    IReadOnlyList<String>? storages;
-
-    FileField({this.storages});
-    FileField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        storages = JsonConverters.fromJson(json['storages'],'IReadOnlyList<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'storages': JsonConverters.toJson(storages,'IReadOnlyList<String>',context!)
-    });
-
-    getTypeName() => "FileField";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomySelectionField extends JsonSchemaField implements IConvertible
-{
-    String? taxonomyId;
-    bool? multiple;
-
-    TaxonomySelectionField({this.taxonomyId,this.multiple});
-    TaxonomySelectionField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        taxonomyId = json['taxonomyId'];
-        multiple = json['multiple'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'taxonomyId': taxonomyId,
-        'multiple': multiple
-    });
-
-    getTypeName() => "TaxonomySelectionField";
-    TypeContext? context = _ctx;
-}
-
-class CollectionSelectionField extends JsonSchemaField implements IConvertible
-{
-    String? collectionId;
-    String? displayField;
-    bool? multiple;
-
-    CollectionSelectionField({this.collectionId,this.displayField,this.multiple});
-    CollectionSelectionField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        collectionId = json['collectionId'];
-        displayField = json['displayField'];
-        multiple = json['multiple'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'collectionId': collectionId,
-        'displayField': displayField,
-        'multiple': multiple
-    });
-
-    getTypeName() => "CollectionSelectionField";
-    TypeContext? context = _ctx;
-}
-
-class UserSelectionField extends JsonSchemaField implements IConvertible
-{
-    bool? multiple;
-
-    UserSelectionField({this.multiple});
-    UserSelectionField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        multiple = json['multiple'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'multiple': multiple
-    });
-
-    getTypeName() => "UserSelectionField";
-    TypeContext? context = _ctx;
-}
-
-class RoleSelectionField extends JsonSchemaField implements IConvertible
-{
-    bool? multiple;
-
-    RoleSelectionField({this.multiple});
-    RoleSelectionField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        multiple = json['multiple'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'multiple': multiple
-    });
-
-    getTypeName() => "RoleSelectionField";
-    TypeContext? context = _ctx;
-}
-
-class EnumSelectionField extends JsonSchemaField implements IConvertible
-{
-    IReadOnlyList<String>? values;
-    bool? multiple;
-
-    EnumSelectionField({this.values,this.multiple});
-    EnumSelectionField.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        values = JsonConverters.fromJson(json['values'],'IReadOnlyList<String>',context!);
-        multiple = json['multiple'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'values': JsonConverters.toJson(values,'IReadOnlyList<String>',context!),
-        'multiple': multiple
-    });
-
-    getTypeName() => "EnumSelectionField";
-    TypeContext? context = _ctx;
 }
 
 class StringFieldDto extends JsonSchemaFieldDto implements IConvertible
@@ -23142,8 +19042,9 @@ class EchoResponse implements IConvertible
     int? graceDaysLeft;
     String? installationDomain;
     String? licensingDocsUrl;
+    EchoAgentDto? agent;
 
-    EchoResponse({this.containerName,this.ip="",this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.mjmlUrl="",this.adminUrlTemplate,this.license,this.askForEnterpriseLicenseEmail,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.isProductionInstallation,this.licensingMode="",this.graceDaysLeft,this.installationDomain,this.licensingDocsUrl});
+    EchoResponse({this.containerName,this.ip="",this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.mjmlUrl="",this.adminUrlTemplate,this.license,this.askForEnterpriseLicenseEmail,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.isProductionInstallation,this.licensingMode="",this.graceDaysLeft,this.installationDomain,this.licensingDocsUrl,this.agent});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -23169,6 +19070,7 @@ class EchoResponse implements IConvertible
         graceDaysLeft = json['graceDaysLeft'];
         installationDomain = json['installationDomain'];
         licensingDocsUrl = json['licensingDocsUrl'];
+        agent = JsonConverters.fromJson(json['agent'],'EchoAgentDto',context!);
         return this;
     }
 
@@ -23194,7 +19096,8 @@ class EchoResponse implements IConvertible
         'licensingMode': licensingMode,
         'graceDaysLeft': graceDaysLeft,
         'installationDomain': installationDomain,
-        'licensingDocsUrl': licensingDocsUrl
+        'licensingDocsUrl': licensingDocsUrl,
+        'agent': JsonConverters.toJson(agent,'EchoAgentDto',context!)
     };
 
     getTypeName() => "EchoResponse";
@@ -23921,6 +19824,90 @@ class GetInstallationLicenseStatusResponse extends ResponseBase implements IConv
     });
 
     getTypeName() => "GetInstallationLicenseStatusResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CreateAiServiceUserResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String keyId = "";
+
+    // @DataMember
+    String key = "";
+
+    CreateAiServiceUserResponse({this.id="",this.keyId="",this.key=""});
+    CreateAiServiceUserResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        keyId = json['keyId'] ?? "";
+        key = json['key'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'keyId': keyId,
+        'key': key
+    });
+
+    getTypeName() => "CreateAiServiceUserResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ListAiServiceUsersResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    List<AiServiceUserDto> items = [];
+
+    ListAiServiceUsersResponse({this.items=const []});
+    ListAiServiceUsersResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        items = JsonConverters.fromJson(json['items'],'List<AiServiceUserDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'items': JsonConverters.toJson(items,'List<AiServiceUserDto>',context!)
+    });
+
+    getTypeName() => "ListAiServiceUsersResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RotateAiServiceUserKeyResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String keyId = "";
+
+    // @DataMember
+    String key = "";
+
+    RotateAiServiceUserKeyResponse({this.keyId="",this.key=""});
+    RotateAiServiceUserKeyResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        keyId = json['keyId'] ?? "";
+        key = json['key'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'keyId': keyId,
+        'key': key
+    });
+
+    getTypeName() => "RotateAiServiceUserKeyResponse";
     TypeContext? context = _ctx;
 }
 
@@ -25055,20 +21042,23 @@ class GetFilesIntegrationsResponse extends ResponseBase implements IConvertible
 {
     String? defaultIntegrationId;
     PaginatedResponse<FilesIntegrationListProjection>? list;
+    List<FileProvider> availableProviders = [];
 
-    GetFilesIntegrationsResponse({this.defaultIntegrationId,this.list});
+    GetFilesIntegrationsResponse({this.defaultIntegrationId,this.list,this.availableProviders=const []});
     GetFilesIntegrationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         defaultIntegrationId = json['defaultIntegrationId'];
         list = JsonConverters.fromJson(json['list'],'PaginatedResponse<FilesIntegrationListProjection>',context!);
+        availableProviders = JsonConverters.fromJson(json['availableProviders'],'List<FileProvider>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'defaultIntegrationId': defaultIntegrationId,
-        'list': JsonConverters.toJson(list,'PaginatedResponse<FilesIntegrationListProjection>',context!)
+        'list': JsonConverters.toJson(list,'PaginatedResponse<FilesIntegrationListProjection>',context!),
+        'availableProviders': JsonConverters.toJson(availableProviders,'List<FileProvider>',context!)
     });
 
     getTypeName() => "GetFilesIntegrationsResponse";
@@ -25102,20 +21092,23 @@ class GetFolderFilesResponse extends ResponseBase implements IConvertible
 {
     PaginatedResponse<FileResourceRefDto>? list;
     List<String>? folders;
+    List<PublicFolderDto>? publicFolders;
 
-    GetFolderFilesResponse({this.list,this.folders});
+    GetFolderFilesResponse({this.list,this.folders,this.publicFolders});
     GetFolderFilesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         list = JsonConverters.fromJson(json['list'],'PaginatedResponse<FileResourceRefDto>',context!);
         folders = JsonConverters.fromJson(json['folders'],'List<String>',context!);
+        publicFolders = JsonConverters.fromJson(json['publicFolders'],'List<PublicFolderDto>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'list': JsonConverters.toJson(list,'PaginatedResponse<FileResourceRefDto>',context!),
-        'folders': JsonConverters.toJson(folders,'List<String>',context!)
+        'folders': JsonConverters.toJson(folders,'List<String>',context!),
+        'publicFolders': JsonConverters.toJson(publicFolders,'List<PublicFolderDto>',context!)
     });
 
     getTypeName() => "GetFolderFilesResponse";
@@ -26553,6 +22546,51 @@ class GetPushIntegrationsResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class GetPushDeviceResponse extends ResponseBase implements IConvertible
+{
+    PushDeviceDto? item;
+    String? userId;
+
+    GetPushDeviceResponse({this.item,this.userId});
+    GetPushDeviceResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'PushDeviceDto',context!);
+        userId = json['userId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'PushDeviceDto',context!),
+        'userId': userId
+    });
+
+    getTypeName() => "GetPushDeviceResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushDevicesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<PushDeviceListProjection>? list;
+
+    GetPushDevicesResponse({this.list});
+    GetPushDevicesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushDeviceListProjection>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<PushDeviceListProjection>',context!)
+    });
+
+    getTypeName() => "GetPushDevicesResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetPushCampaignResponse extends ResponseBase implements IConvertible
 {
     PushCampaignDto? item;
@@ -27044,6 +23082,45 @@ class SaveLogSettingsResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class GetAgentOnboardingResponse extends ResponseBase implements IConvertible
+{
+    String? prompt;
+    String? hubUrl;
+    String? apiUrl;
+    String? mcpUrl;
+    String? docsUrl;
+    String? installationType;
+    List<AgentOnboardingSnippet>? snippets;
+
+    GetAgentOnboardingResponse({this.prompt,this.hubUrl,this.apiUrl,this.mcpUrl,this.docsUrl,this.installationType,this.snippets});
+    GetAgentOnboardingResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        prompt = json['prompt'];
+        hubUrl = json['hubUrl'];
+        apiUrl = json['apiUrl'];
+        mcpUrl = json['mcpUrl'];
+        docsUrl = json['docsUrl'];
+        installationType = json['installationType'];
+        snippets = JsonConverters.fromJson(json['snippets'],'List<AgentOnboardingSnippet>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'prompt': prompt,
+        'hubUrl': hubUrl,
+        'apiUrl': apiUrl,
+        'mcpUrl': mcpUrl,
+        'docsUrl': docsUrl,
+        'installationType': installationType,
+        'snippets': JsonConverters.toJson(snippets,'List<AgentOnboardingSnippet>',context!)
+    });
+
+    getTypeName() => "GetAgentOnboardingResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetAiToolsResponse extends ResponseBase implements IConvertible
 {
     List<AiToolManifestItem>? tools;
@@ -27083,27 +23160,6 @@ class InvokeAiToolResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "InvokeAiToolResponse";
-    TypeContext? context = _ctx;
-}
-
-class AskChatResponse extends ResponseBase implements IConvertible
-{
-    String? result;
-
-    AskChatResponse({this.result});
-    AskChatResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = json['result'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': result
-    });
-
-    getTypeName() => "AskChatResponse";
     TypeContext? context = _ctx;
 }
 
@@ -29109,6 +25165,7 @@ class InternalsTypeGen implements IConvertible, IGet
     TelnyxSmsIntegrationDto? typegen_169_TelnyxSmsIntegrationDto;
     TwilioSmsIntegrationDto? typegen_170_TwilioSmsIntegrationDto;
     VonageSmsIntegrationDto? typegen_171_VonageSmsIntegrationDto;
+    FakeSmsIntegrationDto? typegen_246_FakeSmsIntegrationDto;
     AndroidFirebasePushIntegrationDto? typegen_172_AndroidFirebasePushIntegrationDto;
     AppleApnsPushIntegrationDto? typegen_173_AppleApnsPushIntegrationDto;
     ChromePluginPushIntegrationDto? typegen_174_ChromePluginPushIntegrationDto;
@@ -29116,11 +25173,13 @@ class InternalsTypeGen implements IConvertible, IGet
     EdgeWebPushIntegrationDto? typegen_176_EdgeWebPushIntegrationDto;
     FirefoxWebPushIntegrationDto? typegen_177_FirefoxWebPushIntegrationDto;
     SafariPushIntegrationDto? typegen_178_SafariPushIntegrationDto;
+    FakePushIntegrationDto? typegen_247_FakePushIntegrationDto;
     AwsCrossAccountRoleEmailIntegrationDto? typegen_179_AwsCrossAccountRoleEmailIntegrationDto;
     AwsIamEmailIntegrationDto? typegen_180_AwsIamEmailIntegrationDto;
     MailGunEmailIntegrationDto? typegen_181_MailGunEmailIntegrationDto;
     SendGridEmailIntegrationDto? typegen_182_SendGridEmailIntegrationDto;
     SmtpEmailIntegrationDto? typegen_183_SmtpEmailIntegrationDto;
+    FakeEmailIntegrationDto? typegen_248_FakeEmailIntegrationDto;
     WebhookIntegrationDto? typegen_192_WebhookIntegrationDto;
     WebhookDestinationDto? typegen_193_WebhookDestinationDto;
     SchedulerTaskDto? typegen_194_SchedulerTaskDto;
@@ -29174,7 +25233,7 @@ class InternalsTypeGen implements IConvertible, IGet
     NoticeEntryWireDto? typegen_244_NoticeEntryWireDto;
     ConversationSnapshotEntryWireDto? typegen_245_ConversationSnapshotEntryWireDto;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_208_SetCodeIntegrationAsDefault,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_208_SetCodeIntegrationAsDefault,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -29352,6 +25411,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_169_TelnyxSmsIntegrationDto = JsonConverters.fromJson(json['typegen_169_TelnyxSmsIntegrationDto'],'TelnyxSmsIntegrationDto',context!);
         typegen_170_TwilioSmsIntegrationDto = JsonConverters.fromJson(json['typegen_170_TwilioSmsIntegrationDto'],'TwilioSmsIntegrationDto',context!);
         typegen_171_VonageSmsIntegrationDto = JsonConverters.fromJson(json['typegen_171_VonageSmsIntegrationDto'],'VonageSmsIntegrationDto',context!);
+        typegen_246_FakeSmsIntegrationDto = JsonConverters.fromJson(json['typegen_246_FakeSmsIntegrationDto'],'FakeSmsIntegrationDto',context!);
         typegen_172_AndroidFirebasePushIntegrationDto = JsonConverters.fromJson(json['typegen_172_AndroidFirebasePushIntegrationDto'],'AndroidFirebasePushIntegrationDto',context!);
         typegen_173_AppleApnsPushIntegrationDto = JsonConverters.fromJson(json['typegen_173_AppleApnsPushIntegrationDto'],'AppleApnsPushIntegrationDto',context!);
         typegen_174_ChromePluginPushIntegrationDto = JsonConverters.fromJson(json['typegen_174_ChromePluginPushIntegrationDto'],'ChromePluginPushIntegrationDto',context!);
@@ -29359,11 +25419,13 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_176_EdgeWebPushIntegrationDto = JsonConverters.fromJson(json['typegen_176_EdgeWebPushIntegrationDto'],'EdgeWebPushIntegrationDto',context!);
         typegen_177_FirefoxWebPushIntegrationDto = JsonConverters.fromJson(json['typegen_177_FirefoxWebPushIntegrationDto'],'FirefoxWebPushIntegrationDto',context!);
         typegen_178_SafariPushIntegrationDto = JsonConverters.fromJson(json['typegen_178_SafariPushIntegrationDto'],'SafariPushIntegrationDto',context!);
+        typegen_247_FakePushIntegrationDto = JsonConverters.fromJson(json['typegen_247_FakePushIntegrationDto'],'FakePushIntegrationDto',context!);
         typegen_179_AwsCrossAccountRoleEmailIntegrationDto = JsonConverters.fromJson(json['typegen_179_AwsCrossAccountRoleEmailIntegrationDto'],'AwsCrossAccountRoleEmailIntegrationDto',context!);
         typegen_180_AwsIamEmailIntegrationDto = JsonConverters.fromJson(json['typegen_180_AwsIamEmailIntegrationDto'],'AwsIamEmailIntegrationDto',context!);
         typegen_181_MailGunEmailIntegrationDto = JsonConverters.fromJson(json['typegen_181_MailGunEmailIntegrationDto'],'MailGunEmailIntegrationDto',context!);
         typegen_182_SendGridEmailIntegrationDto = JsonConverters.fromJson(json['typegen_182_SendGridEmailIntegrationDto'],'SendGridEmailIntegrationDto',context!);
         typegen_183_SmtpEmailIntegrationDto = JsonConverters.fromJson(json['typegen_183_SmtpEmailIntegrationDto'],'SmtpEmailIntegrationDto',context!);
+        typegen_248_FakeEmailIntegrationDto = JsonConverters.fromJson(json['typegen_248_FakeEmailIntegrationDto'],'FakeEmailIntegrationDto',context!);
         typegen_192_WebhookIntegrationDto = JsonConverters.fromJson(json['typegen_192_WebhookIntegrationDto'],'WebhookIntegrationDto',context!);
         typegen_193_WebhookDestinationDto = JsonConverters.fromJson(json['typegen_193_WebhookDestinationDto'],'WebhookDestinationDto',context!);
         typegen_194_SchedulerTaskDto = JsonConverters.fromJson(json['typegen_194_SchedulerTaskDto'],'SchedulerTaskDto',context!);
@@ -29594,6 +25656,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_169_TelnyxSmsIntegrationDto': JsonConverters.toJson(typegen_169_TelnyxSmsIntegrationDto,'TelnyxSmsIntegrationDto',context!),
         'typegen_170_TwilioSmsIntegrationDto': JsonConverters.toJson(typegen_170_TwilioSmsIntegrationDto,'TwilioSmsIntegrationDto',context!),
         'typegen_171_VonageSmsIntegrationDto': JsonConverters.toJson(typegen_171_VonageSmsIntegrationDto,'VonageSmsIntegrationDto',context!),
+        'typegen_246_FakeSmsIntegrationDto': JsonConverters.toJson(typegen_246_FakeSmsIntegrationDto,'FakeSmsIntegrationDto',context!),
         'typegen_172_AndroidFirebasePushIntegrationDto': JsonConverters.toJson(typegen_172_AndroidFirebasePushIntegrationDto,'AndroidFirebasePushIntegrationDto',context!),
         'typegen_173_AppleApnsPushIntegrationDto': JsonConverters.toJson(typegen_173_AppleApnsPushIntegrationDto,'AppleApnsPushIntegrationDto',context!),
         'typegen_174_ChromePluginPushIntegrationDto': JsonConverters.toJson(typegen_174_ChromePluginPushIntegrationDto,'ChromePluginPushIntegrationDto',context!),
@@ -29601,11 +25664,13 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_176_EdgeWebPushIntegrationDto': JsonConverters.toJson(typegen_176_EdgeWebPushIntegrationDto,'EdgeWebPushIntegrationDto',context!),
         'typegen_177_FirefoxWebPushIntegrationDto': JsonConverters.toJson(typegen_177_FirefoxWebPushIntegrationDto,'FirefoxWebPushIntegrationDto',context!),
         'typegen_178_SafariPushIntegrationDto': JsonConverters.toJson(typegen_178_SafariPushIntegrationDto,'SafariPushIntegrationDto',context!),
+        'typegen_247_FakePushIntegrationDto': JsonConverters.toJson(typegen_247_FakePushIntegrationDto,'FakePushIntegrationDto',context!),
         'typegen_179_AwsCrossAccountRoleEmailIntegrationDto': JsonConverters.toJson(typegen_179_AwsCrossAccountRoleEmailIntegrationDto,'AwsCrossAccountRoleEmailIntegrationDto',context!),
         'typegen_180_AwsIamEmailIntegrationDto': JsonConverters.toJson(typegen_180_AwsIamEmailIntegrationDto,'AwsIamEmailIntegrationDto',context!),
         'typegen_181_MailGunEmailIntegrationDto': JsonConverters.toJson(typegen_181_MailGunEmailIntegrationDto,'MailGunEmailIntegrationDto',context!),
         'typegen_182_SendGridEmailIntegrationDto': JsonConverters.toJson(typegen_182_SendGridEmailIntegrationDto,'SendGridEmailIntegrationDto',context!),
         'typegen_183_SmtpEmailIntegrationDto': JsonConverters.toJson(typegen_183_SmtpEmailIntegrationDto,'SmtpEmailIntegrationDto',context!),
+        'typegen_248_FakeEmailIntegrationDto': JsonConverters.toJson(typegen_248_FakeEmailIntegrationDto,'FakeEmailIntegrationDto',context!),
         'typegen_192_WebhookIntegrationDto': JsonConverters.toJson(typegen_192_WebhookIntegrationDto,'WebhookIntegrationDto',context!),
         'typegen_193_WebhookDestinationDto': JsonConverters.toJson(typegen_193_WebhookDestinationDto,'WebhookDestinationDto',context!),
         'typegen_194_SchedulerTaskDto': JsonConverters.toJson(typegen_194_SchedulerTaskDto,'SchedulerTaskDto',context!),
@@ -30842,17 +26907,25 @@ class UpdateProjectAllowedOrigins extends CodeMashRequestBase implements IReturn
     // @ApiMember(Description="The complete new list of allowed origin URLs, e.g. [\"https://app.example.com\", \"https://example.com\"]. An entry with no scheme (e.g. \"example.com\") defaults to https. Whatever is not in this list stops being allowed.")
     List<String>? origins;
 
-    UpdateProjectAllowedOrigins({this.origins});
+    /**
+    * Optional. true removes the project's own Admin Portal origin (pr_{projectId}.{admin host}) on purpose. Without it, a list that drops that origin is rejected with CM-ERRORS-PROJECTS-037, because the Norbix-generated end-user portal could no longer call the project's API.
+    */
+    // @ApiMember(Description="Optional. true removes the project's own Admin Portal origin (pr_{projectId}.{admin host}) on purpose. Without it, a list that drops that origin is rejected with CM-ERRORS-PROJECTS-037, because the Norbix-generated end-user portal could no longer call the project's API.")
+    bool? removeAdminPortalOrigin;
+
+    UpdateProjectAllowedOrigins({this.origins,this.removeAdminPortalOrigin});
     UpdateProjectAllowedOrigins.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         origins = JsonConverters.fromJson(json['origins'],'List<String>',context!);
+        removeAdminPortalOrigin = json['removeAdminPortalOrigin'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'origins': JsonConverters.toJson(origins,'List<String>',context!)
+        'origins': JsonConverters.toJson(origins,'List<String>',context!),
+        'removeAdminPortalOrigin': removeAdminPortalOrigin
     });
 
     createResponse() => EmptyResponse();
@@ -32180,1036 +28253,156 @@ class GetInstallationLicenseStatus extends RequestBase implements IReturn<GetIns
     TypeContext? context = _ctx;
 }
 
-class AccountCreated implements IConvertible, IPost
+// @Route("/{version}/account/ai/service-users", "POST")
+class CreateAiServiceUserRequest extends RequestBase implements IReturn<CreateAiServiceUserResponse>, IConvertible, IPost
 {
-    EmailAddress? email;
-    DisplayName? displayName;
-    AccountId? accountId;
-    UtcDateTime? createdOn;
+    /**
+    * A name people recognise, e.g. "Claude Code on my laptop".
+    */
+    // @ApiMember(Description="A name people recognise, e.g. \"Claude Code on my laptop\".", IsRequired=true)
+    String name = "";
 
-    AccountCreated({this.email,this.displayName,this.accountId,this.createdOn});
-    AccountCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    /**
+    * Reach (account | project + projectId), rights (read | admin), envs (["TEST"] or ["TEST","PROD"]).
+    */
+    // @ApiMember(Description="Reach (account | project + projectId), rights (read | admin), envs ([\"TEST\"] or [\"TEST\",\"PROD\"]).", IsRequired=true)
+    AiScopeDto? scope;
+
+    CreateAiServiceUserRequest({this.name="",this.scope});
+    CreateAiServiceUserRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        email = JsonConverters.fromJson(json['email'],'EmailAddress',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        accountId = JsonConverters.fromJson(json['accountId'],'AccountId',context!);
-        createdOn = JsonConverters.fromJson(json['createdOn'],'UtcDateTime',context!);
+        super.fromMap(json);
+        name = json['name'] ?? "";
+        scope = JsonConverters.fromJson(json['scope'],'AiScopeDto',context!);
         return this;
     }
 
-    Map<String, dynamic> toJson() => {
-        'email': JsonConverters.toJson(email,'EmailAddress',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'accountId': JsonConverters.toJson(accountId,'AccountId',context!),
-        'createdOn': JsonConverters.toJson(createdOn,'UtcDateTime',context!)
-    };
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'name': name,
+        'scope': JsonConverters.toJson(scope,'AiScopeDto',context!)
+    });
 
-    getTypeName() => "AccountCreated";
+    createResponse() => CreateAiServiceUserResponse();
+    getResponseTypeName() => "CreateAiServiceUserResponse";
+    getTypeName() => "CreateAiServiceUserRequest";
     TypeContext? context = _ctx;
 }
 
-class AccountProfileUpdated implements IConvertible, IPost
+// @Route("/{version}/account/ai/service-users", "GET")
+class ListAiServiceUsersRequest extends RequestBase implements IReturn<ListAiServiceUsersResponse>, IConvertible, IGet
 {
-    DisplayName? displayName;
-    EmailAddress? billingEmail;
-    EmailAddress? operationsEmail;
-    EmailAddress? securityEmail;
-
-    AccountProfileUpdated({this.displayName,this.billingEmail,this.operationsEmail,this.securityEmail});
-    AccountProfileUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
+    ListAiServiceUsersRequest();
+    ListAiServiceUsersRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
     fromMap(Map<String, dynamic> json) {
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        billingEmail = JsonConverters.fromJson(json['billingEmail'],'EmailAddress',context!);
-        operationsEmail = JsonConverters.fromJson(json['operationsEmail'],'EmailAddress',context!);
-        securityEmail = JsonConverters.fromJson(json['securityEmail'],'EmailAddress',context!);
+        super.fromMap(json);
         return this;
     }
 
-    Map<String, dynamic> toJson() => {
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'billingEmail': JsonConverters.toJson(billingEmail,'EmailAddress',context!),
-        'operationsEmail': JsonConverters.toJson(operationsEmail,'EmailAddress',context!),
-        'securityEmail': JsonConverters.toJson(securityEmail,'EmailAddress',context!)
-    };
-
-    getTypeName() => "AccountProfileUpdated";
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => ListAiServiceUsersResponse();
+    getResponseTypeName() => "ListAiServiceUsersResponse";
+    getTypeName() => "ListAiServiceUsersRequest";
     TypeContext? context = _ctx;
 }
 
-class AccountSetAsActive implements IConvertible, IPost
+// @Route("/{version}/account/ai/service-users/{Id}/keys", "POST")
+class RotateAiServiceUserKeyRequest extends RequestBase implements IReturn<RotateAiServiceUserKeyResponse>, IConvertible, IPost
 {
-    AccountSetAsActive();
-    AccountSetAsActive.fromJson(Map<String, dynamic> json) : super();
+    /**
+    * The service user id (aisu_…).
+    */
+    // @ApiMember(Description="The service user id (aisu_…).", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional key id (aisk_…) to revoke in the same change — a rotation.
+    */
+    // @ApiMember(Description="Optional key id (aisk_…) to revoke in the same change — a rotation.")
+    String? revokeKeyId;
+
+    RotateAiServiceUserKeyRequest({this.id="",this.revokeKeyId});
+    RotateAiServiceUserKeyRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        revokeKeyId = json['revokeKeyId'];
         return this;
     }
 
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "AccountSetAsActive";
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'revokeKeyId': revokeKeyId
+    });
+
+    createResponse() => RotateAiServiceUserKeyResponse();
+    getResponseTypeName() => "RotateAiServiceUserKeyResponse";
+    getTypeName() => "RotateAiServiceUserKeyRequest";
     TypeContext? context = _ctx;
 }
 
-class AccountValidationTokenIssued implements IConvertible, IPost
+// @Route("/{version}/account/ai/service-users/{Id}/keys/{KeyId}", "DELETE")
+class RevokeAiServiceUserKeyRequest extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
 {
-    ExpirationToken? expiration;
+    /**
+    * The service user id (aisu_…).
+    */
+    // @ApiMember(Description="The service user id (aisu_…).", IsRequired=true)
+    String id = "";
 
-    AccountValidationTokenIssued({this.expiration});
-    AccountValidationTokenIssued.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    /**
+    * The key id (aisk_…) to revoke.
+    */
+    // @ApiMember(Description="The key id (aisk_…) to revoke.", IsRequired=true)
+    String keyId = "";
+
+    RevokeAiServiceUserKeyRequest({this.id="",this.keyId=""});
+    RevokeAiServiceUserKeyRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        expiration = JsonConverters.fromJson(json['expiration'],'ExpirationToken',context!);
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        keyId = json['keyId'] ?? "";
         return this;
     }
 
-    Map<String, dynamic> toJson() => {
-        'expiration': JsonConverters.toJson(expiration,'ExpirationToken',context!)
-    };
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'keyId': keyId
+    });
 
-    getTypeName() => "AccountValidationTokenIssued";
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "RevokeAiServiceUserKeyRequest";
     TypeContext? context = _ctx;
 }
 
-class AccountVerified implements IConvertible, IPost
+// @Route("/{version}/account/ai/service-users/{Id}", "DELETE")
+class DeleteAiServiceUserRequest extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
 {
-    AccountVerified();
-    AccountVerified.fromJson(Map<String, dynamic> json) : super();
+    /**
+    * The service user id (aisu_…).
+    */
+    // @ApiMember(Description="The service user id (aisu_…).", IsRequired=true)
+    String id = "";
+
+    DeleteAiServiceUserRequest({this.id=""});
+    DeleteAiServiceUserRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
         return this;
     }
 
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "AccountVerified";
-    TypeContext? context = _ctx;
-}
-
-class AccountBlocked implements IConvertible, IPost
-{
-    AccountBlocked();
-    AccountBlocked.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "AccountBlocked";
-    TypeContext? context = _ctx;
-}
-
-class AccountSetAsInactive implements IConvertible, IPost
-{
-    AccountSetAsInactive();
-    AccountSetAsInactive.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "AccountSetAsInactive";
-    TypeContext? context = _ctx;
-}
-
-class AccountUnregistered implements IConvertible, IPost
-{
-    AccountUnregistered();
-    AccountUnregistered.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "AccountUnregistered";
-    TypeContext? context = _ctx;
-}
-
-class LicenseCreated implements IConvertible, IPost
-{
-    CodeMashLicense? license;
-
-    LicenseCreated({this.license});
-    LicenseCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        license = JsonConverters.fromJson(json['license'],'CodeMashLicense',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'license': JsonConverters.toJson(license,'CodeMashLicense',context!)
-    };
-
-    getTypeName() => "LicenseCreated";
-    TypeContext? context = _ctx;
-}
-
-class ProjectCreated implements IConvertible, IPost
-{
-    ProjectId? id;
-    ProjectName? name;
-    IntegrationId? databaseIntegrationId;
-    ProjectRegion? primaryRegion;
-    List<ProjectRegion>? additionalRegions;
-    String? description;
-    bool? isProvisioning;
-
-    ProjectCreated({this.id,this.name,this.databaseIntegrationId,this.primaryRegion,this.additionalRegions,this.description,this.isProvisioning});
-    ProjectCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'ProjectId',context!);
-        name = JsonConverters.fromJson(json['name'],'ProjectName',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        primaryRegion = JsonConverters.fromJson(json['primaryRegion'],'ProjectRegion',context!);
-        additionalRegions = JsonConverters.fromJson(json['additionalRegions'],'List<ProjectRegion>',context!);
-        description = json['description'];
-        isProvisioning = json['isProvisioning'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'ProjectId',context!),
-        'name': JsonConverters.toJson(name,'ProjectName',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'primaryRegion': JsonConverters.toJson(primaryRegion,'ProjectRegion',context!),
-        'additionalRegions': JsonConverters.toJson(additionalRegions,'List<ProjectRegion>',context!),
-        'description': description,
-        'isProvisioning': isProvisioning
-    };
-
-    getTypeName() => "ProjectCreated";
-    TypeContext? context = _ctx;
-}
-
-class ProjectActivated implements IConvertible, IPost
-{
-    ProjectActivated();
-    ProjectActivated.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "ProjectActivated";
-    TypeContext? context = _ctx;
-}
-
-class ProjectSuspendedByLicense implements IConvertible, IPost
-{
-    ProjectSuspendedByLicense();
-    ProjectSuspendedByLicense.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "ProjectSuspendedByLicense";
-    TypeContext? context = _ctx;
-}
-
-class ProjectResumedFromLicenseSuspension implements IConvertible, IPost
-{
-    ProjectResumedFromLicenseSuspension();
-    ProjectResumedFromLicenseSuspension.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "ProjectResumedFromLicenseSuspension";
-    TypeContext? context = _ctx;
-}
-
-class ProjectDisabled implements IConvertible, IPost
-{
-    ProjectDisabled();
-    ProjectDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "ProjectDisabled";
-    TypeContext? context = _ctx;
-}
-
-class ProjectDeleted implements IConvertible, IPost
-{
-    ProjectDeleted();
-    ProjectDeleted.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "ProjectDeleted";
-    TypeContext? context = _ctx;
-}
-
-class ProjectNameChanged implements IConvertible, IPost
-{
-    ProjectName? projectName;
-
-    ProjectNameChanged({this.projectName});
-    ProjectNameChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectName = JsonConverters.fromJson(json['projectName'],'ProjectName',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectName': JsonConverters.toJson(projectName,'ProjectName',context!)
-    };
-
-    getTypeName() => "ProjectNameChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectDescriptionChanged implements IConvertible, IPost
-{
-    String? description;
-
-    ProjectDescriptionChanged({this.description});
-    ProjectDescriptionChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        description = json['description'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'description': description
-    };
-
-    getTypeName() => "ProjectDescriptionChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectMarketingUrlChanged implements IConvertible, IPost
-{
-    DomainUrl? url;
-
-    ProjectMarketingUrlChanged({this.url});
-    ProjectMarketingUrlChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        url = JsonConverters.fromJson(json['url'],'DomainUrl',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'url': JsonConverters.toJson(url,'DomainUrl',context!)
-    };
-
-    getTypeName() => "ProjectMarketingUrlChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectAdminUrlChanged implements IConvertible, IPost
-{
-    DomainUrl? url;
-
-    ProjectAdminUrlChanged({this.url});
-    ProjectAdminUrlChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        url = JsonConverters.fromJson(json['url'],'DomainUrl',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'url': JsonConverters.toJson(url,'DomainUrl',context!)
-    };
-
-    getTypeName() => "ProjectAdminUrlChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectLegalDocumentsChanged implements IConvertible, IPost
-{
-    ProjectLegalDocuments? documents;
-
-    ProjectLegalDocumentsChanged({this.documents});
-    ProjectLegalDocumentsChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        documents = JsonConverters.fromJson(json['documents'],'ProjectLegalDocuments',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'documents': JsonConverters.toJson(documents,'ProjectLegalDocuments',context!)
-    };
-
-    getTypeName() => "ProjectLegalDocumentsChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectExposeLegalToAdminPortalChanged implements IConvertible, IPost
-{
-    bool? exposed;
-
-    ProjectExposeLegalToAdminPortalChanged({this.exposed});
-    ProjectExposeLegalToAdminPortalChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        exposed = json['exposed'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'exposed': exposed
-    };
-
-    getTypeName() => "ProjectExposeLegalToAdminPortalChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectAdminPortalServiceUserAssigned implements IConvertible, IPost
-{
-    AuthId? serviceUserId;
-
-    ProjectAdminPortalServiceUserAssigned({this.serviceUserId});
-    ProjectAdminPortalServiceUserAssigned.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        serviceUserId = JsonConverters.fromJson(json['serviceUserId'],'AuthId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'serviceUserId': JsonConverters.toJson(serviceUserId,'AuthId',context!)
-    };
-
-    getTypeName() => "ProjectAdminPortalServiceUserAssigned";
-    TypeContext? context = _ctx;
-}
-
-class ProjectAllowedOriginsChanged implements IConvertible, IPost
-{
-    List<DomainUrl>? origins;
-
-    ProjectAllowedOriginsChanged({this.origins});
-    ProjectAllowedOriginsChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        origins = JsonConverters.fromJson(json['origins'],'List<DomainUrl>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'origins': JsonConverters.toJson(origins,'List<DomainUrl>',context!)
-    };
-
-    getTypeName() => "ProjectAllowedOriginsChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectEnvironmentCreated implements IConvertible, IPost
-{
-    Env? env;
-    Map<String,int?> ranks = {};
-
-    ProjectEnvironmentCreated({this.env,this.ranks=const {}});
-    ProjectEnvironmentCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        ranks = JsonConverters.fromJson(json['ranks'],'Map<String,int?>',context!) ?? {};
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'ranks': JsonConverters.toJson(ranks,'Map<String,int?>',context!)
-    };
-
-    getTypeName() => "ProjectEnvironmentCreated";
-    TypeContext? context = _ctx;
-}
-
-class ProjectEnvironmentDeleted implements IConvertible, IPost
-{
-    Env? env;
-    Map<String,int?> ranks = {};
-
-    ProjectEnvironmentDeleted({this.env,this.ranks=const {}});
-    ProjectEnvironmentDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        ranks = JsonConverters.fromJson(json['ranks'],'Map<String,int?>',context!) ?? {};
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'ranks': JsonConverters.toJson(ranks,'Map<String,int?>',context!)
-    };
-
-    getTypeName() => "ProjectEnvironmentDeleted";
-    TypeContext? context = _ctx;
-}
-
-class ProjectEnvironmentRanksChanged implements IConvertible, IPost
-{
-    Map<String,int?> ranks = {};
-
-    ProjectEnvironmentRanksChanged({this.ranks=const {}});
-    ProjectEnvironmentRanksChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        ranks = JsonConverters.fromJson(json['ranks'],'Map<String,int?>',context!) ?? {};
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'ranks': JsonConverters.toJson(ranks,'Map<String,int?>',context!)
-    };
-
-    getTypeName() => "ProjectEnvironmentRanksChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectDefaultLanguageChanged implements IConvertible, IPost
-{
-    Language? language;
-
-    ProjectDefaultLanguageChanged({this.language});
-    ProjectDefaultLanguageChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        language = JsonConverters.fromJson(json['language'],'Language',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'language': JsonConverters.toJson(language,'Language',context!)
-    };
-
-    getTypeName() => "ProjectDefaultLanguageChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectLanguagesChanged implements IConvertible, IPost
-{
-    List<Language> languages = [];
-
-    ProjectLanguagesChanged({this.languages=const []});
-    ProjectLanguagesChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        languages = JsonConverters.fromJson(json['languages'],'List<Language>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'languages': JsonConverters.toJson(languages,'List<Language>',context!)
-    };
-
-    getTypeName() => "ProjectLanguagesChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectLogoChanged implements IConvertible, IPost
-{
-    ProjectLogo? logo;
-
-    ProjectLogoChanged({this.logo});
-    ProjectLogoChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        logo = JsonConverters.fromJson(json['logo'],'ProjectLogo',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'logo': JsonConverters.toJson(logo,'ProjectLogo',context!)
-    };
-
-    getTypeName() => "ProjectLogoChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectIconChanged implements IConvertible, IPost
-{
-    ProjectIcon? icon;
-
-    ProjectIconChanged({this.icon});
-    ProjectIconChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        icon = JsonConverters.fromJson(json['icon'],'ProjectIcon',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'icon': JsonConverters.toJson(icon,'ProjectIcon',context!)
-    };
-
-    getTypeName() => "ProjectIconChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectMainColorChanged implements IConvertible, IPost
-{
-    BrandColor? color;
-
-    ProjectMainColorChanged({this.color});
-    ProjectMainColorChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        color = JsonConverters.fromJson(json['color'],'BrandColor',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'color': JsonConverters.toJson(color,'BrandColor',context!)
-    };
-
-    getTypeName() => "ProjectMainColorChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectAccentColorChanged implements IConvertible, IPost
-{
-    BrandColor? color;
-
-    ProjectAccentColorChanged({this.color});
-    ProjectAccentColorChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        color = JsonConverters.fromJson(json['color'],'BrandColor',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'color': JsonConverters.toJson(color,'BrandColor',context!)
-    };
-
-    getTypeName() => "ProjectAccentColorChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectRegionsChanged implements IConvertible, IPost
-{
-    ProjectRegion? primaryRegion;
-    List<ProjectRegion>? additionalRegions;
-
-    ProjectRegionsChanged({this.primaryRegion,this.additionalRegions});
-    ProjectRegionsChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        primaryRegion = JsonConverters.fromJson(json['primaryRegion'],'ProjectRegion',context!);
-        additionalRegions = JsonConverters.fromJson(json['additionalRegions'],'List<ProjectRegion>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'primaryRegion': JsonConverters.toJson(primaryRegion,'ProjectRegion',context!),
-        'additionalRegions': JsonConverters.toJson(additionalRegions,'List<ProjectRegion>',context!)
-    };
-
-    getTypeName() => "ProjectRegionsChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectCommunicationSet implements IConvertible, IPost
-{
-    ProjectCommunication? projectCommunication;
-
-    ProjectCommunicationSet({this.projectCommunication});
-    ProjectCommunicationSet.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectCommunication = JsonConverters.fromJson(json['projectCommunication'],'ProjectCommunication',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectCommunication': JsonConverters.toJson(projectCommunication,'ProjectCommunication',context!)
-    };
-
-    getTypeName() => "ProjectCommunicationSet";
-    TypeContext? context = _ctx;
-}
-
-class ProjectTimeZoneChanged implements IConvertible, IPost
-{
-    TimeZone? timeZone;
-
-    ProjectTimeZoneChanged({this.timeZone});
-    ProjectTimeZoneChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        timeZone = JsonConverters.fromJson(json['timeZone'],'TimeZone',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'timeZone': JsonConverters.toJson(timeZone,'TimeZone',context!)
-    };
-
-    getTypeName() => "ProjectTimeZoneChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectPaymentZonesChanged implements IConvertible, IPost
-{
-    List<TimeZone>? paymentZones;
-
-    ProjectPaymentZonesChanged({this.paymentZones});
-    ProjectPaymentZonesChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        paymentZones = JsonConverters.fromJson(json['paymentZones'],'List<TimeZone>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'paymentZones': JsonConverters.toJson(paymentZones,'List<TimeZone>',context!)
-    };
-
-    getTypeName() => "ProjectPaymentZonesChanged";
-    TypeContext? context = _ctx;
-}
-
-class ProjectCommunicationGroupSaved implements IConvertible, IPost
-{
-    GroupDefinition? group;
-    CommunicationChannel? channel;
-    CommunicationChannel? originChannel;
-
-    ProjectCommunicationGroupSaved({this.group,this.channel,this.originChannel});
-    ProjectCommunicationGroupSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        group = JsonConverters.fromJson(json['group'],'GroupDefinition',context!);
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        originChannel = JsonConverters.fromJson(json['originChannel'],'CommunicationChannel',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'group': JsonConverters.toJson(group,'GroupDefinition',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'originChannel': JsonConverters.toJson(originChannel,'CommunicationChannel',context!)
-    };
-
-    getTypeName() => "ProjectCommunicationGroupSaved";
-    TypeContext? context = _ctx;
-}
-
-class ProjectCommunicationTagFromGroupDeleted implements IConvertible, IPost
-{
-    Tag? groupTag;
-    Tag? removedTag;
-
-    ProjectCommunicationTagFromGroupDeleted({this.groupTag,this.removedTag});
-    ProjectCommunicationTagFromGroupDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        groupTag = JsonConverters.fromJson(json['groupTag'],'Tag',context!);
-        removedTag = JsonConverters.fromJson(json['removedTag'],'Tag',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'groupTag': JsonConverters.toJson(groupTag,'Tag',context!),
-        'removedTag': JsonConverters.toJson(removedTag,'Tag',context!)
-    };
-
-    getTypeName() => "ProjectCommunicationTagFromGroupDeleted";
-    TypeContext? context = _ctx;
-}
-
-class ProjectCommunicationGroupDeleted implements IConvertible, IPost
-{
-    Tag? groupTag;
-
-    ProjectCommunicationGroupDeleted({this.groupTag});
-    ProjectCommunicationGroupDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        groupTag = JsonConverters.fromJson(json['groupTag'],'Tag',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'groupTag': JsonConverters.toJson(groupTag,'Tag',context!)
-    };
-
-    getTypeName() => "ProjectCommunicationGroupDeleted";
-    TypeContext? context = _ctx;
-}
-
-class ProjectCommunicationTagSaved implements IConvertible, IPost
-{
-    TagDefinition? tag;
-    Tag? groupTag;
-    CommunicationChannel? channel;
-
-    ProjectCommunicationTagSaved({this.tag,this.groupTag,this.channel});
-    ProjectCommunicationTagSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        tag = JsonConverters.fromJson(json['tag'],'TagDefinition',context!);
-        groupTag = JsonConverters.fromJson(json['groupTag'],'Tag',context!);
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'tag': JsonConverters.toJson(tag,'TagDefinition',context!),
-        'groupTag': JsonConverters.toJson(groupTag,'Tag',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!)
-    };
-
-    getTypeName() => "ProjectCommunicationTagSaved";
-    TypeContext? context = _ctx;
-}
-
-class ProjectCommunicationTagDeleted implements IConvertible, IPost
-{
-    Tag? tag;
-
-    ProjectCommunicationTagDeleted({this.tag});
-    ProjectCommunicationTagDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        tag = JsonConverters.fromJson(json['tag'],'Tag',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'tag': JsonConverters.toJson(tag,'Tag',context!)
-    };
-
-    getTypeName() => "ProjectCommunicationTagDeleted";
-    TypeContext? context = _ctx;
-}
-
-class CustomerCreated implements IConvertible, IPost
-{
-    PaymentCustomerRef? paymentCustomerRef;
-
-    CustomerCreated({this.paymentCustomerRef});
-    CustomerCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        paymentCustomerRef = JsonConverters.fromJson(json['paymentCustomerRef'],'PaymentCustomerRef',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'paymentCustomerRef': JsonConverters.toJson(paymentCustomerRef,'PaymentCustomerRef',context!)
-    };
-
-    getTypeName() => "CustomerCreated";
-    TypeContext? context = _ctx;
-}
-
-class SubscriptionChanged implements IConvertible, IPost
-{
-    CodeMashManagedServiceSubscription? subscription;
-
-    SubscriptionChanged({this.subscription});
-    SubscriptionChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        subscription = JsonConverters.fromJson(json['subscription'],'CodeMashManagedServiceSubscription',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'subscription': JsonConverters.toJson(subscription,'CodeMashManagedServiceSubscription',context!)
-    };
-
-    getTypeName() => "SubscriptionChanged";
-    TypeContext? context = _ctx;
-}
-
-class SubscriptionCanceled implements IConvertible, IPost
-{
-    PaymentCustomerRef? paymentCustomerRef;
-    String subscriptionId = "";
-
-    SubscriptionCanceled({this.paymentCustomerRef,this.subscriptionId=""});
-    SubscriptionCanceled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        paymentCustomerRef = JsonConverters.fromJson(json['paymentCustomerRef'],'PaymentCustomerRef',context!);
-        subscriptionId = json['subscriptionId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'paymentCustomerRef': JsonConverters.toJson(paymentCustomerRef,'PaymentCustomerRef',context!),
-        'subscriptionId': subscriptionId
-    };
-
-    getTypeName() => "SubscriptionCanceled";
-    TypeContext? context = _ctx;
-}
-
-class AccountTeamPolicyCreated implements IConvertible, IPost
-{
-    MembershipPolicy? policy;
-
-    AccountTeamPolicyCreated({this.policy});
-    AccountTeamPolicyCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        policy = JsonConverters.fromJson(json['policy'],'MembershipPolicy',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'policy': JsonConverters.toJson(policy,'MembershipPolicy',context!)
-    };
-
-    getTypeName() => "AccountTeamPolicyCreated";
-    TypeContext? context = _ctx;
-}
-
-class AccountTeamPolicyUpdated implements IConvertible, IPost
-{
-    MembershipPolicy? policy;
-
-    AccountTeamPolicyUpdated({this.policy});
-    AccountTeamPolicyUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        policy = JsonConverters.fromJson(json['policy'],'MembershipPolicy',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'policy': JsonConverters.toJson(policy,'MembershipPolicy',context!)
-    };
-
-    getTypeName() => "AccountTeamPolicyUpdated";
-    TypeContext? context = _ctx;
-}
-
-class AccountTeamPolicyDeleted implements IConvertible, IPost
-{
-    PolicyId? policyId;
-
-    AccountTeamPolicyDeleted({this.policyId});
-    AccountTeamPolicyDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        policyId = JsonConverters.fromJson(json['policyId'],'PolicyId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'policyId': JsonConverters.toJson(policyId,'PolicyId',context!)
-    };
-
-    getTypeName() => "AccountTeamPolicyDeleted";
-    TypeContext? context = _ctx;
-}
-
-class AccountTeamRoleCreated implements IConvertible, IPost
-{
-    MembershipRole? role;
-
-    AccountTeamRoleCreated({this.role});
-    AccountTeamRoleCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        role = JsonConverters.fromJson(json['role'],'MembershipRole',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'role': JsonConverters.toJson(role,'MembershipRole',context!)
-    };
-
-    getTypeName() => "AccountTeamRoleCreated";
-    TypeContext? context = _ctx;
-}
-
-class AccountTeamRoleUpdated implements IConvertible, IPost
-{
-    MembershipRole? role;
-
-    AccountTeamRoleUpdated({this.role});
-    AccountTeamRoleUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        role = JsonConverters.fromJson(json['role'],'MembershipRole',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'role': JsonConverters.toJson(role,'MembershipRole',context!)
-    };
-
-    getTypeName() => "AccountTeamRoleUpdated";
-    TypeContext? context = _ctx;
-}
-
-class AccountTeamRoleDeleted implements IConvertible, IPost
-{
-    RoleId? roleId;
-
-    AccountTeamRoleDeleted({this.roleId});
-    AccountTeamRoleDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        roleId = JsonConverters.fromJson(json['roleId'],'RoleId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'roleId': JsonConverters.toJson(roleId,'RoleId',context!)
-    };
-
-    getTypeName() => "AccountTeamRoleDeleted";
-    TypeContext? context = _ctx;
-}
-
-class AtlasUsageRecorded implements IConvertible, IPost
-{
-    AtlasUsageRecord? record;
-
-    AtlasUsageRecorded({this.record});
-    AtlasUsageRecorded.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        record = JsonConverters.fromJson(json['record'],'AtlasUsageRecord',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'record': JsonConverters.toJson(record,'AtlasUsageRecord',context!)
-    };
-
-    getTypeName() => "AtlasUsageRecorded";
-    TypeContext? context = _ctx;
-}
-
-class UsageBillingIngestionFailed implements IConvertible, IPost
-{
-    UsageIngestionFailure? failure;
-
-    UsageBillingIngestionFailed({this.failure});
-    UsageBillingIngestionFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        failure = JsonConverters.fromJson(json['failure'],'UsageIngestionFailure',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'failure': JsonConverters.toJson(failure,'UsageIngestionFailure',context!)
-    };
-
-    getTypeName() => "UsageBillingIngestionFailed";
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteAiServiceUserRequest";
     TypeContext? context = _ctx;
 }
 
@@ -34472,458 +29665,6 @@ class UpdateAuthenticationSettings extends CodeMashRequestBase implements IRetur
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "UpdateAuthenticationSettings";
-    TypeContext? context = _ctx;
-}
-
-class MembershipIntegrationSaved implements IConvertible, IPost
-{
-    MembershipIntegration? integration;
-
-    MembershipIntegrationSaved({this.integration});
-    MembershipIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'MembershipIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'MembershipIntegration',context!)
-    };
-
-    getTypeName() => "MembershipIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class MembershipIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    MembershipIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    MembershipIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MembershipIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class MembershipIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    MembershipIntegrationRenamed({this.id,this.name,this.env});
-    MembershipIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MembershipIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class MembershipIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MembershipIntegrationDeleted({this.id,this.env});
-    MembershipIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MembershipIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class MembershipIntegrationSetAsDefault implements IConvertible, IPost
-{
-    IntegrationId? id;
-
-    MembershipIntegrationSetAsDefault({this.id});
-    MembershipIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "MembershipIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class MembershipIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MembershipIntegrationEnabled({this.id,this.env});
-    MembershipIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MembershipIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class MembershipIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MembershipIntegrationDisabled({this.id,this.env});
-    MembershipIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MembershipIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class MembershipEstablished implements IConvertible, IPost
-{
-    MembershipEstablished();
-    MembershipEstablished.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "MembershipEstablished";
-    TypeContext? context = _ctx;
-}
-
-class MembershipEnabled implements IConvertible, IPost
-{
-    MembershipEnabled();
-    MembershipEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "MembershipEnabled";
-    TypeContext? context = _ctx;
-}
-
-class MembershipDisabled implements IConvertible, IPost
-{
-    MembershipDisabled();
-    MembershipDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "MembershipDisabled";
-    TypeContext? context = _ctx;
-}
-
-class SetUserRegistersAsRole implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    RoleName? role;
-
-    SetUserRegistersAsRole({this.projectId,this.role});
-    SetUserRegistersAsRole.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        role = JsonConverters.fromJson(json['role'],'RoleName',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'role': JsonConverters.toJson(role,'RoleName',context!)
-    };
-
-    getTypeName() => "SetUserRegistersAsRole";
-    TypeContext? context = _ctx;
-}
-
-class PolicyCreated implements IConvertible, IPost
-{
-    MembershipPolicy? policy;
-
-    PolicyCreated({this.policy});
-    PolicyCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        policy = JsonConverters.fromJson(json['policy'],'MembershipPolicy',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'policy': JsonConverters.toJson(policy,'MembershipPolicy',context!)
-    };
-
-    getTypeName() => "PolicyCreated";
-    TypeContext? context = _ctx;
-}
-
-class PolicyUpdated implements IConvertible, IPost
-{
-    MembershipPolicy? policy;
-
-    PolicyUpdated({this.policy});
-    PolicyUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        policy = JsonConverters.fromJson(json['policy'],'MembershipPolicy',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'policy': JsonConverters.toJson(policy,'MembershipPolicy',context!)
-    };
-
-    getTypeName() => "PolicyUpdated";
-    TypeContext? context = _ctx;
-}
-
-class PolicyDeleted implements IConvertible, IPost
-{
-    PolicyId? policyId;
-
-    PolicyDeleted({this.policyId});
-    PolicyDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        policyId = JsonConverters.fromJson(json['policyId'],'PolicyId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'policyId': JsonConverters.toJson(policyId,'PolicyId',context!)
-    };
-
-    getTypeName() => "PolicyDeleted";
-    TypeContext? context = _ctx;
-}
-
-class RoleCreated implements IConvertible, IPost
-{
-    MembershipRole? role;
-
-    RoleCreated({this.role});
-    RoleCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        role = JsonConverters.fromJson(json['role'],'MembershipRole',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'role': JsonConverters.toJson(role,'MembershipRole',context!)
-    };
-
-    getTypeName() => "RoleCreated";
-    TypeContext? context = _ctx;
-}
-
-class RoleUpdated implements IConvertible, IPost
-{
-    MembershipRole? role;
-
-    RoleUpdated({this.role});
-    RoleUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        role = JsonConverters.fromJson(json['role'],'MembershipRole',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'role': JsonConverters.toJson(role,'MembershipRole',context!)
-    };
-
-    getTypeName() => "RoleUpdated";
-    TypeContext? context = _ctx;
-}
-
-class RoleDeleted implements IConvertible, IPost
-{
-    RoleId? roleId;
-
-    RoleDeleted({this.roleId});
-    RoleDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        roleId = JsonConverters.fromJson(json['roleId'],'RoleId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'roleId': JsonConverters.toJson(roleId,'RoleId',context!)
-    };
-
-    getTypeName() => "RoleDeleted";
-    TypeContext? context = _ctx;
-}
-
-class MembershipTriggerSaved implements IConvertible, IPost
-{
-    MembershipTrigger? trigger;
-
-    MembershipTriggerSaved({this.trigger});
-    MembershipTriggerSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'MembershipTrigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'MembershipTrigger',context!)
-    };
-
-    getTypeName() => "MembershipTriggerSaved";
-    TypeContext? context = _ctx;
-}
-
-class MembershipTriggerMirrored implements IConvertible, IPost
-{
-    Trigger? trigger;
-
-    MembershipTriggerMirrored({this.trigger});
-    MembershipTriggerMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'Trigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'Trigger',context!)
-    };
-
-    getTypeName() => "MembershipTriggerMirrored";
-    TypeContext? context = _ctx;
-}
-
-class MembershipTriggerEnabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    MembershipTriggerEnabled({this.env});
-    MembershipTriggerEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "MembershipTriggerEnabled";
-    TypeContext? context = _ctx;
-}
-
-class MembershipTriggerDisabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    MembershipTriggerDisabled({this.env});
-    MembershipTriggerDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "MembershipTriggerDisabled";
-    TypeContext? context = _ctx;
-}
-
-class MembershipTriggerDeleted extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    MembershipTriggerDeleted({this.env});
-    MembershipTriggerDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "MembershipTriggerDeleted";
     TypeContext? context = _ctx;
 }
 
@@ -37896,816 +32637,6 @@ class TestDatabaseAggregateRequest extends CodeMashRequestBase implements IRetur
     TypeContext? context = _ctx;
 }
 
-class MongoDbAggregateCreated implements IConvertible, IPost
-{
-    MongoDbAggregate? aggregate;
-
-    MongoDbAggregateCreated({this.aggregate});
-    MongoDbAggregateCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        aggregate = JsonConverters.fromJson(json['aggregate'],'MongoDbAggregate',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'aggregate': JsonConverters.toJson(aggregate,'MongoDbAggregate',context!)
-    };
-
-    getTypeName() => "MongoDbAggregateCreated";
-    TypeContext? context = _ctx;
-}
-
-class MongoDbAggregateUpdated implements IConvertible, IPost
-{
-    MongoDbAggregate? aggregate;
-
-    MongoDbAggregateUpdated({this.aggregate});
-    MongoDbAggregateUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        aggregate = JsonConverters.fromJson(json['aggregate'],'MongoDbAggregate',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'aggregate': JsonConverters.toJson(aggregate,'MongoDbAggregate',context!)
-    };
-
-    getTypeName() => "MongoDbAggregateUpdated";
-    TypeContext? context = _ctx;
-}
-
-class MongoDbAggregateDeleted implements IConvertible, IPost
-{
-    SchemaId? schemaId;
-    MongoDbAggregateId? id;
-
-    MongoDbAggregateDeleted({this.schemaId,this.id});
-    MongoDbAggregateDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        schemaId = JsonConverters.fromJson(json['schemaId'],'SchemaId',context!);
-        id = JsonConverters.fromJson(json['id'],'MongoDbAggregateId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'schemaId': JsonConverters.toJson(schemaId,'SchemaId',context!),
-        'id': JsonConverters.toJson(id,'MongoDbAggregateId',context!)
-    };
-
-    getTypeName() => "MongoDbAggregateDeleted";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseEstablished implements IConvertible, IPost
-{
-    DatabaseEstablished();
-    DatabaseEstablished.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "DatabaseEstablished";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseEnabled implements IConvertible, IPost
-{
-    DatabaseEnabled();
-    DatabaseEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "DatabaseEnabled";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseDisabled implements IConvertible, IPost
-{
-    DatabaseDisabled();
-    DatabaseDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "DatabaseDisabled";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationSaved implements IConvertible, IPost
-{
-    DatabaseIntegration? integration;
-
-    DatabaseIntegrationSaved({this.integration});
-    DatabaseIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'DatabaseIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'DatabaseIntegration',context!)
-    };
-
-    getTypeName() => "DatabaseIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    DatabaseIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    DatabaseIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "DatabaseIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    DatabaseIntegrationRenamed({this.id,this.name,this.env});
-    DatabaseIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "DatabaseIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationSetAsDefault implements IConvertible, IPost
-{
-    Env? env;
-    IntegrationId? id;
-
-    DatabaseIntegrationSetAsDefault({this.env,this.id});
-    DatabaseIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "DatabaseIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    DatabaseIntegrationDeleted({this.id,this.env});
-    DatabaseIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "DatabaseIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    DatabaseIntegrationEnabled({this.id,this.env});
-    DatabaseIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "DatabaseIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    DatabaseIntegrationDisabled({this.id,this.env});
-    DatabaseIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "DatabaseIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationProvisioningStarted implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    String atlasProjectId = "";
-    String atlasClusterName = "";
-
-    DatabaseIntegrationProvisioningStarted({this.integrationId,this.atlasProjectId="",this.atlasClusterName=""});
-    DatabaseIntegrationProvisioningStarted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        atlasProjectId = json['atlasProjectId'] ?? "";
-        atlasClusterName = json['atlasClusterName'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'atlasProjectId': atlasProjectId,
-        'atlasClusterName': atlasClusterName
-    };
-
-    getTypeName() => "DatabaseIntegrationProvisioningStarted";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationProvisioningCompleted implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    String connectionStringTemplate = "";
-
-    DatabaseIntegrationProvisioningCompleted({this.integrationId,this.connectionStringTemplate=""});
-    DatabaseIntegrationProvisioningCompleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        connectionStringTemplate = json['connectionStringTemplate'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'connectionStringTemplate': connectionStringTemplate
-    };
-
-    getTypeName() => "DatabaseIntegrationProvisioningCompleted";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationProvisioningFailed implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    String reason = "";
-    bool? retryable;
-
-    DatabaseIntegrationProvisioningFailed({this.integrationId,this.reason="",this.retryable});
-    DatabaseIntegrationProvisioningFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        reason = json['reason'] ?? "";
-        retryable = json['retryable'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'reason': reason,
-        'retryable': retryable
-    };
-
-    getTypeName() => "DatabaseIntegrationProvisioningFailed";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseIntegrationDeprovisioned implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    String atlasProjectId = "";
-    String atlasClusterName = "";
-
-    DatabaseIntegrationDeprovisioned({this.integrationId,this.atlasProjectId="",this.atlasClusterName=""});
-    DatabaseIntegrationDeprovisioned.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        atlasProjectId = json['atlasProjectId'] ?? "";
-        atlasClusterName = json['atlasClusterName'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'atlasProjectId': atlasProjectId,
-        'atlasClusterName': atlasClusterName
-    };
-
-    getTypeName() => "DatabaseIntegrationDeprovisioned";
-    TypeContext? context = _ctx;
-}
-
-class ProjectStatusChanged implements IConvertible, IPost
-{
-    ProjectStatus? status;
-
-    ProjectStatusChanged({this.status});
-    ProjectStatusChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        status = JsonConverters.fromJson(json['status'],'ProjectStatus',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'status': JsonConverters.toJson(status,'ProjectStatus',context!)
-    };
-
-    getTypeName() => "ProjectStatusChanged";
-    TypeContext? context = _ctx;
-}
-
-class SchemaCreated implements IConvertible, IPost
-{
-    Schema? schema;
-
-    SchemaCreated({this.schema});
-    SchemaCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        schema = JsonConverters.fromJson(json['schema'],'Schema',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'schema': JsonConverters.toJson(schema,'Schema',context!)
-    };
-
-    getTypeName() => "SchemaCreated";
-    TypeContext? context = _ctx;
-}
-
-class SchemaMirrored implements IConvertible, IPost
-{
-    Schema? schema;
-
-    SchemaMirrored({this.schema});
-    SchemaMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        schema = JsonConverters.fromJson(json['schema'],'Schema',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'schema': JsonConverters.toJson(schema,'Schema',context!)
-    };
-
-    getTypeName() => "SchemaMirrored";
-    TypeContext? context = _ctx;
-}
-
-class SchemaDraftUpdated implements IConvertible, IPost
-{
-    SchemaId? id;
-    SchemaDraft? draft;
-    Env? env;
-
-    SchemaDraftUpdated({this.id,this.draft,this.env});
-    SchemaDraftUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'SchemaId',context!);
-        draft = JsonConverters.fromJson(json['draft'],'SchemaDraft',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'SchemaId',context!),
-        'draft': JsonConverters.toJson(draft,'SchemaDraft',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SchemaDraftUpdated";
-    TypeContext? context = _ctx;
-}
-
-class SchemaDraftDiscarded implements IConvertible, IPost
-{
-    SchemaId? id;
-    Env? env;
-
-    SchemaDraftDiscarded({this.id,this.env});
-    SchemaDraftDiscarded.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'SchemaId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'SchemaId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SchemaDraftDiscarded";
-    TypeContext? context = _ctx;
-}
-
-class SchemaVersionPublished implements IConvertible, IPost
-{
-    SchemaId? id;
-    PublishedSchemaVersion? version;
-    SchemaDiff? diff;
-    Env? env;
-
-    SchemaVersionPublished({this.id,this.version,this.diff,this.env});
-    SchemaVersionPublished.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'SchemaId',context!);
-        version = JsonConverters.fromJson(json['version'],'PublishedSchemaVersion',context!);
-        diff = JsonConverters.fromJson(json['diff'],'SchemaDiff',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'SchemaId',context!),
-        'version': JsonConverters.toJson(version,'PublishedSchemaVersion',context!),
-        'diff': JsonConverters.toJson(diff,'SchemaDiff',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SchemaVersionPublished";
-    TypeContext? context = _ctx;
-}
-
-class SchemaSettingsUpdated implements IConvertible, IPost
-{
-    SchemaId? id;
-    SchemaSettings? settings;
-    Env? env;
-
-    SchemaSettingsUpdated({this.id,this.settings,this.env});
-    SchemaSettingsUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'SchemaId',context!);
-        settings = JsonConverters.fromJson(json['settings'],'SchemaSettings',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'SchemaId',context!),
-        'settings': JsonConverters.toJson(settings,'SchemaSettings',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SchemaSettingsUpdated";
-    TypeContext? context = _ctx;
-}
-
-class SchemaDeleted implements IConvertible, IPost
-{
-    SchemaId? id;
-    Env? env;
-
-    SchemaDeleted({this.id,this.env});
-    SchemaDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'SchemaId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'SchemaId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SchemaDeleted";
-    TypeContext? context = _ctx;
-}
-
-class SchemaRenamed implements IConvertible, IPost
-{
-    SchemaId? schemaId;
-    SchemaName? newName;
-    bool? renameUniqueName;
-    Env? env;
-
-    SchemaRenamed({this.schemaId,this.newName,this.renameUniqueName,this.env});
-    SchemaRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        schemaId = JsonConverters.fromJson(json['schemaId'],'SchemaId',context!);
-        newName = JsonConverters.fromJson(json['newName'],'SchemaName',context!);
-        renameUniqueName = json['renameUniqueName'];
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'schemaId': JsonConverters.toJson(schemaId,'SchemaId',context!),
-        'newName': JsonConverters.toJson(newName,'SchemaName',context!),
-        'renameUniqueName': renameUniqueName,
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SchemaRenamed";
-    TypeContext? context = _ctx;
-}
-
-class SchemaDataCleared implements IConvertible, IPost
-{
-    SchemaId? id;
-    List<IntegrationId> integrations = [];
-    Env? env;
-
-    SchemaDataCleared({this.id,this.integrations=const [],this.env});
-    SchemaDataCleared.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'SchemaId',context!);
-        integrations = JsonConverters.fromJson(json['integrations'],'List<IntegrationId>',context!) ?? [];
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'SchemaId',context!),
-        'integrations': JsonConverters.toJson(integrations,'List<IntegrationId>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SchemaDataCleared";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomyCreated implements IConvertible, IPost
-{
-    Taxonomy? taxonomy;
-
-    TaxonomyCreated({this.taxonomy});
-    TaxonomyCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        taxonomy = JsonConverters.fromJson(json['taxonomy'],'Taxonomy',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'taxonomy': JsonConverters.toJson(taxonomy,'Taxonomy',context!)
-    };
-
-    getTypeName() => "TaxonomyCreated";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomyUpdated implements IConvertible, IPost
-{
-    Taxonomy? taxonomy;
-
-    TaxonomyUpdated({this.taxonomy});
-    TaxonomyUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        taxonomy = JsonConverters.fromJson(json['taxonomy'],'Taxonomy',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'taxonomy': JsonConverters.toJson(taxonomy,'Taxonomy',context!)
-    };
-
-    getTypeName() => "TaxonomyUpdated";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomyDeleted implements IConvertible, IPost
-{
-    TaxonomyId? taxonomyId;
-
-    TaxonomyDeleted({this.taxonomyId});
-    TaxonomyDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!)
-    };
-
-    getTypeName() => "TaxonomyDeleted";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomyDataCleared implements IConvertible, IPost
-{
-    TaxonomyId? taxonomyId;
-    List<IntegrationId> integrations = [];
-
-    TaxonomyDataCleared({this.taxonomyId,this.integrations=const []});
-    TaxonomyDataCleared.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
-        integrations = JsonConverters.fromJson(json['integrations'],'List<IntegrationId>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
-        'integrations': JsonConverters.toJson(integrations,'List<IntegrationId>',context!)
-    };
-
-    getTypeName() => "TaxonomyDataCleared";
-    TypeContext? context = _ctx;
-}
-
-class SchemaTriggerSaved implements IConvertible, IPost
-{
-    SchemaTrigger? trigger;
-
-    SchemaTriggerSaved({this.trigger});
-    SchemaTriggerSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'SchemaTrigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'SchemaTrigger',context!)
-    };
-
-    getTypeName() => "SchemaTriggerSaved";
-    TypeContext? context = _ctx;
-}
-
-class DatabaseTriggerMirrored implements IConvertible, IPost
-{
-    Trigger? trigger;
-
-    DatabaseTriggerMirrored({this.trigger});
-    DatabaseTriggerMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'Trigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'Trigger',context!)
-    };
-
-    getTypeName() => "DatabaseTriggerMirrored";
-    TypeContext? context = _ctx;
-}
-
-class SchemaTriggerEnabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    SchemaId? schemaId;
-    Env? env;
-
-    SchemaTriggerEnabled({this.schemaId,this.env});
-    SchemaTriggerEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        schemaId = JsonConverters.fromJson(json['schemaId'],'SchemaId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'schemaId': JsonConverters.toJson(schemaId,'SchemaId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "SchemaTriggerEnabled";
-    TypeContext? context = _ctx;
-}
-
-class SchemaTriggerDisabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    SchemaId? schemaId;
-    Env? env;
-
-    SchemaTriggerDisabled({this.schemaId,this.env});
-    SchemaTriggerDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        schemaId = JsonConverters.fromJson(json['schemaId'],'SchemaId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'schemaId': JsonConverters.toJson(schemaId,'SchemaId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "SchemaTriggerDisabled";
-    TypeContext? context = _ctx;
-}
-
-class SchemaTriggerDeleted extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    SchemaId? schemaId;
-    Env? env;
-
-    SchemaTriggerDeleted({this.schemaId,this.env});
-    SchemaTriggerDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        schemaId = JsonConverters.fromJson(json['schemaId'],'SchemaId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'schemaId': JsonConverters.toJson(schemaId,'SchemaId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "SchemaTriggerDeleted";
-    TypeContext? context = _ctx;
-}
-
 class ProcessCollectionImport implements IConvertible, IPost
 {
     String importId = "";
@@ -38735,615 +32666,6 @@ class ProcessCollectionImport implements IConvertible, IPost
     };
 
     getTypeName() => "ProcessCollectionImport";
-    TypeContext? context = _ctx;
-}
-
-class RecordInserted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    String id = "";
-    dynamic? document;
-
-    RecordInserted({this.projectId,this.databaseIntegrationId,this.schemaName,this.id="",this.document});
-    RecordInserted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        id = json['id'] ?? "";
-        document = JsonConverters.fromJson(json['document'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'id': id,
-        'document': JsonConverters.toJson(document,'dynamic',context!)
-    };
-
-    getTypeName() => "RecordInserted";
-    TypeContext? context = _ctx;
-}
-
-class RecordUpdated implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    String id = "";
-    dynamic? from;
-    dynamic? to;
-
-    RecordUpdated({this.projectId,this.databaseIntegrationId,this.schemaName,this.id="",this.from,this.to});
-    RecordUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        id = json['id'] ?? "";
-        from = JsonConverters.fromJson(json['from'],'dynamic',context!);
-        to = JsonConverters.fromJson(json['to'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'id': id,
-        'from': JsonConverters.toJson(from,'dynamic',context!),
-        'to': JsonConverters.toJson(to,'dynamic',context!)
-    };
-
-    getTypeName() => "RecordUpdated";
-    TypeContext? context = _ctx;
-}
-
-class RecordDeleted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    String id = "";
-    dynamic? document;
-
-    RecordDeleted({this.projectId,this.databaseIntegrationId,this.schemaName,this.id="",this.document});
-    RecordDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        id = json['id'] ?? "";
-        document = JsonConverters.fromJson(json['document'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'id': id,
-        'document': JsonConverters.toJson(document,'dynamic',context!)
-    };
-
-    getTypeName() => "RecordDeleted";
-    TypeContext? context = _ctx;
-}
-
-class RecordReplaced implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    String id = "";
-    dynamic? from;
-    dynamic? to;
-
-    RecordReplaced({this.projectId,this.databaseIntegrationId,this.schemaName,this.id="",this.from,this.to});
-    RecordReplaced.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        id = json['id'] ?? "";
-        from = JsonConverters.fromJson(json['from'],'dynamic',context!);
-        to = JsonConverters.fromJson(json['to'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'id': id,
-        'from': JsonConverters.toJson(from,'dynamic',context!),
-        'to': JsonConverters.toJson(to,'dynamic',context!)
-    };
-
-    getTypeName() => "RecordReplaced";
-    TypeContext? context = _ctx;
-}
-
-class RecordResponsibilityChanged implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    String id = "";
-    AuthId? fromOwner;
-    AuthId? toOwner;
-
-    RecordResponsibilityChanged({this.projectId,this.databaseIntegrationId,this.schemaName,this.id="",this.fromOwner,this.toOwner});
-    RecordResponsibilityChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        id = json['id'] ?? "";
-        fromOwner = JsonConverters.fromJson(json['fromOwner'],'AuthId',context!);
-        toOwner = JsonConverters.fromJson(json['toOwner'],'AuthId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'id': id,
-        'fromOwner': JsonConverters.toJson(fromOwner,'AuthId',context!),
-        'toOwner': JsonConverters.toJson(toOwner,'AuthId',context!)
-    };
-
-    getTypeName() => "RecordResponsibilityChanged";
-    TypeContext? context = _ctx;
-}
-
-class RecordsInserted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    IReadOnlyList<String>? ids;
-    IReadOnlyList<dynamic>? documents;
-
-    RecordsInserted({this.projectId,this.databaseIntegrationId,this.schemaName,this.ids,this.documents});
-    RecordsInserted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        ids = JsonConverters.fromJson(json['ids'],'IReadOnlyList<String>',context!);
-        documents = JsonConverters.fromJson(json['documents'],'IReadOnlyList<dynamic>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'ids': JsonConverters.toJson(ids,'IReadOnlyList<String>',context!),
-        'documents': JsonConverters.toJson(documents,'IReadOnlyList<dynamic>',context!)
-    };
-
-    getTypeName() => "RecordsInserted";
-    TypeContext? context = _ctx;
-}
-
-class RecordsUpdated implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    int matchedCount = 0;
-    int modifiedCount = 0;
-    dynamic? update;
-
-    RecordsUpdated({this.projectId,this.databaseIntegrationId,this.schemaName,this.matchedCount=0,this.modifiedCount=0,this.update});
-    RecordsUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        matchedCount = json['matchedCount'] ?? 0;
-        modifiedCount = json['modifiedCount'] ?? 0;
-        update = JsonConverters.fromJson(json['update'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'matchedCount': matchedCount,
-        'modifiedCount': modifiedCount,
-        'update': JsonConverters.toJson(update,'dynamic',context!)
-    };
-
-    getTypeName() => "RecordsUpdated";
-    TypeContext? context = _ctx;
-}
-
-class RecordsDeleted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    SchemaName? schemaName;
-    int deletedCount = 0;
-    dynamic? filter;
-
-    RecordsDeleted({this.projectId,this.databaseIntegrationId,this.schemaName,this.deletedCount=0,this.filter});
-    RecordsDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        schemaName = JsonConverters.fromJson(json['schemaName'],'SchemaName',context!);
-        deletedCount = json['deletedCount'] ?? 0;
-        filter = JsonConverters.fromJson(json['filter'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'schemaName': JsonConverters.toJson(schemaName,'SchemaName',context!),
-        'deletedCount': deletedCount,
-        'filter': JsonConverters.toJson(filter,'dynamic',context!)
-    };
-
-    getTypeName() => "RecordsDeleted";
-    TypeContext? context = _ctx;
-}
-
-class EmailVerificationCodeRequested implements IPasskeyMessage, IConvertible, IPost
-{
-    String email = "";
-    String projectId = "";
-    String code = "";
-    DateTime? expiresAtUtc;
-
-    EmailVerificationCodeRequested({this.email="",this.projectId="",this.code="",this.expiresAtUtc});
-    EmailVerificationCodeRequested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        email = json['email'] ?? "";
-        projectId = json['projectId'] ?? "";
-        code = json['code'] ?? "";
-        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'email': email,
-        'projectId': projectId,
-        'code': code,
-        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "EmailVerificationCodeRequested";
-    TypeContext? context = _ctx;
-}
-
-class MagicLinkRequested implements IPasskeyMessage, IConvertible, IPost
-{
-    String email = "";
-    String projectId = "";
-    String token = "";
-    DateTime? expiresAtUtc;
-
-    MagicLinkRequested({this.email="",this.projectId="",this.token="",this.expiresAtUtc});
-    MagicLinkRequested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        email = json['email'] ?? "";
-        projectId = json['projectId'] ?? "";
-        token = json['token'] ?? "";
-        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'email': email,
-        'projectId': projectId,
-        'token': token,
-        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "MagicLinkRequested";
-    TypeContext? context = _ctx;
-}
-
-class PasswordResetRequested implements IPasskeyMessage, IConvertible, IPost
-{
-    String email = "";
-    String projectId = "";
-    String token = "";
-    DateTime? expiresAtUtc;
-
-    PasswordResetRequested({this.email="",this.projectId="",this.token="",this.expiresAtUtc});
-    PasswordResetRequested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        email = json['email'] ?? "";
-        projectId = json['projectId'] ?? "";
-        token = json['token'] ?? "";
-        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'email': email,
-        'projectId': projectId,
-        'token': token,
-        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "PasswordResetRequested";
-    TypeContext? context = _ctx;
-}
-
-class PasswordChanged implements IPasskeyMessage, IConvertible, IPost
-{
-    String email = "";
-    String projectId = "";
-
-    PasswordChanged({this.email="",this.projectId=""});
-    PasswordChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        email = json['email'] ?? "";
-        projectId = json['projectId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'email': email,
-        'projectId': projectId
-    };
-
-    getTypeName() => "PasswordChanged";
-    TypeContext? context = _ctx;
-}
-
-class SseCallTriggered implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    AccountId? accountId;
-    TriggerId? triggerId;
-    TriggerType? triggerType;
-    String sourceEvent = "";
-    String? targetUserAuthId;
-    String? schemaId;
-    IReadOnlyDictionary<String,String>? tokenMappings;
-    String? correlationId;
-
-    SseCallTriggered({this.projectId,this.accountId,this.triggerId,this.triggerType,this.sourceEvent="",this.targetUserAuthId,this.schemaId,this.tokenMappings,this.correlationId});
-    SseCallTriggered.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        accountId = JsonConverters.fromJson(json['accountId'],'AccountId',context!);
-        triggerId = JsonConverters.fromJson(json['triggerId'],'TriggerId',context!);
-        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
-        sourceEvent = json['sourceEvent'] ?? "";
-        targetUserAuthId = json['targetUserAuthId'];
-        schemaId = json['schemaId'];
-        tokenMappings = JsonConverters.fromJson(json['tokenMappings'],'IReadOnlyDictionary<String,String>',context!);
-        correlationId = json['correlationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'accountId': JsonConverters.toJson(accountId,'AccountId',context!),
-        'triggerId': JsonConverters.toJson(triggerId,'TriggerId',context!),
-        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!),
-        'sourceEvent': sourceEvent,
-        'targetUserAuthId': targetUserAuthId,
-        'schemaId': schemaId,
-        'tokenMappings': JsonConverters.toJson(tokenMappings,'IReadOnlyDictionary<String,String>',context!),
-        'correlationId': correlationId
-    };
-
-    getTypeName() => "SseCallTriggered";
-    TypeContext? context = _ctx;
-}
-
-class UserRegistered implements IConvertible, IPost
-{
-    Auth? auth;
-    UserId? linkToUser;
-
-    UserRegistered({this.auth,this.linkToUser});
-    UserRegistered.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        auth = JsonConverters.fromJson(json['auth'],'Auth',context!);
-        linkToUser = JsonConverters.fromJson(json['linkToUser'],'UserId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'auth': JsonConverters.toJson(auth,'Auth',context!),
-        'linkToUser': JsonConverters.toJson(linkToUser,'UserId',context!)
-    };
-
-    getTypeName() => "UserRegistered";
-    TypeContext? context = _ctx;
-}
-
-class UserCreated implements IConvertible, IPost
-{
-    UserId? userId;
-    ProjectId? projectId;
-    AuthId? authId;
-
-    UserCreated({this.userId,this.projectId,this.authId});
-    UserCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        userId = JsonConverters.fromJson(json['userId'],'UserId',context!);
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        authId = JsonConverters.fromJson(json['authId'],'AuthId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'userId': JsonConverters.toJson(userId,'UserId',context!),
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'authId': JsonConverters.toJson(authId,'AuthId',context!)
-    };
-
-    getTypeName() => "UserCreated";
-    TypeContext? context = _ctx;
-}
-
-class UserUpdated implements IConvertible, IPost
-{
-    AuthId? authId;
-    UserGeneralInfo? from;
-    UserGeneralInfo? to;
-
-    UserUpdated({this.authId,this.from,this.to});
-    UserUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        authId = JsonConverters.fromJson(json['authId'],'AuthId',context!);
-        from = JsonConverters.fromJson(json['from'],'UserGeneralInfo',context!);
-        to = JsonConverters.fromJson(json['to'],'UserGeneralInfo',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'authId': JsonConverters.toJson(authId,'AuthId',context!),
-        'from': JsonConverters.toJson(from,'UserGeneralInfo',context!),
-        'to': JsonConverters.toJson(to,'UserGeneralInfo',context!)
-    };
-
-    getTypeName() => "UserUpdated";
-    TypeContext? context = _ctx;
-}
-
-class UserBlocked implements IConvertible, IPost
-{
-    UserGeneralInfo? user;
-    AuthId? authId;
-
-    UserBlocked({this.user,this.authId});
-    UserBlocked.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        user = JsonConverters.fromJson(json['user'],'UserGeneralInfo',context!);
-        authId = JsonConverters.fromJson(json['authId'],'AuthId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'user': JsonConverters.toJson(user,'UserGeneralInfo',context!),
-        'authId': JsonConverters.toJson(authId,'AuthId',context!)
-    };
-
-    getTypeName() => "UserBlocked";
-    TypeContext? context = _ctx;
-}
-
-class UserUnblocked implements IConvertible, IPost
-{
-    UserGeneralInfo? user;
-    AuthId? authId;
-
-    UserUnblocked({this.user,this.authId});
-    UserUnblocked.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        user = JsonConverters.fromJson(json['user'],'UserGeneralInfo',context!);
-        authId = JsonConverters.fromJson(json['authId'],'AuthId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'user': JsonConverters.toJson(user,'UserGeneralInfo',context!),
-        'authId': JsonConverters.toJson(authId,'AuthId',context!)
-    };
-
-    getTypeName() => "UserUnblocked";
-    TypeContext? context = _ctx;
-}
-
-class UserInvited implements IConvertible, IPost
-{
-    EmailAddress? emailAddress;
-
-    UserInvited({this.emailAddress});
-    UserInvited.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        emailAddress = JsonConverters.fromJson(json['emailAddress'],'EmailAddress',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'emailAddress': JsonConverters.toJson(emailAddress,'EmailAddress',context!)
-    };
-
-    getTypeName() => "UserInvited";
-    TypeContext? context = _ctx;
-}
-
-class UserVerified implements IConvertible, IPost
-{
-    AuthId? authId;
-    UserGeneralInfo? user;
-
-    UserVerified({this.authId,this.user});
-    UserVerified.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        authId = JsonConverters.fromJson(json['authId'],'AuthId',context!);
-        user = JsonConverters.fromJson(json['user'],'UserGeneralInfo',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'authId': JsonConverters.toJson(authId,'AuthId',context!),
-        'user': JsonConverters.toJson(user,'UserGeneralInfo',context!)
-    };
-
-    getTypeName() => "UserVerified";
-    TypeContext? context = _ctx;
-}
-
-class UserDeleted implements IConvertible, IPost
-{
-    UserGeneralInfo? user;
-    AuthId? authId;
-
-    UserDeleted({this.user,this.authId});
-    UserDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        user = JsonConverters.fromJson(json['user'],'UserGeneralInfo',context!);
-        authId = JsonConverters.fromJson(json['authId'],'AuthId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'user': JsonConverters.toJson(user,'UserGeneralInfo',context!),
-        'authId': JsonConverters.toJson(authId,'AuthId',context!)
-    };
-
-    getTypeName() => "UserDeleted";
     TypeContext? context = _ctx;
 }
 
@@ -39492,6 +32814,150 @@ class SaveFilesTrigger extends SaveTrigger implements IReturn<IdResponse>, IConv
     createResponse() => IdResponse();
     getResponseTypeName() => "IdResponse";
     getTypeName() => "SaveFilesTrigger";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/item/private", "POST")
+class MakeFilePrivateRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the file lives on.
+    */
+    // @ApiMember(Description="The files integration the file lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Path of the file, relative to the integration.
+    */
+    // @ApiMember(Description="Path of the file, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFilePrivateRequest({this.filesIntegrationId="",this.path=""});
+    MakeFilePrivateRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "MakeFilePrivateRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/item/public", "POST")
+class MakeFilePublicRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the file lives on.
+    */
+    // @ApiMember(Description="The files integration the file lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Path of the file to publish, relative to the integration.
+    */
+    // @ApiMember(Description="Path of the file to publish, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFilePublicRequest({this.filesIntegrationId="",this.path=""});
+    MakeFilePublicRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "MakeFilePublicRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/folder/private", "POST")
+class MakeFolderPrivateRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the folder lives on.
+    */
+    // @ApiMember(Description="The files integration the folder lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Folder prefix, relative to the integration.
+    */
+    // @ApiMember(Description="Folder prefix, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFolderPrivateRequest({this.filesIntegrationId="",this.path=""});
+    MakeFolderPrivateRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "MakeFolderPrivateRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/folder/public", "POST")
+class MakeFolderPublicRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the folder lives on.
+    */
+    // @ApiMember(Description="The files integration the folder lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Folder prefix to publish, relative to the integration.
+    */
+    // @ApiMember(Description="Folder prefix to publish, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFolderPublicRequest({this.filesIntegrationId="",this.path=""});
+    MakeFolderPublicRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "MakeFolderPublicRequest";
     TypeContext? context = _ctx;
 }
 
@@ -39747,370 +33213,6 @@ class GetFolderFiles extends CodeMashListPaginationRequestBase implements IRetur
     createResponse() => GetFolderFilesResponse();
     getResponseTypeName() => "GetFolderFilesResponse";
     getTypeName() => "GetFolderFiles";
-    TypeContext? context = _ctx;
-}
-
-class FilesEstablished implements IConvertible, IPost
-{
-    FilesEstablished();
-    FilesEstablished.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "FilesEstablished";
-    TypeContext? context = _ctx;
-}
-
-class FilesEnabled implements IConvertible, IPost
-{
-    FilesEnabled();
-    FilesEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "FilesEnabled";
-    TypeContext? context = _ctx;
-}
-
-class FilesDisabled implements IConvertible, IPost
-{
-    FilesDisabled();
-    FilesDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "FilesDisabled";
-    TypeContext? context = _ctx;
-}
-
-class FilesIntegrationSaved implements IConvertible, IPost
-{
-    FileIntegration? integration;
-
-    FilesIntegrationSaved({this.integration});
-    FilesIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'FileIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'FileIntegration',context!)
-    };
-
-    getTypeName() => "FilesIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class FilesIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    FilesIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    FilesIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "FilesIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class FilesIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    FilesIntegrationRenamed({this.id,this.name,this.env});
-    FilesIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "FilesIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class FilesIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    FilesIntegrationDeleted({this.id,this.env});
-    FilesIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "FilesIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class FilesIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    FilesIntegrationEnabled({this.id,this.env});
-    FilesIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "FilesIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class FilesIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    FilesIntegrationDisabled({this.id,this.env});
-    FilesIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "FilesIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class FilesIntegrationSetAsDefault implements IConvertible, IPost
-{
-    Env? env;
-    IntegrationId? id;
-
-    FilesIntegrationSetAsDefault({this.env,this.id});
-    FilesIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "FilesIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class FilesTriggerSaved implements IConvertible, IPost
-{
-    FileTrigger? trigger;
-
-    FilesTriggerSaved({this.trigger});
-    FilesTriggerSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'FileTrigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'FileTrigger',context!)
-    };
-
-    getTypeName() => "FilesTriggerSaved";
-    TypeContext? context = _ctx;
-}
-
-class FilesTriggerMirrored implements IConvertible, IPost
-{
-    Trigger? trigger;
-
-    FilesTriggerMirrored({this.trigger});
-    FilesTriggerMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'Trigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'Trigger',context!)
-    };
-
-    getTypeName() => "FilesTriggerMirrored";
-    TypeContext? context = _ctx;
-}
-
-class FilesTriggerEnabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    FilesTriggerEnabled({this.env});
-    FilesTriggerEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "FilesTriggerEnabled";
-    TypeContext? context = _ctx;
-}
-
-class FilesTriggerDisabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    FilesTriggerDisabled({this.env});
-    FilesTriggerDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "FilesTriggerDisabled";
-    TypeContext? context = _ctx;
-}
-
-class FilesTriggerDeleted extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    FilesTriggerDeleted({this.env});
-    FilesTriggerDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "FilesTriggerDeleted";
-    TypeContext? context = _ctx;
-}
-
-class FileUploaded implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? integrationId;
-    FileResourceRef? fileRef;
-
-    FileUploaded({this.projectId,this.integrationId,this.fileRef});
-    FileUploaded.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        fileRef = JsonConverters.fromJson(json['fileRef'],'FileResourceRef',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'fileRef': JsonConverters.toJson(fileRef,'FileResourceRef',context!)
-    };
-
-    getTypeName() => "FileUploaded";
-    TypeContext? context = _ctx;
-}
-
-class FileDeleted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? integrationId;
-    String path = "";
-
-    FileDeleted({this.projectId,this.integrationId,this.path=""});
-    FileDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        path = json['path'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'path': path
-    };
-
-    getTypeName() => "FileDeleted";
     TypeContext? context = _ctx;
 }
 
@@ -41357,19 +34459,28 @@ class CreateEmailCampaignRequest extends CodeMashRequestBase implements IReturn<
     // @DataMember
     String? databaseIntegrationId;
 
-    CreateEmailCampaignRequest({this.campaign,this.databaseIntegrationId});
+    /**
+    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-016. Set it only when the user explicitly asked to send now.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-016. Set it only when the user explicitly asked to send now.")
+    bool? sendNow;
+
+    CreateEmailCampaignRequest({this.campaign,this.databaseIntegrationId,this.sendNow});
     CreateEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         campaign = JsonConverters.fromJson(json['campaign'],'EmailCampaignRequest',context!);
         databaseIntegrationId = json['databaseIntegrationId'];
+        sendNow = json['sendNow'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'campaign': JsonConverters.toJson(campaign,'EmailCampaignRequest',context!),
-        'databaseIntegrationId': databaseIntegrationId
+        'databaseIntegrationId': databaseIntegrationId,
+        'sendNow': sendNow
     });
 
     createResponse() => IdResponse();
@@ -41386,14 +34497,27 @@ class CreateEmailCampaignRequest extends CodeMashRequestBase implements IReturn<
 // @DataContract
 class DeleteEmailCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
 {
-    DeleteEmailCampaignRequest();
-    DeleteEmailCampaignRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String? databaseIntegrationId;
+
+    DeleteEmailCampaignRequest({this.id="",this.databaseIntegrationId});
+    DeleteEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "DeleteEmailCampaignRequest";
@@ -41720,22 +34844,38 @@ class GetEmailCampaignStatistics extends CodeMashRequestBase implements IReturn<
 class PreviewEmailNotification extends RequestBase implements IReturn<PreviewEmailNotificationResponse>, IConvertible, IGet
 {
     /**
-    * The opaque, pre-signed preview hash identifying the project and notification to preview.
+    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
     */
-    // @ApiMember(Description="The opaque, pre-signed preview hash identifying the project and notification to preview.", IsRequired=true)
+    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
     String hash = "";
 
-    PreviewEmailNotification({this.hash=""});
+    /**
+    * Signed-in preview by id: the project id. With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
+    String? projectId;
+
+    /**
+    * Signed-in preview by id: the notification id (needs email:read). With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the notification id (needs email:read). With a hash it must match the hash.")
+    String? notificationId;
+
+    PreviewEmailNotification({this.hash="",this.projectId,this.notificationId});
     PreviewEmailNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         hash = json['hash'] ?? "";
+        projectId = json['projectId'];
+        notificationId = json['notificationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'hash': hash
+        'hash': hash,
+        'projectId': projectId,
+        'notificationId': notificationId
     });
 
     createResponse() => PreviewEmailNotificationResponse();
@@ -41790,7 +34930,7 @@ class StopEmailCampaignRequest extends CodeMashRequestBase implements IReturn<Em
 /**
 * Get an email campaign message
 */
-// @Route("/{version}/notifications/emails/campaigns/{campaignId}/messages/{id}", "GET")
+// @Route("/{version}/notifications/emails/campaigns/{campaignId}/messages/{notificationId}", "GET")
 // @Api(Description="Get an email campaign message")
 class GetEmailCampaignMessage extends CodeMashRequestBase implements IReturn<GetEmailCampaignMessageResponse>, IConvertible, IGet
 {
@@ -41888,987 +35028,6 @@ class GetEmailCampaignMessagesRequest extends CodeMashListPaginationRequestBase 
     createResponse() => GetEmailCampaignMessagesResponse();
     getResponseTypeName() => "GetEmailCampaignMessagesResponse";
     getTypeName() => "GetEmailCampaignMessagesRequest";
-    TypeContext? context = _ctx;
-}
-
-class EmailServiceEstablished implements IConvertible, IPost
-{
-    EmailServiceEstablished();
-    EmailServiceEstablished.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "EmailServiceEstablished";
-    TypeContext? context = _ctx;
-}
-
-class ProjectDatabaseConnected implements IConvertible, IPost
-{
-    Env? env;
-
-    ProjectDatabaseConnected({this.env});
-    ProjectDatabaseConnected.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "ProjectDatabaseConnected";
-    TypeContext? context = _ctx;
-}
-
-class EmailServiceEnabled implements IConvertible, IPost
-{
-    EmailServiceEnabled();
-    EmailServiceEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "EmailServiceEnabled";
-    TypeContext? context = _ctx;
-}
-
-class EmailServiceDisabled implements IConvertible, IPost
-{
-    EmailServiceDisabled();
-    EmailServiceDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "EmailServiceDisabled";
-    TypeContext? context = _ctx;
-}
-
-class EmailFooterSaved implements IConvertible, IPost
-{
-    EmailFooterId? id;
-    DisplayName? name;
-    List<MessageTranslation<TemplateCode>> translations = [];
-    Env? env;
-
-    EmailFooterSaved({this.id,this.name,this.translations=const [],this.env});
-    EmailFooterSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'EmailFooterId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<TemplateCode>>',context!) ?? [];
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'EmailFooterId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<TemplateCode>>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailFooterSaved";
-    TypeContext? context = _ctx;
-}
-
-class EmailFooterMirrored implements IConvertible, IPost
-{
-    EmailFooter? footer;
-
-    EmailFooterMirrored({this.footer});
-    EmailFooterMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        footer = JsonConverters.fromJson(json['footer'],'EmailFooter',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'footer': JsonConverters.toJson(footer,'EmailFooter',context!)
-    };
-
-    getTypeName() => "EmailFooterMirrored";
-    TypeContext? context = _ctx;
-}
-
-class EmailFooterDeleted implements IConvertible, IPost
-{
-    EmailFooterId? id;
-    Env? env;
-
-    EmailFooterDeleted({this.id,this.env});
-    EmailFooterDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'EmailFooterId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'EmailFooterId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailFooterDeleted";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationSaved implements IConvertible, IPost
-{
-    EmailIntegration? integration;
-
-    EmailIntegrationSaved({this.integration});
-    EmailIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'EmailIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'EmailIntegration',context!)
-    };
-
-    getTypeName() => "EmailIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    EmailIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    EmailIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationHumanDeliveryConfirmed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DateTime? confirmedAtUtc;
-
-    EmailIntegrationHumanDeliveryConfirmed({this.id,this.confirmedAtUtc});
-    EmailIntegrationHumanDeliveryConfirmed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        confirmedAtUtc = JsonConverters.fromJson(json['confirmedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'confirmedAtUtc': JsonConverters.toJson(confirmedAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "EmailIntegrationHumanDeliveryConfirmed";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    EmailIntegrationRenamed({this.id,this.name,this.env});
-    EmailIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationSetAsDefault implements IConvertible, IPost
-{
-    Env? env;
-    IntegrationId? id;
-
-    EmailIntegrationSetAsDefault({this.env,this.id});
-    EmailIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "EmailIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    EmailIntegrationDeleted({this.id,this.env});
-    EmailIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    EmailIntegrationEnabled({this.id,this.env});
-    EmailIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class EmailIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    EmailIntegrationDisabled({this.id,this.env});
-    EmailIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class EmailSignatureSaved implements IConvertible, IPost
-{
-    EmailSignatureId? id;
-    DisplayName? name;
-    List<MessageTranslation<TemplateCode>> translations = [];
-    Env? env;
-
-    EmailSignatureSaved({this.id,this.name,this.translations=const [],this.env});
-    EmailSignatureSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'EmailSignatureId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<TemplateCode>>',context!) ?? [];
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'EmailSignatureId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<TemplateCode>>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailSignatureSaved";
-    TypeContext? context = _ctx;
-}
-
-class EmailSignatureMirrored implements IConvertible, IPost
-{
-    EmailSignature? signature;
-
-    EmailSignatureMirrored({this.signature});
-    EmailSignatureMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        signature = JsonConverters.fromJson(json['signature'],'EmailSignature',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'signature': JsonConverters.toJson(signature,'EmailSignature',context!)
-    };
-
-    getTypeName() => "EmailSignatureMirrored";
-    TypeContext? context = _ctx;
-}
-
-class EmailSignatureDeleted implements IConvertible, IPost
-{
-    EmailSignatureId? id;
-    Env? env;
-
-    EmailSignatureDeleted({this.id,this.env});
-    EmailSignatureDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'EmailSignatureId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'EmailSignatureId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailSignatureDeleted";
-    TypeContext? context = _ctx;
-}
-
-class EmailTemplateCreated implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    DisplayName? displayName;
-    List<MessageTranslation<EmailMessageContent>> translations = [];
-    CommunicationChannel? channel;
-    String? description;
-    List<Tag>? tags;
-    List<FileResourceRef>? languageAgnosticAttachments;
-    Env? env;
-
-    EmailTemplateCreated({this.templateId,this.displayName,this.translations=const [],this.channel,this.description,this.tags,this.languageAgnosticAttachments,this.env});
-    EmailTemplateCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<EmailMessageContent>>',context!) ?? [];
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        description = json['description'];
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        languageAgnosticAttachments = JsonConverters.fromJson(json['languageAgnosticAttachments'],'List<FileResourceRef>',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<EmailMessageContent>>',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'description': description,
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'languageAgnosticAttachments': JsonConverters.toJson(languageAgnosticAttachments,'List<FileResourceRef>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailTemplateCreated";
-    TypeContext? context = _ctx;
-}
-
-class EmailTemplateUpdated implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    DisplayName? displayName;
-    List<MessageTranslation<EmailMessageContent>> translations = [];
-    CommunicationChannel? channel;
-    String? description;
-    List<Tag>? tags;
-    List<FileResourceRef>? languageAgnosticAttachments;
-    List<FileResourceRef>? attachmentsToBeDeleted;
-    Env? env;
-
-    EmailTemplateUpdated({this.templateId,this.displayName,this.translations=const [],this.channel,this.description,this.tags,this.languageAgnosticAttachments,this.attachmentsToBeDeleted,this.env});
-    EmailTemplateUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<EmailMessageContent>>',context!) ?? [];
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        description = json['description'];
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        languageAgnosticAttachments = JsonConverters.fromJson(json['languageAgnosticAttachments'],'List<FileResourceRef>',context!);
-        attachmentsToBeDeleted = JsonConverters.fromJson(json['attachmentsToBeDeleted'],'List<FileResourceRef>',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<EmailMessageContent>>',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'description': description,
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'languageAgnosticAttachments': JsonConverters.toJson(languageAgnosticAttachments,'List<FileResourceRef>',context!),
-        'attachmentsToBeDeleted': JsonConverters.toJson(attachmentsToBeDeleted,'List<FileResourceRef>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailTemplateUpdated";
-    TypeContext? context = _ctx;
-}
-
-class EmailTemplateMirrored implements IConvertible, IPost
-{
-    EmailTemplate? template;
-
-    EmailTemplateMirrored({this.template});
-    EmailTemplateMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        template = JsonConverters.fromJson(json['template'],'EmailTemplate',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'template': JsonConverters.toJson(template,'EmailTemplate',context!)
-    };
-
-    getTypeName() => "EmailTemplateMirrored";
-    TypeContext? context = _ctx;
-}
-
-class EmailTemplateBackfilled implements IConvertible, IPost
-{
-    EmailTemplate? template;
-
-    EmailTemplateBackfilled({this.template});
-    EmailTemplateBackfilled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        template = JsonConverters.fromJson(json['template'],'EmailTemplate',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'template': JsonConverters.toJson(template,'EmailTemplate',context!)
-    };
-
-    getTypeName() => "EmailTemplateBackfilled";
-    TypeContext? context = _ctx;
-}
-
-class EmailTemplateDeleted implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    List<FileResourceRef>? filesToBeDeleted;
-    IntegrationId? fileIntegrationId;
-    Env? env;
-
-    EmailTemplateDeleted({this.templateId,this.filesToBeDeleted,this.fileIntegrationId,this.env});
-    EmailTemplateDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        filesToBeDeleted = JsonConverters.fromJson(json['filesToBeDeleted'],'List<FileResourceRef>',context!);
-        fileIntegrationId = JsonConverters.fromJson(json['fileIntegrationId'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'filesToBeDeleted': JsonConverters.toJson(filesToBeDeleted,'List<FileResourceRef>',context!),
-        'fileIntegrationId': JsonConverters.toJson(fileIntegrationId,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailTemplateDeleted";
-    TypeContext? context = _ctx;
-}
-
-class EmailTemplateArchived implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    EmailTemplateArchived({this.templateId,this.env});
-    EmailTemplateArchived.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailTemplateArchived";
-    TypeContext? context = _ctx;
-}
-
-class EmailTemplateUnArchived implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    EmailTemplateUnArchived({this.templateId,this.env});
-    EmailTemplateUnArchived.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailTemplateUnArchived";
-    TypeContext? context = _ctx;
-}
-
-class EmailValidationIntegrationSaved implements IConvertible, IPost
-{
-    EmailValidationIntegration? integration;
-
-    EmailValidationIntegrationSaved({this.integration});
-    EmailValidationIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'EmailValidationIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'EmailValidationIntegration',context!)
-    };
-
-    getTypeName() => "EmailValidationIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class EmailValidationIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    EmailValidationIntegrationDeleted({this.id,this.env});
-    EmailValidationIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailValidationIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class EmailValidationIntegrationSecretsConfigured implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    EmailValidationIntegrationSecretsConfigured({this.id,this.env});
-    EmailValidationIntegrationSecretsConfigured.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailValidationIntegrationSecretsConfigured";
-    TypeContext? context = _ctx;
-}
-
-class EmailValidationIntegrationSecretsConfigurationFailed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    EmailValidationIntegrationSecretsConfigurationFailed({this.id,this.env});
-    EmailValidationIntegrationSecretsConfigurationFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailValidationIntegrationSecretsConfigurationFailed";
-    TypeContext? context = _ctx;
-}
-
-class EmailValidationIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    EmailValidationIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    EmailValidationIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "EmailValidationIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class EmailBatchRegistered implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    CampaignId? campaignId;
-    CampaignBatchId? campaignBatchId;
-    String? startingAfter;
-
-    EmailBatchRegistered({this.projectId,this.campaignId,this.campaignBatchId,this.startingAfter});
-    EmailBatchRegistered.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        campaignBatchId = JsonConverters.fromJson(json['campaignBatchId'],'CampaignBatchId',context!);
-        startingAfter = json['startingAfter'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'campaignBatchId': JsonConverters.toJson(campaignBatchId,'CampaignBatchId',context!),
-        'startingAfter': startingAfter
-    };
-
-    getTypeName() => "EmailBatchRegistered";
-    TypeContext? context = _ctx;
-}
-
-class EmailNotificationRead implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    CampaignId? campaignId;
-    CampaignBatchId? campaignBatchId;
-    NotificationId? notificationId;
-
-    EmailNotificationRead({this.projectId,this.campaignId,this.campaignBatchId,this.notificationId});
-    EmailNotificationRead.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        campaignBatchId = JsonConverters.fromJson(json['campaignBatchId'],'CampaignBatchId',context!);
-        notificationId = JsonConverters.fromJson(json['notificationId'],'NotificationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'campaignBatchId': JsonConverters.toJson(campaignBatchId,'CampaignBatchId',context!),
-        'notificationId': JsonConverters.toJson(notificationId,'NotificationId',context!)
-    };
-
-    getTypeName() => "EmailNotificationRead";
-    TypeContext? context = _ctx;
-}
-
-class EmailNotificationClicked implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    CampaignId? campaignId;
-    CampaignBatchId? campaignBatchId;
-    NotificationId? notificationId;
-    String? sourceId;
-
-    EmailNotificationClicked({this.projectId,this.campaignId,this.campaignBatchId,this.notificationId,this.sourceId});
-    EmailNotificationClicked.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        campaignBatchId = JsonConverters.fromJson(json['campaignBatchId'],'CampaignBatchId',context!);
-        notificationId = JsonConverters.fromJson(json['notificationId'],'NotificationId',context!);
-        sourceId = json['sourceId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'campaignBatchId': JsonConverters.toJson(campaignBatchId,'CampaignBatchId',context!),
-        'notificationId': JsonConverters.toJson(notificationId,'NotificationId',context!),
-        'sourceId': sourceId
-    };
-
-    getTypeName() => "EmailNotificationClicked";
-    TypeContext? context = _ctx;
-}
-
-class EmailCampaignStarted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    CampaignId? campaignId;
-
-    EmailCampaignStarted({this.projectId,this.campaignId});
-    EmailCampaignStarted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!)
-    };
-
-    getTypeName() => "EmailCampaignStarted";
-    TypeContext? context = _ctx;
-}
-
-class EmailCampaignStopped implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    CampaignId? campaignId;
-    CampaignStopReason? reason;
-
-    EmailCampaignStopped({this.projectId,this.campaignId,this.reason});
-    EmailCampaignStopped.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        reason = JsonConverters.fromJson(json['reason'],'CampaignStopReason',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'reason': JsonConverters.toJson(reason,'CampaignStopReason',context!)
-    };
-
-    getTypeName() => "EmailCampaignStopped";
-    TypeContext? context = _ctx;
-}
-
-class EmailCampaignCompleted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    CampaignId? campaignId;
-    List<ErrorDto>? errors;
-
-    EmailCampaignCompleted({this.projectId,this.campaignId,this.errors});
-    EmailCampaignCompleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
-    };
-
-    getTypeName() => "EmailCampaignCompleted";
-    TypeContext? context = _ctx;
-}
-
-class EmailCampaignFailed implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    CampaignId? campaignId;
-    List<ErrorDto> errors = [];
-
-    EmailCampaignFailed({this.projectId,this.campaignId,this.errors=const []});
-    EmailCampaignFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
-    };
-
-    getTypeName() => "EmailCampaignFailed";
-    TypeContext? context = _ctx;
-}
-
-class EmailCampaignTriggered implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    TriggerId? triggerId;
-    TriggerType? triggerType;
-    String sourceEvent = "";
-    String? schemaId;
-    IReadOnlyDictionary<String,String>? tokenMappings;
-
-    EmailCampaignTriggered({this.projectId,this.triggerId,this.triggerType,this.sourceEvent="",this.schemaId,this.tokenMappings});
-    EmailCampaignTriggered.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        triggerId = JsonConverters.fromJson(json['triggerId'],'TriggerId',context!);
-        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
-        sourceEvent = json['sourceEvent'] ?? "";
-        schemaId = json['schemaId'];
-        tokenMappings = JsonConverters.fromJson(json['tokenMappings'],'IReadOnlyDictionary<String,String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'triggerId': JsonConverters.toJson(triggerId,'TriggerId',context!),
-        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!),
-        'sourceEvent': sourceEvent,
-        'schemaId': schemaId,
-        'tokenMappings': JsonConverters.toJson(tokenMappings,'IReadOnlyDictionary<String,String>',context!)
-    };
-
-    getTypeName() => "EmailCampaignTriggered";
-    TypeContext? context = _ctx;
-}
-
-class EmailDeliveryEventReceived implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? integrationId;
-    EmailAddress? recipient;
-    EmailDeliveryEventType? type;
-    DateTime? occurredAt;
-    String? providerMessageId;
-    String? reason;
-
-    EmailDeliveryEventReceived({this.projectId,this.integrationId,this.recipient,this.type,this.occurredAt,this.providerMessageId,this.reason});
-    EmailDeliveryEventReceived.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        recipient = JsonConverters.fromJson(json['recipient'],'EmailAddress',context!);
-        type = JsonConverters.fromJson(json['type'],'EmailDeliveryEventType',context!);
-        occurredAt = JsonConverters.fromJson(json['occurredAt'],'DateTime',context!) ?? DateTime(0);
-        providerMessageId = json['providerMessageId'];
-        reason = json['reason'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'recipient': JsonConverters.toJson(recipient,'EmailAddress',context!),
-        'type': JsonConverters.toJson(type,'EmailDeliveryEventType',context!),
-        'occurredAt': JsonConverters.toJson(occurredAt,'DateTime',context!),
-        'providerMessageId': providerMessageId,
-        'reason': reason
-    };
-
-    getTypeName() => "EmailDeliveryEventReceived";
     TypeContext? context = _ctx;
 }
 
@@ -43644,7 +35803,14 @@ class CreateSmsCampaignRequest extends CodeMashRequestBase implements IReturn<Id
     // @ApiMember(Description="For deliveryType 'PhoneNumbers'. JSON object: {\"recipientsSourceType\":\"PhoneNumbers\",\"phoneNumbers\":[\"+37060000000\"],\"campaignTime\":<unix seconds UTC>}. Numbers in international format.")
     SmsToPhoneNumbersDeliverySettingsDto? phoneNumbers;
 
-    CreateSmsCampaignRequest({this.templateId="",this.databaseIntegrationId,this.language,this.initiatorId,this.deliveryType,this.allUsers,this.specifiedUsers,this.collection,this.phoneNumbers});
+    /**
+    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-016. Set it only when the user explicitly asked to send now.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-016. Set it only when the user explicitly asked to send now.")
+    bool? sendNow;
+
+    CreateSmsCampaignRequest({this.templateId="",this.databaseIntegrationId,this.language,this.initiatorId,this.deliveryType,this.allUsers,this.specifiedUsers,this.collection,this.phoneNumbers,this.sendNow});
     CreateSmsCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -43658,6 +35824,7 @@ class CreateSmsCampaignRequest extends CodeMashRequestBase implements IReturn<Id
         specifiedUsers = JsonConverters.fromJson(json['specifiedUsers'],'SmsToUsersDeliverySettingsDto',context!);
         collection = JsonConverters.fromJson(json['collection'],'SmsToCollectionRecordsDeliverySettingsDto',context!);
         phoneNumbers = JsonConverters.fromJson(json['phoneNumbers'],'SmsToPhoneNumbersDeliverySettingsDto',context!);
+        sendNow = json['sendNow'];
         return this;
     }
 
@@ -43670,7 +35837,8 @@ class CreateSmsCampaignRequest extends CodeMashRequestBase implements IReturn<Id
         'allUsers': JsonConverters.toJson(allUsers,'SmsToAllUsersDeliverySettingsDto',context!),
         'specifiedUsers': JsonConverters.toJson(specifiedUsers,'SmsToUsersDeliverySettingsDto',context!),
         'collection': JsonConverters.toJson(collection,'SmsToCollectionRecordsDeliverySettingsDto',context!),
-        'phoneNumbers': JsonConverters.toJson(phoneNumbers,'SmsToPhoneNumbersDeliverySettingsDto',context!)
+        'phoneNumbers': JsonConverters.toJson(phoneNumbers,'SmsToPhoneNumbersDeliverySettingsDto',context!),
+        'sendNow': sendNow
     });
 
     createResponse() => IdResponse();
@@ -44007,22 +36175,38 @@ class GetSmsCampaignStatistics extends CodeMashRequestBase implements IReturn<Ge
 class PreviewSmsNotification extends RequestBase implements IReturn<PreviewSmsNotificationResponse>, IConvertible, IGet
 {
     /**
-    * Signed preview hash identifying the notification to render.
+    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
     */
-    // @ApiMember(Description="Signed preview hash identifying the notification to render.")
+    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
     String hash = "";
 
-    PreviewSmsNotification({this.hash=""});
+    /**
+    * Signed-in preview by id: the project id. With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
+    String? projectId;
+
+    /**
+    * Signed-in preview by id: the notification id (needs sms:read). With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the notification id (needs sms:read). With a hash it must match the hash.")
+    String? notificationId;
+
+    PreviewSmsNotification({this.hash="",this.projectId,this.notificationId});
     PreviewSmsNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         hash = json['hash'] ?? "";
+        projectId = json['projectId'];
+        notificationId = json['notificationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'hash': hash
+        'hash': hash,
+        'projectId': projectId,
+        'notificationId': notificationId
     });
 
     createResponse() => PreviewSmsNotificationResponse();
@@ -44074,7 +36258,7 @@ class StopSmsCampaignRequest extends CodeMashRequestBase implements IReturn<Empt
 /**
 * Gets campaign sms message details
 */
-// @Route("/{version}/notifications/sms/campaigns/{campaignId}/messages/{id}", "GET")
+// @Route("/{version}/notifications/sms/campaigns/{campaignId}/messages/{notificationId}", "GET")
 // @Api(Description="Gets campaign sms message details")
 class GetSmsCampaignMessage extends CodeMashRequestBase implements IReturn<GetSmsCampaignMessageResponse>, IConvertible, IGet
 {
@@ -44172,615 +36356,6 @@ class GetSmsCampaignMessagesRequest extends CodeMashListPaginationRequestBase im
     createResponse() => GetSmsCampaignMessagesResponse();
     getResponseTypeName() => "GetSmsCampaignMessagesResponse";
     getTypeName() => "GetSmsCampaignMessagesRequest";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationSaved implements IConvertible, IPost
-{
-    SmsIntegration? integration;
-
-    SmsIntegrationSaved({this.integration});
-    SmsIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'SmsIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'SmsIntegration',context!)
-    };
-
-    getTypeName() => "SmsIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    SmsIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    SmsIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationHumanDeliveryConfirmed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DateTime? confirmedAtUtc;
-
-    SmsIntegrationHumanDeliveryConfirmed({this.id,this.confirmedAtUtc});
-    SmsIntegrationHumanDeliveryConfirmed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        confirmedAtUtc = JsonConverters.fromJson(json['confirmedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'confirmedAtUtc': JsonConverters.toJson(confirmedAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "SmsIntegrationHumanDeliveryConfirmed";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    SmsIntegrationRenamed({this.id,this.name,this.env});
-    SmsIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationSetAsDefault implements IConvertible, IPost
-{
-    Env? env;
-    IntegrationId? id;
-
-    SmsIntegrationSetAsDefault({this.env,this.id});
-    SmsIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "SmsIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    SmsIntegrationDeleted({this.id,this.env});
-    SmsIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    SmsIntegrationEnabled({this.id,this.env});
-    SmsIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class SmsIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    SmsIntegrationDisabled({this.id,this.env});
-    SmsIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class SmsServiceEstablished implements IConvertible, IPost
-{
-    List<SmsTemplate>? defaultTemplates;
-
-    SmsServiceEstablished({this.defaultTemplates});
-    SmsServiceEstablished.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        defaultTemplates = JsonConverters.fromJson(json['defaultTemplates'],'List<SmsTemplate>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'defaultTemplates': JsonConverters.toJson(defaultTemplates,'List<SmsTemplate>',context!)
-    };
-
-    getTypeName() => "SmsServiceEstablished";
-    TypeContext? context = _ctx;
-}
-
-class SmsServiceEnabled implements IConvertible, IPost
-{
-    SmsServiceEnabled();
-    SmsServiceEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "SmsServiceEnabled";
-    TypeContext? context = _ctx;
-}
-
-class SmsServiceDisabled implements IConvertible, IPost
-{
-    SmsServiceDisabled();
-    SmsServiceDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "SmsServiceDisabled";
-    TypeContext? context = _ctx;
-}
-
-class SmsTemplateCreated implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    DisplayName? displayName;
-    List<MessageTranslation<SmsMessageContent>> translations = [];
-    CommunicationChannel? channel;
-    String? description;
-    List<Tag>? tags;
-    Env? env;
-
-    SmsTemplateCreated({this.templateId,this.displayName,this.translations=const [],this.channel,this.description,this.tags,this.env});
-    SmsTemplateCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<SmsMessageContent>>',context!) ?? [];
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        description = json['description'];
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<SmsMessageContent>>',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'description': description,
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsTemplateCreated";
-    TypeContext? context = _ctx;
-}
-
-class SmsTemplateUpdated implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    DisplayName? displayName;
-    List<MessageTranslation<SmsMessageContent>> translations = [];
-    CommunicationChannel? channel;
-    String? description;
-    List<Tag>? tags;
-    Env? env;
-
-    SmsTemplateUpdated({this.templateId,this.displayName,this.translations=const [],this.channel,this.description,this.tags,this.env});
-    SmsTemplateUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<SmsMessageContent>>',context!) ?? [];
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        description = json['description'];
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<SmsMessageContent>>',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'description': description,
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsTemplateUpdated";
-    TypeContext? context = _ctx;
-}
-
-class SmsTemplateMirrored implements IConvertible, IPost
-{
-    SmsTemplate? template;
-
-    SmsTemplateMirrored({this.template});
-    SmsTemplateMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        template = JsonConverters.fromJson(json['template'],'SmsTemplate',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'template': JsonConverters.toJson(template,'SmsTemplate',context!)
-    };
-
-    getTypeName() => "SmsTemplateMirrored";
-    TypeContext? context = _ctx;
-}
-
-class SmsTemplateDeleted implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    SmsTemplateDeleted({this.templateId,this.env});
-    SmsTemplateDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsTemplateDeleted";
-    TypeContext? context = _ctx;
-}
-
-class SmsTemplateArchived implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    SmsTemplateArchived({this.templateId,this.env});
-    SmsTemplateArchived.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsTemplateArchived";
-    TypeContext? context = _ctx;
-}
-
-class SmsTemplateUnArchived implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    SmsTemplateUnArchived({this.templateId,this.env});
-    SmsTemplateUnArchived.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "SmsTemplateUnArchived";
-    TypeContext? context = _ctx;
-}
-
-class SmsBatchRegistered implements IConvertible, IPost
-{
-    CampaignId? campaignId;
-    CampaignBatchId? campaignBatchId;
-    String? startingAfter;
-
-    SmsBatchRegistered({this.campaignId,this.campaignBatchId,this.startingAfter});
-    SmsBatchRegistered.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        campaignBatchId = JsonConverters.fromJson(json['campaignBatchId'],'CampaignBatchId',context!);
-        startingAfter = json['startingAfter'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'campaignBatchId': JsonConverters.toJson(campaignBatchId,'CampaignBatchId',context!),
-        'startingAfter': startingAfter
-    };
-
-    getTypeName() => "SmsBatchRegistered";
-    TypeContext? context = _ctx;
-}
-
-class SmsNotificationRead implements IConvertible, IPost
-{
-    CampaignId? campaignId;
-    CampaignBatchId? campaignBatchId;
-    NotificationId? notificationId;
-
-    SmsNotificationRead({this.campaignId,this.campaignBatchId,this.notificationId});
-    SmsNotificationRead.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        campaignBatchId = JsonConverters.fromJson(json['campaignBatchId'],'CampaignBatchId',context!);
-        notificationId = JsonConverters.fromJson(json['notificationId'],'NotificationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'campaignBatchId': JsonConverters.toJson(campaignBatchId,'CampaignBatchId',context!),
-        'notificationId': JsonConverters.toJson(notificationId,'NotificationId',context!)
-    };
-
-    getTypeName() => "SmsNotificationRead";
-    TypeContext? context = _ctx;
-}
-
-class SmsNotificationClicked implements IConvertible, IPost
-{
-    CampaignId? campaignId;
-    CampaignBatchId? campaignBatchId;
-    NotificationId? notificationId;
-    String? sourceId;
-
-    SmsNotificationClicked({this.campaignId,this.campaignBatchId,this.notificationId,this.sourceId});
-    SmsNotificationClicked.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        campaignBatchId = JsonConverters.fromJson(json['campaignBatchId'],'CampaignBatchId',context!);
-        notificationId = JsonConverters.fromJson(json['notificationId'],'NotificationId',context!);
-        sourceId = json['sourceId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'campaignBatchId': JsonConverters.toJson(campaignBatchId,'CampaignBatchId',context!),
-        'notificationId': JsonConverters.toJson(notificationId,'NotificationId',context!),
-        'sourceId': sourceId
-    };
-
-    getTypeName() => "SmsNotificationClicked";
-    TypeContext? context = _ctx;
-}
-
-class SmsCampaignStarted implements IConvertible, IPost
-{
-    CampaignId? campaignId;
-
-    SmsCampaignStarted({this.campaignId});
-    SmsCampaignStarted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!)
-    };
-
-    getTypeName() => "SmsCampaignStarted";
-    TypeContext? context = _ctx;
-}
-
-class SmsCampaignStopped implements IConvertible, IPost
-{
-    CampaignId? campaignId;
-    CampaignStopReason? reason;
-
-    SmsCampaignStopped({this.campaignId,this.reason});
-    SmsCampaignStopped.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        reason = JsonConverters.fromJson(json['reason'],'CampaignStopReason',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'reason': JsonConverters.toJson(reason,'CampaignStopReason',context!)
-    };
-
-    getTypeName() => "SmsCampaignStopped";
-    TypeContext? context = _ctx;
-}
-
-class SmsCampaignCompleted implements IConvertible, IPost
-{
-    CampaignId? campaignId;
-    List<ErrorDto>? errors;
-
-    SmsCampaignCompleted({this.campaignId,this.errors});
-    SmsCampaignCompleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
-    };
-
-    getTypeName() => "SmsCampaignCompleted";
-    TypeContext? context = _ctx;
-}
-
-class SmsCampaignFailed implements IConvertible, IPost
-{
-    CampaignId? campaignId;
-    List<ErrorDto> errors = [];
-
-    SmsCampaignFailed({this.campaignId,this.errors=const []});
-    SmsCampaignFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = JsonConverters.fromJson(json['campaignId'],'CampaignId',context!);
-        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': JsonConverters.toJson(campaignId,'CampaignId',context!),
-        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
-    };
-
-    getTypeName() => "SmsCampaignFailed";
-    TypeContext? context = _ctx;
-}
-
-class SmsCampaignTriggered implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    TriggerId? triggerId;
-    TriggerType? triggerType;
-    String sourceEvent = "";
-    String? schemaId;
-    IReadOnlyDictionary<String,String>? tokenMappings;
-
-    SmsCampaignTriggered({this.projectId,this.triggerId,this.triggerType,this.sourceEvent="",this.schemaId,this.tokenMappings});
-    SmsCampaignTriggered.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        triggerId = JsonConverters.fromJson(json['triggerId'],'TriggerId',context!);
-        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
-        sourceEvent = json['sourceEvent'] ?? "";
-        schemaId = json['schemaId'];
-        tokenMappings = JsonConverters.fromJson(json['tokenMappings'],'IReadOnlyDictionary<String,String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'triggerId': JsonConverters.toJson(triggerId,'TriggerId',context!),
-        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!),
-        'sourceEvent': sourceEvent,
-        'schemaId': schemaId,
-        'tokenMappings': JsonConverters.toJson(tokenMappings,'IReadOnlyDictionary<String,String>',context!)
-    };
-
-    getTypeName() => "SmsCampaignTriggered";
     TypeContext? context = _ctx;
 }
 
@@ -44909,478 +36484,6 @@ class GetMarketplaceFunctionCatalog extends CodeMashRequestBase implements IRetu
     createResponse() => GetMarketplaceFunctionCatalogResponse();
     getResponseTypeName() => "GetMarketplaceFunctionCatalogResponse";
     getTypeName() => "GetMarketplaceFunctionCatalog";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationSaved implements IConvertible, IPost
-{
-    CodeIntegration? integration;
-
-    CodeIntegrationSaved({this.integration});
-    CodeIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'CodeIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'CodeIntegration',context!)
-    };
-
-    getTypeName() => "CodeIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    CodeIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    CodeIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "CodeIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationHumanDeliveryConfirmed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DateTime? confirmedAtUtc;
-
-    CodeIntegrationHumanDeliveryConfirmed({this.id,this.confirmedAtUtc});
-    CodeIntegrationHumanDeliveryConfirmed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        confirmedAtUtc = JsonConverters.fromJson(json['confirmedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'confirmedAtUtc': JsonConverters.toJson(confirmedAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "CodeIntegrationHumanDeliveryConfirmed";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    CodeIntegrationRenamed({this.id,this.name,this.env});
-    CodeIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "CodeIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationSetAsDefault implements IConvertible, IPost
-{
-    IntegrationId? id;
-
-    CodeIntegrationSetAsDefault({this.id});
-    CodeIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "CodeIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    CodeIntegrationDeleted({this.id,this.env});
-    CodeIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "CodeIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    CodeIntegrationEnabled({this.id,this.env});
-    CodeIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "CodeIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class CodeIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    CodeIntegrationDisabled({this.id,this.env});
-    CodeIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "CodeIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegrationSaved implements IConvertible, IPost
-{
-    MarketplaceIntegration? integration;
-
-    MarketplaceIntegrationSaved({this.integration});
-    MarketplaceIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'MarketplaceIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'MarketplaceIntegration',context!)
-    };
-
-    getTypeName() => "MarketplaceIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MarketplaceIntegrationDeleted({this.id,this.env});
-    MarketplaceIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MarketplaceIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MarketplaceIntegrationEnabled({this.id,this.env});
-    MarketplaceIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MarketplaceIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MarketplaceIntegrationDisabled({this.id,this.env});
-    MarketplaceIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MarketplaceIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    MarketplaceIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    MarketplaceIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MarketplaceIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegrationSecretsConfigured implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MarketplaceIntegrationSecretsConfigured({this.id,this.env});
-    MarketplaceIntegrationSecretsConfigured.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MarketplaceIntegrationSecretsConfigured";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceIntegrationSecretsConfigurationFailed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    MarketplaceIntegrationSecretsConfigurationFailed({this.id,this.env});
-    MarketplaceIntegrationSecretsConfigurationFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "MarketplaceIntegrationSecretsConfigurationFailed";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceFunctionSaved implements IConvertible, IPost
-{
-    MarketplaceFunction? function;
-
-    MarketplaceFunctionSaved({this.function});
-    MarketplaceFunctionSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        function = JsonConverters.fromJson(json['function'],'MarketplaceFunction',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'function': JsonConverters.toJson(function,'MarketplaceFunction',context!)
-    };
-
-    getTypeName() => "MarketplaceFunctionSaved";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceFunctionDeleted implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    MarketplaceFunctionId? functionId;
-
-    MarketplaceFunctionDeleted({this.integrationId,this.functionId});
-    MarketplaceFunctionDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        functionId = JsonConverters.fromJson(json['functionId'],'MarketplaceFunctionId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'functionId': JsonConverters.toJson(functionId,'MarketplaceFunctionId',context!)
-    };
-
-    getTypeName() => "MarketplaceFunctionDeleted";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceFunctionEnabled implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    MarketplaceFunctionId? functionId;
-
-    MarketplaceFunctionEnabled({this.integrationId,this.functionId});
-    MarketplaceFunctionEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        functionId = JsonConverters.fromJson(json['functionId'],'MarketplaceFunctionId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'functionId': JsonConverters.toJson(functionId,'MarketplaceFunctionId',context!)
-    };
-
-    getTypeName() => "MarketplaceFunctionEnabled";
-    TypeContext? context = _ctx;
-}
-
-class MarketplaceFunctionDisabled implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    MarketplaceFunctionId? functionId;
-
-    MarketplaceFunctionDisabled({this.integrationId,this.functionId});
-    MarketplaceFunctionDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        functionId = JsonConverters.fromJson(json['functionId'],'MarketplaceFunctionId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'functionId': JsonConverters.toJson(functionId,'MarketplaceFunctionId',context!)
-    };
-
-    getTypeName() => "MarketplaceFunctionDisabled";
-    TypeContext? context = _ctx;
-}
-
-class ServerlessEnabled implements IConvertible, IPost
-{
-    ServerlessEnabled();
-    ServerlessEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "ServerlessEnabled";
-    TypeContext? context = _ctx;
-}
-
-class ServerlessDisabled implements IConvertible, IPost
-{
-    ServerlessDisabled();
-    ServerlessDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "ServerlessDisabled";
     TypeContext? context = _ctx;
 }
 
@@ -46104,45 +37207,6 @@ class TestPushIntegration extends CodeMashRequestBase implements IReturn<TestEma
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/notifications/push/integrations/app/request", "POST")
-class RegisterCodeMashAppPushIntegration extends CodeMashRequestBase implements IReturn<EmptyResponse>, IHasAccountId, IConvertible, IPost
-{
-    String accountId = "";
-    String userId = "";
-    String requestId = "";
-    int pin = 0;
-    DateTime? validTill;
-    String publicKey = "";
-
-    RegisterCodeMashAppPushIntegration({this.accountId="",this.userId="",this.requestId="",this.pin=0,this.validTill,this.publicKey=""});
-    RegisterCodeMashAppPushIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        accountId = json['accountId'] ?? "";
-        userId = json['userId'] ?? "";
-        requestId = json['requestId'] ?? "";
-        pin = json['pin'] ?? 0;
-        validTill = JsonConverters.fromJson(json['validTill'],'DateTime',context!) ?? DateTime(0);
-        publicKey = json['publicKey'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'accountId': accountId,
-        'userId': userId,
-        'requestId': requestId,
-        'pin': pin,
-        'validTill': JsonConverters.toJson(validTill,'DateTime',context!),
-        'publicKey': publicKey
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "RegisterCodeMashAppPushIntegration";
-    TypeContext? context = _ctx;
-}
-
 /**
 * Registers a device for push notifications
 */
@@ -46210,6 +37274,102 @@ class RegisterDevice extends RequestBase implements IReturn<IdResponse>, IHasPro
 }
 
 /**
+* Gets a registered push device
+*/
+// @Route("/{version}/notifications/push/devices/{id}", "GET")
+// @Api(Description="Gets a registered push device")
+class GetPushDevice extends CodeMashRequestBase implements IReturn<GetPushDeviceResponse>, IConvertible, IGet
+{
+    /**
+    * The device id to fetch. Get it from get_push_devices.
+    */
+    // @ApiMember(Description="The device id to fetch. Get it from get_push_devices.")
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    GetPushDevice({this.id="",this.databaseIntegrationId});
+    GetPushDevice.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushDeviceResponse();
+    getResponseTypeName() => "GetPushDeviceResponse";
+    getTypeName() => "GetPushDevice";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets registered push devices
+*/
+// @Route("/{version}/notifications/push/devices", "GET")
+// @Api(Description="Gets registered push devices")
+class GetPushDevices extends CodeMashListPaginationRequestBase implements IReturn<GetPushDevicesResponse>, IConvertible, IGet
+{
+    /**
+    * Optional: only the devices of this user.
+    */
+    // @ApiMember(Description="Optional: only the devices of this user.")
+    String? userId;
+
+    /**
+    * Optional: only the device registered with this provider token.
+    */
+    // @ApiMember(Description="Optional: only the device registered with this provider token.")
+    String? deviceKey;
+
+    /**
+    * Optional: only devices of this platform — ios, android, chrome, safari or expo.
+    */
+    // @ApiMember(Description="Optional: only devices of this platform — ios, android, chrome, safari or expo.")
+    String? platform;
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    GetPushDevices({this.userId,this.deviceKey,this.platform,this.databaseIntegrationId});
+    GetPushDevices.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        userId = json['userId'];
+        deviceKey = json['deviceKey'];
+        platform = json['platform'];
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'userId': userId,
+        'deviceKey': deviceKey,
+        'platform': platform,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushDevicesResponse();
+    getResponseTypeName() => "GetPushDevicesResponse";
+    getTypeName() => "GetPushDevices";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Create push campaign
 */
 // @Route("/{version}/notifications/push/campaigns", "POST")
@@ -46223,19 +37383,28 @@ class CreatePushCampaignRequest extends CodeMashRequestBase implements IReturn<I
     // @DataMember
     String? databaseIntegrationId;
 
-    CreatePushCampaignRequest({this.campaign,this.databaseIntegrationId});
+    /**
+    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-016. Set it only when the user explicitly asked to send now.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-016. Set it only when the user explicitly asked to send now.")
+    bool? sendNow;
+
+    CreatePushCampaignRequest({this.campaign,this.databaseIntegrationId,this.sendNow});
     CreatePushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         campaign = JsonConverters.fromJson(json['campaign'],'PushCampaignRequest',context!);
         databaseIntegrationId = json['databaseIntegrationId'];
+        sendNow = json['sendNow'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'campaign': JsonConverters.toJson(campaign,'PushCampaignRequest',context!),
-        'databaseIntegrationId': databaseIntegrationId
+        'databaseIntegrationId': databaseIntegrationId,
+        'sendNow': sendNow
     });
 
     createResponse() => IdResponse();
@@ -46252,14 +37421,35 @@ class CreatePushCampaignRequest extends CodeMashRequestBase implements IReturn<I
 // @DataContract
 class DeletePushCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
 {
-    DeletePushCampaignRequest();
-    DeletePushCampaignRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    /**
+    * The push campaign id to delete. Get it from get_push_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The push campaign id to delete. Get it from get_push_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    DeletePushCampaignRequest({this.id="",this.databaseIntegrationId});
+    DeletePushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "DeletePushCampaignRequest";
@@ -46562,22 +37752,38 @@ class GetPushCampaignStatistics extends CodeMashRequestBase implements IReturn<G
 class PreviewPushNotification extends RequestBase implements IReturn<PreviewPushNotificationResponse>, IConvertible, IGet
 {
     /**
-    * The encrypted preview hash identifying the project and notification.
+    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
     */
-    // @ApiMember(Description="The encrypted preview hash identifying the project and notification.")
+    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
     String hash = "";
 
-    PreviewPushNotification({this.hash=""});
+    /**
+    * Signed-in preview by id: the project id. With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
+    String? projectId;
+
+    /**
+    * Signed-in preview by id: the notification id (needs push:read). With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the notification id (needs push:read). With a hash it must match the hash.")
+    String? notificationId;
+
+    PreviewPushNotification({this.hash="",this.projectId,this.notificationId});
     PreviewPushNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         hash = json['hash'] ?? "";
+        projectId = json['projectId'];
+        notificationId = json['notificationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'hash': hash
+        'hash': hash,
+        'projectId': projectId,
+        'notificationId': notificationId
     });
 
     createResponse() => PreviewPushNotificationResponse();
@@ -46594,14 +37800,35 @@ class PreviewPushNotification extends RequestBase implements IReturn<PreviewPush
 // @DataContract
 class StopPushCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
 {
-    StopPushCampaignRequest();
-    StopPushCampaignRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    /**
+    * The campaign id to stop.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id to stop.")
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    StopPushCampaignRequest({this.id="",this.databaseIntegrationId});
+    StopPushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "StopPushCampaignRequest";
@@ -46611,7 +37838,7 @@ class StopPushCampaignRequest extends CodeMashRequestBase implements IReturn<Emp
 /**
 * Gets campaign push notification details
 */
-// @Route("/{version}/notifications/push/campaigns/{campaignId}/messages/{id}", "GET")
+// @Route("/{version}/notifications/push/campaigns/{campaignId}/messages/{notificationId}", "GET")
 // @Api(Description="Gets campaign push notification details")
 class GetPushCampaignMessage extends CodeMashRequestBase implements IReturn<GetPushCampaignMessageResponse>, IConvertible, IGet
 {
@@ -46709,456 +37936,6 @@ class GetPushCampaignMessagesRequest extends CodeMashListPaginationRequestBase i
     createResponse() => GetPushCampaignMessagesResponse();
     getResponseTypeName() => "GetPushCampaignMessagesResponse";
     getTypeName() => "GetPushCampaignMessagesRequest";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationSaved implements IConvertible, IPost
-{
-    PushIntegration? integration;
-
-    PushIntegrationSaved({this.integration});
-    PushIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'PushIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'PushIntegration',context!)
-    };
-
-    getTypeName() => "PushIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    PushIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    PushIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationHumanDeliveryConfirmed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DateTime? confirmedAtUtc;
-
-    PushIntegrationHumanDeliveryConfirmed({this.id,this.confirmedAtUtc});
-    PushIntegrationHumanDeliveryConfirmed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        confirmedAtUtc = JsonConverters.fromJson(json['confirmedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'confirmedAtUtc': JsonConverters.toJson(confirmedAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "PushIntegrationHumanDeliveryConfirmed";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    PushIntegrationRenamed({this.id,this.name,this.env});
-    PushIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationSetAsDefault implements IConvertible, IPost
-{
-    Env? env;
-    IntegrationId? id;
-
-    PushIntegrationSetAsDefault({this.env,this.id});
-    PushIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'env': JsonConverters.toJson(env,'Env',context!),
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "PushIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    PushIntegrationDeleted({this.id,this.env});
-    PushIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    PushIntegrationEnabled({this.id,this.env});
-    PushIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class PushIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    PushIntegrationDisabled({this.id,this.env});
-    PushIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class PushServiceEstablished implements IConvertible, IPost
-{
-    List<PushTemplate>? defaultTemplates;
-
-    PushServiceEstablished({this.defaultTemplates});
-    PushServiceEstablished.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        defaultTemplates = JsonConverters.fromJson(json['defaultTemplates'],'List<PushTemplate>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'defaultTemplates': JsonConverters.toJson(defaultTemplates,'List<PushTemplate>',context!)
-    };
-
-    getTypeName() => "PushServiceEstablished";
-    TypeContext? context = _ctx;
-}
-
-class PushServiceEnabled implements IConvertible, IPost
-{
-    PushServiceEnabled();
-    PushServiceEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "PushServiceEnabled";
-    TypeContext? context = _ctx;
-}
-
-class PushServiceDisabled implements IConvertible, IPost
-{
-    PushServiceDisabled();
-    PushServiceDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "PushServiceDisabled";
-    TypeContext? context = _ctx;
-}
-
-class PushModuleTagSaved implements IConvertible, IPost
-{
-    TagDefinition? tag;
-    CommunicationChannel? communicationChannel;
-
-    PushModuleTagSaved({this.tag,this.communicationChannel});
-    PushModuleTagSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        tag = JsonConverters.fromJson(json['tag'],'TagDefinition',context!);
-        communicationChannel = JsonConverters.fromJson(json['communicationChannel'],'CommunicationChannel',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'tag': JsonConverters.toJson(tag,'TagDefinition',context!),
-        'communicationChannel': JsonConverters.toJson(communicationChannel,'CommunicationChannel',context!)
-    };
-
-    getTypeName() => "PushModuleTagSaved";
-    TypeContext? context = _ctx;
-}
-
-class PushModuleTagDeleted implements IConvertible, IPost
-{
-    Tag? tag;
-    CommunicationChannel? communicationChannel;
-
-    PushModuleTagDeleted({this.tag,this.communicationChannel});
-    PushModuleTagDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        tag = JsonConverters.fromJson(json['tag'],'Tag',context!);
-        communicationChannel = JsonConverters.fromJson(json['communicationChannel'],'CommunicationChannel',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'tag': JsonConverters.toJson(tag,'Tag',context!),
-        'communicationChannel': JsonConverters.toJson(communicationChannel,'CommunicationChannel',context!)
-    };
-
-    getTypeName() => "PushModuleTagDeleted";
-    TypeContext? context = _ctx;
-}
-
-class PushTemplateCreated implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    DisplayName? displayName;
-    List<MessageTranslation<PushMessageContent>> translations = [];
-    CommunicationChannel? channel;
-    String? description;
-    List<Tag>? tags;
-    Env? env;
-
-    PushTemplateCreated({this.templateId,this.displayName,this.translations=const [],this.channel,this.description,this.tags,this.env});
-    PushTemplateCreated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<PushMessageContent>>',context!) ?? [];
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        description = json['description'];
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<PushMessageContent>>',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'description': description,
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushTemplateCreated";
-    TypeContext? context = _ctx;
-}
-
-class PushTemplateUpdated implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    DisplayName? displayName;
-    List<MessageTranslation<PushMessageContent>> translations = [];
-    CommunicationChannel? channel;
-    String? description;
-    List<Tag>? tags;
-    Env? env;
-
-    PushTemplateUpdated({this.templateId,this.displayName,this.translations=const [],this.channel,this.description,this.tags,this.env});
-    PushTemplateUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        displayName = JsonConverters.fromJson(json['displayName'],'DisplayName',context!);
-        translations = JsonConverters.fromJson(json['translations'],'List<MessageTranslation<PushMessageContent>>',context!) ?? [];
-        channel = JsonConverters.fromJson(json['channel'],'CommunicationChannel',context!);
-        description = json['description'];
-        tags = JsonConverters.fromJson(json['tags'],'List<Tag>',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'displayName': JsonConverters.toJson(displayName,'DisplayName',context!),
-        'translations': JsonConverters.toJson(translations,'List<MessageTranslation<PushMessageContent>>',context!),
-        'channel': JsonConverters.toJson(channel,'CommunicationChannel',context!),
-        'description': description,
-        'tags': JsonConverters.toJson(tags,'List<Tag>',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushTemplateUpdated";
-    TypeContext? context = _ctx;
-}
-
-class PushTemplateMirrored implements IConvertible, IPost
-{
-    PushTemplate? template;
-
-    PushTemplateMirrored({this.template});
-    PushTemplateMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        template = JsonConverters.fromJson(json['template'],'PushTemplate',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'template': JsonConverters.toJson(template,'PushTemplate',context!)
-    };
-
-    getTypeName() => "PushTemplateMirrored";
-    TypeContext? context = _ctx;
-}
-
-class PushTemplateDeleted implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    PushTemplateDeleted({this.templateId,this.env});
-    PushTemplateDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushTemplateDeleted";
-    TypeContext? context = _ctx;
-}
-
-class PushTemplateArchived implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    PushTemplateArchived({this.templateId,this.env});
-    PushTemplateArchived.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushTemplateArchived";
-    TypeContext? context = _ctx;
-}
-
-class PushTemplateUnArchived implements IConvertible, IPost
-{
-    TemplateId? templateId;
-    Env? env;
-
-    PushTemplateUnArchived({this.templateId,this.env});
-    PushTemplateUnArchived.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        templateId = JsonConverters.fromJson(json['templateId'],'TemplateId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'templateId': JsonConverters.toJson(templateId,'TemplateId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PushTemplateUnArchived";
     TypeContext? context = _ctx;
 }
 
@@ -47612,318 +38389,6 @@ class TestPaymentsIntegration extends CodeMashRequestBase implements IReturn<Tes
     createResponse() => TestPaymentsIntegrationResponse();
     getResponseTypeName() => "TestPaymentsIntegrationResponse";
     getTypeName() => "TestPaymentsIntegration";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsIntegrationSaved implements IConvertible, IPost
-{
-    PaymentIntegration? integration;
-
-    PaymentsIntegrationSaved({this.integration});
-    PaymentsIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'PaymentIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'PaymentIntegration',context!)
-    };
-
-    getTypeName() => "PaymentsIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    PaymentsIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    PaymentsIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PaymentsIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsIntegrationHumanDeliveryConfirmed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DateTime? confirmedAtUtc;
-
-    PaymentsIntegrationHumanDeliveryConfirmed({this.id,this.confirmedAtUtc});
-    PaymentsIntegrationHumanDeliveryConfirmed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        confirmedAtUtc = JsonConverters.fromJson(json['confirmedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'confirmedAtUtc': JsonConverters.toJson(confirmedAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "PaymentsIntegrationHumanDeliveryConfirmed";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    PaymentsIntegrationRenamed({this.id,this.name,this.env});
-    PaymentsIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PaymentsIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    PaymentsIntegrationDeleted({this.id,this.env});
-    PaymentsIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PaymentsIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    PaymentsIntegrationEnabled({this.id,this.env});
-    PaymentsIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PaymentsIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    PaymentsIntegrationDisabled({this.id,this.env});
-    PaymentsIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "PaymentsIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsEstablished implements IConvertible, IPost
-{
-    PaymentsEstablished();
-    PaymentsEstablished.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "PaymentsEstablished";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsEnabled implements IConvertible, IPost
-{
-    PaymentsEnabled();
-    PaymentsEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "PaymentsEnabled";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsDisabled implements IConvertible, IPost
-{
-    PaymentsDisabled();
-    PaymentsDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "PaymentsDisabled";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsTriggerSaved implements IConvertible, IPost
-{
-    PaymentTrigger? trigger;
-
-    PaymentsTriggerSaved({this.trigger});
-    PaymentsTriggerSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'PaymentTrigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'PaymentTrigger',context!)
-    };
-
-    getTypeName() => "PaymentsTriggerSaved";
-    TypeContext? context = _ctx;
-}
-
-class PaymentTriggerMirrored implements IConvertible, IPost
-{
-    Trigger? trigger;
-
-    PaymentTriggerMirrored({this.trigger});
-    PaymentTriggerMirrored.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        trigger = JsonConverters.fromJson(json['trigger'],'Trigger',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'trigger': JsonConverters.toJson(trigger,'Trigger',context!)
-    };
-
-    getTypeName() => "PaymentTriggerMirrored";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsTriggerEnabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    PaymentsTriggerEnabled({this.env});
-    PaymentsTriggerEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "PaymentsTriggerEnabled";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsTriggerDisabled extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    PaymentsTriggerDisabled({this.env});
-    PaymentsTriggerDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "PaymentsTriggerDisabled";
-    TypeContext? context = _ctx;
-}
-
-class PaymentsTriggerDeleted extends TriggerByIdEventBase implements IConvertible, IPost
-{
-    Env? env;
-
-    PaymentsTriggerDeleted({this.env});
-    PaymentsTriggerDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'env': JsonConverters.toJson(env,'Env',context!)
-    });
-
-    getTypeName() => "PaymentsTriggerDeleted";
     TypeContext? context = _ctx;
 }
 
@@ -48397,324 +38862,24 @@ class SaveLogSettings extends CodeMashRequestBase implements IReturn<SaveLogSett
     TypeContext? context = _ctx;
 }
 
-class LoggingIntegrationSaved implements IConvertible, IPost
+/**
+* Paste-ready prompt and client snippets to connect an AI tool to this installation.
+*/
+// @Route("/{version}/account/agent/onboarding", "GET")
+// @Api(Description="Paste-ready prompt and client snippets to connect an AI tool to this installation.")
+class GetAgentOnboardingRequest extends RequestBase implements IReturn<GetAgentOnboardingResponse>, IConvertible, IGet
 {
-    LoggingIntegration? integration;
-
-    LoggingIntegrationSaved({this.integration});
-    LoggingIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
+    GetAgentOnboardingRequest();
+    GetAgentOnboardingRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
     fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'LoggingIntegration',context!);
+        super.fromMap(json);
         return this;
     }
 
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'LoggingIntegration',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    LoggingIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    LoggingIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationRenamed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    DisplayName? name;
-    Env? env;
-
-    LoggingIntegrationRenamed({this.id,this.name,this.env});
-    LoggingIntegrationRenamed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'name': JsonConverters.toJson(name,'DisplayName',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationRenamed";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LoggingIntegrationDeleted({this.id,this.env});
-    LoggingIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LoggingIntegrationEnabled({this.id,this.env});
-    LoggingIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LoggingIntegrationDisabled({this.id,this.env});
-    LoggingIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationSecretsConfigured implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LoggingIntegrationSecretsConfigured({this.id,this.env});
-    LoggingIntegrationSecretsConfigured.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationSecretsConfigured";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationSecretsConfigurationFailed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LoggingIntegrationSecretsConfigurationFailed({this.id,this.env});
-    LoggingIntegrationSecretsConfigurationFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationSecretsConfigurationFailed";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationSecretsCleared implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LoggingIntegrationSecretsCleared({this.id,this.env});
-    LoggingIntegrationSecretsCleared.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationSecretsCleared";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationSecretsClearingFailed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LoggingIntegrationSecretsClearingFailed({this.id,this.env});
-    LoggingIntegrationSecretsClearingFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationSecretsClearingFailed";
-    TypeContext? context = _ctx;
-}
-
-class LoggingIntegrationSetAsDefault implements IConvertible, IPost
-{
-    IntegrationId? id;
-
-    LoggingIntegrationSetAsDefault({this.id});
-    LoggingIntegrationSetAsDefault.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!)
-    };
-
-    getTypeName() => "LoggingIntegrationSetAsDefault";
-    TypeContext? context = _ctx;
-}
-
-class NorbixLoggingLogsWipeRequested implements IConvertible, IPost
-{
-    IntegrationId? deletedIntegrationId;
-    IntegrationId? databaseIntegrationId;
-
-    NorbixLoggingLogsWipeRequested({this.deletedIntegrationId,this.databaseIntegrationId});
-    NorbixLoggingLogsWipeRequested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        deletedIntegrationId = JsonConverters.fromJson(json['deletedIntegrationId'],'IntegrationId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'deletedIntegrationId': JsonConverters.toJson(deletedIntegrationId,'IntegrationId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!)
-    };
-
-    getTypeName() => "NorbixLoggingLogsWipeRequested";
-    TypeContext? context = _ctx;
-}
-
-class LoggingEstablished implements IConvertible, IPost
-{
-    LoggingEstablished();
-    LoggingEstablished.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "LoggingEstablished";
-    TypeContext? context = _ctx;
-}
-
-class LoggingEnabled implements IConvertible, IPost
-{
-    LoggingEnabled();
-    LoggingEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "LoggingEnabled";
-    TypeContext? context = _ctx;
-}
-
-class LoggingDisabled implements IConvertible, IPost
-{
-    LoggingDisabled();
-    LoggingDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "LoggingDisabled";
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetAgentOnboardingResponse();
+    getResponseTypeName() => "GetAgentOnboardingResponse";
+    getTypeName() => "GetAgentOnboardingRequest";
     TypeContext? context = _ctx;
 }
 
@@ -48774,37 +38939,6 @@ class InvokeAiToolRequest extends RequestBase implements IReturn<InvokeAiToolRes
     createResponse() => InvokeAiToolResponse();
     getResponseTypeName() => "InvokeAiToolResponse";
     getTypeName() => "InvokeAiToolRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets account info.
-*/
-// @Route("/{version}/account/chat/complete", "POST")
-// @Api(Description="Gets account info.")
-class AskChatRequest extends RequestBase implements IReturn<AskChatResponse>, IConvertible, IPost
-{
-    String prompt = "";
-    String? profile;
-
-    AskChatRequest({this.prompt="",this.profile});
-    AskChatRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        prompt = json['prompt'] ?? "";
-        profile = json['profile'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'prompt': prompt,
-        'profile': profile
-    });
-
-    createResponse() => AskChatResponse();
-    getResponseTypeName() => "AskChatResponse";
-    getTypeName() => "AskChatRequest";
     TypeContext? context = _ctx;
 }
 
@@ -49869,544 +40003,6 @@ class TestMcpIntegration extends CodeMashRequestBase implements IReturn<TestLlmI
     TypeContext? context = _ctx;
 }
 
-class LlmIntegrationSaved implements IConvertible, IPost
-{
-    LlmIntegration? llmIntegration;
-
-    LlmIntegrationSaved({this.llmIntegration});
-    LlmIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        llmIntegration = JsonConverters.fromJson(json['llmIntegration'],'LlmIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'llmIntegration': JsonConverters.toJson(llmIntegration,'LlmIntegration',context!)
-    };
-
-    getTypeName() => "LlmIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class LlmIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LlmIntegrationDeleted({this.id,this.env});
-    LlmIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LlmIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class LlmIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LlmIntegrationEnabled({this.id,this.env});
-    LlmIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LlmIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class LlmIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LlmIntegrationDisabled({this.id,this.env});
-    LlmIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LlmIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class LlmIntegrationSecretsConfigured implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LlmIntegrationSecretsConfigured({this.id,this.env});
-    LlmIntegrationSecretsConfigured.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LlmIntegrationSecretsConfigured";
-    TypeContext? context = _ctx;
-}
-
-class LlmIntegrationSecretsConfigurationFailed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    LlmIntegrationSecretsConfigurationFailed({this.id,this.env});
-    LlmIntegrationSecretsConfigurationFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LlmIntegrationSecretsConfigurationFailed";
-    TypeContext? context = _ctx;
-}
-
-class LlmIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    LlmIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    LlmIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "LlmIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class McpIntegrationSaved implements IConvertible, IPost
-{
-    McpIntegration? mcpIntegration;
-
-    McpIntegrationSaved({this.mcpIntegration});
-    McpIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        mcpIntegration = JsonConverters.fromJson(json['mcpIntegration'],'McpIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'mcpIntegration': JsonConverters.toJson(mcpIntegration,'McpIntegration',context!)
-    };
-
-    getTypeName() => "McpIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class McpIntegrationDeleted implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    McpIntegrationDeleted({this.id,this.env});
-    McpIntegrationDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "McpIntegrationDeleted";
-    TypeContext? context = _ctx;
-}
-
-class McpIntegrationEnabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    McpIntegrationEnabled({this.id,this.env});
-    McpIntegrationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "McpIntegrationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class McpIntegrationDisabled implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    McpIntegrationDisabled({this.id,this.env});
-    McpIntegrationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "McpIntegrationDisabled";
-    TypeContext? context = _ctx;
-}
-
-class McpIntegrationSecretsConfigured implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    McpIntegrationSecretsConfigured({this.id,this.env});
-    McpIntegrationSecretsConfigured.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "McpIntegrationSecretsConfigured";
-    TypeContext? context = _ctx;
-}
-
-class McpIntegrationSecretsConfigurationFailed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    McpIntegrationSecretsConfigurationFailed({this.id,this.env});
-    McpIntegrationSecretsConfigurationFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "McpIntegrationSecretsConfigurationFailed";
-    TypeContext? context = _ctx;
-}
-
-class McpIntegrationTested implements IConvertible, IPost
-{
-    IntegrationId? id;
-    bool? succeeded;
-    IReadOnlyList<String>? errorMessages;
-    DateTime? testedAtUtc;
-    Env? env;
-
-    McpIntegrationTested({this.id,this.succeeded,this.errorMessages,this.testedAtUtc,this.env});
-    McpIntegrationTested.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        succeeded = json['succeeded'];
-        errorMessages = JsonConverters.fromJson(json['errorMessages'],'IReadOnlyList<String>',context!);
-        testedAtUtc = JsonConverters.fromJson(json['testedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'succeeded': succeeded,
-        'errorMessages': JsonConverters.toJson(errorMessages,'IReadOnlyList<String>',context!),
-        'testedAtUtc': JsonConverters.toJson(testedAtUtc,'DateTime',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "McpIntegrationTested";
-    TypeContext? context = _ctx;
-}
-
-class WebhookIntegrationSaved implements IConvertible, IPost
-{
-    WebhookIntegration? integration;
-
-    WebhookIntegrationSaved({this.integration});
-    WebhookIntegrationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integration = JsonConverters.fromJson(json['integration'],'WebhookIntegration',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integration': JsonConverters.toJson(integration,'WebhookIntegration',context!)
-    };
-
-    getTypeName() => "WebhookIntegrationSaved";
-    TypeContext? context = _ctx;
-}
-
-class WebhookIntegrationExtraHeadersChanged implements IConvertible, IPost
-{
-    IntegrationId? id;
-    IReadOnlyDictionary<String,String>? extraHeaders;
-
-    WebhookIntegrationExtraHeadersChanged({this.id,this.extraHeaders});
-    WebhookIntegrationExtraHeadersChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        extraHeaders = JsonConverters.fromJson(json['extraHeaders'],'IReadOnlyDictionary<String,String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'extraHeaders': JsonConverters.toJson(extraHeaders,'IReadOnlyDictionary<String,String>',context!)
-    };
-
-    getTypeName() => "WebhookIntegrationExtraHeadersChanged";
-    TypeContext? context = _ctx;
-}
-
-class WebhookIntegrationSecretsConfigured implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    WebhookIntegrationSecretsConfigured({this.id,this.env});
-    WebhookIntegrationSecretsConfigured.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "WebhookIntegrationSecretsConfigured";
-    TypeContext? context = _ctx;
-}
-
-class WebhookIntegrationSecretsConfigurationFailed implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    WebhookIntegrationSecretsConfigurationFailed({this.id,this.env});
-    WebhookIntegrationSecretsConfigurationFailed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "WebhookIntegrationSecretsConfigurationFailed";
-    TypeContext? context = _ctx;
-}
-
-class WebhookIntegrationSecretsCleared implements IConvertible, IPost
-{
-    IntegrationId? id;
-    Env? env;
-
-    WebhookIntegrationSecretsCleared({this.id,this.env});
-    WebhookIntegrationSecretsCleared.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = JsonConverters.fromJson(json['id'],'IntegrationId',context!);
-        env = JsonConverters.fromJson(json['env'],'Env',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': JsonConverters.toJson(id,'IntegrationId',context!),
-        'env': JsonConverters.toJson(env,'Env',context!)
-    };
-
-    getTypeName() => "WebhookIntegrationSecretsCleared";
-    TypeContext? context = _ctx;
-}
-
-class WebhookDestinationSaved implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    WebhookDestination? destination;
-
-    WebhookDestinationSaved({this.integrationId,this.destination});
-    WebhookDestinationSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        destination = JsonConverters.fromJson(json['destination'],'WebhookDestination',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'destination': JsonConverters.toJson(destination,'WebhookDestination',context!)
-    };
-
-    getTypeName() => "WebhookDestinationSaved";
-    TypeContext? context = _ctx;
-}
-
-class WebhookDestinationRemoved implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    WebhookDestinationId? destinationId;
-
-    WebhookDestinationRemoved({this.integrationId,this.destinationId});
-    WebhookDestinationRemoved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        destinationId = JsonConverters.fromJson(json['destinationId'],'WebhookDestinationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'destinationId': JsonConverters.toJson(destinationId,'WebhookDestinationId',context!)
-    };
-
-    getTypeName() => "WebhookDestinationRemoved";
-    TypeContext? context = _ctx;
-}
-
-class WebhookDestinationEnabled implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    WebhookDestinationId? destinationId;
-
-    WebhookDestinationEnabled({this.integrationId,this.destinationId});
-    WebhookDestinationEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        destinationId = JsonConverters.fromJson(json['destinationId'],'WebhookDestinationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'destinationId': JsonConverters.toJson(destinationId,'WebhookDestinationId',context!)
-    };
-
-    getTypeName() => "WebhookDestinationEnabled";
-    TypeContext? context = _ctx;
-}
-
-class WebhookDestinationDisabled implements IConvertible, IPost
-{
-    IntegrationId? integrationId;
-    WebhookDestinationId? destinationId;
-
-    WebhookDestinationDisabled({this.integrationId,this.destinationId});
-    WebhookDestinationDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = JsonConverters.fromJson(json['integrationId'],'IntegrationId',context!);
-        destinationId = JsonConverters.fromJson(json['destinationId'],'WebhookDestinationId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': JsonConverters.toJson(integrationId,'IntegrationId',context!),
-        'destinationId': JsonConverters.toJson(destinationId,'WebhookDestinationId',context!)
-    };
-
-    getTypeName() => "WebhookDestinationDisabled";
-    TypeContext? context = _ctx;
-}
-
 /**
 * Gets the project's webhook integration
 */
@@ -50491,7 +40087,7 @@ class UpdateWebhookIntegrationExtraHeadersRequest extends CodeMashRequestBase im
 }
 
 // @Route("/{version}/webhooks/{source}/{integrationInstanceId}", "POST")
-class ReceiveWebhook implements IReturn<HttpResult>, IConvertible, IPost
+class ReceiveWebhook implements IReturnVoid, IConvertible, IPost
 {
     String source = "";
     String integrationInstanceId = "";
@@ -50513,8 +40109,7 @@ class ReceiveWebhook implements IReturn<HttpResult>, IConvertible, IPost
         'requestStream': JsonConverters.toJson(requestStream,'Uint8List',context!)
     };
 
-    createResponse() => HttpResult();
-    getResponseTypeName() => "HttpResult";
+    createResponse() {}
     getTypeName() => "ReceiveWebhook";
     TypeContext? context = _ctx;
 }
@@ -50907,112 +40502,6 @@ class SaveSchedulerTaskRequest extends CodeMashRequestBase implements IReturn<Id
     createResponse() => IdResponse();
     getResponseTypeName() => "IdResponse";
     getTypeName() => "SaveSchedulerTaskRequest";
-    TypeContext? context = _ctx;
-}
-
-class SchedulerEnabled implements IConvertible, IPost
-{
-    SchedulerEnabled();
-    SchedulerEnabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "SchedulerEnabled";
-    TypeContext? context = _ctx;
-}
-
-class SchedulerDisabled implements IConvertible, IPost
-{
-    SchedulerDisabled();
-    SchedulerDisabled.fromJson(Map<String, dynamic> json) : super();
-    fromMap(Map<String, dynamic> json) {
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {};
-    getTypeName() => "SchedulerDisabled";
-    TypeContext? context = _ctx;
-}
-
-class SchedulerTaskSaved implements IConvertible, IPost
-{
-    SchedulerTask? task;
-
-    SchedulerTaskSaved({this.task});
-    SchedulerTaskSaved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        task = JsonConverters.fromJson(json['task'],'SchedulerTask',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'task': JsonConverters.toJson(task,'SchedulerTask',context!)
-    };
-
-    getTypeName() => "SchedulerTaskSaved";
-    TypeContext? context = _ctx;
-}
-
-class SchedulerTaskEnabled implements IConvertible, IPost
-{
-    TaskId? taskId;
-
-    SchedulerTaskEnabled({this.taskId});
-    SchedulerTaskEnabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        taskId = JsonConverters.fromJson(json['taskId'],'TaskId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'taskId': JsonConverters.toJson(taskId,'TaskId',context!)
-    };
-
-    getTypeName() => "SchedulerTaskEnabled";
-    TypeContext? context = _ctx;
-}
-
-class SchedulerTaskDisabled implements IConvertible, IPost
-{
-    TaskId? taskId;
-
-    SchedulerTaskDisabled({this.taskId});
-    SchedulerTaskDisabled.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        taskId = JsonConverters.fromJson(json['taskId'],'TaskId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'taskId': JsonConverters.toJson(taskId,'TaskId',context!)
-    };
-
-    getTypeName() => "SchedulerTaskDisabled";
-    TypeContext? context = _ctx;
-}
-
-class SchedulerTaskDeleted implements IConvertible, IPost
-{
-    TaskId? taskId;
-
-    SchedulerTaskDeleted({this.taskId});
-    SchedulerTaskDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        taskId = JsonConverters.fromJson(json['taskId'],'TaskId',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'taskId': JsonConverters.toJson(taskId,'TaskId',context!)
-    };
-
-    getTypeName() => "SchedulerTaskDeleted";
     TypeContext? context = _ctx;
 }
 
@@ -52172,282 +41661,6 @@ class OpenSupportCaseRequest extends RequestBase implements IReturn<IdResponse>,
     TypeContext? context = _ctx;
 }
 
-class SupportCaseOpened implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    AccountId? accountId;
-    ProjectId? projectId;
-    String? reporterId;
-    SupportCaseKind? kind;
-    SupportCaseSeverity? severity;
-    String subject = "";
-    DeploymentMode? deploymentMode;
-    String? gatewayVersion;
-    String? region;
-    String? planTier;
-    UtcDateTime? openedOn;
-
-    SupportCaseOpened({this.caseId,this.accountId,this.projectId,this.reporterId,this.kind,this.severity,this.subject="",this.deploymentMode,this.gatewayVersion,this.region,this.planTier,this.openedOn});
-    SupportCaseOpened.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        accountId = JsonConverters.fromJson(json['accountId'],'AccountId',context!);
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        reporterId = json['reporterId'];
-        kind = JsonConverters.fromJson(json['kind'],'SupportCaseKind',context!);
-        severity = JsonConverters.fromJson(json['severity'],'SupportCaseSeverity',context!);
-        subject = json['subject'] ?? "";
-        deploymentMode = JsonConverters.fromJson(json['deploymentMode'],'DeploymentMode',context!);
-        gatewayVersion = json['gatewayVersion'];
-        region = json['region'];
-        planTier = json['planTier'];
-        openedOn = JsonConverters.fromJson(json['openedOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'accountId': JsonConverters.toJson(accountId,'AccountId',context!),
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'reporterId': reporterId,
-        'kind': JsonConverters.toJson(kind,'SupportCaseKind',context!),
-        'severity': JsonConverters.toJson(severity,'SupportCaseSeverity',context!),
-        'subject': subject,
-        'deploymentMode': JsonConverters.toJson(deploymentMode,'DeploymentMode',context!),
-        'gatewayVersion': gatewayVersion,
-        'region': region,
-        'planTier': planTier,
-        'openedOn': JsonConverters.toJson(openedOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportCaseOpened";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseTriaged implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    SupportCaseKind? kind;
-    SupportCaseSeverity? severity;
-    String? affectedModule;
-    String? triagedBy;
-    UtcDateTime? triagedOn;
-
-    SupportCaseTriaged({this.caseId,this.kind,this.severity,this.affectedModule,this.triagedBy,this.triagedOn});
-    SupportCaseTriaged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        kind = JsonConverters.fromJson(json['kind'],'SupportCaseKind',context!);
-        severity = JsonConverters.fromJson(json['severity'],'SupportCaseSeverity',context!);
-        affectedModule = json['affectedModule'];
-        triagedBy = json['triagedBy'];
-        triagedOn = JsonConverters.fromJson(json['triagedOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'kind': JsonConverters.toJson(kind,'SupportCaseKind',context!),
-        'severity': JsonConverters.toJson(severity,'SupportCaseSeverity',context!),
-        'affectedModule': affectedModule,
-        'triagedBy': triagedBy,
-        'triagedOn': JsonConverters.toJson(triagedOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportCaseTriaged";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseMessageAppended implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    SupportMessageRef? message;
-
-    SupportCaseMessageAppended({this.caseId,this.message});
-    SupportCaseMessageAppended.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        message = JsonConverters.fromJson(json['message'],'SupportMessageRef',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'message': JsonConverters.toJson(message,'SupportMessageRef',context!)
-    };
-
-    getTypeName() => "SupportCaseMessageAppended";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseStatusChanged implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    SupportCaseStatus? from;
-    SupportCaseStatus? to;
-    UtcDateTime? changedOn;
-
-    SupportCaseStatusChanged({this.caseId,this.from,this.to,this.changedOn});
-    SupportCaseStatusChanged.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        from = JsonConverters.fromJson(json['from'],'SupportCaseStatus',context!);
-        to = JsonConverters.fromJson(json['to'],'SupportCaseStatus',context!);
-        changedOn = JsonConverters.fromJson(json['changedOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'from': JsonConverters.toJson(from,'SupportCaseStatus',context!),
-        'to': JsonConverters.toJson(to,'SupportCaseStatus',context!),
-        'changedOn': JsonConverters.toJson(changedOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportCaseStatusChanged";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseResolved implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    CaseResolution? resolution;
-    UtcDateTime? resolvedOn;
-
-    SupportCaseResolved({this.caseId,this.resolution,this.resolvedOn});
-    SupportCaseResolved.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        resolution = JsonConverters.fromJson(json['resolution'],'CaseResolution',context!);
-        resolvedOn = JsonConverters.fromJson(json['resolvedOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'resolution': JsonConverters.toJson(resolution,'CaseResolution',context!),
-        'resolvedOn': JsonConverters.toJson(resolvedOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportCaseResolved";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseClosed implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    String? closedBy;
-    UtcDateTime? closedOn;
-    SupportCaseCloseReason? reason;
-
-    SupportCaseClosed({this.caseId,this.closedBy,this.closedOn,this.reason});
-    SupportCaseClosed.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        closedBy = json['closedBy'];
-        closedOn = JsonConverters.fromJson(json['closedOn'],'UtcDateTime',context!);
-        reason = JsonConverters.fromJson(json['reason'],'SupportCaseCloseReason',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'closedBy': closedBy,
-        'closedOn': JsonConverters.toJson(closedOn,'UtcDateTime',context!),
-        'reason': JsonConverters.toJson(reason,'SupportCaseCloseReason',context!)
-    };
-
-    getTypeName() => "SupportCaseClosed";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseReopened implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    String reason = "";
-    UtcDateTime? reopenedOn;
-
-    SupportCaseReopened({this.caseId,this.reason="",this.reopenedOn});
-    SupportCaseReopened.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        reason = json['reason'] ?? "";
-        reopenedOn = JsonConverters.fromJson(json['reopenedOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'reason': reason,
-        'reopenedOn': JsonConverters.toJson(reopenedOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportCaseReopened";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseWaitingReminderSent implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    int tierDays = 0;
-    UtcDateTime? sentOn;
-
-    SupportCaseWaitingReminderSent({this.caseId,this.tierDays=0,this.sentOn});
-    SupportCaseWaitingReminderSent.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        tierDays = json['tierDays'] ?? 0;
-        sentOn = JsonConverters.fromJson(json['sentOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'tierDays': tierDays,
-        'sentOn': JsonConverters.toJson(sentOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportCaseWaitingReminderSent";
-    TypeContext? context = _ctx;
-}
-
-class SupportCaseAttachmentLinked implements IConvertible, IPost
-{
-    SupportCaseId? caseId;
-    String attachmentRef = "";
-    String? fileName;
-    UtcDateTime? linkedOn;
-
-    SupportCaseAttachmentLinked({this.caseId,this.attachmentRef="",this.fileName,this.linkedOn});
-    SupportCaseAttachmentLinked.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        caseId = JsonConverters.fromJson(json['caseId'],'SupportCaseId',context!);
-        attachmentRef = json['attachmentRef'] ?? "";
-        fileName = json['fileName'];
-        linkedOn = JsonConverters.fromJson(json['linkedOn'],'UtcDateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'caseId': JsonConverters.toJson(caseId,'SupportCaseId',context!),
-        'attachmentRef': attachmentRef,
-        'fileName': fileName,
-        'linkedOn': JsonConverters.toJson(linkedOn,'UtcDateTime',context!)
-    };
-
-    getTypeName() => "SupportCaseAttachmentLinked";
-    TypeContext? context = _ctx;
-}
-
 // @Route("/{version}/diagnostics/packs", "GET")
 class GetDiagnosticPacks extends CodeMashRequestBase implements IReturn<GetDiagnosticPacksResponse>, IConvertible, IGet
 {
@@ -52681,10 +41894,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SchemaTriggerType': TypeInfo(TypeOf.Enum, enumValues:SchemaTriggerType.values),
     'SchemaTriggerRequest': TypeInfo(TypeOf.Class, create:() => SchemaTriggerRequest()),
     'FilesTriggerType': TypeInfo(TypeOf.Enum, enumValues:FilesTriggerType.values),
-    'FileChecksumDto': TypeInfo(TypeOf.Class, create:() => FileChecksumDto()),
-    'FileResourceDto': TypeInfo(TypeOf.Class, create:() => FileResourceDto()),
-    'FileProvider': TypeInfo(TypeOf.Enum, enumValues:FileProvider.values),
-    'FileResourceRefDto': TypeInfo(TypeOf.Class, create:() => FileResourceRefDto()),
     'FilesTriggerRequest': TypeInfo(TypeOf.Class, create:() => FilesTriggerRequest()),
     'PaymentTriggerType': TypeInfo(TypeOf.Enum, enumValues:PaymentTriggerType.values),
     'PaymentTriggerRequest': TypeInfo(TypeOf.Class, create:() => PaymentTriggerRequest()),
@@ -52692,6 +41901,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DatabaseIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'MongoDbConnectionStringDatabaseIntegrationRequest': TypeInfo(TypeOf.Class, create:() => MongoDbConnectionStringDatabaseIntegrationRequest()),
     'MongoDbAtlasFlexManagedDatabaseIntegrationRequest': TypeInfo(TypeOf.Class, create:() => MongoDbAtlasFlexManagedDatabaseIntegrationRequest()),
+    'FileProvider': TypeInfo(TypeOf.Enum, enumValues:FileProvider.values),
     'FilesIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'GoogleDriveFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => GoogleDriveFilesIntegrationRequest()),
     'FtpFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FtpFilesIntegrationRequest()),
@@ -52782,6 +41992,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TemplateDto': TypeInfo(TypeOf.Class, create:() => TemplateDto()),
     'EmailTemplateEngine': TypeInfo(TypeOf.Enum, enumValues:EmailTemplateEngine.values),
     'EmailBodyDto': TypeInfo(TypeOf.Class, create:() => EmailBodyDto()),
+    'FileChecksumDto': TypeInfo(TypeOf.Class, create:() => FileChecksumDto()),
+    'FileResourceDto': TypeInfo(TypeOf.Class, create:() => FileResourceDto()),
+    'FileResourceRefDto': TypeInfo(TypeOf.Class, create:() => FileResourceRefDto()),
     'EmailMessageContentDto': TypeInfo(TypeOf.Class, create:() => EmailMessageContentDto()),
     'List<FileResourceRefDto>': TypeInfo(TypeOf.Class, create:() => <FileResourceRefDto>[]),
     'EmailMessageTranslationDto': TypeInfo(TypeOf.Class, create:() => EmailMessageTranslationDto()),
@@ -52814,9 +42027,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TriggerActionSseDto': TypeInfo(TypeOf.Class, create:() => TriggerActionSseDto()),
     'TriggerActionMarketplaceDto': TypeInfo(TypeOf.Class, create:() => TriggerActionMarketplaceDto()),
     'RequestBase': TypeInfo(TypeOf.Class, create:() => RequestBase()),
-    'Env': TypeInfo(TypeOf.Class, create:() => Env()),
-    'CursorArgs': TypeInfo(TypeOf.Class, create:() => CursorArgs()),
-    'PagingArgs': TypeInfo(TypeOf.Class, create:() => PagingArgs()),
     'CodeMashListPaginationRequestBase': TypeInfo(TypeOf.Class, create:() => CodeMashListPaginationRequestBase()),
     'GetTriggers': TypeInfo(TypeOf.Class, create:() => GetTriggers()),
     'ErrorDto': TypeInfo(TypeOf.Class, create:() => ErrorDto()),
@@ -52833,6 +42043,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PushToUsersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToUsersDeliverySettingsDto()),
     'PushToAccountUsersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToAccountUsersDeliverySettingsDto()),
     'PushToCollectionRecordsDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToCollectionRecordsDeliverySettingsDto()),
+    'PushDeviceDeliveryFamily': TypeInfo(TypeOf.Enum, enumValues:PushDeviceDeliveryFamily.values),
     'PushDeviceDeliveryTokenDto': TypeInfo(TypeOf.Class, create:() => PushDeviceDeliveryTokenDto()),
     'PushToDevicesDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToDevicesDeliverySettingsDto()),
     'List<PushDeviceDeliveryTokenDto>': TypeInfo(TypeOf.Class, create:() => <PushDeviceDeliveryTokenDto>[]),
@@ -52925,6 +42136,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TelnyxSmsIntegrationDto': TypeInfo(TypeOf.Class, create:() => TelnyxSmsIntegrationDto()),
     'TwilioSmsIntegrationDto': TypeInfo(TypeOf.Class, create:() => TwilioSmsIntegrationDto()),
     'VonageSmsIntegrationDto': TypeInfo(TypeOf.Class, create:() => VonageSmsIntegrationDto()),
+    'FakeSmsIntegrationDto': TypeInfo(TypeOf.Class, create:() => FakeSmsIntegrationDto()),
     'PushIntegrationDto': TypeInfo(TypeOf.Class, create:() => PushIntegrationDto()),
     'AndroidFirebasePushIntegrationDto': TypeInfo(TypeOf.Class, create:() => AndroidFirebasePushIntegrationDto()),
     'AppleApnsPushIntegrationDto': TypeInfo(TypeOf.Class, create:() => AppleApnsPushIntegrationDto()),
@@ -52933,6 +42145,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EdgeWebPushIntegrationDto': TypeInfo(TypeOf.Class, create:() => EdgeWebPushIntegrationDto()),
     'FirefoxWebPushIntegrationDto': TypeInfo(TypeOf.Class, create:() => FirefoxWebPushIntegrationDto()),
     'SafariPushIntegrationDto': TypeInfo(TypeOf.Class, create:() => SafariPushIntegrationDto()),
+    'FakePushIntegrationDto': TypeInfo(TypeOf.Class, create:() => FakePushIntegrationDto()),
     'EmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => EmailIntegrationDto()),
     'AwsSesEmailIntegrationDto': TypeInfo(TypeOf.AbstractClass),
     'AwsCrossAccountRoleEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsCrossAccountRoleEmailIntegrationDto()),
@@ -52940,6 +42153,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MailGunEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => MailGunEmailIntegrationDto()),
     'SendGridEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => SendGridEmailIntegrationDto()),
     'SmtpEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => SmtpEmailIntegrationDto()),
+    'FakeEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => FakeEmailIntegrationDto()),
     'WebhookDestinationDto': TypeInfo(TypeOf.Class, create:() => WebhookDestinationDto()),
     'IReadOnlyDictionary<String,String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyDictionary<String,String>()),
     'WebhookIntegrationDto': TypeInfo(TypeOf.Class, create:() => WebhookIntegrationDto()),
@@ -53012,248 +42226,42 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DeliveryChannel': TypeInfo(TypeOf.Enum, enumValues:DeliveryChannel.values),
     'TagDefinitionDto': TypeInfo(TypeOf.Class, create:() => TagDefinitionDto()),
     'Map<DeliveryChannel,bool?>': TypeInfo(TypeOf.Class, create:() => Map<DeliveryChannel,bool?>()),
-    'EmailAddress': TypeInfo(TypeOf.Class, create:() => EmailAddress()),
-    'AggregateId': TypeInfo(TypeOf.AbstractClass),
-    'AccountId': TypeInfo(TypeOf.Class, create:() => AccountId()),
-    'UtcDateTime': TypeInfo(TypeOf.Class, create:() => UtcDateTime()),
-    'TimeUnit': TypeInfo(TypeOf.Enum, enumValues:TimeUnit.values),
-    'ExpirationToken': TypeInfo(TypeOf.Class, create:() => ExpirationToken()),
-    'CodeMashSubscriptionId': TypeInfo(TypeOf.Class, create:() => CodeMashSubscriptionId()),
-    'ProjectId': TypeInfo(TypeOf.Class, create:() => ProjectId()),
-    'IntegrationId': TypeInfo(TypeOf.Class, create:() => IntegrationId()),
-    'ResourceRefKind': TypeInfo(TypeOf.Enum, enumValues:ResourceRefKind.values),
-    'ResourceRef': TypeInfo(TypeOf.AbstractClass),
-    'ResourceSource': TypeInfo(TypeOf.Enum, enumValues:ResourceSource.values),
-    'PaymentCustomerRef': TypeInfo(TypeOf.Class, create:() => PaymentCustomerRef()),
-    'Quantity': TypeInfo(TypeOf.Class, create:() => Quantity()),
-    'CodeMashManagedServiceSubscription': TypeInfo(TypeOf.Class, create:() => CodeMashManagedServiceSubscription()),
-    'DomainUrl': TypeInfo(TypeOf.Class, create:() => DomainUrl()),
-    'CodeMashLicense': TypeInfo(TypeOf.Class, create:() => CodeMashLicense()),
-    'ProjectName': TypeInfo(TypeOf.Class, create:() => ProjectName()),
-    'NorbixRegion': TypeInfo(TypeOf.Class, create:() => NorbixRegion()),
-    'Continent': TypeInfo(TypeOf.Enum, enumValues:Continent.values),
-    'ProjectRegion': TypeInfo(TypeOf.Class, create:() => ProjectRegion()),
-    'ProjectLegalDocuments': TypeInfo(TypeOf.Class, create:() => ProjectLegalDocuments()),
-    'AuthId': TypeInfo(TypeOf.Class, create:() => AuthId()),
-    'Language': TypeInfo(TypeOf.Class, create:() => Language()),
-    'FileResourceId': TypeInfo(TypeOf.Class, create:() => FileResourceId()),
-    'FileChecksum': TypeInfo(TypeOf.Class, create:() => FileChecksum()),
-    'FileResource': TypeInfo(TypeOf.Class, create:() => FileResource()),
-    'FileResourceRef': TypeInfo(TypeOf.Class, create:() => FileResourceRef()),
-    'ProjectLogo': TypeInfo(TypeOf.Class, create:() => ProjectLogo()),
-    'ProjectIcon': TypeInfo(TypeOf.Class, create:() => ProjectIcon()),
-    'BrandColor': TypeInfo(TypeOf.Class, create:() => BrandColor()),
-    'Tag': TypeInfo(TypeOf.Class, create:() => Tag()),
-    'GroupTags': TypeInfo(TypeOf.Class, create:() => GroupTags()),
-    'List<Tag>': TypeInfo(TypeOf.Class, create:() => <Tag>[]),
-    'ProjectCommunicationChannel': TypeInfo(TypeOf.Class, create:() => ProjectCommunicationChannel()),
-    'List<GroupTags>': TypeInfo(TypeOf.Class, create:() => <GroupTags>[]),
-    'TagDescription': TypeInfo(TypeOf.Class, create:() => TagDescription()),
-    'MessageTranslation<TContent>': TypeInfo(TypeOf.GenericDef,create:() => MessageTranslation()),
-    'TagTranslation': TypeInfo(TypeOf.Class, create:() => TagTranslation()),
-    'BaseTagDefinition': TypeInfo(TypeOf.AbstractClass),
-    'List<TagTranslation>': TypeInfo(TypeOf.Class, create:() => <TagTranslation>[]),
-    'GroupDefinition': TypeInfo(TypeOf.Class, create:() => GroupDefinition()),
-    'TagDefinition': TypeInfo(TypeOf.Class, create:() => TagDefinition()),
-    'ProjectCommunication': TypeInfo(TypeOf.Class, create:() => ProjectCommunication()),
-    'List<ProjectCommunicationChannel>': TypeInfo(TypeOf.Class, create:() => <ProjectCommunicationChannel>[]),
-    'List<GroupDefinition>': TypeInfo(TypeOf.Class, create:() => <GroupDefinition>[]),
-    'List<TagDefinition>': TypeInfo(TypeOf.Class, create:() => <TagDefinition>[]),
-    'TimeZone': TypeInfo(TypeOf.Class, create:() => TimeZone()),
-    'PolicyId': TypeInfo(TypeOf.AbstractClass),
-    'PermissionEffect': TypeInfo(TypeOf.Enum, enumValues:PermissionEffect.values),
-    'ApplicationModule': TypeInfo(TypeOf.Enum, enumValues:ApplicationModule.values),
-    'PermissionAction': TypeInfo(TypeOf.Class, create:() => PermissionAction()),
-    'ResourceKind': TypeInfo(TypeOf.Class, create:() => ResourceKind()),
-    'ResourceIdentifier': TypeInfo(TypeOf.Class, create:() => ResourceIdentifier()),
-    'ResourcePattern': TypeInfo(TypeOf.Class, create:() => ResourcePattern()),
-    'Permission': TypeInfo(TypeOf.Class, create:() => Permission()),
-    'List<PermissionAction>': TypeInfo(TypeOf.Class, create:() => <PermissionAction>[]),
-    'List<ResourcePattern>': TypeInfo(TypeOf.Class, create:() => <ResourcePattern>[]),
-    'MembershipPolicy': TypeInfo(TypeOf.Class, create:() => MembershipPolicy()),
-    'List<Permission>': TypeInfo(TypeOf.Class, create:() => <Permission>[]),
-    'RoleId': TypeInfo(TypeOf.AbstractClass),
-    'MembershipRole': TypeInfo(TypeOf.Class, create:() => MembershipRole()),
-    'List<PolicyId>': TypeInfo(TypeOf.Class, create:() => <PolicyId>[]),
-    'BillingPeriod': TypeInfo(TypeOf.Class, create:() => BillingPeriod()),
-    'AtlasClusterChargeRecord': TypeInfo(TypeOf.Class, create:() => AtlasClusterChargeRecord()),
-    'AtlasUsageRecord': TypeInfo(TypeOf.Class, create:() => AtlasUsageRecord()),
-    'IReadOnlyList<AtlasClusterChargeRecord>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<AtlasClusterChargeRecord>()),
-    'UsageIngestionFailureReason': TypeInfo(TypeOf.Enum, enumValues:UsageIngestionFailureReason.values),
-    'UsageIngestionFailure': TypeInfo(TypeOf.Class, create:() => UsageIngestionFailure()),
+    'CursorArgs': TypeInfo(TypeOf.Class, create:() => CursorArgs()),
+    'PagingArgs': TypeInfo(TypeOf.Class, create:() => PagingArgs()),
+    'AiScopeDto': TypeInfo(TypeOf.Class, create:() => AiScopeDto()),
     'DeleteTrigger': TypeInfo(TypeOf.Class, create:() => DeleteTrigger()),
     'DisableTrigger': TypeInfo(TypeOf.Class, create:() => DisableTrigger()),
     'EnableTrigger': TypeInfo(TypeOf.Class, create:() => EnableTrigger()),
     'GetTrigger': TypeInfo(TypeOf.AbstractClass),
     'SaveTrigger': TypeInfo(TypeOf.Class, create:() => SaveTrigger()),
     'CredentialsSettingsModeDto': TypeInfo(TypeOf.Class, create:() => CredentialsSettingsModeDto()),
-    'Integration': TypeInfo(TypeOf.AbstractClass),
-    'MembershipIntegration': TypeInfo(TypeOf.AbstractClass),
-    'TriggerId': TypeInfo(TypeOf.Class, create:() => TriggerId()),
-    'TriggerAction': TypeInfo(TypeOf.AbstractClass),
-    'TemplateCode': TypeInfo(TypeOf.Class, create:() => TemplateCode()),
-    'Trigger': TypeInfo(TypeOf.AbstractClass),
-    'MembershipTrigger': TypeInfo(TypeOf.Class, create:() => MembershipTrigger()),
-    'TriggerByIdEventBase': TypeInfo(TypeOf.AbstractClass),
     'SchemaSettingsDto': TypeInfo(TypeOf.Class, create:() => SchemaSettingsDto()),
     'SchemaListColumnDto': TypeInfo(TypeOf.Class, create:() => SchemaListColumnDto()),
     'SchemaListSortDto': TypeInfo(TypeOf.Class, create:() => SchemaListSortDto()),
     'SchemaListSettingsDto': TypeInfo(TypeOf.Class, create:() => SchemaListSettingsDto()),
     'List<SchemaListColumnDto>': TypeInfo(TypeOf.Class, create:() => <SchemaListColumnDto>[]),
     'ImportColumnMappingDto': TypeInfo(TypeOf.Class, create:() => ImportColumnMappingDto()),
-    'MongoDbAggregateId': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateId()),
-    'MongoDbAggregateQuery': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateQuery()),
-    'SchemaId': TypeInfo(TypeOf.Class, create:() => SchemaId()),
-    'MongoDbAggregate': TypeInfo(TypeOf.Class, create:() => MongoDbAggregate()),
-    'DatabaseIntegration': TypeInfo(TypeOf.AbstractClass),
-    'ProjectStatus': TypeInfo(TypeOf.Enum, enumValues:ProjectStatus.values),
-    'SchemaName': TypeInfo(TypeOf.Class, create:() => SchemaName()),
-    'JsonSchemaFieldName': TypeInfo(TypeOf.Class, create:() => JsonSchemaFieldName()),
-    'JsonSchemaField': TypeInfo(TypeOf.AbstractClass),
-    'DataSchema': TypeInfo(TypeOf.Class, create:() => DataSchema()),
-    'List<JsonSchemaField>': TypeInfo(TypeOf.Class, create:() => <JsonSchemaField>[]),
-    'VisualSchema': TypeInfo(TypeOf.Class, create:() => VisualSchema()),
-    'SchemaDraft': TypeInfo(TypeOf.Class, create:() => SchemaDraft()),
-    'SchemaVersion': TypeInfo(TypeOf.Class, create:() => SchemaVersion()),
-    'MetaSchemaVersion': TypeInfo(TypeOf.Class, create:() => MetaSchemaVersion()),
-    'PublishedSchemaVersion': TypeInfo(TypeOf.Class, create:() => PublishedSchemaVersion()),
-    'SchemaSettings': TypeInfo(TypeOf.Class, create:() => SchemaSettings()),
-    'Schema': TypeInfo(TypeOf.Class, create:() => Schema()),
-    'IReadOnlyList<PublishedSchemaVersion>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<PublishedSchemaVersion>()),
-    'List<Trigger>': TypeInfo(TypeOf.Class, create:() => <Trigger>[]),
-    'SchemaDiff': TypeInfo(TypeOf.Class, create:() => SchemaDiff()),
-    'TaxonomyId': TypeInfo(TypeOf.Class, create:() => TaxonomyId()),
-    'TaxonomyName': TypeInfo(TypeOf.Class, create:() => TaxonomyName()),
-    'RecordId': TypeInfo(TypeOf.Class, create:() => RecordId()),
-    'Taxonomy': TypeInfo(TypeOf.Class, create:() => Taxonomy()),
-    'List<TaxonomyId>': TypeInfo(TypeOf.Class, create:() => <TaxonomyId>[]),
-    'SchemaTrigger': TypeInfo(TypeOf.Class, create:() => SchemaTrigger()),
-    'IPasskeyMessage': TypeInfo(TypeOf.Interface),
-    'AuthUserName': TypeInfo(TypeOf.Class, create:() => AuthUserName()),
-    'AuthType': TypeInfo(TypeOf.Enum, enumValues:AuthType.values),
-    'IpAddress': TypeInfo(TypeOf.Class, create:() => IpAddress()),
-    'AccessInformation': TypeInfo(TypeOf.Class, create:() => AccessInformation()),
-    'Registration': TypeInfo(TypeOf.Class, create:() => Registration()),
-    'Login': TypeInfo(TypeOf.Class, create:() => Login()),
-    'Phone': TypeInfo(TypeOf.Class, create:() => Phone()),
-    'FirstName': TypeInfo(TypeOf.Class, create:() => FirstName()),
-    'LastName': TypeInfo(TypeOf.Class, create:() => LastName()),
-    'MidName': TypeInfo(TypeOf.Class, create:() => MidName()),
-    'FullName': TypeInfo(TypeOf.Class, create:() => FullName()),
-    'City': TypeInfo(TypeOf.Class, create:() => City()),
-    'Country': TypeInfo(TypeOf.Class, create:() => Country()),
-    'AddressLine': TypeInfo(TypeOf.Class, create:() => AddressLine()),
-    'PostalCode': TypeInfo(TypeOf.Class, create:() => PostalCode()),
-    'CountryState': TypeInfo(TypeOf.Class, create:() => CountryState()),
-    'Address': TypeInfo(TypeOf.Class, create:() => Address()),
-    'Gender': TypeInfo(TypeOf.Enum, enumValues:Gender.values),
-    'MarketingBlockReason': TypeInfo(TypeOf.Enum, enumValues:MarketingBlockReason.values),
-    'UserMarketingPreferences': TypeInfo(TypeOf.Class, create:() => UserMarketingPreferences()),
-    'Map<DeliveryChannel,Set<Tag>?>': TypeInfo(TypeOf.Class, create:() => Map<DeliveryChannel,Set<Tag>?>()),
-    'Set<Tag>': TypeInfo(TypeOf.Class, create:() => Set<Tag>()),
-    'List<MarketingBlockReason>': TypeInfo(TypeOf.Class, create:() => <MarketingBlockReason>[]),
-    'UserGeneralInfo': TypeInfo(TypeOf.Class, create:() => UserGeneralInfo()),
-    'AuthStatus': TypeInfo(TypeOf.Enum, enumValues:AuthStatus.values),
-    'DeviceId': TypeInfo(TypeOf.Class, create:() => DeviceId()),
-    'DeviceType': TypeInfo(TypeOf.Enum, enumValues:DeviceType.values),
-    'PushDeviceToken': TypeInfo(TypeOf.Class, create:() => PushDeviceToken()),
-    'PushDeviceDeliveryFamily': TypeInfo(TypeOf.Enum, enumValues:PushDeviceDeliveryFamily.values),
-    'PushDeviceDeliveryToken': TypeInfo(TypeOf.Class, create:() => PushDeviceDeliveryToken()),
-    'PushDevice': TypeInfo(TypeOf.Class, create:() => PushDevice()),
-    'PushDevices': TypeInfo(TypeOf.Class, create:() => PushDevices()),
-    'UserId': TypeInfo(TypeOf.Class, create:() => UserId()),
-    'UserRef': TypeInfo(TypeOf.Class, create:() => UserRef()),
-    'Auth': TypeInfo(TypeOf.Class, create:() => Auth()),
-    'List<RoleName>': TypeInfo(TypeOf.Class, create:() => <RoleName>[]),
-    'FileIntegration': TypeInfo(TypeOf.AbstractClass),
-    'FileTrigger': TypeInfo(TypeOf.Class, create:() => FileTrigger()),
     'EmailValidationProvider': TypeInfo(TypeOf.Enum, enumValues:EmailValidationProvider.values),
     'EmailValidationIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SaveEmailTemplate': TypeInfo(TypeOf.Class, create:() => SaveEmailTemplate()),
     'TranslationDto': TypeInfo(TypeOf.Class, create:() => TranslationDto()),
-    'EmailFooterId': TypeInfo(TypeOf.Class, create:() => EmailFooterId()),
-    'EmailFooter': TypeInfo(TypeOf.Class, create:() => EmailFooter()),
-    'List<MessageTranslation<TemplateCode>>': TypeInfo(TypeOf.Class, create:() => <MessageTranslation<TemplateCode>>[]),
-    'MessageTranslation<TemplateCode>': TypeInfo(TypeOf.Class, create:() => MessageTranslation<TemplateCode>()),
-    'EmailSenderName': TypeInfo(TypeOf.Class, create:() => EmailSenderName()),
-    'EmailIntegration': TypeInfo(TypeOf.AbstractClass),
-    'EmailSignatureId': TypeInfo(TypeOf.Class, create:() => EmailSignatureId()),
-    'EmailSignature': TypeInfo(TypeOf.Class, create:() => EmailSignature()),
-    'TemplateId': TypeInfo(TypeOf.Class, create:() => TemplateId()),
-    'Template<TMessageContent>': TypeInfo(TypeOf.GenericDef,create:() => Template()),
-    'List<MessageTranslation<TMessageContent>>': TypeInfo(TypeOf.Class, create:() => <MessageTranslation<TMessageContent>>[]),
-    'MessageTranslation<TMessageContent>': TypeInfo(TypeOf.Class, create:() => MessageTranslation<TMessageContent>()),
-    'TMessageContent': TypeInfo(TypeOf.Class, create:() => TMessageContent()),
-    'EmailSubject': TypeInfo(TypeOf.Class, create:() => EmailSubject()),
-    'EmailBody': TypeInfo(TypeOf.Class, create:() => EmailBody()),
-    'EmailMessageContent': TypeInfo(TypeOf.Class, create:() => EmailMessageContent()),
-    'List<FileResourceRef>': TypeInfo(TypeOf.Class, create:() => <FileResourceRef>[]),
-    'EmailTemplate': TypeInfo(TypeOf.Class, create:() => EmailTemplate()),
-    'EmailValidationIntegration': TypeInfo(TypeOf.AbstractClass),
-    'CampaignId': TypeInfo(TypeOf.Class, create:() => CampaignId()),
-    'CampaignBatchId': TypeInfo(TypeOf.Class, create:() => CampaignBatchId()),
-    'NotificationId': TypeInfo(TypeOf.Class, create:() => NotificationId()),
-    'CampaignStopReason': TypeInfo(TypeOf.Enum, enumValues:CampaignStopReason.values),
-    'EmailDeliveryEventType': TypeInfo(TypeOf.Enum, enumValues:EmailDeliveryEventType.values),
     'SaveSmsTemplate': TypeInfo(TypeOf.Class, create:() => SaveSmsTemplate()),
     'SmsIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
-    'SmsIntegration': TypeInfo(TypeOf.AbstractClass),
-    'SmsTitle': TypeInfo(TypeOf.Class, create:() => SmsTitle()),
-    'SmsBody': TypeInfo(TypeOf.Class, create:() => SmsBody()),
-    'SmsMessageContent': TypeInfo(TypeOf.Class, create:() => SmsMessageContent()),
-    'SmsTemplate': TypeInfo(TypeOf.Class, create:() => SmsTemplate()),
-    'CodeIntegration': TypeInfo(TypeOf.AbstractClass),
-    'MarketplaceIntegrationTransport': TypeInfo(TypeOf.Enum, enumValues:MarketplaceIntegrationTransport.values),
-    'MarketplaceIntegrationCategory': TypeInfo(TypeOf.Enum, enumValues:MarketplaceIntegrationCategory.values),
-    'MarketplaceTokenResolver': TypeInfo(TypeOf.Enum, enumValues:MarketplaceTokenResolver.values),
-    'SecretValueFormat': TypeInfo(TypeOf.Enum, enumValues:SecretValueFormat.values),
-    'MarketplaceTokenMapping': TypeInfo(TypeOf.Class, create:() => MarketplaceTokenMapping()),
-    'MarketplaceIntegration': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegration()),
-    'IReadOnlyList<MarketplaceTokenMapping>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceTokenMapping>()),
-    'MarketplaceFunctionId': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionId()),
-    'MarketplaceFunction': TypeInfo(TypeOf.Class, create:() => MarketplaceFunction()),
     'SavePushTemplate': TypeInfo(TypeOf.Class, create:() => SavePushTemplate()),
+    'DeviceType': TypeInfo(TypeOf.Enum, enumValues:DeviceType.values),
     'PushDeviceDto': TypeInfo(TypeOf.Class, create:() => PushDeviceDto()),
     'PushCampaignRequest': TypeInfo(TypeOf.AbstractClass),
-    'PushIntegration': TypeInfo(TypeOf.AbstractClass),
-    'PushTitle': TypeInfo(TypeOf.Class, create:() => PushTitle()),
-    'PushBody': TypeInfo(TypeOf.Class, create:() => PushBody()),
-    'PushMessageContent': TypeInfo(TypeOf.Class, create:() => PushMessageContent()),
-    'PushTemplate': TypeInfo(TypeOf.Class, create:() => PushTemplate()),
-    'PaymentIntegration': TypeInfo(TypeOf.AbstractClass),
-    'PaymentTrigger': TypeInfo(TypeOf.Class, create:() => PaymentTrigger()),
-    'List<IntegrationId>': TypeInfo(TypeOf.Class, create:() => <IntegrationId>[]),
-    'LoggingIntegration': TypeInfo(TypeOf.AbstractClass),
     'ChatScreenContextDto': TypeInfo(TypeOf.AbstractClass),
-    'LlmIntegration': TypeInfo(TypeOf.AbstractClass),
-    'McpIntegration': TypeInfo(TypeOf.AbstractClass),
-    'WebhookDestinationId': TypeInfo(TypeOf.Class, create:() => WebhookDestinationId()),
-    'TriggerEventName': TypeInfo(TypeOf.AbstractClass),
-    'WebhookDestination': TypeInfo(TypeOf.Class, create:() => WebhookDestination()),
-    'List<TriggerEventName>': TypeInfo(TypeOf.Class, create:() => <TriggerEventName>[]),
-    'WebhookIntegration': TypeInfo(TypeOf.Class, create:() => WebhookIntegration()),
-    'List<WebhookDestination>': TypeInfo(TypeOf.Class, create:() => <WebhookDestination>[]),
     'SchedulerTaskRequest': TypeInfo(TypeOf.AbstractClass),
-    'TaskId': TypeInfo(TypeOf.Class, create:() => TaskId()),
-    'CronExpression': TypeInfo(TypeOf.Class, create:() => CronExpression()),
-    'SchedulerTask': TypeInfo(TypeOf.Class, create:() => SchedulerTask()),
     'ResourceKindDto': TypeInfo(TypeOf.Enum, enumValues:ResourceKindDto.values),
     'ResourceRefDto': TypeInfo(TypeOf.AbstractClass),
     'CaseResolutionFixKind': TypeInfo(TypeOf.Enum, enumValues:CaseResolutionFixKind.values),
     'CaseResolutionDto': TypeInfo(TypeOf.Class, create:() => CaseResolutionDto()),
-    'SupportCaseId': TypeInfo(TypeOf.Class, create:() => SupportCaseId()),
-    'SupportCaseKind': TypeInfo(TypeOf.Enum, enumValues:SupportCaseKind.values),
-    'SupportCaseSeverity': TypeInfo(TypeOf.Enum, enumValues:SupportCaseSeverity.values),
-    'DeploymentMode': TypeInfo(TypeOf.Enum, enumValues:DeploymentMode.values),
-    'SupportMessageAuthorKind': TypeInfo(TypeOf.Enum, enumValues:SupportMessageAuthorKind.values),
-    'SupportMessageRef': TypeInfo(TypeOf.Class, create:() => SupportMessageRef()),
-    'SupportCaseStatus': TypeInfo(TypeOf.Enum, enumValues:SupportCaseStatus.values),
-    'CaseResolution': TypeInfo(TypeOf.Class, create:() => CaseResolution()),
-    'SupportCaseCloseReason': TypeInfo(TypeOf.Enum, enumValues:SupportCaseCloseReason.values),
     'CodeMashRelease': TypeInfo(TypeOf.Enum, enumValues:CodeMashRelease.values),
     'CodeMashRuntime': TypeInfo(TypeOf.Enum, enumValues:CodeMashRuntime.values),
     'EchoLicenseDto': TypeInfo(TypeOf.Class, create:() => EchoLicenseDto()),
     'EchoRegionDto': TypeInfo(TypeOf.Class, create:() => EchoRegionDto()),
+    'EchoAgentDto': TypeInfo(TypeOf.Class, create:() => EchoAgentDto()),
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
@@ -53273,6 +42281,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<PromotionItemDto>': TypeInfo(TypeOf.Class, create:() => <PromotionItemDto>[]),
     'List<PromotionBlockerDto>': TypeInfo(TypeOf.Class, create:() => <PromotionBlockerDto>[]),
     'ProjectEnvironmentsDto': TypeInfo(TypeOf.Class, create:() => ProjectEnvironmentsDto()),
+    'ProjectStatus': TypeInfo(TypeOf.Enum, enumValues:ProjectStatus.values),
+    'Continent': TypeInfo(TypeOf.Enum, enumValues:Continent.values),
     'ProjectRegionDto': TypeInfo(TypeOf.Class, create:() => ProjectRegionDto()),
     'ProjectBrandDto': TypeInfo(TypeOf.Class, create:() => ProjectBrandDto()),
     'NotificationsSettingsGroupDto': TypeInfo(TypeOf.Class, create:() => NotificationsSettingsGroupDto()),
@@ -53292,6 +42302,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AiDto': TypeInfo(TypeOf.Class, create:() => AiDto()),
     'MembershipTriggerDto': TypeInfo(TypeOf.Class, create:() => MembershipTriggerDto()),
     'RoleItemDto': TypeInfo(TypeOf.Class, create:() => RoleItemDto()),
+    'PermissionEffect': TypeInfo(TypeOf.Enum, enumValues:PermissionEffect.values),
     'PermissionDto': TypeInfo(TypeOf.Class, create:() => PermissionDto()),
     'PolicyItemDto': TypeInfo(TypeOf.Class, create:() => PolicyItemDto()),
     'List<PermissionDto>': TypeInfo(TypeOf.Class, create:() => <PermissionDto>[]),
@@ -53318,12 +42329,17 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'Map<String,int?>': TypeInfo(TypeOf.Class, create:() => Map<String,int?>()),
     'ProjectListItemDto': TypeInfo(TypeOf.Class, create:() => ProjectListItemDto()),
     'PaginatedResponse<TViewModelProjection>': TypeInfo(TypeOf.GenericDef,create:() => PaginatedResponse()),
+    'AuthType': TypeInfo(TypeOf.Enum, enumValues:AuthType.values),
     'AccessInformationDto': TypeInfo(TypeOf.Class, create:() => AccessInformationDto()),
     'RegistrationDto': TypeInfo(TypeOf.Class, create:() => RegistrationDto()),
     'LoginDto': TypeInfo(TypeOf.Class, create:() => LoginDto()),
+    'Gender': TypeInfo(TypeOf.Enum, enumValues:Gender.values),
+    'MarketingBlockReason': TypeInfo(TypeOf.Enum, enumValues:MarketingBlockReason.values),
     'UserGeneralInfoDto': TypeInfo(TypeOf.Class, create:() => UserGeneralInfoDto()),
     'Map<String,Set<String>?>': TypeInfo(TypeOf.Class, create:() => Map<String,Set<String>?>()),
     'Set<String>': TypeInfo(TypeOf.Class, create:() => Set<String>()),
+    'List<MarketingBlockReason>': TypeInfo(TypeOf.Class, create:() => <MarketingBlockReason>[]),
+    'AuthStatus': TypeInfo(TypeOf.Enum, enumValues:AuthStatus.values),
     'AuthDto': TypeInfo(TypeOf.Class, create:() => AuthDto()),
     'AccountPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => AccountPasswordPolicyDto()),
     'AccountTeamRoleDto': TypeInfo(TypeOf.Class, create:() => AccountTeamRoleDto()),
@@ -53337,6 +42353,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'LicenseDto': TypeInfo(TypeOf.Class, create:() => LicenseDto()),
     'LicenseHeartbeatVerdictDto': TypeInfo(TypeOf.Class, create:() => LicenseHeartbeatVerdictDto()),
     'InstallationLicenseStatusDto': TypeInfo(TypeOf.Class, create:() => InstallationLicenseStatusDto()),
+    'AiServiceUserKeyDto': TypeInfo(TypeOf.Class, create:() => AiServiceUserKeyDto()),
+    'AiServiceUserDto': TypeInfo(TypeOf.Class, create:() => AiServiceUserDto()),
+    'List<AiServiceUserKeyDto>': TypeInfo(TypeOf.Class, create:() => <AiServiceUserKeyDto>[]),
     'ServiceUserApiKeyDto': TypeInfo(TypeOf.Class, create:() => ServiceUserApiKeyDto()),
     'GetTriggerResponse': TypeInfo(TypeOf.AbstractClass),
     'TriggerProjectionList': TypeInfo(TypeOf.Class, create:() => TriggerProjectionList()),
@@ -53395,6 +42414,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MongoDbAggregateListProjection': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateListProjection()),
     'FilesTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => FilesTriggerProjectionList()),
     'FilesIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => FilesIntegrationListProjection()),
+    'PublicFolderDto': TypeInfo(TypeOf.Class, create:() => PublicFolderDto()),
     'NotificationModuleDependencyItemDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDependencyItemDto()),
     'NotificationModuleDisableDependenciesDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDisableDependenciesDto()),
     'List<NotificationModuleDependencyItemDto>': TypeInfo(TypeOf.Class, create:() => <NotificationModuleDependencyItemDto>[]),
@@ -53451,6 +42471,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PushTemplateListProjection': TypeInfo(TypeOf.Class, create:() => PushTemplateListProjection()),
     'PushSettings': TypeInfo(TypeOf.Class, create:() => PushSettings()),
     'PushIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => PushIntegrationListProjection()),
+    'PushDeviceListProjection': TypeInfo(TypeOf.Class, create:() => PushDeviceListProjection()),
     'PushCampaignDto': TypeInfo(TypeOf.Class, create:() => PushCampaignDto()),
     'PushRecipientDto': TypeInfo(TypeOf.Class, create:() => PushRecipientDto()),
     'PushRecipientsDto': TypeInfo(TypeOf.Class, create:() => PushRecipientsDto()),
@@ -53462,6 +42483,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PaymentsIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationListProjection()),
     'LoggingIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationListProjection()),
     'TenantLogEntryDto': TypeInfo(TypeOf.Class, create:() => TenantLogEntryDto()),
+    'AgentOnboardingSnippet': TypeInfo(TypeOf.Class, create:() => AgentOnboardingSnippet()),
     'AiToolManifestParameter': TypeInfo(TypeOf.Class, create:() => AiToolManifestParameter()),
     'AiToolManifestItem': TypeInfo(TypeOf.Class, create:() => AiToolManifestItem()),
     'List<AiToolManifestParameter>': TypeInfo(TypeOf.Class, create:() => <AiToolManifestParameter>[]),
@@ -53524,8 +42546,13 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DsarRequestDto': TypeInfo(TypeOf.Class, create:() => DsarRequestDto()),
     'ComplianceAuditEntryDto': TypeInfo(TypeOf.Class, create:() => ComplianceAuditEntryDto()),
     'AccountComplianceDto': TypeInfo(TypeOf.Class, create:() => AccountComplianceDto()),
+    'SupportCaseKind': TypeInfo(TypeOf.Enum, enumValues:SupportCaseKind.values),
+    'SupportCaseSeverity': TypeInfo(TypeOf.Enum, enumValues:SupportCaseSeverity.values),
+    'SupportCaseStatus': TypeInfo(TypeOf.Enum, enumValues:SupportCaseStatus.values),
     'SupportCustomerStatus': TypeInfo(TypeOf.Enum, enumValues:SupportCustomerStatus.values),
+    'DeploymentMode': TypeInfo(TypeOf.Enum, enumValues:DeploymentMode.values),
     'SupportCaseDto': TypeInfo(TypeOf.Class, create:() => SupportCaseDto()),
+    'SupportMessageAuthorKind': TypeInfo(TypeOf.Enum, enumValues:SupportMessageAuthorKind.values),
     'SupportCaseMessageDto': TypeInfo(TypeOf.Class, create:() => SupportCaseMessageDto()),
     'SupportCaseDetailDto': TypeInfo(TypeOf.Class, create:() => SupportCaseDetailDto()),
     'List<SupportCaseMessageDto>': TypeInfo(TypeOf.Class, create:() => <SupportCaseMessageDto>[]),
@@ -53554,24 +42581,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'IHasDatabaseId': TypeInfo(TypeOf.Interface),
     'IBindableContract': TypeInfo(TypeOf.Interface),
     'IHasRazorTemplateCode': TypeInfo(TypeOf.Interface),
-    'IHasDomainEntityId': TypeInfo(TypeOf.Interface),
-    'IIntegrationIdentification': TypeInfo(TypeOf.Interface),
     'IHasResponsibleUserId': TypeInfo(TypeOf.Interface),
     'ICursorArgs': TypeInfo(TypeOf.Interface),
-    'StringField': TypeInfo(TypeOf.Class, create:() => StringField()),
-    'DecimalField': TypeInfo(TypeOf.Class, create:() => DecimalField()),
-    'CurrencyField': TypeInfo(TypeOf.Class, create:() => CurrencyField()),
-    'BooleanField': TypeInfo(TypeOf.Class, create:() => BooleanField()),
-    'DateField': TypeInfo(TypeOf.Class, create:() => DateField()),
-    'IntegerField': TypeInfo(TypeOf.Class, create:() => IntegerField()),
-    'GeolocationField': TypeInfo(TypeOf.Class, create:() => GeolocationField()),
-    'TagsField': TypeInfo(TypeOf.Class, create:() => TagsField()),
-    'FileField': TypeInfo(TypeOf.Class, create:() => FileField()),
-    'TaxonomySelectionField': TypeInfo(TypeOf.Class, create:() => TaxonomySelectionField()),
-    'CollectionSelectionField': TypeInfo(TypeOf.Class, create:() => CollectionSelectionField()),
-    'UserSelectionField': TypeInfo(TypeOf.Class, create:() => UserSelectionField()),
-    'RoleSelectionField': TypeInfo(TypeOf.Class, create:() => RoleSelectionField()),
-    'EnumSelectionField': TypeInfo(TypeOf.Class, create:() => EnumSelectionField()),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
     'DecimalFieldDto': TypeInfo(TypeOf.Class, create:() => DecimalFieldDto()),
     'CurrencyFieldDto': TypeInfo(TypeOf.Class, create:() => CurrencyFieldDto()),
@@ -53627,6 +42638,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<LicenseDto>': TypeInfo(TypeOf.Class, create:() => <LicenseDto>[]),
     'PostLicenseHeartbeatResponse': TypeInfo(TypeOf.Class, create:() => PostLicenseHeartbeatResponse()),
     'GetInstallationLicenseStatusResponse': TypeInfo(TypeOf.Class, create:() => GetInstallationLicenseStatusResponse()),
+    'CreateAiServiceUserResponse': TypeInfo(TypeOf.Class, create:() => CreateAiServiceUserResponse()),
+    'ListAiServiceUsersResponse': TypeInfo(TypeOf.Class, create:() => ListAiServiceUsersResponse()),
+    'List<AiServiceUserDto>': TypeInfo(TypeOf.Class, create:() => <AiServiceUserDto>[]),
+    'RotateAiServiceUserKeyResponse': TypeInfo(TypeOf.Class, create:() => RotateAiServiceUserKeyResponse()),
     'IssueServiceUserApiKeyResponse': TypeInfo(TypeOf.Class, create:() => IssueServiceUserApiKeyResponse()),
     'ListServiceUserApiKeysResponse': TypeInfo(TypeOf.Class, create:() => ListServiceUserApiKeysResponse()),
     'List<ServiceUserApiKeyDto>': TypeInfo(TypeOf.Class, create:() => <ServiceUserApiKeyDto>[]),
@@ -53700,9 +42715,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetFilesIntegrationResponse()),
     'GetFilesIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetFilesIntegrationsResponse()),
     'PaginatedResponse<FilesIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FilesIntegrationListProjection>()),
+    'List<FileProvider>': TypeInfo(TypeOf.Class, create:() => <FileProvider>[]),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
     'GetFolderFilesResponse': TypeInfo(TypeOf.Class, create:() => GetFolderFilesResponse()),
     'PaginatedResponse<FileResourceRefDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FileResourceRefDto>()),
+    'List<PublicFolderDto>': TypeInfo(TypeOf.Class, create:() => <PublicFolderDto>[]),
     'GetNotificationModuleDisableDependenciesResponse': TypeInfo(TypeOf.Class, create:() => GetNotificationModuleDisableDependenciesResponse()),
     'TestEmailValidationIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestEmailValidationIntegrationResponse()),
     'List<TestEmailValidationItemDto>': TypeInfo(TypeOf.Class, create:() => <TestEmailValidationItemDto>[]),
@@ -53789,6 +42806,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPushIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetPushIntegrationResponse()),
     'GetPushIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetPushIntegrationsResponse()),
     'PaginatedResponse<PushIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushIntegrationListProjection>()),
+    'GetPushDeviceResponse': TypeInfo(TypeOf.Class, create:() => GetPushDeviceResponse()),
+    'GetPushDevicesResponse': TypeInfo(TypeOf.Class, create:() => GetPushDevicesResponse()),
+    'PaginatedResponse<PushDeviceListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushDeviceListProjection>()),
     'GetPushCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignResponse()),
     'GetPushCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignsResponse()),
     'PaginatedResponse<PushCampaignDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignDto>()),
@@ -53820,10 +42840,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetLogsResponse': TypeInfo(TypeOf.Class, create:() => GetLogsResponse()),
     'GetLogSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetLogSettingsResponse()),
     'SaveLogSettingsResponse': TypeInfo(TypeOf.Class, create:() => SaveLogSettingsResponse()),
+    'GetAgentOnboardingResponse': TypeInfo(TypeOf.Class, create:() => GetAgentOnboardingResponse()),
+    'List<AgentOnboardingSnippet>': TypeInfo(TypeOf.Class, create:() => <AgentOnboardingSnippet>[]),
     'GetAiToolsResponse': TypeInfo(TypeOf.Class, create:() => GetAiToolsResponse()),
     'List<AiToolManifestItem>': TypeInfo(TypeOf.Class, create:() => <AiToolManifestItem>[]),
     'InvokeAiToolResponse': TypeInfo(TypeOf.Class, create:() => InvokeAiToolResponse()),
-    'AskChatResponse': TypeInfo(TypeOf.Class, create:() => AskChatResponse()),
     'UploadChatAttachmentResponse': TypeInfo(TypeOf.Class, create:() => UploadChatAttachmentResponse()),
     'ChatAvailabilityResponse': TypeInfo(TypeOf.Class, create:() => ChatAvailabilityResponse()),
     'List<ChatModelOption>': TypeInfo(TypeOf.Class, create:() => <ChatModelOption>[]),
@@ -53999,62 +43020,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetLicenses': TypeInfo(TypeOf.Class, create:() => GetLicenses()),
     'PostLicenseHeartbeat': TypeInfo(TypeOf.Class, create:() => PostLicenseHeartbeat()),
     'GetInstallationLicenseStatus': TypeInfo(TypeOf.Class, create:() => GetInstallationLicenseStatus()),
-    'AccountCreated': TypeInfo(TypeOf.Class, create:() => AccountCreated()),
-    'AccountProfileUpdated': TypeInfo(TypeOf.Class, create:() => AccountProfileUpdated()),
-    'AccountSetAsActive': TypeInfo(TypeOf.Class, create:() => AccountSetAsActive()),
-    'AccountValidationTokenIssued': TypeInfo(TypeOf.Class, create:() => AccountValidationTokenIssued()),
-    'AccountVerified': TypeInfo(TypeOf.Class, create:() => AccountVerified()),
-    'AccountBlocked': TypeInfo(TypeOf.Class, create:() => AccountBlocked()),
-    'AccountSetAsInactive': TypeInfo(TypeOf.Class, create:() => AccountSetAsInactive()),
-    'AccountUnregistered': TypeInfo(TypeOf.Class, create:() => AccountUnregistered()),
-    'LicenseCreated': TypeInfo(TypeOf.Class, create:() => LicenseCreated()),
-    'ProjectCreated': TypeInfo(TypeOf.Class, create:() => ProjectCreated()),
-    'List<ProjectRegion>': TypeInfo(TypeOf.Class, create:() => <ProjectRegion>[]),
-    'ProjectActivated': TypeInfo(TypeOf.Class, create:() => ProjectActivated()),
-    'ProjectSuspendedByLicense': TypeInfo(TypeOf.Class, create:() => ProjectSuspendedByLicense()),
-    'ProjectResumedFromLicenseSuspension': TypeInfo(TypeOf.Class, create:() => ProjectResumedFromLicenseSuspension()),
-    'ProjectDisabled': TypeInfo(TypeOf.Class, create:() => ProjectDisabled()),
-    'ProjectDeleted': TypeInfo(TypeOf.Class, create:() => ProjectDeleted()),
-    'ProjectNameChanged': TypeInfo(TypeOf.Class, create:() => ProjectNameChanged()),
-    'ProjectDescriptionChanged': TypeInfo(TypeOf.Class, create:() => ProjectDescriptionChanged()),
-    'ProjectMarketingUrlChanged': TypeInfo(TypeOf.Class, create:() => ProjectMarketingUrlChanged()),
-    'ProjectAdminUrlChanged': TypeInfo(TypeOf.Class, create:() => ProjectAdminUrlChanged()),
-    'ProjectLegalDocumentsChanged': TypeInfo(TypeOf.Class, create:() => ProjectLegalDocumentsChanged()),
-    'ProjectExposeLegalToAdminPortalChanged': TypeInfo(TypeOf.Class, create:() => ProjectExposeLegalToAdminPortalChanged()),
-    'ProjectAdminPortalServiceUserAssigned': TypeInfo(TypeOf.Class, create:() => ProjectAdminPortalServiceUserAssigned()),
-    'ProjectAllowedOriginsChanged': TypeInfo(TypeOf.Class, create:() => ProjectAllowedOriginsChanged()),
-    'List<DomainUrl>': TypeInfo(TypeOf.Class, create:() => <DomainUrl>[]),
-    'ProjectEnvironmentCreated': TypeInfo(TypeOf.Class, create:() => ProjectEnvironmentCreated()),
-    'ProjectEnvironmentDeleted': TypeInfo(TypeOf.Class, create:() => ProjectEnvironmentDeleted()),
-    'ProjectEnvironmentRanksChanged': TypeInfo(TypeOf.Class, create:() => ProjectEnvironmentRanksChanged()),
-    'ProjectDefaultLanguageChanged': TypeInfo(TypeOf.Class, create:() => ProjectDefaultLanguageChanged()),
-    'ProjectLanguagesChanged': TypeInfo(TypeOf.Class, create:() => ProjectLanguagesChanged()),
-    'List<Language>': TypeInfo(TypeOf.Class, create:() => <Language>[]),
-    'ProjectLogoChanged': TypeInfo(TypeOf.Class, create:() => ProjectLogoChanged()),
-    'ProjectIconChanged': TypeInfo(TypeOf.Class, create:() => ProjectIconChanged()),
-    'ProjectMainColorChanged': TypeInfo(TypeOf.Class, create:() => ProjectMainColorChanged()),
-    'ProjectAccentColorChanged': TypeInfo(TypeOf.Class, create:() => ProjectAccentColorChanged()),
-    'ProjectRegionsChanged': TypeInfo(TypeOf.Class, create:() => ProjectRegionsChanged()),
-    'ProjectCommunicationSet': TypeInfo(TypeOf.Class, create:() => ProjectCommunicationSet()),
-    'ProjectTimeZoneChanged': TypeInfo(TypeOf.Class, create:() => ProjectTimeZoneChanged()),
-    'ProjectPaymentZonesChanged': TypeInfo(TypeOf.Class, create:() => ProjectPaymentZonesChanged()),
-    'List<TimeZone>': TypeInfo(TypeOf.Class, create:() => <TimeZone>[]),
-    'ProjectCommunicationGroupSaved': TypeInfo(TypeOf.Class, create:() => ProjectCommunicationGroupSaved()),
-    'ProjectCommunicationTagFromGroupDeleted': TypeInfo(TypeOf.Class, create:() => ProjectCommunicationTagFromGroupDeleted()),
-    'ProjectCommunicationGroupDeleted': TypeInfo(TypeOf.Class, create:() => ProjectCommunicationGroupDeleted()),
-    'ProjectCommunicationTagSaved': TypeInfo(TypeOf.Class, create:() => ProjectCommunicationTagSaved()),
-    'ProjectCommunicationTagDeleted': TypeInfo(TypeOf.Class, create:() => ProjectCommunicationTagDeleted()),
-    'CustomerCreated': TypeInfo(TypeOf.Class, create:() => CustomerCreated()),
-    'SubscriptionChanged': TypeInfo(TypeOf.Class, create:() => SubscriptionChanged()),
-    'SubscriptionCanceled': TypeInfo(TypeOf.Class, create:() => SubscriptionCanceled()),
-    'AccountTeamPolicyCreated': TypeInfo(TypeOf.Class, create:() => AccountTeamPolicyCreated()),
-    'AccountTeamPolicyUpdated': TypeInfo(TypeOf.Class, create:() => AccountTeamPolicyUpdated()),
-    'AccountTeamPolicyDeleted': TypeInfo(TypeOf.Class, create:() => AccountTeamPolicyDeleted()),
-    'AccountTeamRoleCreated': TypeInfo(TypeOf.Class, create:() => AccountTeamRoleCreated()),
-    'AccountTeamRoleUpdated': TypeInfo(TypeOf.Class, create:() => AccountTeamRoleUpdated()),
-    'AccountTeamRoleDeleted': TypeInfo(TypeOf.Class, create:() => AccountTeamRoleDeleted()),
-    'AtlasUsageRecorded': TypeInfo(TypeOf.Class, create:() => AtlasUsageRecorded()),
-    'UsageBillingIngestionFailed': TypeInfo(TypeOf.Class, create:() => UsageBillingIngestionFailed()),
+    'CreateAiServiceUserRequest': TypeInfo(TypeOf.Class, create:() => CreateAiServiceUserRequest()),
+    'ListAiServiceUsersRequest': TypeInfo(TypeOf.Class, create:() => ListAiServiceUsersRequest()),
+    'RotateAiServiceUserKeyRequest': TypeInfo(TypeOf.Class, create:() => RotateAiServiceUserKeyRequest()),
+    'RevokeAiServiceUserKeyRequest': TypeInfo(TypeOf.Class, create:() => RevokeAiServiceUserKeyRequest()),
+    'DeleteAiServiceUserRequest': TypeInfo(TypeOf.Class, create:() => DeleteAiServiceUserRequest()),
     'DisableMembership': TypeInfo(TypeOf.Class, create:() => DisableMembership()),
     'EnableMembership': TypeInfo(TypeOf.Class, create:() => EnableMembership()),
     'IssueServiceUserApiKeyRequest': TypeInfo(TypeOf.Class, create:() => IssueServiceUserApiKeyRequest()),
@@ -54091,28 +43061,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetAuthenticationSettings': TypeInfo(TypeOf.Class, create:() => GetAuthenticationSettings()),
     'UpdateAuthenticationSettings': TypeInfo(TypeOf.Class, create:() => UpdateAuthenticationSettings()),
     'List<CredentialsSettingsModeDto>': TypeInfo(TypeOf.Class, create:() => <CredentialsSettingsModeDto>[]),
-    'MembershipIntegrationSaved': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationSaved()),
-    'MembershipIntegrationTested': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationTested()),
-    'MembershipIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationRenamed()),
-    'MembershipIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationDeleted()),
-    'MembershipIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationSetAsDefault()),
-    'MembershipIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationEnabled()),
-    'MembershipIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationDisabled()),
-    'MembershipEstablished': TypeInfo(TypeOf.Class, create:() => MembershipEstablished()),
-    'MembershipEnabled': TypeInfo(TypeOf.Class, create:() => MembershipEnabled()),
-    'MembershipDisabled': TypeInfo(TypeOf.Class, create:() => MembershipDisabled()),
-    'SetUserRegistersAsRole': TypeInfo(TypeOf.Class, create:() => SetUserRegistersAsRole()),
-    'PolicyCreated': TypeInfo(TypeOf.Class, create:() => PolicyCreated()),
-    'PolicyUpdated': TypeInfo(TypeOf.Class, create:() => PolicyUpdated()),
-    'PolicyDeleted': TypeInfo(TypeOf.Class, create:() => PolicyDeleted()),
-    'RoleCreated': TypeInfo(TypeOf.Class, create:() => RoleCreated()),
-    'RoleUpdated': TypeInfo(TypeOf.Class, create:() => RoleUpdated()),
-    'RoleDeleted': TypeInfo(TypeOf.Class, create:() => RoleDeleted()),
-    'MembershipTriggerSaved': TypeInfo(TypeOf.Class, create:() => MembershipTriggerSaved()),
-    'MembershipTriggerMirrored': TypeInfo(TypeOf.Class, create:() => MembershipTriggerMirrored()),
-    'MembershipTriggerEnabled': TypeInfo(TypeOf.Class, create:() => MembershipTriggerEnabled()),
-    'MembershipTriggerDisabled': TypeInfo(TypeOf.Class, create:() => MembershipTriggerDisabled()),
-    'MembershipTriggerDeleted': TypeInfo(TypeOf.Class, create:() => MembershipTriggerDeleted()),
     'DisableDatabase': TypeInfo(TypeOf.Class, create:() => DisableDatabase()),
     'EnableDatabase': TypeInfo(TypeOf.Class, create:() => EnableDatabase()),
     'DeleteSchemaTrigger': TypeInfo(TypeOf.Class, create:() => DeleteSchemaTrigger()),
@@ -54185,65 +43133,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetDatabaseAggregates': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregates()),
     'SaveDatabaseAggregateRequest': TypeInfo(TypeOf.Class, create:() => SaveDatabaseAggregateRequest()),
     'TestDatabaseAggregateRequest': TypeInfo(TypeOf.Class, create:() => TestDatabaseAggregateRequest()),
-    'MongoDbAggregateCreated': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateCreated()),
-    'MongoDbAggregateUpdated': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateUpdated()),
-    'MongoDbAggregateDeleted': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateDeleted()),
-    'DatabaseEstablished': TypeInfo(TypeOf.Class, create:() => DatabaseEstablished()),
-    'DatabaseEnabled': TypeInfo(TypeOf.Class, create:() => DatabaseEnabled()),
-    'DatabaseDisabled': TypeInfo(TypeOf.Class, create:() => DatabaseDisabled()),
-    'DatabaseIntegrationSaved': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationSaved()),
-    'DatabaseIntegrationTested': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationTested()),
-    'DatabaseIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationRenamed()),
-    'DatabaseIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationSetAsDefault()),
-    'DatabaseIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationDeleted()),
-    'DatabaseIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationEnabled()),
-    'DatabaseIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationDisabled()),
-    'DatabaseIntegrationProvisioningStarted': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationProvisioningStarted()),
-    'DatabaseIntegrationProvisioningCompleted': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationProvisioningCompleted()),
-    'DatabaseIntegrationProvisioningFailed': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationProvisioningFailed()),
-    'DatabaseIntegrationDeprovisioned': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationDeprovisioned()),
-    'ProjectStatusChanged': TypeInfo(TypeOf.Class, create:() => ProjectStatusChanged()),
-    'SchemaCreated': TypeInfo(TypeOf.Class, create:() => SchemaCreated()),
-    'SchemaMirrored': TypeInfo(TypeOf.Class, create:() => SchemaMirrored()),
-    'SchemaDraftUpdated': TypeInfo(TypeOf.Class, create:() => SchemaDraftUpdated()),
-    'SchemaDraftDiscarded': TypeInfo(TypeOf.Class, create:() => SchemaDraftDiscarded()),
-    'SchemaVersionPublished': TypeInfo(TypeOf.Class, create:() => SchemaVersionPublished()),
-    'SchemaSettingsUpdated': TypeInfo(TypeOf.Class, create:() => SchemaSettingsUpdated()),
-    'SchemaDeleted': TypeInfo(TypeOf.Class, create:() => SchemaDeleted()),
-    'SchemaRenamed': TypeInfo(TypeOf.Class, create:() => SchemaRenamed()),
-    'SchemaDataCleared': TypeInfo(TypeOf.Class, create:() => SchemaDataCleared()),
-    'TaxonomyCreated': TypeInfo(TypeOf.Class, create:() => TaxonomyCreated()),
-    'TaxonomyUpdated': TypeInfo(TypeOf.Class, create:() => TaxonomyUpdated()),
-    'TaxonomyDeleted': TypeInfo(TypeOf.Class, create:() => TaxonomyDeleted()),
-    'TaxonomyDataCleared': TypeInfo(TypeOf.Class, create:() => TaxonomyDataCleared()),
-    'SchemaTriggerSaved': TypeInfo(TypeOf.Class, create:() => SchemaTriggerSaved()),
-    'DatabaseTriggerMirrored': TypeInfo(TypeOf.Class, create:() => DatabaseTriggerMirrored()),
-    'SchemaTriggerEnabled': TypeInfo(TypeOf.Class, create:() => SchemaTriggerEnabled()),
-    'SchemaTriggerDisabled': TypeInfo(TypeOf.Class, create:() => SchemaTriggerDisabled()),
-    'SchemaTriggerDeleted': TypeInfo(TypeOf.Class, create:() => SchemaTriggerDeleted()),
     'ProcessCollectionImport': TypeInfo(TypeOf.Class, create:() => ProcessCollectionImport()),
-    'RecordInserted': TypeInfo(TypeOf.Class, create:() => RecordInserted()),
-    'RecordUpdated': TypeInfo(TypeOf.Class, create:() => RecordUpdated()),
-    'RecordDeleted': TypeInfo(TypeOf.Class, create:() => RecordDeleted()),
-    'RecordReplaced': TypeInfo(TypeOf.Class, create:() => RecordReplaced()),
-    'RecordResponsibilityChanged': TypeInfo(TypeOf.Class, create:() => RecordResponsibilityChanged()),
-    'RecordsInserted': TypeInfo(TypeOf.Class, create:() => RecordsInserted()),
-    'IReadOnlyList<dynamic>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<dynamic>()),
-    'RecordsUpdated': TypeInfo(TypeOf.Class, create:() => RecordsUpdated()),
-    'RecordsDeleted': TypeInfo(TypeOf.Class, create:() => RecordsDeleted()),
-    'EmailVerificationCodeRequested': TypeInfo(TypeOf.Class, create:() => EmailVerificationCodeRequested()),
-    'MagicLinkRequested': TypeInfo(TypeOf.Class, create:() => MagicLinkRequested()),
-    'PasswordResetRequested': TypeInfo(TypeOf.Class, create:() => PasswordResetRequested()),
-    'PasswordChanged': TypeInfo(TypeOf.Class, create:() => PasswordChanged()),
-    'SseCallTriggered': TypeInfo(TypeOf.Class, create:() => SseCallTriggered()),
-    'UserRegistered': TypeInfo(TypeOf.Class, create:() => UserRegistered()),
-    'UserCreated': TypeInfo(TypeOf.Class, create:() => UserCreated()),
-    'UserUpdated': TypeInfo(TypeOf.Class, create:() => UserUpdated()),
-    'UserBlocked': TypeInfo(TypeOf.Class, create:() => UserBlocked()),
-    'UserUnblocked': TypeInfo(TypeOf.Class, create:() => UserUnblocked()),
-    'UserInvited': TypeInfo(TypeOf.Class, create:() => UserInvited()),
-    'UserVerified': TypeInfo(TypeOf.Class, create:() => UserVerified()),
-    'UserDeleted': TypeInfo(TypeOf.Class, create:() => UserDeleted()),
     'DisableFiles': TypeInfo(TypeOf.Class, create:() => DisableFiles()),
     'EnableFiles': TypeInfo(TypeOf.Class, create:() => EnableFiles()),
     'DeleteFilesTrigger': TypeInfo(TypeOf.Class, create:() => DeleteFilesTrigger()),
@@ -54252,6 +43142,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetFilesTrigger': TypeInfo(TypeOf.Class, create:() => GetFilesTrigger()),
     'GetFilesTriggers': TypeInfo(TypeOf.Class, create:() => GetFilesTriggers()),
     'SaveFilesTrigger': TypeInfo(TypeOf.Class, create:() => SaveFilesTrigger()),
+    'MakeFilePrivateRequest': TypeInfo(TypeOf.Class, create:() => MakeFilePrivateRequest()),
+    'MakeFilePublicRequest': TypeInfo(TypeOf.Class, create:() => MakeFilePublicRequest()),
+    'MakeFolderPrivateRequest': TypeInfo(TypeOf.Class, create:() => MakeFolderPrivateRequest()),
+    'MakeFolderPublicRequest': TypeInfo(TypeOf.Class, create:() => MakeFolderPublicRequest()),
     'DeleteFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DeleteFilesIntegrationRequest()),
     'DisableFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DisableFilesIntegrationRequest()),
     'EnableFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => EnableFilesIntegrationRequest()),
@@ -54261,23 +43155,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SetFilesIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetFilesIntegrationAsDefaultRequest()),
     'TestFilesIntegration': TypeInfo(TypeOf.Class, create:() => TestFilesIntegration()),
     'GetFolderFiles': TypeInfo(TypeOf.Class, create:() => GetFolderFiles()),
-    'FilesEstablished': TypeInfo(TypeOf.Class, create:() => FilesEstablished()),
-    'FilesEnabled': TypeInfo(TypeOf.Class, create:() => FilesEnabled()),
-    'FilesDisabled': TypeInfo(TypeOf.Class, create:() => FilesDisabled()),
-    'FilesIntegrationSaved': TypeInfo(TypeOf.Class, create:() => FilesIntegrationSaved()),
-    'FilesIntegrationTested': TypeInfo(TypeOf.Class, create:() => FilesIntegrationTested()),
-    'FilesIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => FilesIntegrationRenamed()),
-    'FilesIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => FilesIntegrationDeleted()),
-    'FilesIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => FilesIntegrationEnabled()),
-    'FilesIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => FilesIntegrationDisabled()),
-    'FilesIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => FilesIntegrationSetAsDefault()),
-    'FilesTriggerSaved': TypeInfo(TypeOf.Class, create:() => FilesTriggerSaved()),
-    'FilesTriggerMirrored': TypeInfo(TypeOf.Class, create:() => FilesTriggerMirrored()),
-    'FilesTriggerEnabled': TypeInfo(TypeOf.Class, create:() => FilesTriggerEnabled()),
-    'FilesTriggerDisabled': TypeInfo(TypeOf.Class, create:() => FilesTriggerDisabled()),
-    'FilesTriggerDeleted': TypeInfo(TypeOf.Class, create:() => FilesTriggerDeleted()),
-    'FileUploaded': TypeInfo(TypeOf.Class, create:() => FileUploaded()),
-    'FileDeleted': TypeInfo(TypeOf.Class, create:() => FileDeleted()),
     'DisableEmail': TypeInfo(TypeOf.Class, create:() => DisableEmail()),
     'GetEmailDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetEmailDisableDependencies()),
     'EnableEmail': TypeInfo(TypeOf.Class, create:() => EnableEmail()),
@@ -54328,47 +43205,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'StopEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopEmailCampaignRequest()),
     'GetEmailCampaignMessage': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessage()),
     'GetEmailCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessagesRequest()),
-    'EmailServiceEstablished': TypeInfo(TypeOf.Class, create:() => EmailServiceEstablished()),
-    'ProjectDatabaseConnected': TypeInfo(TypeOf.Class, create:() => ProjectDatabaseConnected()),
-    'EmailServiceEnabled': TypeInfo(TypeOf.Class, create:() => EmailServiceEnabled()),
-    'EmailServiceDisabled': TypeInfo(TypeOf.Class, create:() => EmailServiceDisabled()),
-    'EmailFooterSaved': TypeInfo(TypeOf.Class, create:() => EmailFooterSaved()),
-    'EmailFooterMirrored': TypeInfo(TypeOf.Class, create:() => EmailFooterMirrored()),
-    'EmailFooterDeleted': TypeInfo(TypeOf.Class, create:() => EmailFooterDeleted()),
-    'EmailIntegrationSaved': TypeInfo(TypeOf.Class, create:() => EmailIntegrationSaved()),
-    'EmailIntegrationTested': TypeInfo(TypeOf.Class, create:() => EmailIntegrationTested()),
-    'EmailIntegrationHumanDeliveryConfirmed': TypeInfo(TypeOf.Class, create:() => EmailIntegrationHumanDeliveryConfirmed()),
-    'EmailIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => EmailIntegrationRenamed()),
-    'EmailIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => EmailIntegrationSetAsDefault()),
-    'EmailIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => EmailIntegrationDeleted()),
-    'EmailIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => EmailIntegrationEnabled()),
-    'EmailIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => EmailIntegrationDisabled()),
-    'EmailSignatureSaved': TypeInfo(TypeOf.Class, create:() => EmailSignatureSaved()),
-    'EmailSignatureMirrored': TypeInfo(TypeOf.Class, create:() => EmailSignatureMirrored()),
-    'EmailSignatureDeleted': TypeInfo(TypeOf.Class, create:() => EmailSignatureDeleted()),
-    'EmailTemplateCreated': TypeInfo(TypeOf.Class, create:() => EmailTemplateCreated()),
-    'List<MessageTranslation<EmailMessageContent>>': TypeInfo(TypeOf.Class, create:() => <MessageTranslation<EmailMessageContent>>[]),
-    'MessageTranslation<EmailMessageContent>': TypeInfo(TypeOf.Class, create:() => MessageTranslation<EmailMessageContent>()),
-    'EmailTemplateUpdated': TypeInfo(TypeOf.Class, create:() => EmailTemplateUpdated()),
-    'EmailTemplateMirrored': TypeInfo(TypeOf.Class, create:() => EmailTemplateMirrored()),
-    'EmailTemplateBackfilled': TypeInfo(TypeOf.Class, create:() => EmailTemplateBackfilled()),
-    'EmailTemplateDeleted': TypeInfo(TypeOf.Class, create:() => EmailTemplateDeleted()),
-    'EmailTemplateArchived': TypeInfo(TypeOf.Class, create:() => EmailTemplateArchived()),
-    'EmailTemplateUnArchived': TypeInfo(TypeOf.Class, create:() => EmailTemplateUnArchived()),
-    'EmailValidationIntegrationSaved': TypeInfo(TypeOf.Class, create:() => EmailValidationIntegrationSaved()),
-    'EmailValidationIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => EmailValidationIntegrationDeleted()),
-    'EmailValidationIntegrationSecretsConfigured': TypeInfo(TypeOf.Class, create:() => EmailValidationIntegrationSecretsConfigured()),
-    'EmailValidationIntegrationSecretsConfigurationFailed': TypeInfo(TypeOf.Class, create:() => EmailValidationIntegrationSecretsConfigurationFailed()),
-    'EmailValidationIntegrationTested': TypeInfo(TypeOf.Class, create:() => EmailValidationIntegrationTested()),
-    'EmailBatchRegistered': TypeInfo(TypeOf.Class, create:() => EmailBatchRegistered()),
-    'EmailNotificationRead': TypeInfo(TypeOf.Class, create:() => EmailNotificationRead()),
-    'EmailNotificationClicked': TypeInfo(TypeOf.Class, create:() => EmailNotificationClicked()),
-    'EmailCampaignStarted': TypeInfo(TypeOf.Class, create:() => EmailCampaignStarted()),
-    'EmailCampaignStopped': TypeInfo(TypeOf.Class, create:() => EmailCampaignStopped()),
-    'EmailCampaignCompleted': TypeInfo(TypeOf.Class, create:() => EmailCampaignCompleted()),
-    'EmailCampaignFailed': TypeInfo(TypeOf.Class, create:() => EmailCampaignFailed()),
-    'EmailCampaignTriggered': TypeInfo(TypeOf.Class, create:() => EmailCampaignTriggered()),
-    'EmailDeliveryEventReceived': TypeInfo(TypeOf.Class, create:() => EmailDeliveryEventReceived()),
     'DisableSms': TypeInfo(TypeOf.Class, create:() => DisableSms()),
     'GetSmsDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetSmsDisableDependencies()),
     'EnableSms': TypeInfo(TypeOf.Class, create:() => EnableSms()),
@@ -54404,59 +43240,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'StopSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopSmsCampaignRequest()),
     'GetSmsCampaignMessage': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessage()),
     'GetSmsCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesRequest()),
-    'SmsIntegrationSaved': TypeInfo(TypeOf.Class, create:() => SmsIntegrationSaved()),
-    'SmsIntegrationTested': TypeInfo(TypeOf.Class, create:() => SmsIntegrationTested()),
-    'SmsIntegrationHumanDeliveryConfirmed': TypeInfo(TypeOf.Class, create:() => SmsIntegrationHumanDeliveryConfirmed()),
-    'SmsIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => SmsIntegrationRenamed()),
-    'SmsIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => SmsIntegrationSetAsDefault()),
-    'SmsIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => SmsIntegrationDeleted()),
-    'SmsIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => SmsIntegrationEnabled()),
-    'SmsIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => SmsIntegrationDisabled()),
-    'SmsServiceEstablished': TypeInfo(TypeOf.Class, create:() => SmsServiceEstablished()),
-    'List<SmsTemplate>': TypeInfo(TypeOf.Class, create:() => <SmsTemplate>[]),
-    'SmsServiceEnabled': TypeInfo(TypeOf.Class, create:() => SmsServiceEnabled()),
-    'SmsServiceDisabled': TypeInfo(TypeOf.Class, create:() => SmsServiceDisabled()),
-    'SmsTemplateCreated': TypeInfo(TypeOf.Class, create:() => SmsTemplateCreated()),
-    'List<MessageTranslation<SmsMessageContent>>': TypeInfo(TypeOf.Class, create:() => <MessageTranslation<SmsMessageContent>>[]),
-    'MessageTranslation<SmsMessageContent>': TypeInfo(TypeOf.Class, create:() => MessageTranslation<SmsMessageContent>()),
-    'SmsTemplateUpdated': TypeInfo(TypeOf.Class, create:() => SmsTemplateUpdated()),
-    'SmsTemplateMirrored': TypeInfo(TypeOf.Class, create:() => SmsTemplateMirrored()),
-    'SmsTemplateDeleted': TypeInfo(TypeOf.Class, create:() => SmsTemplateDeleted()),
-    'SmsTemplateArchived': TypeInfo(TypeOf.Class, create:() => SmsTemplateArchived()),
-    'SmsTemplateUnArchived': TypeInfo(TypeOf.Class, create:() => SmsTemplateUnArchived()),
-    'SmsBatchRegistered': TypeInfo(TypeOf.Class, create:() => SmsBatchRegistered()),
-    'SmsNotificationRead': TypeInfo(TypeOf.Class, create:() => SmsNotificationRead()),
-    'SmsNotificationClicked': TypeInfo(TypeOf.Class, create:() => SmsNotificationClicked()),
-    'SmsCampaignStarted': TypeInfo(TypeOf.Class, create:() => SmsCampaignStarted()),
-    'SmsCampaignStopped': TypeInfo(TypeOf.Class, create:() => SmsCampaignStopped()),
-    'SmsCampaignCompleted': TypeInfo(TypeOf.Class, create:() => SmsCampaignCompleted()),
-    'SmsCampaignFailed': TypeInfo(TypeOf.Class, create:() => SmsCampaignFailed()),
-    'SmsCampaignTriggered': TypeInfo(TypeOf.Class, create:() => SmsCampaignTriggered()),
     'ReplaceMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => ReplaceMarketplaceIntegrationSecretsRequest()),
     'RevealMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsRequest()),
     'SetMarketplaceIntegrationTokenMappingsRequest': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationTokenMappingsRequest()),
     'GetMarketplaceFunctionCatalog': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionCatalog()),
-    'CodeIntegrationSaved': TypeInfo(TypeOf.Class, create:() => CodeIntegrationSaved()),
-    'CodeIntegrationTested': TypeInfo(TypeOf.Class, create:() => CodeIntegrationTested()),
-    'CodeIntegrationHumanDeliveryConfirmed': TypeInfo(TypeOf.Class, create:() => CodeIntegrationHumanDeliveryConfirmed()),
-    'CodeIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => CodeIntegrationRenamed()),
-    'CodeIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => CodeIntegrationSetAsDefault()),
-    'CodeIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => CodeIntegrationDeleted()),
-    'CodeIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => CodeIntegrationEnabled()),
-    'CodeIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => CodeIntegrationDisabled()),
-    'MarketplaceIntegrationSaved': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationSaved()),
-    'MarketplaceIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationDeleted()),
-    'MarketplaceIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationEnabled()),
-    'MarketplaceIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationDisabled()),
-    'MarketplaceIntegrationTested': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationTested()),
-    'MarketplaceIntegrationSecretsConfigured': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationSecretsConfigured()),
-    'MarketplaceIntegrationSecretsConfigurationFailed': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationSecretsConfigurationFailed()),
-    'MarketplaceFunctionSaved': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionSaved()),
-    'MarketplaceFunctionDeleted': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionDeleted()),
-    'MarketplaceFunctionEnabled': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionEnabled()),
-    'MarketplaceFunctionDisabled': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionDisabled()),
-    'ServerlessEnabled': TypeInfo(TypeOf.Class, create:() => ServerlessEnabled()),
-    'ServerlessDisabled': TypeInfo(TypeOf.Class, create:() => ServerlessDisabled()),
     'DisablePush': TypeInfo(TypeOf.Class, create:() => DisablePush()),
     'GetPushDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetPushDisableDependencies()),
     'EnablePush': TypeInfo(TypeOf.Class, create:() => EnablePush()),
@@ -54480,8 +43267,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SavePushIntegration': TypeInfo(TypeOf.Class, create:() => SavePushIntegration()),
     'SetPushIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetPushIntegrationAsDefaultRequest()),
     'TestPushIntegration': TypeInfo(TypeOf.Class, create:() => TestPushIntegration()),
-    'RegisterCodeMashAppPushIntegration': TypeInfo(TypeOf.Class, create:() => RegisterCodeMashAppPushIntegration()),
     'RegisterDevice': TypeInfo(TypeOf.Class, create:() => RegisterDevice()),
+    'GetPushDevice': TypeInfo(TypeOf.Class, create:() => GetPushDevice()),
+    'GetPushDevices': TypeInfo(TypeOf.Class, create:() => GetPushDevices()),
     'CreatePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreatePushCampaignRequest()),
     'DeletePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => DeletePushCampaignRequest()),
     'GetPushCampaign': TypeInfo(TypeOf.Class, create:() => GetPushCampaign()),
@@ -54494,28 +43282,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'StopPushCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopPushCampaignRequest()),
     'GetPushCampaignMessage': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessage()),
     'GetPushCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessagesRequest()),
-    'PushIntegrationSaved': TypeInfo(TypeOf.Class, create:() => PushIntegrationSaved()),
-    'PushIntegrationTested': TypeInfo(TypeOf.Class, create:() => PushIntegrationTested()),
-    'PushIntegrationHumanDeliveryConfirmed': TypeInfo(TypeOf.Class, create:() => PushIntegrationHumanDeliveryConfirmed()),
-    'PushIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => PushIntegrationRenamed()),
-    'PushIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => PushIntegrationSetAsDefault()),
-    'PushIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => PushIntegrationDeleted()),
-    'PushIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => PushIntegrationEnabled()),
-    'PushIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => PushIntegrationDisabled()),
-    'PushServiceEstablished': TypeInfo(TypeOf.Class, create:() => PushServiceEstablished()),
-    'List<PushTemplate>': TypeInfo(TypeOf.Class, create:() => <PushTemplate>[]),
-    'PushServiceEnabled': TypeInfo(TypeOf.Class, create:() => PushServiceEnabled()),
-    'PushServiceDisabled': TypeInfo(TypeOf.Class, create:() => PushServiceDisabled()),
-    'PushModuleTagSaved': TypeInfo(TypeOf.Class, create:() => PushModuleTagSaved()),
-    'PushModuleTagDeleted': TypeInfo(TypeOf.Class, create:() => PushModuleTagDeleted()),
-    'PushTemplateCreated': TypeInfo(TypeOf.Class, create:() => PushTemplateCreated()),
-    'List<MessageTranslation<PushMessageContent>>': TypeInfo(TypeOf.Class, create:() => <MessageTranslation<PushMessageContent>>[]),
-    'MessageTranslation<PushMessageContent>': TypeInfo(TypeOf.Class, create:() => MessageTranslation<PushMessageContent>()),
-    'PushTemplateUpdated': TypeInfo(TypeOf.Class, create:() => PushTemplateUpdated()),
-    'PushTemplateMirrored': TypeInfo(TypeOf.Class, create:() => PushTemplateMirrored()),
-    'PushTemplateDeleted': TypeInfo(TypeOf.Class, create:() => PushTemplateDeleted()),
-    'PushTemplateArchived': TypeInfo(TypeOf.Class, create:() => PushTemplateArchived()),
-    'PushTemplateUnArchived': TypeInfo(TypeOf.Class, create:() => PushTemplateUnArchived()),
     'DisablePayments': TypeInfo(TypeOf.Class, create:() => DisablePayments()),
     'EnablePayments': TypeInfo(TypeOf.Class, create:() => EnablePayments()),
     'GetPaymentsWebhookLog': TypeInfo(TypeOf.Class, create:() => GetPaymentsWebhookLog()),
@@ -54533,21 +43299,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentsIntegrations': TypeInfo(TypeOf.Class, create:() => GetPaymentsIntegrations()),
     'SavePaymentsIntegration': TypeInfo(TypeOf.Class, create:() => SavePaymentsIntegration()),
     'TestPaymentsIntegration': TypeInfo(TypeOf.Class, create:() => TestPaymentsIntegration()),
-    'PaymentsIntegrationSaved': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationSaved()),
-    'PaymentsIntegrationTested': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationTested()),
-    'PaymentsIntegrationHumanDeliveryConfirmed': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationHumanDeliveryConfirmed()),
-    'PaymentsIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationRenamed()),
-    'PaymentsIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationDeleted()),
-    'PaymentsIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationEnabled()),
-    'PaymentsIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationDisabled()),
-    'PaymentsEstablished': TypeInfo(TypeOf.Class, create:() => PaymentsEstablished()),
-    'PaymentsEnabled': TypeInfo(TypeOf.Class, create:() => PaymentsEnabled()),
-    'PaymentsDisabled': TypeInfo(TypeOf.Class, create:() => PaymentsDisabled()),
-    'PaymentsTriggerSaved': TypeInfo(TypeOf.Class, create:() => PaymentsTriggerSaved()),
-    'PaymentTriggerMirrored': TypeInfo(TypeOf.Class, create:() => PaymentTriggerMirrored()),
-    'PaymentsTriggerEnabled': TypeInfo(TypeOf.Class, create:() => PaymentsTriggerEnabled()),
-    'PaymentsTriggerDisabled': TypeInfo(TypeOf.Class, create:() => PaymentsTriggerDisabled()),
-    'PaymentsTriggerDeleted': TypeInfo(TypeOf.Class, create:() => PaymentsTriggerDeleted()),
     'DisableLogging': TypeInfo(TypeOf.Class, create:() => DisableLogging()),
     'EnableLogging': TypeInfo(TypeOf.Class, create:() => EnableLogging()),
     'DeleteLoggingIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DeleteLoggingIntegrationRequest()),
@@ -54562,24 +43313,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetLogs': TypeInfo(TypeOf.Class, create:() => GetLogs()),
     'GetLogSettings': TypeInfo(TypeOf.Class, create:() => GetLogSettings()),
     'SaveLogSettings': TypeInfo(TypeOf.Class, create:() => SaveLogSettings()),
-    'LoggingIntegrationSaved': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationSaved()),
-    'LoggingIntegrationTested': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationTested()),
-    'LoggingIntegrationRenamed': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationRenamed()),
-    'LoggingIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationDeleted()),
-    'LoggingIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationEnabled()),
-    'LoggingIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationDisabled()),
-    'LoggingIntegrationSecretsConfigured': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationSecretsConfigured()),
-    'LoggingIntegrationSecretsConfigurationFailed': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationSecretsConfigurationFailed()),
-    'LoggingIntegrationSecretsCleared': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationSecretsCleared()),
-    'LoggingIntegrationSecretsClearingFailed': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationSecretsClearingFailed()),
-    'LoggingIntegrationSetAsDefault': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationSetAsDefault()),
-    'NorbixLoggingLogsWipeRequested': TypeInfo(TypeOf.Class, create:() => NorbixLoggingLogsWipeRequested()),
-    'LoggingEstablished': TypeInfo(TypeOf.Class, create:() => LoggingEstablished()),
-    'LoggingEnabled': TypeInfo(TypeOf.Class, create:() => LoggingEnabled()),
-    'LoggingDisabled': TypeInfo(TypeOf.Class, create:() => LoggingDisabled()),
+    'GetAgentOnboardingRequest': TypeInfo(TypeOf.Class, create:() => GetAgentOnboardingRequest()),
     'GetAiToolsRequest': TypeInfo(TypeOf.Class, create:() => GetAiToolsRequest()),
     'InvokeAiToolRequest': TypeInfo(TypeOf.Class, create:() => InvokeAiToolRequest()),
-    'AskChatRequest': TypeInfo(TypeOf.Class, create:() => AskChatRequest()),
     'UploadChatAttachmentRequest': TypeInfo(TypeOf.Class, create:() => UploadChatAttachmentRequest()),
     'ChatAvailabilityRequest': TypeInfo(TypeOf.Class, create:() => ChatAvailabilityRequest()),
     'GetChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => GetChatMemoryRequest()),
@@ -54615,29 +43351,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMcpIntegrations': TypeInfo(TypeOf.Class, create:() => GetMcpIntegrations()),
     'SaveMcpIntegration': TypeInfo(TypeOf.Class, create:() => SaveMcpIntegration()),
     'TestMcpIntegration': TypeInfo(TypeOf.Class, create:() => TestMcpIntegration()),
-    'LlmIntegrationSaved': TypeInfo(TypeOf.Class, create:() => LlmIntegrationSaved()),
-    'LlmIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => LlmIntegrationDeleted()),
-    'LlmIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => LlmIntegrationEnabled()),
-    'LlmIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => LlmIntegrationDisabled()),
-    'LlmIntegrationSecretsConfigured': TypeInfo(TypeOf.Class, create:() => LlmIntegrationSecretsConfigured()),
-    'LlmIntegrationSecretsConfigurationFailed': TypeInfo(TypeOf.Class, create:() => LlmIntegrationSecretsConfigurationFailed()),
-    'LlmIntegrationTested': TypeInfo(TypeOf.Class, create:() => LlmIntegrationTested()),
-    'McpIntegrationSaved': TypeInfo(TypeOf.Class, create:() => McpIntegrationSaved()),
-    'McpIntegrationDeleted': TypeInfo(TypeOf.Class, create:() => McpIntegrationDeleted()),
-    'McpIntegrationEnabled': TypeInfo(TypeOf.Class, create:() => McpIntegrationEnabled()),
-    'McpIntegrationDisabled': TypeInfo(TypeOf.Class, create:() => McpIntegrationDisabled()),
-    'McpIntegrationSecretsConfigured': TypeInfo(TypeOf.Class, create:() => McpIntegrationSecretsConfigured()),
-    'McpIntegrationSecretsConfigurationFailed': TypeInfo(TypeOf.Class, create:() => McpIntegrationSecretsConfigurationFailed()),
-    'McpIntegrationTested': TypeInfo(TypeOf.Class, create:() => McpIntegrationTested()),
-    'WebhookIntegrationSaved': TypeInfo(TypeOf.Class, create:() => WebhookIntegrationSaved()),
-    'WebhookIntegrationExtraHeadersChanged': TypeInfo(TypeOf.Class, create:() => WebhookIntegrationExtraHeadersChanged()),
-    'WebhookIntegrationSecretsConfigured': TypeInfo(TypeOf.Class, create:() => WebhookIntegrationSecretsConfigured()),
-    'WebhookIntegrationSecretsConfigurationFailed': TypeInfo(TypeOf.Class, create:() => WebhookIntegrationSecretsConfigurationFailed()),
-    'WebhookIntegrationSecretsCleared': TypeInfo(TypeOf.Class, create:() => WebhookIntegrationSecretsCleared()),
-    'WebhookDestinationSaved': TypeInfo(TypeOf.Class, create:() => WebhookDestinationSaved()),
-    'WebhookDestinationRemoved': TypeInfo(TypeOf.Class, create:() => WebhookDestinationRemoved()),
-    'WebhookDestinationEnabled': TypeInfo(TypeOf.Class, create:() => WebhookDestinationEnabled()),
-    'WebhookDestinationDisabled': TypeInfo(TypeOf.Class, create:() => WebhookDestinationDisabled()),
     'GetWebhookIntegration': TypeInfo(TypeOf.Class, create:() => GetWebhookIntegration()),
     'RevealWebhookIntegrationSecretRequest': TypeInfo(TypeOf.Class, create:() => RevealWebhookIntegrationSecretRequest()),
     'RotateWebhookIntegrationSecretRequest': TypeInfo(TypeOf.Class, create:() => RotateWebhookIntegrationSecretRequest()),
@@ -54655,12 +43368,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetSchedulerTask': TypeInfo(TypeOf.Class, create:() => GetSchedulerTask()),
     'GetSchedulerTasks': TypeInfo(TypeOf.Class, create:() => GetSchedulerTasks()),
     'SaveSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => SaveSchedulerTaskRequest()),
-    'SchedulerEnabled': TypeInfo(TypeOf.Class, create:() => SchedulerEnabled()),
-    'SchedulerDisabled': TypeInfo(TypeOf.Class, create:() => SchedulerDisabled()),
-    'SchedulerTaskSaved': TypeInfo(TypeOf.Class, create:() => SchedulerTaskSaved()),
-    'SchedulerTaskEnabled': TypeInfo(TypeOf.Class, create:() => SchedulerTaskEnabled()),
-    'SchedulerTaskDisabled': TypeInfo(TypeOf.Class, create:() => SchedulerTaskDisabled()),
-    'SchedulerTaskDeleted': TypeInfo(TypeOf.Class, create:() => SchedulerTaskDeleted()),
     'ResolveResources': TypeInfo(TypeOf.Class, create:() => ResolveResources()),
     'IReadOnlyList<ResourceRefDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<ResourceRefDto>()),
     'CreateContactRequest': TypeInfo(TypeOf.Class, create:() => CreateContactRequest()),
@@ -54697,15 +43404,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetSupportCase': TypeInfo(TypeOf.Class, create:() => GetSupportCase()),
     'GetSupportCases': TypeInfo(TypeOf.Class, create:() => GetSupportCases()),
     'OpenSupportCaseRequest': TypeInfo(TypeOf.Class, create:() => OpenSupportCaseRequest()),
-    'SupportCaseOpened': TypeInfo(TypeOf.Class, create:() => SupportCaseOpened()),
-    'SupportCaseTriaged': TypeInfo(TypeOf.Class, create:() => SupportCaseTriaged()),
-    'SupportCaseMessageAppended': TypeInfo(TypeOf.Class, create:() => SupportCaseMessageAppended()),
-    'SupportCaseStatusChanged': TypeInfo(TypeOf.Class, create:() => SupportCaseStatusChanged()),
-    'SupportCaseResolved': TypeInfo(TypeOf.Class, create:() => SupportCaseResolved()),
-    'SupportCaseClosed': TypeInfo(TypeOf.Class, create:() => SupportCaseClosed()),
-    'SupportCaseReopened': TypeInfo(TypeOf.Class, create:() => SupportCaseReopened()),
-    'SupportCaseWaitingReminderSent': TypeInfo(TypeOf.Class, create:() => SupportCaseWaitingReminderSent()),
-    'SupportCaseAttachmentLinked': TypeInfo(TypeOf.Class, create:() => SupportCaseAttachmentLinked()),
     'GetDiagnosticPacks': TypeInfo(TypeOf.Class, create:() => GetDiagnosticPacks()),
     'RunDiagnosticPackRequest': TypeInfo(TypeOf.Class, create:() => RunDiagnosticPackRequest()),
     'GetDiagnosticEcho': TypeInfo(TypeOf.Class, create:() => GetDiagnosticEcho()),
