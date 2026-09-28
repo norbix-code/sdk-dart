@@ -586,13 +586,22 @@ CI never runs `make gen`. The generated files under `lib/src/api/` and
 ships the SDK with the generated artifacts produced from the canonical
 route files.
 
+## Versioning
+
+The major version is frozen at **v2** until the public launch.
+
+- A breaking change is released as a **minor** (for example v2.2.0 → v2.3.0), never as a new major.
+- Write it as `feat(<scope>): <what>` and add a line `Breaking: <what changed and what callers must do>` in plain words, in the pull-request body and in the commit message.
+- Never mark it the conventional-commits way: no `!` in the title (`feat!:`), no BREAKING CHANGE footer. The `PR title` check fails a pull request that does.
+- As a safety net, the release config (`.releaserc.json` → `releaseRules`) maps breaking commits to a minor, so one that slips through still does not bump the major.
+
 ## Releases
 
 Versioned with Conventional Commits + `semantic-release`:
 
 - `feat:` — minor
 - `fix:` — patch
-- `feat!` / `BREAKING CHANGE:` — major
+- breaking change — minor until the public launch (see Versioning)
 
 Channels: `main` → stable, `next` → `-rc.*`, `beta` → `-beta.*`.
 
