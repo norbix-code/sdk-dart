@@ -381,4 +381,126 @@ class ProjectsResource extends Resource {
       pathParams: <String, Object?>{'projectId': projectId},
     );
   }
+
+  /// `GET /{version}/account/projects/{projectId}/ai/settings`
+  Future<Object?> getProjectAiSettings(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/ai/settings',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `PUT /{version}/account/projects/{projectId}/ai/settings`
+  Future<Object?> updateProjectAiSettings(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/ai/settings',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `POST /{version}/account/projects/{projectId}/ai/assistants`
+  Future<Object?> createProjectAiAssistant(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/ai/assistants',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `PUT /{version}/account/projects/{projectId}/ai/assistants/{assistantId}`
+  Future<Object?> updateProjectAiAssistant(
+      {required Object projectId,
+      required Object assistantId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/account/projects/{projectId}/ai/assistants/{assistantId}',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{
+        'projectId': projectId,
+        'assistantId': assistantId
+      },
+    );
+  }
+
+  /// `DELETE /{version}/account/projects/{projectId}/ai/assistants/{assistantId}`
+  Future<Object?> deleteProjectAiAssistant(
+      {required Object projectId,
+      required Object assistantId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/account/projects/{projectId}/ai/assistants/{assistantId}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{
+        'projectId': projectId,
+        'assistantId': assistantId
+      },
+    );
+  }
+
+  /// `GET /{version}/account/projects/{projectId}/ai/usage`
+  Future<Object?> getProjectAiUsage(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/ai/usage',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `PUT /{version}/account/projects/{projectId}/admin-portal/enabled`
+  Future<Object?> setAdminPortalEnabled(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/admin-portal/enabled',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
 }

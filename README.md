@@ -612,3 +612,29 @@ stored credential. `main` is protected, so nothing is committed back:
 `pubspec.yaml` and `CHANGELOG.md` are stamped with the version only inside the
 publish job. To re-publish a tag, run **Publish to pub.dev** from the Actions
 tab with that tag selected.
+
+## End-user AI chat and project AI settings
+
+`api.aiChat` is the end-user AI chat for a signed-in project user: availability,
+sessions, entries, feedback, attachments, memory and `startEndUserChatTurn`,
+which answers at once with a `turnId`. The answer streams over the gateway's
+SSE endpoint on the user's own channel `ai-chat:{projectId}:{authId}`
+(events `ai.chat.turn.*`, `ai.chat.session.*`); a subscription to another
+user's channel is refused with 403 and
+`responseStatus.errorCode = "AiChatChannelRefused"` before the stream starts —
+do not retry it. This SDK has no SSE client.
+
+```dart
+final turn = await api.aiChat.startEndUserChatTurn(
+  body: {'sessionId': sessionId, 'message': 'What can you do?'},
+);
+```
+
+Project owners configure the assistant on the Hub: `hub.projects`
+(`getProjectAiSettings`, `updateProjectAiSettings`, `createProjectAiAssistant`,
+`updateProjectAiAssistant`, `deleteProjectAiAssistant`, `getProjectAiUsage`,
+`setAdminPortalEnabled`) and `hub.aiIntegrations` (`getEmbeddingIntegrations`,
+`saveEmbeddingIntegration`, `getEmbeddingIntegration`,
+`deleteEmbeddingIntegration`, `testEmbeddingIntegration`,
+`setLlmIntegrationAsDefault`).
+

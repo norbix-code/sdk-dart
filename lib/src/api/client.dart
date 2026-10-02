@@ -5,6 +5,7 @@ import '../core/config.dart';
 import '../core/http_driver.dart';
 import '../core/transport.dart';
 
+import 'resources/ai_chat.dart';
 import 'resources/api_keys.dart';
 import 'resources/auth.dart';
 import 'resources/database.dart';
@@ -120,6 +121,7 @@ class NorbixApi {
   /// (staging <-> production) at runtime.
   void setConfig(NorbixConfig config) => _transport.config = config;
 
+  late final AiChatResource aiChat = AiChatResource(_transport);
   late final ApiKeysResource apiKeys = ApiKeysResource(_transport);
   late final AuthResource auth = AuthResource(_transport);
   late final DatabaseResource database = DatabaseResource(_transport);
