@@ -7,35 +7,35 @@ import '../../core/resource.dart';
 class SmsNotificationsResource extends Resource {
   SmsNotificationsResource(super.transport);
 
-  /// `PUT /{version}/notifications/sms/templates/{id}/archive`
+  /// `PUT /{version}/notifications/sms/templates/{Id}/archive`
   Future<Object?> archiveSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/templates/{id}/archive',
+      route: '/{version}/notifications/sms/templates/{Id}/archive',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `POST /{version}/notifications/sms/templates/{id}/clone`
+  /// `POST /{version}/notifications/sms/templates/{Id}/clone`
   Future<Object?> cloneSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/templates/{id}/clone',
+      route: '/{version}/notifications/sms/templates/{Id}/clone',
       method: 'POST',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -100,35 +100,35 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `DELETE /{version}/notifications/sms/integrations/{id}`
+  /// `DELETE /{version}/notifications/sms/integrations/{Id}`
   Future<Object?> deleteSmsIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/integrations/{id}',
+      route: '/{version}/notifications/sms/integrations/{Id}',
       method: 'DELETE',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `DELETE /{version}/notifications/sms/templates/{id}`
+  /// `DELETE /{version}/notifications/sms/templates/{Id}`
   Future<Object?> deleteSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/templates/{id}',
+      route: '/{version}/notifications/sms/templates/{Id}',
       method: 'DELETE',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -144,19 +144,19 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/sms/integrations/{id}/disable`
+  /// `PUT /{version}/notifications/sms/integrations/{Id}/disable`
   Future<Object?> disableSmsIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/integrations/{id}/disable',
+      route: '/{version}/notifications/sms/integrations/{Id}/disable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -172,19 +172,19 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/sms/integrations/{id}/enable`
+  /// `PUT /{version}/notifications/sms/integrations/{Id}/enable`
   Future<Object?> enableSmsIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/integrations/{id}/enable',
+      route: '/{version}/notifications/sms/integrations/{Id}/enable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -252,7 +252,11 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/sms/campaigns/{campaignId}/messages/{id}`
+  /// `GET /{version}/notifications/sms/campaigns/{campaignId}/messages/{notificationId}`
+  ///
+  /// One message (notification) of a campaign. `id` is the notification id
+  /// from `getSmsCampaignMessages`; it travels in the path under the
+  /// gateway's own name `notificationId`.
   Future<Object?> getSmsCampaignMessage(
       {required Object campaignId,
       required Object id,
@@ -260,11 +264,14 @@ class SmsNotificationsResource extends Resource {
       Map<String, String>? headers}) {
     return transport.send(
       route:
-          '/{version}/notifications/sms/campaigns/{campaignId}/messages/{id}',
+          '/{version}/notifications/sms/campaigns/{campaignId}/messages/{notificationId}',
       method: 'GET',
       query: query,
       headers: headers,
-      pathParams: <String, Object?>{'campaignId': campaignId, 'id': id},
+      pathParams: <String, Object?>{
+        'campaignId': campaignId,
+        'notificationId': id
+      },
     );
   }
 
@@ -301,6 +308,21 @@ class SmsNotificationsResource extends Resource {
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/sms/campaigns',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/notifications/sms/disable-dependencies`
+  ///
+  /// What disabling the SMS module would affect (running campaigns,
+  /// integrations). Call it before `disableSms` so the user can be warned.
+  Future<Object?> getSmsDisableDependencies(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/sms/disable-dependencies',
       method: 'GET',
       query: query,
       headers: headers,
@@ -403,6 +425,26 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
+  /// `POST /{version}/notifications/sms/templates/render`
+  ///
+  /// Runs the Razor SMS template `code` with the given `tokens`
+  /// (`[{'name': ..., 'value': ...}]`) and answers the bound text, or the
+  /// list of tokens that are still unresolved. `isForPreview: true` relaxes
+  /// some validation.
+  Future<Object?> renderSms(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/sms/templates/render',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `POST /{version}/notifications/sms/integrations`
   Future<Object?> saveSmsIntegration(
       {Map<String, Object?>? query,
@@ -418,34 +460,38 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/sms/integrations/{id}/default`
+  /// `PUT /{version}/notifications/sms/integrations/{Id}/default`
   Future<Object?> setSmsIntegrationAsDefault(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/integrations/{id}/default',
+      route: '/{version}/notifications/sms/integrations/{Id}/default',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `POST /{version}/notifications/sms/templates/razor-syntax-check`
-  Future<Object?> smsRazorSyntaxCheck(
-      {Map<String, Object?>? query,
+  /// `POST /{version}/notifications/sms/campaigns/{Id}/stop`
+  ///
+  /// Stops a scheduled or running campaign: no further messages are sent.
+  /// Cannot be undone — a stopped campaign is not resumed; create a new one.
+  Future<Object?> stopSmsCampaign(
+      {required Object id,
+      Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/templates/razor-syntax-check',
+      route: '/{version}/notifications/sms/campaigns/{Id}/stop',
       method: 'POST',
       query: query,
       body: body,
       headers: headers,
-      pathParams: null,
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
@@ -464,19 +510,19 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/notifications/sms/templates/{id}/unarchive`
+  /// `PUT /{version}/notifications/sms/templates/{Id}/unarchive`
   Future<Object?> unArchiveSmsTemplate(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/notifications/sms/templates/{id}/unarchive',
+      route: '/{version}/notifications/sms/templates/{Id}/unarchive',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 

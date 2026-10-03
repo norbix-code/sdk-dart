@@ -550,6 +550,52 @@ final preview = await hub.emailNotifications.previewEmailNotification(
 A signed-in member can pass `projectId` + `notificationId` in `query`
 instead of `hash`. A bad or expired link throws `NorbixAuthError` (401).
 
+### SMS
+
+`hub.smsNotifications` covers every SMS Hub endpoint (35): the module
+switch (`enableSms`, `disableSms`, `getSmsDisableDependencies`,
+`getSmsSettings`), integrations (`getSmsIntegrations`, `getSmsIntegration`,
+`saveSmsIntegration`, `testSmsIntegration`,
+`confirmSmsIntegrationHumanDelivery`, `deleteSmsIntegration`,
+`setSmsIntegrationAsDefault`, `enableSmsIntegration`,
+`disableSmsIntegration`), templates (`getSmsTemplates`, `getSmsTemplate`,
+`createSmsTemplate`, `updateSmsTemplate`, `deleteSmsTemplate`,
+`archiveSmsTemplate`, `unArchiveSmsTemplate`, `cloneSmsTemplate`,
+`getSmsMessageContentTokens`, `renderSms`) and campaigns
+(`getSmsCampaigns`, `createSmsCampaign`, `getSmsCampaign`,
+`deleteSmsCampaign`, `stopSmsCampaign`, `getSmsCampaignStatistics`,
+`getSmsCampaignBatches`, `getSmsCampaignBatchNotifications`,
+`getSmsCampaignBatchNotification`, `getSmsCampaignMessages`,
+`getSmsCampaignMessage`), plus `previewSmsNotification` above.
+
+```dart
+final hub = NorbixHub(config: NorbixConfig(baseUrl: 'https://hub.norbix.ai', apiKey: 'k'));
+
+// What would a module switch-off affect? Ask before disableSms().
+final deps = await hub.smsNotifications.getSmsDisableDependencies();
+
+// Render a template's Razor code with token values before saving it.
+final text = await hub.smsNotifications.renderSms(
+  body: {
+    'code': 'Hi @Model.FirstName, your code is @Model.Code',
+    'tokens': [
+      {'name': 'FirstName', 'value': 'Ada'},
+      {'name': 'Code', 'value': '4242'},
+    ],
+  },
+);
+
+// Stop a running campaign — no further messages go out; this cannot be undone.
+await hub.smsNotifications.stopSmsCampaign(id: 'cmp_1');
+```
+
+Ids travel in the path under the gateway's own names: `stopSmsCampaign(id:)`
+calls `POST /{version}/notifications/sms/campaigns/{Id}/stop`, and
+`getSmsCampaignMessage(campaignId:, id:)` calls
+`GET /{version}/notifications/sms/campaigns/{campaignId}/messages/{notificationId}`.
+The old `smsRazorSyntaxCheck` method is gone: its route no longer exists on
+the gateway (`renderSms` is the replacement).
+
 ## Repo layout
 
 ```
