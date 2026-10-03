@@ -739,16 +739,24 @@ The developer MCP endpoint and AI service users on `hub.accounts`:
 | `deleteAiServiceUser` | `DELETE /{version}/account/ai/service-users/{Id}` |
 
 ```dart
+final init = await hub.accounts.sendMcpMessage(message: {
+  'jsonrpc': '2.0', 'id': 1, 'method': 'initialize',
+  'params': {'protocolVersion': '2025-11-25', 'capabilities': {}, 'clientInfo': {'name': 'my-app', 'version': '1.0'}},
+});
+final sessionId = init.sessionId!; // from the Mcp-Session-Id header
+
 final tools = await hub.accounts.sendMcpMessage(
-  body: {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'},
-  headers: {
-    'accept': 'application/json, text/event-stream',
-    'mcp-session-id': sessionId, // from the initialize answer
-  },
+  message: {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'},
+  sessionId: sessionId,
 );
+print(tools.json); // {jsonrpc: 2.0, id: 2, result: {tools: [...]}}
+
+await hub.accounts.endMcpSession(sessionId: sessionId);
 ```
 
-The answer is parsed JSON, or the raw SSE text when the server streams. This
-SDK has no SSE client, so `openMcpStream` completes only when the server
-closes the stream. A service user key (`nbsu_...`) used as the client's key
-narrows the MCP tools to that user's scope.
+The MCP methods return an `McpResponse` — status, `sessionId`, `json`, and the
+raw `body` — because the session id travels in a response header and a
+`tools/call` may answer with an SSE stream (`isEventStream`, raw text in
+`body`). This SDK has no SSE client, so `openMcpStream` completes only when the
+server closes the stream. A service user key (`nbsu_...`) used as the client's
+key narrows the MCP tools to that user's scope.

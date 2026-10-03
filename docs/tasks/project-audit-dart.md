@@ -14,7 +14,8 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
    decision(sdk-dart:mcp): the one gateway route with three verbs becomes three methods (`sendMcpMessage` POST, `openMcpStream` GET, `endMcpSession` DELETE); the TypeScript SDK has only the POST, named `mcp`
 5. [done] fix(sdk-dart:ai-integrations): LLM and MCP integration enable / disable / delete used `{id}` where the gateway route says `{Id}`, so the coverage scanner counted them as missing; routes aligned and tested
 6. [done] docs(sdk-dart:readme): README section for the new methods and the module list
-7. [done] chore(sdk-dart:checks): `dart analyze` no issues, `dart test` 181 passed (22 new); push and open the pull request
+7. [done] chore(sdk-dart:checks): `dart analyze` no issues, `dart test` passed (see step 8 for the final count); push and open the pull request
+8. [done] fix(sdk-dart:mcp): the MCP methods returned only the parsed body, so the session id from the `initialize` answer header was lost and every later call failed with 400; they now return an `McpResponse` with the session id, the JSON or the raw SSE text; `dart analyze` no issues, `dart test` 182 passed
 
 ## Changes
 | file (absolute, branch audit/project) | what changed | step |
@@ -31,8 +32,35 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/ai_integrations.dart | LLM / MCP enable, disable, delete: route placeholder `{id}` → `{Id}` (gateway spelling); Dart argument stays `id`, no caller change | 5 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/ai_integrations_llm_mcp_test.dart | new: one route test per method (6) — none existed | 5 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/README.md | resource table per client; new section with the 15 new methods and examples; LLM / MCP switches named in the AI section | 6 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/core/transport.dart | new `sendRaw`: same pipeline as `send`, returns status, headers and raw body | 8 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/mcp_response.dart | new `McpResponse`: statusCode, sessionId, contentType, isEventStream, body, json | 8 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/norbix_hub.dart | exports mcp_response.dart | 8 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/accounts.dart | MCP methods take `message`, `sessionId`, `protocolVersion`, `toolsets`, `lastEventId` and return `McpResponse` | 8 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/accounts_mcp_service_users_test.dart | MCP tests: session id read from the header, SSE kept raw, GET asks for SSE, DELETE sends the session, 400 throws | 8 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/README.md | MCP example: initialize → session id → tools/list → end session | 8 |
 
 ## Findings
+fix(sdk-dart:mcp): the gateway hands out the MCP session id only in the `Mcp-Session-Id` answer header and refuses every later call without it, so a body-only method cannot hold a session — done (fixed here, step 8)
+    where: /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/mcp_response.dart:23 (branch audit/project)
+```csharp
+// gateway — src/Isidos.CodeMash.Gateway.Hub.AI/McpHttpTransport.cs:157-165 (merge-callbacks-gateway-stack)
+        if (body is JsonObject single && (single["method"] as JsonValue)?.ToString() == "initialize")
+        {
+            await InitializeAsync(single, input, request, response, aborted);   // <-- session id goes out as a header here
+            return;
+        }
+
+        var session = await RequireSessionAsync(input, request, response, aborted);  // <-- here: no header → 400
+        if (session == null)
+            return;
+```
+```dart
+// after — lib/src/hub/mcp_response.dart:21-23 (audit/project)
+  /// The `Mcp-Session-Id` header — set on the `initialize` answer. Send it
+  /// back as `sessionId` on every later call.
+  String? get sessionId => _header('mcp-session-id');
+```
+
 fix(sdk-dart:ai-integrations): LLM and MCP enable / disable / delete existed but were counted "no" in the coverage matrix, because the scanner matches the route text exactly and Dart wrote `{id}` where the gateway writes `{Id}`; the URL on the wire was already right — done (fixed here, step 5)
     where: /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/ai_integrations.dart:74 (branch audit/project)
 ```dart

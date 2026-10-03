@@ -2,6 +2,7 @@
 // Regenerate with: dart run tool/generate_resources.dart
 
 import '../../core/resource.dart';
+import '../mcp_response.dart';
 
 /// Account profile, team, licenses, regions, status, Stripe billing.
 class AccountsResource extends Resource {
@@ -209,54 +210,72 @@ class AccountsResource extends Resource {
 
   /// `POST /{version}/account/mcp`
   ///
-  /// Developer MCP endpoint (Streamable HTTP, MCP revision 2025-11-25): send one JSON-RPC 2.0 message as [body] (`initialize`, `tools/list`, `tools/call`, ...). Pass the `mcp-session-id` header after `initialize`, and `accept: application/json, text/event-stream`. The answer is parsed JSON, or the raw SSE text when the server streams. An AI service user key (`nbsu_...`) narrows the tools to its scope; `query: {'toolsets': 'ai:campaigns'}` filters `tools/list`.
-  Future<Object?> sendMcpMessage(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
+  /// Developer MCP endpoint (Streamable HTTP, MCP revision 2025-11-25): send
+  /// one JSON-RPC 2.0 [message] (`initialize`, `tools/list`, `tools/call`,
+  /// ...). The `initialize` answer carries the session id in
+  /// [McpResponse.sessionId]; pass it as [sessionId] on every later call.
+  /// The answer is JSON ([McpResponse.json]) or, for a `tools/call`, an SSE
+  /// stream ([McpResponse.body]). [toolsets] filters `tools/list`, e.g.
+  /// `ai:campaigns,ai:project-context`. An AI service user key (`nbsu_...`)
+  /// as the client's key narrows the tools to that user's scope.
+  Future<McpResponse> sendMcpMessage({
+    required Map<String, Object?> message,
+    String? sessionId,
+    String? protocolVersion,
+    String? toolsets,
+    Map<String, String>? headers,
+  }) async {
+    return McpResponse(await transport.sendRaw(
       route: '/{version}/account/mcp',
       method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
+      query: toolsets == null ? null : <String, Object?>{'toolsets': toolsets},
+      body: message,
+      headers: _mcpHeaders(sessionId, protocolVersion, null, headers),
+      accept: 'application/json, text/event-stream',
+    ));
   }
 
   /// `GET /{version}/account/mcp`
   ///
-  /// Open the server-to-client SSE stream of an MCP session (`mcp-session-id` header; `last-event-id` resumes). This SDK has no SSE client: the future completes only when the server closes the stream, with the raw SSE text.
-  Future<Object?> openMcpStream(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
+  /// Open the server-to-client SSE stream of the session [sessionId];
+  /// [lastEventId] resumes a dropped stream. This SDK has no SSE client: the
+  /// future completes only when the server closes the stream, and
+  /// [McpResponse.body] holds the raw SSE text.
+  Future<McpResponse> openMcpStream({
+    required String sessionId,
+    String? lastEventId,
+    Map<String, String>? headers,
+  }) async {
+    return McpResponse(await transport.sendRaw(
       route: '/{version}/account/mcp',
       method: 'GET',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
+      headers: _mcpHeaders(sessionId, null, lastEventId, headers),
+      accept: 'text/event-stream',
+    ));
   }
 
   /// `DELETE /{version}/account/mcp`
   ///
-  /// End the MCP session named by the `mcp-session-id` header.
-  Future<Object?> endMcpSession(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
+  /// End the MCP session [sessionId].
+  Future<McpResponse> endMcpSession({
+    required String sessionId,
+    Map<String, String>? headers,
+  }) async {
+    return McpResponse(await transport.sendRaw(
       route: '/{version}/account/mcp',
       method: 'DELETE',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
+      headers: _mcpHeaders(sessionId, null, null, headers),
+    ));
   }
+
+  Map<String, String> _mcpHeaders(String? sessionId, String? protocolVersion,
+          String? lastEventId, Map<String, String>? extra) =>
+      <String, String>{
+        if (sessionId != null) 'mcp-session-id': sessionId,
+        if (protocolVersion != null) 'mcp-protocol-version': protocolVersion,
+        if (lastEventId != null) 'last-event-id': lastEventId,
+        ...?extra,
+      };
 
   /// `POST /{version}/account/ai/service-users`
   ///
