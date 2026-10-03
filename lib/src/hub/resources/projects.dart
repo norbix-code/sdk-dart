@@ -503,4 +503,95 @@ class ProjectsResource extends Resource {
       pathParams: <String, Object?>{'projectId': projectId},
     );
   }
+
+  /// `PATCH /{version}/account/projects/{projectId}/settings/admin-url`
+  ///
+  /// Set or clear the project's admin portal URL. Body: `{'url': 'https://admin.example.com'}` (`null` clears it).
+  Future<Object?> updateProjectAdminUrl(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/settings/admin-url',
+      method: 'PATCH',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `PATCH /{version}/account/projects/{projectId}/settings/legal`
+  ///
+  /// Save the project's terms and privacy texts. Body: `{'termsMarkdown': '...', 'privacyMarkdown': '...'}`.
+  Future<Object?> updateProjectLegalDocuments(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/settings/legal',
+      method: 'PATCH',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `PATCH /{version}/account/projects/{projectId}/settings/legal/expose`
+  ///
+  /// Show or hide the legal documents on the public project routes. Body: `{'exposed': true}`.
+  Future<Object?> updateProjectExposeLegal(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/settings/legal/expose',
+      method: 'PATCH',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `GET /{version}/account/projects/{projectId}/admin-portal/structure`
+  ///
+  /// The admin portal's structure (collections, sections) for the project.
+  Future<Object?> getAdminPortalStructure(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/admin-portal/structure',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `PUT /{version}/account/projects/{projectId}/settings/admin-portal/service-user`
+  ///
+  /// Choose the AI service user the admin portal acts as. Body: `{'serviceUserId': '...'}`.
+  Future<Object?> assignAdminPortalServiceUser(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/account/projects/{projectId}/settings/admin-portal/service-user',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
 }

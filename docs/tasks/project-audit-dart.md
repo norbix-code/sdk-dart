@@ -7,7 +7,7 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 
 ## Plan
 1. [done] docs(sdk-dart:project): task file with goal and plan
-2. [todo] feat(sdk-dart:projects): admin URL, legal documents, expose legal, admin portal structure and service user on `hub.projects`, with route tests
+2. [done] feat(sdk-dart:projects): admin URL, legal documents, expose legal, admin portal structure and service user on `hub.projects`, with route tests
 3. [todo] feat(sdk-dart:public): new `api.publicProjects` resource for the public project config and legal pages (API host), with route tests
 4. [todo] feat(sdk-dart:accounts): developer MCP endpoint (send, open stream, end session) and AI service users (create, list, delete, rotate key, revoke key) on `hub.accounts`, with route tests
 5. [todo] fix(sdk-dart:ai-integrations): LLM and MCP integration enable / disable / delete used `{id}` where the gateway route says `{Id}`, so the coverage scanner counted them as missing; routes aligned and tested
@@ -18,6 +18,8 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 | file (absolute, branch audit/project) | what changed | step |
 |------|--------------|------|
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/docs/tasks/project-audit-dart.md | this task file | 1 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/projects.dart | 5 methods: updateProjectAdminUrl, updateProjectLegalDocuments, updateProjectExposeLegal, getAdminPortalStructure, assignAdminPortalServiceUser | 2 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/projects_settings_test.dart | new: one route test per method (5) | 2 |
 
 ## Findings
 
