@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-09-28 20:34:13
+Date: 2026-10-02 15:52:04
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -2776,6 +2776,29 @@ enum LlmProvider
     NorbixHosted,
 }
 
+class LlmModelOptionRequest implements IConvertible
+{
+    String id = "";
+    String? displayName;
+
+    LlmModelOptionRequest({this.id="",this.displayName});
+    LlmModelOptionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        displayName = json['displayName'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'displayName': displayName
+    };
+
+    getTypeName() => "LlmModelOptionRequest";
+    TypeContext? context = _ctx;
+}
+
 abstract class LlmIntegrationRequest
 {
     String? integrationId;
@@ -2784,8 +2807,10 @@ abstract class LlmIntegrationRequest
     bool? isEnabled;
     String? endpoint;
     String? defaultModel;
+    bool? isDefault;
+    List<LlmModelOptionRequest>? models;
 
-    LlmIntegrationRequest({this.integrationId,this.provider,this.integrationName="",this.isEnabled,this.endpoint,this.defaultModel});
+    LlmIntegrationRequest({this.integrationId,this.provider,this.integrationName="",this.isEnabled,this.endpoint,this.defaultModel,this.isDefault,this.models});
     LlmIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -2795,6 +2820,8 @@ abstract class LlmIntegrationRequest
         isEnabled = json['isEnabled'];
         endpoint = json['endpoint'];
         defaultModel = json['defaultModel'];
+        isDefault = json['isDefault'];
+        models = JsonConverters.fromJson(json['models'],'List<LlmModelOptionRequest>',context!);
         return this;
     }
 
@@ -2804,7 +2831,9 @@ abstract class LlmIntegrationRequest
         'integrationName': integrationName,
         'isEnabled': isEnabled,
         'endpoint': endpoint,
-        'defaultModel': defaultModel
+        'defaultModel': defaultModel,
+        'isDefault': isDefault,
+        'models': JsonConverters.toJson(models,'List<LlmModelOptionRequest>',context!)
     };
 
     getTypeName() => "LlmIntegrationRequest";
@@ -4642,6 +4671,15 @@ class EmailToCollectionRecordsDeliverySettingsDto extends EmailCampaignDeliveryS
     TypeContext? context = _ctx;
 }
 
+enum PushDeviceDeliveryFamily
+{
+    Ios,
+    Android,
+    Chrome,
+    Safari,
+    Expo,
+}
+
 // @DataContract
 class PushToAllUsersDeliverySettingsDto extends PushCampaignDeliverySettingsDto implements IConvertible
 {
@@ -4651,19 +4689,24 @@ class PushToAllUsersDeliverySettingsDto extends PushCampaignDeliverySettingsDto 
     // @DataMember
     List<String>? userTags;
 
-    PushToAllUsersDeliverySettingsDto({this.rolesNames,this.userTags});
+    // @DataMember
+    List<PushDeviceDeliveryFamily>? platforms;
+
+    PushToAllUsersDeliverySettingsDto({this.rolesNames,this.userTags,this.platforms});
     PushToAllUsersDeliverySettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         rolesNames = JsonConverters.fromJson(json['rolesNames'],'List<String>',context!);
         userTags = JsonConverters.fromJson(json['userTags'],'List<String>',context!);
+        platforms = JsonConverters.fromJson(json['platforms'],'List<PushDeviceDeliveryFamily>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'rolesNames': JsonConverters.toJson(rolesNames,'List<String>',context!),
-        'userTags': JsonConverters.toJson(userTags,'List<String>',context!)
+        'userTags': JsonConverters.toJson(userTags,'List<String>',context!),
+        'platforms': JsonConverters.toJson(platforms,'List<PushDeviceDeliveryFamily>',context!)
     });
 
     getTypeName() => "PushToAllUsersDeliverySettingsDto";
@@ -4699,17 +4742,22 @@ class PushToAccountUsersDeliverySettingsDto extends PushCampaignDeliverySettings
     // @DataMember
     List<String> recipients = [];
 
-    PushToAccountUsersDeliverySettingsDto({this.recipients=const []});
+    // @DataMember
+    List<PushDeviceDeliveryFamily>? platforms;
+
+    PushToAccountUsersDeliverySettingsDto({this.recipients=const [],this.platforms});
     PushToAccountUsersDeliverySettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         recipients = JsonConverters.fromJson(json['recipients'],'List<String>',context!) ?? [];
+        platforms = JsonConverters.fromJson(json['platforms'],'List<PushDeviceDeliveryFamily>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'recipients': JsonConverters.toJson(recipients,'List<String>',context!)
+        'recipients': JsonConverters.toJson(recipients,'List<String>',context!),
+        'platforms': JsonConverters.toJson(platforms,'List<PushDeviceDeliveryFamily>',context!)
     });
 
     getTypeName() => "PushToAccountUsersDeliverySettingsDto";
@@ -4757,15 +4805,6 @@ class PushToCollectionRecordsDeliverySettingsDto extends PushCampaignDeliverySet
 
     getTypeName() => "PushToCollectionRecordsDeliverySettingsDto";
     TypeContext? context = _ctx;
-}
-
-enum PushDeviceDeliveryFamily
-{
-    Ios,
-    Android,
-    Chrome,
-    Safari,
-    Expo,
 }
 
 // @DataContract
@@ -4979,6 +5018,35 @@ class IntegrationDto implements IHasViewId, IConvertible
     TypeContext? context = _ctx;
 }
 
+class LlmModelOptionDto implements IConvertible
+{
+    String id = "";
+    String displayName = "";
+    double inputCreditRate = 0;
+    double outputCreditRate = 0;
+
+    LlmModelOptionDto({this.id="",this.displayName="",this.inputCreditRate=0,this.outputCreditRate=0});
+    LlmModelOptionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        displayName = json['displayName'] ?? "";
+        inputCreditRate = JsonConverters.toDouble(json['inputCreditRate']) ?? 0;
+        outputCreditRate = JsonConverters.toDouble(json['outputCreditRate']) ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'displayName': displayName,
+        'inputCreditRate': inputCreditRate,
+        'outputCreditRate': outputCreditRate
+    };
+
+    getTypeName() => "LlmModelOptionDto";
+    TypeContext? context = _ctx;
+}
+
 abstract class LlmIntegrationDto extends IntegrationDto
 {
     LlmProvider? provider;
@@ -4986,8 +5054,10 @@ abstract class LlmIntegrationDto extends IntegrationDto
     String? defaultModel;
     bool? isConfigured;
     bool? isSystemOwned;
+    bool? isDefault;
+    List<LlmModelOptionDto> models = [];
 
-    LlmIntegrationDto({this.provider,this.baseUrl,this.defaultModel,this.isConfigured,this.isSystemOwned});
+    LlmIntegrationDto({this.provider,this.baseUrl,this.defaultModel,this.isConfigured,this.isSystemOwned,this.isDefault,this.models=const []});
     LlmIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -4997,6 +5067,8 @@ abstract class LlmIntegrationDto extends IntegrationDto
         defaultModel = json['defaultModel'];
         isConfigured = json['isConfigured'];
         isSystemOwned = json['isSystemOwned'];
+        isDefault = json['isDefault'];
+        models = JsonConverters.fromJson(json['models'],'List<LlmModelOptionDto>',context!) ?? [];
         return this;
     }
 
@@ -5005,7 +5077,9 @@ abstract class LlmIntegrationDto extends IntegrationDto
         'baseUrl': baseUrl,
         'defaultModel': defaultModel,
         'isConfigured': isConfigured,
-        'isSystemOwned': isSystemOwned
+        'isSystemOwned': isSystemOwned,
+        'isDefault': isDefault,
+        'models': JsonConverters.toJson(models,'List<LlmModelOptionDto>',context!)
     });
 
     getTypeName() => "LlmIntegrationDto";
@@ -8915,6 +8989,103 @@ class TagDefinitionDto extends TagDefinitionBaseDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+abstract class ProjectAiAssistantRequestBase extends CodeMashRequestBase
+{
+    /**
+    * Name shown to end users. Required, at most 100 characters, unique in the project.
+    */
+    // @ApiMember(Description="Name shown to end users. Required, at most 100 characters, unique in the project.")
+    String? name;
+
+    /**
+    * First message end users see. Public. At most 2 000 characters.
+    */
+    // @ApiMember(Description="First message end users see. Public. At most 2 000 characters.")
+    String? welcomeMessage;
+
+    /**
+    * Instructions for the model. Never shown to end users. At most 20 000 characters.
+    */
+    // @ApiMember(Description="Instructions for the model. Never shown to end users. At most 20 000 characters.")
+    String? systemPrompt;
+
+    /**
+    * Own-scope toolsets the assistant may use: own:records (the user's own database records), own:profile (their profile), own:preferences (their marketing preferences). Any other name is refused.
+    */
+    // @ApiMember(Description="Own-scope toolsets the assistant may use: own:records (the user's own database records), own:profile (their profile), own:preferences (their marketing preferences). Any other name is refused.")
+    List<String>? toolsets;
+
+    /**
+    * The assistant's own LLM integration id (int_…). Empty = the project's default LLM.
+    */
+    // @ApiMember(Description="The assistant's own LLM integration id (int_…). Empty = the project's default LLM.")
+    String? llmIntegrationId;
+
+    /**
+    * Model name. Empty = the integration's default model.
+    */
+    // @ApiMember(Description="Model name. Empty = the integration's default model.")
+    String? model;
+
+    /**
+    * True to let the assistant remember facts about the end user across chats.
+    */
+    // @ApiMember(Description="True to let the assistant remember facts about the end user across chats.")
+    bool? memoryEnabled;
+
+    /**
+    * RAG source ids. Not available yet — must be empty.
+    */
+    // @ApiMember(Description="RAG source ids. Not available yet — must be empty.")
+    List<String>? ragSourceIds;
+
+    /**
+    * AI plan (quota) id. Optional.
+    */
+    // @ApiMember(Description="AI plan (quota) id. Optional.")
+    String? planId;
+
+    /**
+    * True to make this the project's default assistant; the previous default stops being default.
+    */
+    // @ApiMember(Description="True to make this the project's default assistant; the previous default stops being default.")
+    bool? isDefault;
+
+    ProjectAiAssistantRequestBase({this.name,this.welcomeMessage,this.systemPrompt,this.toolsets,this.llmIntegrationId,this.model,this.memoryEnabled,this.ragSourceIds,this.planId,this.isDefault});
+    ProjectAiAssistantRequestBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        name = json['name'];
+        welcomeMessage = json['welcomeMessage'];
+        systemPrompt = json['systemPrompt'];
+        toolsets = JsonConverters.fromJson(json['toolsets'],'List<String>',context!);
+        llmIntegrationId = json['llmIntegrationId'];
+        model = json['model'];
+        memoryEnabled = json['memoryEnabled'];
+        ragSourceIds = JsonConverters.fromJson(json['ragSourceIds'],'List<String>',context!);
+        planId = json['planId'];
+        isDefault = json['isDefault'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'name': name,
+        'welcomeMessage': welcomeMessage,
+        'systemPrompt': systemPrompt,
+        'toolsets': JsonConverters.toJson(toolsets,'List<String>',context!),
+        'llmIntegrationId': llmIntegrationId,
+        'model': model,
+        'memoryEnabled': memoryEnabled,
+        'ragSourceIds': JsonConverters.toJson(ragSourceIds,'List<String>',context!),
+        'planId': planId,
+        'isDefault': isDefault
+    });
+
+    getTypeName() => "ProjectAiAssistantRequestBase";
+    TypeContext? context = _ctx;
+}
+
 class CursorArgs implements ICursorArgs, IConvertible
 {
     String field = "";
@@ -9310,6 +9481,68 @@ class ImportColumnMappingDto implements IConvertible
     };
 
     getTypeName() => "ImportColumnMappingDto";
+    TypeContext? context = _ctx;
+}
+
+abstract class AggregateId
+{
+    String value = "";
+
+    AggregateId({this.value=""});
+    AggregateId.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        value = json['value'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'value': value
+    };
+
+    getTypeName() => "AggregateId";
+    TypeContext? context = _ctx;
+}
+
+class ProjectId extends AggregateId implements IHasDomainEntityId, IConvertible
+{
+    ProjectId();
+    ProjectId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "ProjectId";
+    TypeContext? context = _ctx;
+}
+
+class IntegrationId extends AggregateId implements IHasDomainEntityId, IConvertible
+{
+    IntegrationId();
+    IntegrationId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "IntegrationId";
+    TypeContext? context = _ctx;
+}
+
+class TaxonomyId extends AggregateId implements IHasDomainEntityId, IConvertible
+{
+    TaxonomyId();
+    TaxonomyId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "TaxonomyId";
     TypeContext? context = _ctx;
 }
 
@@ -9735,6 +9968,53 @@ abstract class ChatScreenContextDto
     TypeContext? context = _ctx;
 }
 
+enum EmbeddingProvider
+{
+    Voyage,
+    OpenAI,
+}
+
+abstract class EmbeddingIntegrationRequest
+{
+    String? integrationId;
+    EmbeddingProvider? provider;
+    String integrationName = "";
+    bool? isEnabled;
+    String? endpoint;
+    String model = "";
+    int dimension = 0;
+    String apiKey = "";
+
+    EmbeddingIntegrationRequest({this.integrationId,this.provider,this.integrationName="",this.isEnabled,this.endpoint,this.model="",this.dimension=0,this.apiKey=""});
+    EmbeddingIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        integrationId = json['integrationId'];
+        provider = JsonConverters.fromJson(json['provider'],'EmbeddingProvider',context!);
+        integrationName = json['integrationName'] ?? "";
+        isEnabled = json['isEnabled'];
+        endpoint = json['endpoint'];
+        model = json['model'] ?? "";
+        dimension = json['dimension'] ?? 0;
+        apiKey = json['apiKey'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'integrationId': integrationId,
+        'provider': JsonConverters.toJson(provider,'EmbeddingProvider',context!),
+        'integrationName': integrationName,
+        'isEnabled': isEnabled,
+        'endpoint': endpoint,
+        'model': model,
+        'dimension': dimension,
+        'apiKey': apiKey
+    };
+
+    getTypeName() => "EmbeddingIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
 abstract class SchedulerTaskRequest
 {
     SchedulerTaskType? type;
@@ -10075,6 +10355,55 @@ class PublicAuthDto implements IConvertible
     };
 
     getTypeName() => "PublicAuthDto";
+    TypeContext? context = _ctx;
+}
+
+class PublicAiAssistantDto implements IConvertible
+{
+    String id = "";
+    String name = "";
+    String? welcome;
+
+    PublicAiAssistantDto({this.id="",this.name="",this.welcome});
+    PublicAiAssistantDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        welcome = json['welcome'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'welcome': welcome
+    };
+
+    getTypeName() => "PublicAiAssistantDto";
+    TypeContext? context = _ctx;
+}
+
+class PublicAiChatDto implements IConvertible
+{
+    bool? enabled;
+    List<PublicAiAssistantDto> assistants = [];
+
+    PublicAiChatDto({this.enabled,this.assistants=const []});
+    PublicAiChatDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        enabled = json['enabled'];
+        assistants = JsonConverters.fromJson(json['assistants'],'List<PublicAiAssistantDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'enabled': enabled,
+        'assistants': JsonConverters.toJson(assistants,'List<PublicAiAssistantDto>',context!)
+    };
+
+    getTypeName() => "PublicAiChatDto";
     TypeContext? context = _ctx;
 }
 
@@ -10731,6 +11060,115 @@ class AuthenticationFlowSummaryDto implements IConvertible
 }
 
 // @DataContract
+class AiAssistantDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    String? welcomeMessage;
+
+    // @DataMember
+    String? systemPrompt;
+
+    // @DataMember
+    List<String> toolsets = [];
+
+    // @DataMember
+    String? llmIntegrationId;
+
+    // @DataMember
+    String? model;
+
+    // @DataMember
+    bool? memoryEnabled;
+
+    // @DataMember
+    List<String> ragSourceIds = [];
+
+    // @DataMember
+    String? planId;
+
+    // @DataMember
+    bool? isDefault;
+
+    AiAssistantDto({this.id="",this.name="",this.welcomeMessage,this.systemPrompt,this.toolsets=const [],this.llmIntegrationId,this.model,this.memoryEnabled,this.ragSourceIds=const [],this.planId,this.isDefault});
+    AiAssistantDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        welcomeMessage = json['welcomeMessage'];
+        systemPrompt = json['systemPrompt'];
+        toolsets = JsonConverters.fromJson(json['toolsets'],'List<String>',context!) ?? [];
+        llmIntegrationId = json['llmIntegrationId'];
+        model = json['model'];
+        memoryEnabled = json['memoryEnabled'];
+        ragSourceIds = JsonConverters.fromJson(json['ragSourceIds'],'List<String>',context!) ?? [];
+        planId = json['planId'];
+        isDefault = json['isDefault'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'welcomeMessage': welcomeMessage,
+        'systemPrompt': systemPrompt,
+        'toolsets': JsonConverters.toJson(toolsets,'List<String>',context!),
+        'llmIntegrationId': llmIntegrationId,
+        'model': model,
+        'memoryEnabled': memoryEnabled,
+        'ragSourceIds': JsonConverters.toJson(ragSourceIds,'List<String>',context!),
+        'planId': planId,
+        'isDefault': isDefault
+    };
+
+    getTypeName() => "AiAssistantDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ProjectAiSettingsDto implements IConvertible
+{
+    // @DataMember
+    bool? enabled;
+
+    // @DataMember
+    String? defaultLlmIntegrationId;
+
+    // @DataMember
+    String? defaultModel;
+
+    // @DataMember
+    List<AiAssistantDto> assistants = [];
+
+    ProjectAiSettingsDto({this.enabled,this.defaultLlmIntegrationId,this.defaultModel,this.assistants=const []});
+    ProjectAiSettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        enabled = json['enabled'];
+        defaultLlmIntegrationId = json['defaultLlmIntegrationId'];
+        defaultModel = json['defaultModel'];
+        assistants = JsonConverters.fromJson(json['assistants'],'List<AiAssistantDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'enabled': enabled,
+        'defaultLlmIntegrationId': defaultLlmIntegrationId,
+        'defaultModel': defaultModel,
+        'assistants': JsonConverters.toJson(assistants,'List<AiAssistantDto>',context!)
+    };
+
+    getTypeName() => "ProjectAiSettingsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class TriggerDto implements IHasViewId, IConvertible
 {
     // @DataMember
@@ -10886,19 +11324,24 @@ class AiDto implements IConvertible
     bool? isEnabled;
 
     // @DataMember
+    Map<String,String?> defaultIntegrationViewIds = {};
+
+    // @DataMember
     String? defaultIntegrationViewId;
 
-    AiDto({this.isEnabled,this.defaultIntegrationViewId});
+    AiDto({this.isEnabled,this.defaultIntegrationViewIds=const {},this.defaultIntegrationViewId});
     AiDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         isEnabled = json['isEnabled'];
+        defaultIntegrationViewIds = JsonConverters.toStringMap(json['defaultIntegrationViewIds']) ?? {};
         defaultIntegrationViewId = json['defaultIntegrationViewId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'isEnabled': isEnabled,
+        'defaultIntegrationViewIds': defaultIntegrationViewIds,
         'defaultIntegrationViewId': defaultIntegrationViewId
     };
 
@@ -11472,6 +11915,9 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     bool? exposeLegalToAdminPortal;
 
     // @DataMember
+    ProjectAiSettingsDto? aiChat;
+
+    // @DataMember
     String? legalTermsMarkdown;
 
     // @DataMember
@@ -11558,7 +12004,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     // @DataMember
     int connections = 0;
 
-    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.canonicalAdminUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalEnabled,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
+    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.canonicalAdminUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalEnabled,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
     ProjectDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -11589,6 +12035,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         adminPortalServiceUserId = json['adminPortalServiceUserId'];
         membershipAuthenticationFlows = JsonConverters.fromJson(json['membershipAuthenticationFlows'],'List<AuthenticationFlowSummaryDto>',context!);
         exposeLegalToAdminPortal = json['exposeLegalToAdminPortal'];
+        aiChat = JsonConverters.fromJson(json['aiChat'],'ProjectAiSettingsDto',context!);
         legalTermsMarkdown = json['legalTermsMarkdown'];
         legalPrivacyMarkdown = json['legalPrivacyMarkdown'];
         environments = JsonConverters.fromJson(json['environments'],'List<String>',context!) ?? [];
@@ -11649,6 +12096,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         'adminPortalServiceUserId': adminPortalServiceUserId,
         'membershipAuthenticationFlows': JsonConverters.toJson(membershipAuthenticationFlows,'List<AuthenticationFlowSummaryDto>',context!),
         'exposeLegalToAdminPortal': exposeLegalToAdminPortal,
+        'aiChat': JsonConverters.toJson(aiChat,'ProjectAiSettingsDto',context!),
         'legalTermsMarkdown': legalTermsMarkdown,
         'legalPrivacyMarkdown': legalPrivacyMarkdown,
         'environments': JsonConverters.toJson(environments,'List<String>',context!),
@@ -11733,6 +12181,110 @@ class ProjectListItemDto implements IConvertible
     };
 
     getTypeName() => "ProjectListItemDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class AiUsageGroupDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    int llmInputTokens = 0;
+
+    // @DataMember
+    int llmOutputTokens = 0;
+
+    // @DataMember
+    int embeddingTokens = 0;
+
+    // @DataMember
+    int rerankCalls = 0;
+
+    // @DataMember
+    int totalTokens = 0;
+
+    // @DataMember
+    int chargeableTokens = 0;
+
+    // @DataMember
+    int chargeableRerankCalls = 0;
+
+    // @DataMember
+    int credits = 0;
+
+    AiUsageGroupDto({this.id="",this.llmInputTokens=0,this.llmOutputTokens=0,this.embeddingTokens=0,this.rerankCalls=0,this.totalTokens=0,this.chargeableTokens=0,this.chargeableRerankCalls=0,this.credits=0});
+    AiUsageGroupDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        llmInputTokens = json['llmInputTokens'] ?? 0;
+        llmOutputTokens = json['llmOutputTokens'] ?? 0;
+        embeddingTokens = json['embeddingTokens'] ?? 0;
+        rerankCalls = json['rerankCalls'] ?? 0;
+        totalTokens = json['totalTokens'] ?? 0;
+        chargeableTokens = json['chargeableTokens'] ?? 0;
+        chargeableRerankCalls = json['chargeableRerankCalls'] ?? 0;
+        credits = json['credits'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'llmInputTokens': llmInputTokens,
+        'llmOutputTokens': llmOutputTokens,
+        'embeddingTokens': embeddingTokens,
+        'rerankCalls': rerankCalls,
+        'totalTokens': totalTokens,
+        'chargeableTokens': chargeableTokens,
+        'chargeableRerankCalls': chargeableRerankCalls,
+        'credits': credits
+    };
+
+    getTypeName() => "AiUsageGroupDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ProjectAiUsageDto implements IConvertible
+{
+    // @DataMember
+    String period = "";
+
+    // @DataMember
+    AiUsageGroupDto? totals;
+
+    // @DataMember
+    List<AiUsageGroupDto> assistants = [];
+
+    // @DataMember
+    List<AiUsageGroupDto> topUsers = [];
+
+    // @DataMember
+    List<AiUsageGroupDto> models = [];
+
+    ProjectAiUsageDto({this.period="",this.totals,this.assistants=const [],this.topUsers=const [],this.models=const []});
+    ProjectAiUsageDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        period = json['period'] ?? "";
+        totals = JsonConverters.fromJson(json['totals'],'AiUsageGroupDto',context!);
+        assistants = JsonConverters.fromJson(json['assistants'],'List<AiUsageGroupDto>',context!) ?? [];
+        topUsers = JsonConverters.fromJson(json['topUsers'],'List<AiUsageGroupDto>',context!) ?? [];
+        models = JsonConverters.fromJson(json['models'],'List<AiUsageGroupDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'period': period,
+        'totals': JsonConverters.toJson(totals,'AiUsageGroupDto',context!),
+        'assistants': JsonConverters.toJson(assistants,'List<AiUsageGroupDto>',context!),
+        'topUsers': JsonConverters.toJson(topUsers,'List<AiUsageGroupDto>',context!),
+        'models': JsonConverters.toJson(models,'List<AiUsageGroupDto>',context!)
+    };
+
+    getTypeName() => "ProjectAiUsageDto";
     TypeContext? context = _ctx;
 }
 
@@ -16018,6 +16570,43 @@ class PushDeviceListProjection implements IConvertible
 }
 
 // @DataContract
+class PushAudienceCountDto implements IConvertible
+{
+    // @DataMember
+    int devices = 0;
+
+    // @DataMember
+    int recipients = 0;
+
+    // @DataMember
+    int skippedUserIds = 0;
+
+    // @DataMember
+    bool? isCapped;
+
+    PushAudienceCountDto({this.devices=0,this.recipients=0,this.skippedUserIds=0,this.isCapped});
+    PushAudienceCountDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        devices = json['devices'] ?? 0;
+        recipients = json['recipients'] ?? 0;
+        skippedUserIds = json['skippedUserIds'] ?? 0;
+        isCapped = json['isCapped'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'devices': devices,
+        'recipients': recipients,
+        'skippedUserIds': skippedUserIds,
+        'isCapped': isCapped
+    };
+
+    getTypeName() => "PushAudienceCountDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class PushCampaignDto extends CampaignDto implements IConvertible
 {
     // @DataMember
@@ -16366,19 +16955,22 @@ class AgentOnboardingSnippet implements IConvertible
 {
     String client = "";
     String config = "";
+    String auth = "";
 
-    AgentOnboardingSnippet({this.client="",this.config=""});
+    AgentOnboardingSnippet({this.client="",this.config="",this.auth=""});
     AgentOnboardingSnippet.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         client = json['client'] ?? "";
         config = json['config'] ?? "";
+        auth = json['auth'] ?? "";
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'client': client,
-        'config': config
+        'config': config,
+        'auth': auth
     };
 
     getTypeName() => "AgentOnboardingSnippet";
@@ -16557,6 +17149,198 @@ class ChatSessionListItem implements IConvertible
     };
 
     getTypeName() => "ChatSessionListItem";
+    TypeContext? context = _ctx;
+}
+
+class ScaffoldStep implements IConvertible
+{
+    int order = 0;
+    String kind = "";
+    String title = "";
+    String tool = "";
+    JsonObject? arguments;
+    String? checkTool;
+    String? templateRef;
+
+    ScaffoldStep({this.order=0,this.kind="",this.title="",this.tool="",this.arguments,this.checkTool,this.templateRef});
+    ScaffoldStep.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        order = json['order'] ?? 0;
+        kind = json['kind'] ?? "";
+        title = json['title'] ?? "";
+        tool = json['tool'] ?? "";
+        arguments = JsonConverters.fromJson(json['arguments'],'JsonObject',context!);
+        checkTool = json['checkTool'];
+        templateRef = json['templateRef'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'order': order,
+        'kind': kind,
+        'title': title,
+        'tool': tool,
+        'arguments': JsonConverters.toJson(arguments,'JsonObject',context!),
+        'checkTool': checkTool,
+        'templateRef': templateRef
+    };
+
+    getTypeName() => "ScaffoldStep";
+    TypeContext? context = _ctx;
+}
+
+class ScaffoldIssue implements IConvertible
+{
+    String where = "";
+    String code = "";
+    String message = "";
+
+    ScaffoldIssue({this.where="",this.code="",this.message=""});
+    ScaffoldIssue.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        where = json['where'] ?? "";
+        code = json['code'] ?? "";
+        message = json['message'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'where': where,
+        'code': code,
+        'message': message
+    };
+
+    getTypeName() => "ScaffoldIssue";
+    TypeContext? context = _ctx;
+}
+
+class ScaffoldStepReportWithLink implements IConvertible
+{
+    int order = 0;
+    String title = "";
+    String tool = "";
+    String status = "";
+    String? id;
+    String? dashboardUrl;
+    String? note;
+    IReadOnlyList<String>? errors;
+
+    ScaffoldStepReportWithLink({this.order=0,this.title="",this.tool="",this.status="",this.id,this.dashboardUrl,this.note,this.errors});
+    ScaffoldStepReportWithLink.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        order = json['order'] ?? 0;
+        title = json['title'] ?? "";
+        tool = json['tool'] ?? "";
+        status = json['status'] ?? "";
+        id = json['id'];
+        dashboardUrl = json['dashboardUrl'];
+        note = json['note'];
+        errors = JsonConverters.fromJson(json['errors'],'IReadOnlyList<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'order': order,
+        'title': title,
+        'tool': tool,
+        'status': status,
+        'id': id,
+        'dashboardUrl': dashboardUrl,
+        'note': note,
+        'errors': JsonConverters.toJson(errors,'IReadOnlyList<String>',context!)
+    };
+
+    getTypeName() => "ScaffoldStepReportWithLink";
+    TypeContext? context = _ctx;
+}
+
+class ScaffoldApplyReport implements IConvertible
+{
+    bool? completed;
+    String? projectId;
+    String? projectUrl;
+    String? summary;
+    List<ScaffoldStepReportWithLink> steps = [];
+
+    ScaffoldApplyReport({this.completed,this.projectId,this.projectUrl,this.summary,this.steps=const []});
+    ScaffoldApplyReport.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        completed = json['completed'];
+        projectId = json['projectId'];
+        projectUrl = json['projectUrl'];
+        summary = json['summary'];
+        steps = JsonConverters.fromJson(json['steps'],'List<ScaffoldStepReportWithLink>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'completed': completed,
+        'projectId': projectId,
+        'projectUrl': projectUrl,
+        'summary': summary,
+        'steps': JsonConverters.toJson(steps,'List<ScaffoldStepReportWithLink>',context!)
+    };
+
+    getTypeName() => "ScaffoldApplyReport";
+    TypeContext? context = _ctx;
+}
+
+class TemplatePreviewPartResult implements IConvertible
+{
+    String name = "";
+    String? rendered;
+    IReadOnlyList<String>? errors;
+
+    TemplatePreviewPartResult({this.name="",this.rendered,this.errors});
+    TemplatePreviewPartResult.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        name = json['name'] ?? "";
+        rendered = json['rendered'];
+        errors = JsonConverters.fromJson(json['errors'],'IReadOnlyList<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'name': name,
+        'rendered': rendered,
+        'errors': JsonConverters.toJson(errors,'IReadOnlyList<String>',context!)
+    };
+
+    getTypeName() => "TemplatePreviewPartResult";
+    TypeContext? context = _ctx;
+}
+
+class TemplatePreview implements IConvertible
+{
+    String channel = "";
+    bool? ok;
+    IReadOnlyList<TemplatePreviewPartResult>? parts;
+    IReadOnlyList<String>? errors;
+
+    TemplatePreview({this.channel="",this.ok,this.parts,this.errors});
+    TemplatePreview.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        channel = json['channel'] ?? "";
+        ok = json['ok'];
+        parts = JsonConverters.fromJson(json['parts'],'IReadOnlyList<TemplatePreviewPartResult>',context!);
+        errors = JsonConverters.fromJson(json['errors'],'IReadOnlyList<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'channel': channel,
+        'ok': ok,
+        'parts': JsonConverters.toJson(parts,'IReadOnlyList<TemplatePreviewPartResult>',context!),
+        'errors': JsonConverters.toJson(errors,'IReadOnlyList<String>',context!)
+    };
+
+    getTypeName() => "TemplatePreview";
     TypeContext? context = _ctx;
 }
 
@@ -17124,13 +17908,78 @@ class WorkItemWireDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+abstract class EmbeddingIntegrationDto extends IntegrationDto
+{
+    EmbeddingProvider? provider;
+    String model = "";
+    int dimension = 0;
+    String? baseUrl;
+    bool? isConfigured;
+
+    EmbeddingIntegrationDto({this.provider,this.model="",this.dimension=0,this.baseUrl,this.isConfigured});
+    EmbeddingIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'EmbeddingProvider',context!);
+        model = json['model'] ?? "";
+        dimension = json['dimension'] ?? 0;
+        baseUrl = json['baseUrl'];
+        isConfigured = json['isConfigured'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'EmbeddingProvider',context!),
+        'model': model,
+        'dimension': dimension,
+        'baseUrl': baseUrl,
+        'isConfigured': isConfigured
+    });
+
+    getTypeName() => "EmbeddingIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
+class EmbeddingIntegrationListProjection extends IntegrationListProjection implements IConvertible
+{
+    EmbeddingProvider? embeddingProvider;
+    String model = "";
+    int dimension = 0;
+    bool? isConfigured;
+
+    EmbeddingIntegrationListProjection({this.embeddingProvider,this.model="",this.dimension=0,this.isConfigured});
+    EmbeddingIntegrationListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        embeddingProvider = JsonConverters.fromJson(json['embeddingProvider'],'EmbeddingProvider',context!);
+        model = json['model'] ?? "";
+        dimension = json['dimension'] ?? 0;
+        isConfigured = json['isConfigured'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'embeddingProvider': JsonConverters.toJson(embeddingProvider,'EmbeddingProvider',context!),
+        'model': model,
+        'dimension': dimension,
+        'isConfigured': isConfigured
+    });
+
+    getTypeName() => "EmbeddingIntegrationListProjection";
+    TypeContext? context = _ctx;
+}
+
 class LlmIntegrationListProjection extends IntegrationListProjection implements IConvertible
 {
     LlmProvider? llmProvider;
     String? baseUrl;
     String? defaultModel;
+    bool? isDefault;
+    List<LlmModelOptionDto> models = [];
 
-    LlmIntegrationListProjection({this.llmProvider,this.baseUrl,this.defaultModel});
+    LlmIntegrationListProjection({this.llmProvider,this.baseUrl,this.defaultModel,this.isDefault,this.models=const []});
     LlmIntegrationListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -17138,13 +17987,17 @@ class LlmIntegrationListProjection extends IntegrationListProjection implements 
         llmProvider = JsonConverters.fromJson(json['llmProvider'],'LlmProvider',context!);
         baseUrl = json['baseUrl'];
         defaultModel = json['defaultModel'];
+        isDefault = json['isDefault'];
+        models = JsonConverters.fromJson(json['models'],'List<LlmModelOptionDto>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'llmProvider': JsonConverters.toJson(llmProvider,'LlmProvider',context!),
         'baseUrl': baseUrl,
-        'defaultModel': defaultModel
+        'defaultModel': defaultModel,
+        'isDefault': isDefault,
+        'models': JsonConverters.toJson(models,'List<LlmModelOptionDto>',context!)
     });
 
     getTypeName() => "LlmIntegrationListProjection";
@@ -18655,6 +19508,11 @@ abstract class IHasRazorTemplateCode
 {
 }
 
+abstract class IHasDomainEntityId
+{
+    String viewId = "";
+}
+
 abstract class IHasResponsibleUserId
 {
     String userId = "";
@@ -19110,8 +19968,9 @@ class PublicProjectConfigDto implements IConvertible
     bool? adminPortalEnabled;
     PublicBrandDto? branding;
     PublicAuthDto? auth;
+    PublicAiChatDto? aiChat;
 
-    PublicProjectConfigDto({this.displayName="",this.adminPortalEnabled,this.branding,this.auth});
+    PublicProjectConfigDto({this.displayName="",this.adminPortalEnabled,this.branding,this.auth,this.aiChat});
     PublicProjectConfigDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19119,6 +19978,7 @@ class PublicProjectConfigDto implements IConvertible
         adminPortalEnabled = json['adminPortalEnabled'];
         branding = JsonConverters.fromJson(json['branding'],'PublicBrandDto',context!);
         auth = JsonConverters.fromJson(json['auth'],'PublicAuthDto',context!);
+        aiChat = JsonConverters.fromJson(json['aiChat'],'PublicAiChatDto',context!);
         return this;
     }
 
@@ -19126,7 +19986,8 @@ class PublicProjectConfigDto implements IConvertible
         'displayName': displayName,
         'adminPortalEnabled': adminPortalEnabled,
         'branding': JsonConverters.toJson(branding,'PublicBrandDto',context!),
-        'auth': JsonConverters.toJson(auth,'PublicAuthDto',context!)
+        'auth': JsonConverters.toJson(auth,'PublicAuthDto',context!),
+        'aiChat': JsonConverters.toJson(aiChat,'PublicAiChatDto',context!)
     };
 
     getTypeName() => "PublicProjectConfigDto";
@@ -19460,6 +20321,48 @@ class AdminPortalStructureDto implements IConvertible
     };
 
     getTypeName() => "AdminPortalStructureDto";
+    TypeContext? context = _ctx;
+}
+
+class GetProjectAiSettingsResponse extends ResponseBase implements IConvertible
+{
+    ProjectAiSettingsDto? result;
+
+    GetProjectAiSettingsResponse({this.result});
+    GetProjectAiSettingsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'ProjectAiSettingsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'ProjectAiSettingsDto',context!)
+    });
+
+    getTypeName() => "GetProjectAiSettingsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetProjectAiUsageResponse extends ResponseBase implements IConvertible
+{
+    ProjectAiUsageDto? result;
+
+    GetProjectAiUsageResponse({this.result});
+    GetProjectAiUsageResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'ProjectAiUsageDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'ProjectAiUsageDto',context!)
+    });
+
+    getTypeName() => "GetProjectAiUsageResponse";
     TypeContext? context = _ctx;
 }
 
@@ -22591,6 +23494,27 @@ class GetPushDevicesResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class GetPushCampaignAudienceCountResponse extends ResponseBase implements IConvertible
+{
+    PushAudienceCountDto? result;
+
+    GetPushCampaignAudienceCountResponse({this.result});
+    GetPushCampaignAudienceCountResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'PushAudienceCountDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'PushAudienceCountDto',context!)
+    });
+
+    getTypeName() => "GetPushCampaignAudienceCountResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetPushCampaignResponse extends ResponseBase implements IConvertible
 {
     PushCampaignDto? item;
@@ -23328,6 +24252,93 @@ class ChatTurnResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class ScaffoldProjectResponse extends ResponseBase implements IConvertible
+{
+    String? mode;
+    String? env;
+    bool? valid;
+    List<ScaffoldStep>? plan;
+    List<String>? defaults;
+    List<ScaffoldIssue>? issues;
+    ScaffoldApplyReport? report;
+
+    ScaffoldProjectResponse({this.mode,this.env,this.valid,this.plan,this.defaults,this.issues,this.report});
+    ScaffoldProjectResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        mode = json['mode'];
+        env = json['env'];
+        valid = json['valid'];
+        plan = JsonConverters.fromJson(json['plan'],'List<ScaffoldStep>',context!);
+        defaults = JsonConverters.fromJson(json['defaults'],'List<String>',context!);
+        issues = JsonConverters.fromJson(json['issues'],'List<ScaffoldIssue>',context!);
+        report = JsonConverters.fromJson(json['report'],'ScaffoldApplyReport',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'mode': mode,
+        'env': env,
+        'valid': valid,
+        'plan': JsonConverters.toJson(plan,'List<ScaffoldStep>',context!),
+        'defaults': JsonConverters.toJson(defaults,'List<String>',context!),
+        'issues': JsonConverters.toJson(issues,'List<ScaffoldIssue>',context!),
+        'report': JsonConverters.toJson(report,'ScaffoldApplyReport',context!)
+    });
+
+    getTypeName() => "ScaffoldProjectResponse";
+    TypeContext? context = _ctx;
+}
+
+class ValidateSchemaResponse extends ResponseBase implements IConvertible
+{
+    bool? valid;
+    List<ScaffoldIssue>? issues;
+    List<String>? collections;
+
+    ValidateSchemaResponse({this.valid,this.issues,this.collections});
+    ValidateSchemaResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        valid = json['valid'];
+        issues = JsonConverters.fromJson(json['issues'],'List<ScaffoldIssue>',context!);
+        collections = JsonConverters.fromJson(json['collections'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'valid': valid,
+        'issues': JsonConverters.toJson(issues,'List<ScaffoldIssue>',context!),
+        'collections': JsonConverters.toJson(collections,'List<String>',context!)
+    });
+
+    getTypeName() => "ValidateSchemaResponse";
+    TypeContext? context = _ctx;
+}
+
+class RenderTemplatePreviewResponse extends ResponseBase implements IConvertible
+{
+    TemplatePreview? preview;
+
+    RenderTemplatePreviewResponse({this.preview});
+    RenderTemplatePreviewResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        preview = JsonConverters.fromJson(json['preview'],'TemplatePreview',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'preview': JsonConverters.toJson(preview,'TemplatePreview',context!)
+    });
+
+    getTypeName() => "RenderTemplatePreviewResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetProjectBriefResponse extends ResponseBase implements IConvertible
 {
     String? projectId;
@@ -23430,6 +24441,81 @@ class ExportWorkItemResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "ExportWorkItemResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmbeddingIntegrationResponse extends ResponseBase implements IConvertible
+{
+    EmbeddingIntegrationDto? item;
+
+    GetEmbeddingIntegrationResponse({this.item});
+    GetEmbeddingIntegrationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'EmbeddingIntegrationDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'EmbeddingIntegrationDto',context!)
+    });
+
+    getTypeName() => "GetEmbeddingIntegrationResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmbeddingIntegrationsResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<EmbeddingIntegrationListProjection>? list;
+
+    GetEmbeddingIntegrationsResponse({this.list});
+    GetEmbeddingIntegrationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmbeddingIntegrationListProjection>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<EmbeddingIntegrationListProjection>',context!)
+    });
+
+    getTypeName() => "GetEmbeddingIntegrationsResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TestEmbeddingIntegrationResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    int? dimension;
+
+    // @DataMember
+    int? latencyMs;
+
+    // @DataMember
+    int? totalTokens;
+
+    TestEmbeddingIntegrationResponse({this.dimension,this.latencyMs,this.totalTokens});
+    TestEmbeddingIntegrationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        dimension = json['dimension'];
+        latencyMs = json['latencyMs'];
+        totalTokens = json['totalTokens'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'dimension': dimension,
+        'latencyMs': latencyMs,
+        'totalTokens': totalTokens
+    });
+
+    getTypeName() => "TestEmbeddingIntegrationResponse";
     TypeContext? context = _ctx;
 }
 
@@ -26690,6 +27776,38 @@ class GetProjectTokens extends CodeMashRequestBase implements IReturn<GetProject
 }
 
 /**
+* Turns the project's managed Admin Portal on or off
+*/
+// @Route("/{version}/account/projects/{projectId}/admin-portal/enabled", "PUT")
+// @Api(Description="Turns the project's managed Admin Portal on or off")
+class SetAdminPortalEnabledRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    /**
+    * true turns the managed Admin Portal on; false turns it off.
+    */
+    // @ApiMember(Description="true turns the managed Admin Portal on; false turns it off.", IsRequired=true)
+    bool? enabled;
+
+    SetAdminPortalEnabledRequest({this.enabled});
+    SetAdminPortalEnabledRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        enabled = json['enabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'enabled': enabled
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "SetAdminPortalEnabledRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Assigns the project's Admin Portal service user
 */
 // @Route("/{version}/account/projects/{projectId}/settings/admin-portal/service-user", "PUT")
@@ -26771,6 +27889,192 @@ class UpdateProjectAdminUrl extends CodeMashRequestBase implements IReturn<Empty
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "UpdateProjectAdminUrl";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Reads the project's AI chat settings for end users: on/off, default LLM and assistants
+*/
+// @Route("/{version}/account/projects/{projectId}/ai/settings", "GET")
+// @Api(Description="Reads the project's AI chat settings for end users: on/off, default LLM and assistants")
+class GetProjectAiSettings extends CodeMashRequestBase implements IReturn<GetProjectAiSettingsResponse>, IConvertible, IGet
+{
+    GetProjectAiSettings();
+    GetProjectAiSettings.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetProjectAiSettingsResponse();
+    getResponseTypeName() => "GetProjectAiSettingsResponse";
+    getTypeName() => "GetProjectAiSettings";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Saves the project's AI chat settings: on/off and the default LLM
+*/
+// @Route("/{version}/account/projects/{projectId}/ai/settings", "PUT")
+// @Api(Description="Saves the project's AI chat settings: on/off and the default LLM")
+class UpdateProjectAiSettings extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    /**
+    * True to show end-user AI chat in the Admin Portal, false to hide it.
+    */
+    // @ApiMember(Description="True to show end-user AI chat in the Admin Portal, false to hide it.")
+    bool? enabled;
+
+    /**
+    * Default LLM integration id (int_…) for assistants without their own. Empty clears it.
+    */
+    // @ApiMember(Description="Default LLM integration id (int_…) for assistants without their own. Empty clears it.")
+    String? defaultLlmIntegrationId;
+
+    /**
+    * Model of the default LLM. Empty = the integration's default model.
+    */
+    // @ApiMember(Description="Model of the default LLM. Empty = the integration's default model.")
+    String? defaultModel;
+
+    UpdateProjectAiSettings({this.enabled,this.defaultLlmIntegrationId,this.defaultModel});
+    UpdateProjectAiSettings.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        enabled = json['enabled'];
+        defaultLlmIntegrationId = json['defaultLlmIntegrationId'];
+        defaultModel = json['defaultModel'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'enabled': enabled,
+        'defaultLlmIntegrationId': defaultLlmIntegrationId,
+        'defaultModel': defaultModel
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "UpdateProjectAiSettings";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Adds an end-user AI assistant to the project
+*/
+// @Route("/{version}/account/projects/{projectId}/ai/assistants", "POST")
+// @Api(Description="Adds an end-user AI assistant to the project")
+class CreateProjectAiAssistant extends ProjectAiAssistantRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    CreateProjectAiAssistant();
+    CreateProjectAiAssistant.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CreateProjectAiAssistant";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Updates an end-user AI assistant of the project (full replace)
+*/
+// @Route("/{version}/account/projects/{projectId}/ai/assistants/{assistantId}", "PUT")
+// @Api(Description="Updates an end-user AI assistant of the project (full replace)")
+class UpdateProjectAiAssistant extends ProjectAiAssistantRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    /**
+    * Id of the assistant (ast_…).
+    */
+    // @ApiMember(Description="Id of the assistant (ast_…).", IsRequired=true)
+    String assistantId = "";
+
+    UpdateProjectAiAssistant({this.assistantId=""});
+    UpdateProjectAiAssistant.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        assistantId = json['assistantId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'assistantId': assistantId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "UpdateProjectAiAssistant";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Removes an end-user AI assistant from the project
+*/
+// @Route("/{version}/account/projects/{projectId}/ai/assistants/{assistantId}", "DELETE")
+// @Api(Description="Removes an end-user AI assistant from the project")
+class DeleteProjectAiAssistant extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * Id of the assistant (ast_…).
+    */
+    // @ApiMember(Description="Id of the assistant (ast_…).", IsRequired=true)
+    String assistantId = "";
+
+    DeleteProjectAiAssistant({this.assistantId=""});
+    DeleteProjectAiAssistant.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        assistantId = json['assistantId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'assistantId': assistantId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteProjectAiAssistant";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Reads the project's AI usage this month: totals, per assistant, top users and per model
+*/
+// @Route("/{version}/account/projects/{projectId}/ai/usage", "GET")
+// @Api(Description="Reads the project's AI usage this month: totals, per assistant, top users and per model")
+class GetProjectAiUsage extends CodeMashRequestBase implements IReturn<GetProjectAiUsageResponse>, IConvertible, IGet
+{
+    /**
+    * How many users to list, biggest first. 1–100, default 10.
+    */
+    // @ApiMember(Description="How many users to list, biggest first. 1–100, default 10.")
+    int? top;
+
+    GetProjectAiUsage({this.top});
+    GetProjectAiUsage.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        top = json['top'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'top': top
+    });
+
+    createResponse() => GetProjectAiUsageResponse();
+    getResponseTypeName() => "GetProjectAiUsageResponse";
+    getTypeName() => "GetProjectAiUsage";
     TypeContext? context = _ctx;
 }
 
@@ -32669,6 +33973,137 @@ class ProcessCollectionImport implements IConvertible, IPost
     TypeContext? context = _ctx;
 }
 
+class TermInserted implements IConvertible, IPost
+{
+    ProjectId? projectId;
+    IntegrationId? databaseIntegrationId;
+    TaxonomyId? taxonomyId;
+    String id = "";
+    dynamic? document;
+
+    TermInserted({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.id="",this.document});
+    TermInserted.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
+        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
+        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
+        id = json['id'] ?? "";
+        document = JsonConverters.fromJson(json['document'],'dynamic',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
+        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
+        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
+        'id': id,
+        'document': JsonConverters.toJson(document,'dynamic',context!)
+    };
+
+    getTypeName() => "TermInserted";
+    TypeContext? context = _ctx;
+}
+
+class TermUpdated implements IConvertible, IPost
+{
+    ProjectId? projectId;
+    IntegrationId? databaseIntegrationId;
+    TaxonomyId? taxonomyId;
+    String id = "";
+    dynamic? from;
+    dynamic? to;
+
+    TermUpdated({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.id="",this.from,this.to});
+    TermUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
+        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
+        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
+        id = json['id'] ?? "";
+        from = JsonConverters.fromJson(json['from'],'dynamic',context!);
+        to = JsonConverters.fromJson(json['to'],'dynamic',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
+        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
+        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
+        'id': id,
+        'from': JsonConverters.toJson(from,'dynamic',context!),
+        'to': JsonConverters.toJson(to,'dynamic',context!)
+    };
+
+    getTypeName() => "TermUpdated";
+    TypeContext? context = _ctx;
+}
+
+class TermDeleted implements IConvertible, IPost
+{
+    ProjectId? projectId;
+    IntegrationId? databaseIntegrationId;
+    TaxonomyId? taxonomyId;
+    String id = "";
+    dynamic? document;
+
+    TermDeleted({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.id="",this.document});
+    TermDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
+        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
+        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
+        id = json['id'] ?? "";
+        document = JsonConverters.fromJson(json['document'],'dynamic',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
+        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
+        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
+        'id': id,
+        'document': JsonConverters.toJson(document,'dynamic',context!)
+    };
+
+    getTypeName() => "TermDeleted";
+    TypeContext? context = _ctx;
+}
+
+class TermsDeleted implements IConvertible, IPost
+{
+    ProjectId? projectId;
+    IntegrationId? databaseIntegrationId;
+    TaxonomyId? taxonomyId;
+    int deletedCount = 0;
+    dynamic? filter;
+
+    TermsDeleted({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.deletedCount=0,this.filter});
+    TermsDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
+        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
+        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
+        deletedCount = json['deletedCount'] ?? 0;
+        filter = JsonConverters.fromJson(json['filter'],'dynamic',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
+        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
+        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
+        'deletedCount': deletedCount,
+        'filter': JsonConverters.toJson(filter,'dynamic',context!)
+    };
+
+    getTypeName() => "TermsDeleted";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/files/disable", "GET")
 class DisableFiles extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
 {
@@ -37178,10 +38613,10 @@ class TestPushIntegration extends CodeMashRequestBase implements IReturn<TestEma
     String? testToken;
 
     /**
-    * Optional delivery family for the test token (e.g. Ios, Android, Chrome, Safari, Expo). Requires TestToken when set.
+    * Optional delivery family for the test token (ios, android, chrome or safari). Requires TestToken when set.
     */
     // @DataMember
-    // @ApiMember(Description="Optional delivery family for the test token (e.g. Ios, Android, Chrome, Safari, Expo). Requires TestToken when set.")
+    // @ApiMember(Description="Optional delivery family for the test token (ios, android, chrome or safari). Requires TestToken when set.")
     String? deliveryFamily;
 
     TestPushIntegration({this.integrationId="",this.testToken,this.deliveryFamily});
@@ -37333,9 +38768,9 @@ class GetPushDevices extends CodeMashListPaginationRequestBase implements IRetur
     String? deviceKey;
 
     /**
-    * Optional: only devices of this platform — ios, android, chrome, safari or expo.
+    * Optional: only devices of this platform — ios, android, chrome or safari.
     */
-    // @ApiMember(Description="Optional: only devices of this platform — ios, android, chrome, safari or expo.")
+    // @ApiMember(Description="Optional: only devices of this platform — ios, android, chrome or safari.")
     String? platform;
 
     /**
@@ -37366,6 +38801,49 @@ class GetPushDevices extends CodeMashListPaginationRequestBase implements IRetur
     createResponse() => GetPushDevicesResponse();
     getResponseTypeName() => "GetPushDevicesResponse";
     getTypeName() => "GetPushDevices";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Count the devices a push campaign audience would reach
+*/
+// @Route("/{version}/notifications/push/campaigns/audience-count", "POST")
+// @Api(Description="Count the devices a push campaign audience would reach")
+// @DataContract
+class GetPushCampaignAudienceCountRequest extends CodeMashRequestBase implements IReturn<GetPushCampaignAudienceCountResponse>, IConvertible, IPost
+{
+    /**
+    * The audience, in the same shape as CreatePushCampaignRequest.campaign. Template and send options are ignored.
+    */
+    // @DataMember
+    // @ApiMember(Description="The audience, in the same shape as CreatePushCampaignRequest.campaign. Template and send options are ignored.")
+    PushCampaignRequest? campaign;
+
+    /**
+    * Optional. When omitted, the default database integration for the request's environment is used.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. When omitted, the default database integration for the request's environment is used.")
+    String? databaseIntegrationId;
+
+    GetPushCampaignAudienceCountRequest({this.campaign,this.databaseIntegrationId});
+    GetPushCampaignAudienceCountRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaign = JsonConverters.fromJson(json['campaign'],'PushCampaignRequest',context!);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaign': JsonConverters.toJson(campaign,'PushCampaignRequest',context!),
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushCampaignAudienceCountResponse();
+    getResponseTypeName() => "GetPushCampaignAudienceCountResponse";
+    getTypeName() => "GetPushCampaignAudienceCountRequest";
     TypeContext? context = _ctx;
 }
 
@@ -39450,26 +40928,182 @@ class ChatTurnRequest extends RequestBase implements IReturn<ChatTurnResponse>, 
 }
 
 /**
-* MCP server endpoint — JSON-RPC 2.0 over HTTP POST exposing the AI tool catalog.
+* Plans (preview) or builds (apply) a whole project from one spec.
+*/
+// @Route("/{version}/account/ai/scaffold", "POST")
+// @Api(Description="Plans (preview) or builds (apply) a whole project from one spec.")
+class ScaffoldProjectRequest extends RequestBase implements IReturn<ScaffoldProjectResponse>, IConvertible, IPost
+{
+    /**
+    * The project spec (a JSON object) — see the tool description.
+    */
+    // @ApiMember(Description="The project spec (a JSON object) — see the tool description.", IsRequired=true)
+    String spec = "";
+
+    /**
+    * 'preview' (writes nothing) or 'apply' (builds the project).
+    */
+    // @ApiMember(Description="'preview' (writes nothing) or 'apply' (builds the project).", IsRequired=true)
+    String mode = "";
+
+    String? env;
+
+    ScaffoldProjectRequest({this.spec="",this.mode="",this.env});
+    ScaffoldProjectRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        spec = json['spec'] ?? "";
+        mode = json['mode'] ?? "";
+        env = json['env'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'spec': spec,
+        'mode': mode,
+        'env': env
+    });
+
+    createResponse() => ScaffoldProjectResponse();
+    getResponseTypeName() => "ScaffoldProjectResponse";
+    getTypeName() => "ScaffoldProjectRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Validates a collection schema without saving it.
+*/
+// @Route("/{version}/account/ai/schemas/validate", "POST")
+// @Api(Description="Validates a collection schema without saving it.")
+class ValidateSchemaRequest extends RequestBase implements IReturn<ValidateSchemaResponse>, IConvertible, IPost
+{
+    /**
+    * The schema as JSON — see the tool description.
+    */
+    // @ApiMember(Description="The schema as JSON — see the tool description.", IsRequired=true)
+    String schemaJson = "";
+
+    ValidateSchemaRequest({this.schemaJson=""});
+    ValidateSchemaRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        schemaJson = json['schemaJson'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'schemaJson': schemaJson
+    });
+
+    createResponse() => ValidateSchemaResponse();
+    getResponseTypeName() => "ValidateSchemaResponse";
+    getTypeName() => "ValidateSchemaRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Renders an email, push or SMS template with sample data.
+*/
+// @Route("/{version}/account/ai/templates/render-preview", "POST")
+// @Api(Description="Renders an email, push or SMS template with sample data.")
+class RenderTemplatePreviewRequest extends RequestBase implements IReturn<RenderTemplatePreviewResponse>, IHasEnv, IConvertible, IPost
+{
+    /**
+    * The project of templateId. Not needed to render a body.
+    */
+    // @ApiMember(Description="The project of templateId. Not needed to render a body.")
+    String projectId = "";
+
+    String? env;
+    /**
+    * email | push | sms
+    */
+    // @ApiMember(Description="email | push | sms", IsRequired=true)
+    String channel = "";
+
+    /**
+    * An existing template id (tmpl_…). Needs projectId. Leave empty to render body instead.
+    */
+    // @ApiMember(Description="An existing template id (tmpl_…). Needs projectId. Leave empty to render body instead.")
+    String? templateId;
+
+    /**
+    * Razor template text to render when there is no templateId.
+    */
+    // @ApiMember(Description="Razor template text to render when there is no templateId.")
+    String? body;
+
+    /**
+    * Email subject / push title / SMS subject to render with body. Optional.
+    */
+    // @ApiMember(Description="Email subject / push title / SMS subject to render with body. Optional.")
+    String? subject;
+
+    /**
+    * Sample data as a JSON object, read by the template as @Model.
+    */
+    // @ApiMember(Description="Sample data as a JSON object, read by the template as @Model.")
+    String? sampleData;
+
+    RenderTemplatePreviewRequest({this.projectId="",this.env,this.channel="",this.templateId,this.body,this.subject,this.sampleData});
+    RenderTemplatePreviewRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        projectId = json['projectId'] ?? "";
+        env = json['env'];
+        channel = json['channel'] ?? "";
+        templateId = json['templateId'];
+        body = json['body'];
+        subject = json['subject'];
+        sampleData = json['sampleData'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'projectId': projectId,
+        'env': env,
+        'channel': channel,
+        'templateId': templateId,
+        'body': body,
+        'subject': subject,
+        'sampleData': sampleData
+    });
+
+    createResponse() => RenderTemplatePreviewResponse();
+    getResponseTypeName() => "RenderTemplatePreviewResponse";
+    getTypeName() => "RenderTemplatePreviewRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* MCP server endpoint (Streamable HTTP): JSON-RPC 2.0 over POST, server stream over GET, session end over DELETE.
 */
 // @Route("/{version}/account/mcp", "POST")
-// @Api(Description="MCP server endpoint — JSON-RPC 2.0 over HTTP POST exposing the AI tool catalog.")
+// @Route("/{version}/account/mcp", "GET")
+// @Route("/{version}/account/mcp", "DELETE")
+// @Api(Description="MCP server endpoint (Streamable HTTP): JSON-RPC 2.0 over POST, server stream over GET, session end over DELETE.")
 class McpRequest implements IReturn<String>, IConvertible, IPost
 {
     String? version;
+    String? toolsets;
     Uint8List? requestStream;
 
-    McpRequest({this.version,this.requestStream});
+    McpRequest({this.version,this.toolsets,this.requestStream});
     McpRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         version = json['version'];
+        toolsets = json['toolsets'];
         requestStream = JsonConverters.fromJson(json['requestStream'],'Uint8List',context!) ?? Uint8List(0);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'version': version,
+        'toolsets': toolsets,
         'requestStream': JsonConverters.toJson(requestStream,'Uint8List',context!)
     };
 
@@ -39637,6 +41271,327 @@ class MarkNeedsYouDoneRequest extends CodeMashRequestBase implements IReturn<IdR
     TypeContext? context = _ctx;
 }
 
+/**
+* OAuth protected-resource metadata (RFC 9728) for the Hub MCP endpoint.
+*/
+// @Route("/.well-known/oauth-protected-resource", "GET")
+// @Route("/.well-known/oauth-protected-resource/{Path*}", "GET")
+// @Api(Description="OAuth protected-resource metadata (RFC 9728) for the Hub MCP endpoint.")
+class OAuthProtectedResourceMetadataRequest implements IReturn<String>, IConvertible, IGet
+{
+    String? path;
+
+    OAuthProtectedResourceMetadataRequest({this.path});
+    OAuthProtectedResourceMetadataRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        path = json['path'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'path': path
+    };
+
+    createResponse() => "";
+    getResponseTypeName() => "String";
+    getTypeName() => "OAuthProtectedResourceMetadataRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* OAuth authorization-server metadata (RFC 8414).
+*/
+// @Route("/.well-known/oauth-authorization-server", "GET")
+// @Route("/.well-known/oauth-authorization-server/{Path*}", "GET")
+// @Api(Description="OAuth authorization-server metadata (RFC 8414).")
+class OAuthAuthorizationServerMetadataRequest implements IReturn<String>, IConvertible, IGet
+{
+    String? path;
+
+    OAuthAuthorizationServerMetadataRequest({this.path});
+    OAuthAuthorizationServerMetadataRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        path = json['path'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'path': path
+    };
+
+    createResponse() => "";
+    getResponseTypeName() => "String";
+    getTypeName() => "OAuthAuthorizationServerMetadataRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Registers an MCP client for OAuth (RFC 7591). Public clients only: PKCE, no secret.
+*/
+// @Route("/{version}/oauth/register", "POST")
+// @Api(Description="Registers an MCP client for OAuth (RFC 7591). Public clients only: PKCE, no secret.")
+class OAuthRegisterRequest implements IReturn<String>, IConvertible, IPost
+{
+    String? version;
+    Uint8List? requestStream;
+
+    OAuthRegisterRequest({this.version,this.requestStream});
+    OAuthRegisterRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        version = json['version'];
+        requestStream = JsonConverters.fromJson(json['requestStream'],'Uint8List',context!) ?? Uint8List(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'version': version,
+        'requestStream': JsonConverters.toJson(requestStream,'Uint8List',context!)
+    };
+
+    createResponse() => "";
+    getResponseTypeName() => "String";
+    getTypeName() => "OAuthRegisterRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* OAuth authorization endpoint: sign-in hint or the consent page (HTML).
+*/
+// @Route("/{version}/oauth/authorize", "GET")
+// @Api(Description="OAuth authorization endpoint: sign-in hint or the consent page (HTML).")
+class OAuthAuthorizeRequest implements IReturn<String>, IConvertible, IGet
+{
+    String? version;
+
+    OAuthAuthorizeRequest({this.version});
+    OAuthAuthorizeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        version = json['version'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'version': version
+    };
+
+    createResponse() => "";
+    getResponseTypeName() => "String";
+    getTypeName() => "OAuthAuthorizeRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* OAuth authorization endpoint: the person's decision from the consent page.
+*/
+// @Route("/{version}/oauth/authorize", "POST")
+// @Api(Description="OAuth authorization endpoint: the person's decision from the consent page.")
+class OAuthAuthorizeDecisionRequest implements IReturn<String>, IConvertible, IPost
+{
+    String? version;
+
+    OAuthAuthorizeDecisionRequest({this.version});
+    OAuthAuthorizeDecisionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        version = json['version'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'version': version
+    };
+
+    createResponse() => "";
+    getResponseTypeName() => "String";
+    getTypeName() => "OAuthAuthorizeDecisionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* OAuth token endpoint: authorization code (PKCE S256) or refresh token → access token.
+*/
+// @Route("/{version}/oauth/token", "POST")
+// @Api(Description="OAuth token endpoint: authorization code (PKCE S256) or refresh token → access token.")
+class OAuthTokenRequest implements IReturn<String>, IConvertible, IPost
+{
+    String? version;
+
+    OAuthTokenRequest({this.version});
+    OAuthTokenRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        version = json['version'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'version': version
+    };
+
+    createResponse() => "";
+    getResponseTypeName() => "String";
+    getTypeName() => "OAuthTokenRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* OAuth token revocation (RFC 7009): revokes the grant behind a refresh or access token.
+*/
+// @Route("/{version}/oauth/revoke", "POST")
+// @Api(Description="OAuth token revocation (RFC 7009): revokes the grant behind a refresh or access token.")
+class OAuthRevokeRequest implements IReturn<String>, IConvertible, IPost
+{
+    String? version;
+
+    OAuthRevokeRequest({this.version});
+    OAuthRevokeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        version = json['version'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'version': version
+    };
+
+    createResponse() => "";
+    getResponseTypeName() => "String";
+    getTypeName() => "OAuthRevokeRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/ai/integrations/embeddings/{Id}", "DELETE")
+class DeleteEmbeddingIntegrationRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * Id of the embedding integration to delete.
+    */
+    // @ApiMember(Description="Id of the embedding integration to delete.")
+    String id = "";
+
+    DeleteEmbeddingIntegrationRequest({this.id=""});
+    DeleteEmbeddingIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteEmbeddingIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/ai/integrations/embeddings/{Id}", "GET")
+class GetEmbeddingIntegration extends CodeMashRequestBase implements IReturn<GetEmbeddingIntegrationResponse>, IConvertible, IGet
+{
+    /**
+    * Id of the embedding integration to fetch.
+    */
+    // @ApiMember(Description="Id of the embedding integration to fetch.")
+    String id = "";
+
+    GetEmbeddingIntegration({this.id=""});
+    GetEmbeddingIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => GetEmbeddingIntegrationResponse();
+    getResponseTypeName() => "GetEmbeddingIntegrationResponse";
+    getTypeName() => "GetEmbeddingIntegration";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/ai/integrations/embeddings", "GET")
+class GetEmbeddingIntegrations extends CodeMashListPaginationRequestBase implements IReturn<GetEmbeddingIntegrationsResponse>, IConvertible, IGet
+{
+    GetEmbeddingIntegrations();
+    GetEmbeddingIntegrations.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetEmbeddingIntegrationsResponse();
+    getResponseTypeName() => "GetEmbeddingIntegrationsResponse";
+    getTypeName() => "GetEmbeddingIntegrations";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/ai/integrations/embeddings", "POST")
+// @DataContract
+class SaveEmbeddingIntegration extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    // @DataMember(Name="integration")
+    EmbeddingIntegrationRequest? integration;
+
+    SaveEmbeddingIntegration({this.integration});
+    SaveEmbeddingIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integration = JsonConverters.fromJson(json['integration'],'EmbeddingIntegrationRequest',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integration': JsonConverters.toJson(integration,'EmbeddingIntegrationRequest',context!)
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "SaveEmbeddingIntegration";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/ai/integrations/embeddings/{Id}/test", "POST")
+class TestEmbeddingIntegration extends CodeMashRequestBase implements IReturn<TestEmbeddingIntegrationResponse>, IConvertible, IPost
+{
+    /**
+    * Id of the embedding integration to test.
+    */
+    // @ApiMember(Description="Id of the embedding integration to test.")
+    String id = "";
+
+    TestEmbeddingIntegration({this.id=""});
+    TestEmbeddingIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => TestEmbeddingIntegrationResponse();
+    getResponseTypeName() => "TestEmbeddingIntegrationResponse";
+    getTypeName() => "TestEmbeddingIntegration";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/ai/integrations/llms/{Id}", "DELETE")
 class DeleteLlmIntegrationRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
 {
@@ -39789,6 +41744,34 @@ class SaveLlmIntegration extends CodeMashRequestBase implements IReturn<IdRespon
     createResponse() => IdResponse();
     getResponseTypeName() => "IdResponse";
     getTypeName() => "SaveLlmIntegration";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/ai/integrations/llms/{Id}/default", "PUT")
+class SetLlmIntegrationAsDefaultRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    /**
+    * Id of the LLM integration to make the default.
+    */
+    // @ApiMember(Description="Id of the LLM integration to make the default.")
+    String id = "";
+
+    SetLlmIntegrationAsDefaultRequest({this.id=""});
+    SetLlmIntegrationAsDefaultRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "SetLlmIntegrationAsDefaultRequest";
     TypeContext? context = _ctx;
 }
 
@@ -41969,7 +43952,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AzureFunctionsCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AzureFunctionsCodeIntegrationRequest()),
     'GoogleCloudFunctionsCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => GoogleCloudFunctionsCodeIntegrationRequest()),
     'LlmProvider': TypeInfo(TypeOf.Enum, enumValues:LlmProvider.values),
+    'LlmModelOptionRequest': TypeInfo(TypeOf.Class, create:() => LlmModelOptionRequest()),
     'LlmIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
+    'List<LlmModelOptionRequest>': TypeInfo(TypeOf.Class, create:() => <LlmModelOptionRequest>[]),
     'OllamaLlmIntegrationRequest': TypeInfo(TypeOf.Class, create:() => OllamaLlmIntegrationRequest()),
     'OpenRouterLlmIntegrationRequest': TypeInfo(TypeOf.Class, create:() => OpenRouterLlmIntegrationRequest()),
     'MistralLlmIntegrationRequest': TypeInfo(TypeOf.Class, create:() => MistralLlmIntegrationRequest()),
@@ -42039,11 +44024,12 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmailToUsersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => EmailToUsersDeliverySettingsDto()),
     'EmailToEmailAddressesDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => EmailToEmailAddressesDeliverySettingsDto()),
     'EmailToCollectionRecordsDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => EmailToCollectionRecordsDeliverySettingsDto()),
+    'PushDeviceDeliveryFamily': TypeInfo(TypeOf.Enum, enumValues:PushDeviceDeliveryFamily.values),
     'PushToAllUsersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToAllUsersDeliverySettingsDto()),
+    'List<PushDeviceDeliveryFamily>': TypeInfo(TypeOf.Class, create:() => <PushDeviceDeliveryFamily>[]),
     'PushToUsersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToUsersDeliverySettingsDto()),
     'PushToAccountUsersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToAccountUsersDeliverySettingsDto()),
     'PushToCollectionRecordsDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToCollectionRecordsDeliverySettingsDto()),
-    'PushDeviceDeliveryFamily': TypeInfo(TypeOf.Enum, enumValues:PushDeviceDeliveryFamily.values),
     'PushDeviceDeliveryTokenDto': TypeInfo(TypeOf.Class, create:() => PushDeviceDeliveryTokenDto()),
     'PushToDevicesDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToDevicesDeliverySettingsDto()),
     'List<PushDeviceDeliveryTokenDto>': TypeInfo(TypeOf.Class, create:() => <PushDeviceDeliveryTokenDto>[]),
@@ -42053,7 +44039,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SmsToPhoneNumbersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => SmsToPhoneNumbersDeliverySettingsDto()),
     'IntegrationDto': TypeInfo(TypeOf.Class, create:() => IntegrationDto()),
     'IReadOnlyList<String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<String>()),
+    'LlmModelOptionDto': TypeInfo(TypeOf.Class, create:() => LlmModelOptionDto()),
     'LlmIntegrationDto': TypeInfo(TypeOf.AbstractClass),
+    'List<LlmModelOptionDto>': TypeInfo(TypeOf.Class, create:() => <LlmModelOptionDto>[]),
     'OpenAiLlmIntegrationDto': TypeInfo(TypeOf.Class, create:() => OpenAiLlmIntegrationDto()),
     'AnthropicLlmIntegrationDto': TypeInfo(TypeOf.Class, create:() => AnthropicLlmIntegrationDto()),
     'OllamaLlmIntegrationDto': TypeInfo(TypeOf.Class, create:() => OllamaLlmIntegrationDto()),
@@ -42226,6 +44214,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DeliveryChannel': TypeInfo(TypeOf.Enum, enumValues:DeliveryChannel.values),
     'TagDefinitionDto': TypeInfo(TypeOf.Class, create:() => TagDefinitionDto()),
     'Map<DeliveryChannel,bool?>': TypeInfo(TypeOf.Class, create:() => Map<DeliveryChannel,bool?>()),
+    'ProjectAiAssistantRequestBase': TypeInfo(TypeOf.AbstractClass),
     'CursorArgs': TypeInfo(TypeOf.Class, create:() => CursorArgs()),
     'PagingArgs': TypeInfo(TypeOf.Class, create:() => PagingArgs()),
     'AiScopeDto': TypeInfo(TypeOf.Class, create:() => AiScopeDto()),
@@ -42241,6 +44230,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SchemaListSettingsDto': TypeInfo(TypeOf.Class, create:() => SchemaListSettingsDto()),
     'List<SchemaListColumnDto>': TypeInfo(TypeOf.Class, create:() => <SchemaListColumnDto>[]),
     'ImportColumnMappingDto': TypeInfo(TypeOf.Class, create:() => ImportColumnMappingDto()),
+    'AggregateId': TypeInfo(TypeOf.AbstractClass),
+    'ProjectId': TypeInfo(TypeOf.Class, create:() => ProjectId()),
+    'IntegrationId': TypeInfo(TypeOf.Class, create:() => IntegrationId()),
+    'TaxonomyId': TypeInfo(TypeOf.Class, create:() => TaxonomyId()),
     'EmailValidationProvider': TypeInfo(TypeOf.Enum, enumValues:EmailValidationProvider.values),
     'EmailValidationIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SaveEmailTemplate': TypeInfo(TypeOf.Class, create:() => SaveEmailTemplate()),
@@ -42252,6 +44245,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PushDeviceDto': TypeInfo(TypeOf.Class, create:() => PushDeviceDto()),
     'PushCampaignRequest': TypeInfo(TypeOf.AbstractClass),
     'ChatScreenContextDto': TypeInfo(TypeOf.AbstractClass),
+    'EmbeddingProvider': TypeInfo(TypeOf.Enum, enumValues:EmbeddingProvider.values),
+    'EmbeddingIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SchedulerTaskRequest': TypeInfo(TypeOf.AbstractClass),
     'ResourceKindDto': TypeInfo(TypeOf.Enum, enumValues:ResourceKindDto.values),
     'ResourceRefDto': TypeInfo(TypeOf.AbstractClass),
@@ -42265,6 +44260,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
+    'PublicAiAssistantDto': TypeInfo(TypeOf.Class, create:() => PublicAiAssistantDto()),
+    'PublicAiChatDto': TypeInfo(TypeOf.Class, create:() => PublicAiChatDto()),
+    'List<PublicAiAssistantDto>': TypeInfo(TypeOf.Class, create:() => <PublicAiAssistantDto>[]),
     'AccountOwnerDto': TypeInfo(TypeOf.Class, create:() => AccountOwnerDto()),
     'AccountStatus': TypeInfo(TypeOf.Enum, enumValues:AccountStatus.values),
     'AccountStatusDto': TypeInfo(TypeOf.Class, create:() => AccountStatusDto()),
@@ -42294,6 +44292,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<TagDefinitionDto>': TypeInfo(TypeOf.Class, create:() => <TagDefinitionDto>[]),
     'AuthenticationFlowPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => AuthenticationFlowPasswordPolicyDto()),
     'AuthenticationFlowSummaryDto': TypeInfo(TypeOf.Class, create:() => AuthenticationFlowSummaryDto()),
+    'AiAssistantDto': TypeInfo(TypeOf.Class, create:() => AiAssistantDto()),
+    'ProjectAiSettingsDto': TypeInfo(TypeOf.Class, create:() => ProjectAiSettingsDto()),
+    'List<AiAssistantDto>': TypeInfo(TypeOf.Class, create:() => <AiAssistantDto>[]),
     'TriggerDto': TypeInfo(TypeOf.Class, create:() => TriggerDto()),
     'SchemaTriggerDto': TypeInfo(TypeOf.Class, create:() => SchemaTriggerDto()),
     'DatabaseDto': TypeInfo(TypeOf.Class, create:() => DatabaseDto()),
@@ -42328,6 +44329,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AuthenticationFlowSummaryDto>': TypeInfo(TypeOf.Class, create:() => <AuthenticationFlowSummaryDto>[]),
     'Map<String,int?>': TypeInfo(TypeOf.Class, create:() => Map<String,int?>()),
     'ProjectListItemDto': TypeInfo(TypeOf.Class, create:() => ProjectListItemDto()),
+    'AiUsageGroupDto': TypeInfo(TypeOf.Class, create:() => AiUsageGroupDto()),
+    'ProjectAiUsageDto': TypeInfo(TypeOf.Class, create:() => ProjectAiUsageDto()),
+    'List<AiUsageGroupDto>': TypeInfo(TypeOf.Class, create:() => <AiUsageGroupDto>[]),
     'PaginatedResponse<TViewModelProjection>': TypeInfo(TypeOf.GenericDef,create:() => PaginatedResponse()),
     'AuthType': TypeInfo(TypeOf.Enum, enumValues:AuthType.values),
     'AccessInformationDto': TypeInfo(TypeOf.Class, create:() => AccessInformationDto()),
@@ -42472,6 +44476,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PushSettings': TypeInfo(TypeOf.Class, create:() => PushSettings()),
     'PushIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => PushIntegrationListProjection()),
     'PushDeviceListProjection': TypeInfo(TypeOf.Class, create:() => PushDeviceListProjection()),
+    'PushAudienceCountDto': TypeInfo(TypeOf.Class, create:() => PushAudienceCountDto()),
     'PushCampaignDto': TypeInfo(TypeOf.Class, create:() => PushCampaignDto()),
     'PushRecipientDto': TypeInfo(TypeOf.Class, create:() => PushRecipientDto()),
     'PushRecipientsDto': TypeInfo(TypeOf.Class, create:() => PushRecipientsDto()),
@@ -42490,6 +44495,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ChatModelOption': TypeInfo(TypeOf.Class, create:() => ChatModelOption()),
     'ChatMemoryNote': TypeInfo(TypeOf.Class, create:() => ChatMemoryNote()),
     'ChatSessionListItem': TypeInfo(TypeOf.Class, create:() => ChatSessionListItem()),
+    'ScaffoldStep': TypeInfo(TypeOf.Class, create:() => ScaffoldStep()),
+    'JsonObject': TypeInfo(TypeOf.Class, create:() => JsonObject()),
+    'ScaffoldIssue': TypeInfo(TypeOf.Class, create:() => ScaffoldIssue()),
+    'ScaffoldStepReportWithLink': TypeInfo(TypeOf.Class, create:() => ScaffoldStepReportWithLink()),
+    'ScaffoldApplyReport': TypeInfo(TypeOf.Class, create:() => ScaffoldApplyReport()),
+    'List<ScaffoldStepReportWithLink>': TypeInfo(TypeOf.Class, create:() => <ScaffoldStepReportWithLink>[]),
+    'TemplatePreviewPartResult': TypeInfo(TypeOf.Class, create:() => TemplatePreviewPartResult()),
+    'TemplatePreview': TypeInfo(TypeOf.Class, create:() => TemplatePreview()),
+    'IReadOnlyList<TemplatePreviewPartResult>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<TemplatePreviewPartResult>()),
     'ProjectBriefSourceWireDto': TypeInfo(TypeOf.Class, create:() => ProjectBriefSourceWireDto()),
     'ProjectBriefSatisfiedByWireDto': TypeInfo(TypeOf.Class, create:() => ProjectBriefSatisfiedByWireDto()),
     'ProjectBriefRequirementWireDto': TypeInfo(TypeOf.Class, create:() => ProjectBriefRequirementWireDto()),
@@ -42517,6 +44531,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<WorkItemNeedsYouWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemNeedsYouWireDto>[]),
     'List<WorkItemOpenQuestionWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemOpenQuestionWireDto>[]),
     'List<WorkItemDoneConditionWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemDoneConditionWireDto>[]),
+    'EmbeddingIntegrationDto': TypeInfo(TypeOf.AbstractClass),
+    'EmbeddingIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => EmbeddingIntegrationListProjection()),
     'LlmIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => LlmIntegrationListProjection()),
     'McpIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => McpIntegrationListProjection()),
     'IVirtualDirectory': TypeInfo(TypeOf.Interface),
@@ -42581,6 +44597,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'IHasDatabaseId': TypeInfo(TypeOf.Interface),
     'IBindableContract': TypeInfo(TypeOf.Interface),
     'IHasRazorTemplateCode': TypeInfo(TypeOf.Interface),
+    'IHasDomainEntityId': TypeInfo(TypeOf.Interface),
     'IHasResponsibleUserId': TypeInfo(TypeOf.Interface),
     'ICursorArgs': TypeInfo(TypeOf.Interface),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
@@ -42617,6 +44634,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetProjectTokensResponse': TypeInfo(TypeOf.Class, create:() => GetProjectTokensResponse()),
     'AdminPortalStructureDto': TypeInfo(TypeOf.Class, create:() => AdminPortalStructureDto()),
     'List<AdminPortalModuleDto>': TypeInfo(TypeOf.Class, create:() => <AdminPortalModuleDto>[]),
+    'GetProjectAiSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetProjectAiSettingsResponse()),
+    'GetProjectAiUsageResponse': TypeInfo(TypeOf.Class, create:() => GetProjectAiUsageResponse()),
     'CreateAccountResponse': TypeInfo(TypeOf.Class, create:() => CreateAccountResponse()),
     'GetAccountCollaboratorsResponse': TypeInfo(TypeOf.Class, create:() => GetAccountCollaboratorsResponse()),
     'PaginatedResponse<AuthDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AuthDto>()),
@@ -42809,6 +44828,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPushDeviceResponse': TypeInfo(TypeOf.Class, create:() => GetPushDeviceResponse()),
     'GetPushDevicesResponse': TypeInfo(TypeOf.Class, create:() => GetPushDevicesResponse()),
     'PaginatedResponse<PushDeviceListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushDeviceListProjection>()),
+    'GetPushCampaignAudienceCountResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignAudienceCountResponse()),
     'GetPushCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignResponse()),
     'GetPushCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignsResponse()),
     'PaginatedResponse<PushCampaignDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignDto>()),
@@ -42855,12 +44875,21 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetChatSessionEntriesResponse': TypeInfo(TypeOf.Class, create:() => GetChatSessionEntriesResponse()),
     'List<AiChatEntryWireDto>': TypeInfo(TypeOf.Class, create:() => <AiChatEntryWireDto>[]),
     'ChatTurnResponse': TypeInfo(TypeOf.Class, create:() => ChatTurnResponse()),
+    'ScaffoldProjectResponse': TypeInfo(TypeOf.Class, create:() => ScaffoldProjectResponse()),
+    'List<ScaffoldStep>': TypeInfo(TypeOf.Class, create:() => <ScaffoldStep>[]),
+    'List<ScaffoldIssue>': TypeInfo(TypeOf.Class, create:() => <ScaffoldIssue>[]),
+    'ValidateSchemaResponse': TypeInfo(TypeOf.Class, create:() => ValidateSchemaResponse()),
+    'RenderTemplatePreviewResponse': TypeInfo(TypeOf.Class, create:() => RenderTemplatePreviewResponse()),
     'GetProjectBriefResponse': TypeInfo(TypeOf.Class, create:() => GetProjectBriefResponse()),
     'List<ProjectBriefEventWireDto>': TypeInfo(TypeOf.Class, create:() => <ProjectBriefEventWireDto>[]),
     'GetWorkItemsResponse': TypeInfo(TypeOf.Class, create:() => GetWorkItemsResponse()),
     'List<WorkItemWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemWireDto>[]),
     'GetWorkItemResponse': TypeInfo(TypeOf.Class, create:() => GetWorkItemResponse()),
     'ExportWorkItemResponse': TypeInfo(TypeOf.Class, create:() => ExportWorkItemResponse()),
+    'GetEmbeddingIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetEmbeddingIntegrationResponse()),
+    'GetEmbeddingIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetEmbeddingIntegrationsResponse()),
+    'PaginatedResponse<EmbeddingIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmbeddingIntegrationListProjection>()),
+    'TestEmbeddingIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestEmbeddingIntegrationResponse()),
     'GetLlmIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetLlmIntegrationResponse()),
     'GetLlmIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetLlmIntegrationsResponse()),
     'PaginatedResponse<LlmIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<LlmIntegrationListProjection>()),
@@ -42970,9 +44999,16 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetAccountRegions': TypeInfo(TypeOf.Class, create:() => GetAccountRegions()),
     'WaitForProjectActiveRequest': TypeInfo(TypeOf.Class, create:() => WaitForProjectActiveRequest()),
     'GetProjectTokens': TypeInfo(TypeOf.Class, create:() => GetProjectTokens()),
+    'SetAdminPortalEnabledRequest': TypeInfo(TypeOf.Class, create:() => SetAdminPortalEnabledRequest()),
     'AssignAdminPortalServiceUserRequest': TypeInfo(TypeOf.Class, create:() => AssignAdminPortalServiceUserRequest()),
     'GetAdminPortalStructure': TypeInfo(TypeOf.Class, create:() => GetAdminPortalStructure()),
     'UpdateProjectAdminUrl': TypeInfo(TypeOf.Class, create:() => UpdateProjectAdminUrl()),
+    'GetProjectAiSettings': TypeInfo(TypeOf.Class, create:() => GetProjectAiSettings()),
+    'UpdateProjectAiSettings': TypeInfo(TypeOf.Class, create:() => UpdateProjectAiSettings()),
+    'CreateProjectAiAssistant': TypeInfo(TypeOf.Class, create:() => CreateProjectAiAssistant()),
+    'UpdateProjectAiAssistant': TypeInfo(TypeOf.Class, create:() => UpdateProjectAiAssistant()),
+    'DeleteProjectAiAssistant': TypeInfo(TypeOf.Class, create:() => DeleteProjectAiAssistant()),
+    'GetProjectAiUsage': TypeInfo(TypeOf.Class, create:() => GetProjectAiUsage()),
     'UpdateProjectAccentColor': TypeInfo(TypeOf.Class, create:() => UpdateProjectAccentColor()),
     'UpdateProjectIcon': TypeInfo(TypeOf.Class, create:() => UpdateProjectIcon()),
     'UpdateProjectLogo': TypeInfo(TypeOf.Class, create:() => UpdateProjectLogo()),
@@ -43134,6 +45170,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveDatabaseAggregateRequest': TypeInfo(TypeOf.Class, create:() => SaveDatabaseAggregateRequest()),
     'TestDatabaseAggregateRequest': TypeInfo(TypeOf.Class, create:() => TestDatabaseAggregateRequest()),
     'ProcessCollectionImport': TypeInfo(TypeOf.Class, create:() => ProcessCollectionImport()),
+    'TermInserted': TypeInfo(TypeOf.Class, create:() => TermInserted()),
+    'TermUpdated': TypeInfo(TypeOf.Class, create:() => TermUpdated()),
+    'TermDeleted': TypeInfo(TypeOf.Class, create:() => TermDeleted()),
+    'TermsDeleted': TypeInfo(TypeOf.Class, create:() => TermsDeleted()),
     'DisableFiles': TypeInfo(TypeOf.Class, create:() => DisableFiles()),
     'EnableFiles': TypeInfo(TypeOf.Class, create:() => EnableFiles()),
     'DeleteFilesTrigger': TypeInfo(TypeOf.Class, create:() => DeleteFilesTrigger()),
@@ -43270,6 +45310,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RegisterDevice': TypeInfo(TypeOf.Class, create:() => RegisterDevice()),
     'GetPushDevice': TypeInfo(TypeOf.Class, create:() => GetPushDevice()),
     'GetPushDevices': TypeInfo(TypeOf.Class, create:() => GetPushDevices()),
+    'GetPushCampaignAudienceCountRequest': TypeInfo(TypeOf.Class, create:() => GetPushCampaignAudienceCountRequest()),
     'CreatePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreatePushCampaignRequest()),
     'DeletePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => DeletePushCampaignRequest()),
     'GetPushCampaign': TypeInfo(TypeOf.Class, create:() => GetPushCampaign()),
@@ -43331,18 +45372,34 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DecideChatPlanRequest': TypeInfo(TypeOf.Class, create:() => DecideChatPlanRequest()),
     'StopChatRunStepRequest': TypeInfo(TypeOf.Class, create:() => StopChatRunStepRequest()),
     'ChatTurnRequest': TypeInfo(TypeOf.Class, create:() => ChatTurnRequest()),
+    'ScaffoldProjectRequest': TypeInfo(TypeOf.Class, create:() => ScaffoldProjectRequest()),
+    'ValidateSchemaRequest': TypeInfo(TypeOf.Class, create:() => ValidateSchemaRequest()),
+    'RenderTemplatePreviewRequest': TypeInfo(TypeOf.Class, create:() => RenderTemplatePreviewRequest()),
     'McpRequest': TypeInfo(TypeOf.Class, create:() => McpRequest()),
     'GetProjectBriefRequest': TypeInfo(TypeOf.Class, create:() => GetProjectBriefRequest()),
     'GetWorkItemsRequest': TypeInfo(TypeOf.Class, create:() => GetWorkItemsRequest()),
     'GetWorkItemRequest': TypeInfo(TypeOf.Class, create:() => GetWorkItemRequest()),
     'ExportWorkItemRequest': TypeInfo(TypeOf.Class, create:() => ExportWorkItemRequest()),
     'MarkNeedsYouDoneRequest': TypeInfo(TypeOf.Class, create:() => MarkNeedsYouDoneRequest()),
+    'OAuthProtectedResourceMetadataRequest': TypeInfo(TypeOf.Class, create:() => OAuthProtectedResourceMetadataRequest()),
+    'OAuthAuthorizationServerMetadataRequest': TypeInfo(TypeOf.Class, create:() => OAuthAuthorizationServerMetadataRequest()),
+    'OAuthRegisterRequest': TypeInfo(TypeOf.Class, create:() => OAuthRegisterRequest()),
+    'OAuthAuthorizeRequest': TypeInfo(TypeOf.Class, create:() => OAuthAuthorizeRequest()),
+    'OAuthAuthorizeDecisionRequest': TypeInfo(TypeOf.Class, create:() => OAuthAuthorizeDecisionRequest()),
+    'OAuthTokenRequest': TypeInfo(TypeOf.Class, create:() => OAuthTokenRequest()),
+    'OAuthRevokeRequest': TypeInfo(TypeOf.Class, create:() => OAuthRevokeRequest()),
+    'DeleteEmbeddingIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DeleteEmbeddingIntegrationRequest()),
+    'GetEmbeddingIntegration': TypeInfo(TypeOf.Class, create:() => GetEmbeddingIntegration()),
+    'GetEmbeddingIntegrations': TypeInfo(TypeOf.Class, create:() => GetEmbeddingIntegrations()),
+    'SaveEmbeddingIntegration': TypeInfo(TypeOf.Class, create:() => SaveEmbeddingIntegration()),
+    'TestEmbeddingIntegration': TypeInfo(TypeOf.Class, create:() => TestEmbeddingIntegration()),
     'DeleteLlmIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DeleteLlmIntegrationRequest()),
     'DisableLlmIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DisableLlmIntegrationRequest()),
     'EnableLlmIntegrationRequest': TypeInfo(TypeOf.Class, create:() => EnableLlmIntegrationRequest()),
     'GetLlmIntegration': TypeInfo(TypeOf.Class, create:() => GetLlmIntegration()),
     'GetLlmIntegrations': TypeInfo(TypeOf.Class, create:() => GetLlmIntegrations()),
     'SaveLlmIntegration': TypeInfo(TypeOf.Class, create:() => SaveLlmIntegration()),
+    'SetLlmIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetLlmIntegrationAsDefaultRequest()),
     'TestLlmIntegration': TypeInfo(TypeOf.Class, create:() => TestLlmIntegration()),
     'DeleteMcpIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DeleteMcpIntegrationRequest()),
     'DisableMcpIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DisableMcpIntegrationRequest()),

@@ -214,4 +214,96 @@ class AiIntegrationsResource extends Resource {
       pathParams: null,
     );
   }
+
+  /// `GET /{version}/ai/integrations/embeddings`
+  Future<Object?> getEmbeddingIntegrations(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/ai/integrations/embeddings',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+    );
+  }
+
+  /// `POST /{version}/ai/integrations/embeddings`
+  Future<Object?> saveEmbeddingIntegration(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/ai/integrations/embeddings',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+    );
+  }
+
+  /// `GET /{version}/ai/integrations/embeddings/{Id}`
+  Future<Object?> getEmbeddingIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/ai/integrations/embeddings/{Id}',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// `DELETE /{version}/ai/integrations/embeddings/{Id}`
+  Future<Object?> deleteEmbeddingIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/ai/integrations/embeddings/{Id}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// `POST /{version}/ai/integrations/embeddings/{Id}/test`
+  Future<Object?> testEmbeddingIntegration(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/ai/integrations/embeddings/{Id}/test',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// `PUT /{version}/ai/integrations/llms/{Id}/default`
+  Future<Object?> setLlmIntegrationAsDefault(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/ai/integrations/llms/{Id}/default',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
 }
