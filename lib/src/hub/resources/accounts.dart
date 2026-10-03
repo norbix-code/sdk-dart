@@ -206,4 +206,144 @@ class AccountsResource extends Resource {
       pathParams: null,
     );
   }
+
+  /// `POST /{version}/account/mcp`
+  ///
+  /// Developer MCP endpoint (Streamable HTTP, MCP revision 2025-11-25): send one JSON-RPC 2.0 message as [body] (`initialize`, `tools/list`, `tools/call`, ...). Pass the `mcp-session-id` header after `initialize`, and `accept: application/json, text/event-stream`. The answer is parsed JSON, or the raw SSE text when the server streams. An AI service user key (`nbsu_...`) narrows the tools to its scope; `query: {'toolsets': 'ai:campaigns'}` filters `tools/list`.
+  Future<Object?> sendMcpMessage(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/mcp',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/account/mcp`
+  ///
+  /// Open the server-to-client SSE stream of an MCP session (`mcp-session-id` header; `last-event-id` resumes). This SDK has no SSE client: the future completes only when the server closes the stream, with the raw SSE text.
+  Future<Object?> openMcpStream(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/mcp',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `DELETE /{version}/account/mcp`
+  ///
+  /// End the MCP session named by the `mcp-session-id` header.
+  Future<Object?> endMcpSession(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/mcp',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/ai/service-users`
+  ///
+  /// Create an AI service user (a scoped key for MCP and AI tools). Body: `{'name': '...', 'scope': {...}}`. The answer holds the key once — store it.
+  Future<Object?> createAiServiceUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/account/ai/service-users`
+  ///
+  /// List the account's AI service users and their keys (no secrets).
+  Future<Object?> listAiServiceUsers(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/ai/service-users/{Id}/keys`
+  ///
+  /// Issue a new key for the service user. Body may carry `{'revokeKeyId': '...'}` to revoke an old key in the same call.
+  Future<Object?> rotateAiServiceUserKey(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users/{Id}/keys',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// `DELETE /{version}/account/ai/service-users/{Id}/keys/{KeyId}`
+  ///
+  /// Revoke one key of the service user.
+  Future<Object?> revokeAiServiceUserKey(
+      {required Object id,
+      required Object keyId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users/{Id}/keys/{KeyId}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id, 'KeyId': keyId},
+    );
+  }
+
+  /// `DELETE /{version}/account/ai/service-users/{Id}`
+  ///
+  /// Delete the service user and all its keys.
+  Future<Object?> deleteAiServiceUser(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users/{Id}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
 }

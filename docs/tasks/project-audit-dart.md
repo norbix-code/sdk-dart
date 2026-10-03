@@ -10,7 +10,8 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 2. [done] feat(sdk-dart:projects): admin URL, legal documents, expose legal, admin portal structure and service user on `hub.projects`, with route tests
 3. [done] feat(sdk-dart:public): new `api.publicProjects` resource for the public project config and legal pages (API host), with route tests
    decision(sdk-dart:public): the two public calls go out with no credentials (`authenticated: false`), like the public file link — the gateway route is unsecured and a key has no business there; the TypeScript SDK sends the client's key
-4. [todo] feat(sdk-dart:accounts): developer MCP endpoint (send, open stream, end session) and AI service users (create, list, delete, rotate key, revoke key) on `hub.accounts`, with route tests
+4. [done] feat(sdk-dart:accounts): developer MCP endpoint (send, open stream, end session) and AI service users (create, list, delete, rotate key, revoke key) on `hub.accounts`, with route tests
+   decision(sdk-dart:mcp): the one gateway route with three verbs becomes three methods (`sendMcpMessage` POST, `openMcpStream` GET, `endMcpSession` DELETE); the TypeScript SDK has only the POST, named `mcp`
 5. [todo] fix(sdk-dart:ai-integrations): LLM and MCP integration enable / disable / delete used `{id}` where the gateway route says `{Id}`, so the coverage scanner counted them as missing; routes aligned and tested
 6. [todo] docs(sdk-dart:readme): README section for the new methods and the module list
 7. [todo] chore(sdk-dart:checks): `dart analyze` and `dart test` green; push and open the pull request
@@ -25,6 +26,8 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/api/client.dart | exposes `api.publicProjects` | 3 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/norbix_api.dart | exports public_projects.dart and the missing ai_chat.dart | 3 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/api/public_projects_test.dart | new: one route test per method (2) | 3 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/accounts.dart | 8 methods: sendMcpMessage, openMcpStream, endMcpSession, createAiServiceUser, listAiServiceUsers, rotateAiServiceUserKey, revokeAiServiceUserKey, deleteAiServiceUser | 4 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/accounts_mcp_service_users_test.dart | new: one route test per method (8) plus one for the JSON-RPC body and session header | 4 |
 
 ## Findings
 fix(sdk-dart:api): the API library did not export the end-user AI chat resource, so callers could not name its type — done (fixed here, step 3)
