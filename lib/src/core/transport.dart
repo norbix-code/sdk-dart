@@ -97,6 +97,44 @@ class Transport {
     return response.bytes ?? utf8.encode(response.body);
   }
 
+  /// Send a request and return the whole answer — status, headers and the
+  /// untouched body.
+  ///
+  /// Same pipeline as [send] — same retries, same typed [NorbixError] for any
+  /// status of 400 or more — but nothing is parsed. Use it when a header of
+  /// the answer matters, like the `Mcp-Session-Id` the MCP endpoint issues on
+  /// `initialize`, or when the body may be an SSE stream instead of JSON.
+  Future<HttpDriverResponse> sendRaw({
+    required String route,
+    String method = 'GET',
+    Map<String, Object?>? query,
+    Object? body,
+    Map<String, String>? headers,
+    Map<String, Object?>? pathParams,
+    String? env,
+    String? region,
+    bool authenticated = true,
+    String? accept,
+  }) async {
+    final response = await _execute(
+      route: route,
+      method: method,
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: pathParams,
+      env: env,
+      region: region,
+      authenticated: authenticated,
+      accept: accept,
+    );
+    if (response.statusCode >= 400) {
+      // Reuse the error mapping: it throws the typed error for the status.
+      _parseResponse(response);
+    }
+    return response;
+  }
+
   Future<HttpDriverResponse> _execute({
     required String route,
     required String method,

@@ -7,99 +7,99 @@ import '../../core/resource.dart';
 class AiIntegrationsResource extends Resource {
   AiIntegrationsResource(super.transport);
 
-  /// `DELETE /{version}/ai/integrations/llms/{id}`
+  /// `DELETE /{version}/ai/integrations/llms/{Id}`
   Future<Object?> deleteLlmIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/ai/integrations/llms/{id}',
+      route: '/{version}/ai/integrations/llms/{Id}',
       method: 'DELETE',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `DELETE /{version}/ai/integrations/mcp/{id}`
+  /// `DELETE /{version}/ai/integrations/mcp/{Id}`
   Future<Object?> deleteMcpIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/ai/integrations/mcp/{id}',
+      route: '/{version}/ai/integrations/mcp/{Id}',
       method: 'DELETE',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `PUT /{version}/ai/integrations/llms/{id}/disable`
+  /// `PUT /{version}/ai/integrations/llms/{Id}/disable`
   Future<Object?> disableLlmIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/ai/integrations/llms/{id}/disable',
+      route: '/{version}/ai/integrations/llms/{Id}/disable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `PUT /{version}/ai/integrations/mcp/{id}/disable`
+  /// `PUT /{version}/ai/integrations/mcp/{Id}/disable`
   Future<Object?> disableMcpIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/ai/integrations/mcp/{id}/disable',
+      route: '/{version}/ai/integrations/mcp/{Id}/disable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `PUT /{version}/ai/integrations/llms/{id}/enable`
+  /// `PUT /{version}/ai/integrations/llms/{Id}/enable`
   Future<Object?> enableLlmIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/ai/integrations/llms/{id}/enable',
+      route: '/{version}/ai/integrations/llms/{Id}/enable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 
-  /// `PUT /{version}/ai/integrations/mcp/{id}/enable`
+  /// `PUT /{version}/ai/integrations/mcp/{Id}/enable`
   Future<Object?> enableMcpIntegration(
       {required Object id,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/ai/integrations/mcp/{id}/enable',
+      route: '/{version}/ai/integrations/mcp/{Id}/enable',
       method: 'PUT',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'id': id},
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 

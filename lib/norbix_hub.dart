@@ -17,6 +17,7 @@ export 'src/core/resource.dart';
 export 'src/core/transport.dart';
 
 export 'src/hub/client.dart' show NorbixHub, kNorbixHubDefaultBaseUrl;
+export 'src/hub/mcp_response.dart';
 export 'src/hub/resources/accounts.dart';
 export 'src/hub/resources/ai_integrations.dart';
 export 'src/hub/resources/api_keys.dart';

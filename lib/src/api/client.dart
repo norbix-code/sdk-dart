@@ -10,6 +10,7 @@ import 'resources/api_keys.dart';
 import 'resources/auth.dart';
 import 'resources/database.dart';
 import 'resources/files.dart';
+import 'resources/public_projects.dart';
 import 'resources/user_auth.dart';
 import 'resources/users.dart';
 
@@ -126,6 +127,8 @@ class NorbixApi {
   late final AuthResource auth = AuthResource(_transport);
   late final DatabaseResource database = DatabaseResource(_transport);
   late final FilesResource files = FilesResource(_transport);
+  late final PublicProjectsResource publicProjects =
+      PublicProjectsResource(_transport);
   late final UserAuthResource userAuth = UserAuthResource(_transport);
   late final UsersResource users = UsersResource(_transport);
 

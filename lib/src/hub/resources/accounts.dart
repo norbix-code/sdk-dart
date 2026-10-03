@@ -2,6 +2,7 @@
 // Regenerate with: dart run tool/generate_resources.dart
 
 import '../../core/resource.dart';
+import '../mcp_response.dart';
 
 /// Account profile, team, licenses, regions, status, Stripe billing.
 class AccountsResource extends Resource {
@@ -204,6 +205,164 @@ class AccountsResource extends Resource {
       query: query,
       headers: headers,
       pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/mcp`
+  ///
+  /// Developer MCP endpoint (Streamable HTTP, MCP revision 2025-11-25): send
+  /// one JSON-RPC 2.0 [message] (`initialize`, `tools/list`, `tools/call`,
+  /// ...). The `initialize` answer carries the session id in
+  /// [McpResponse.sessionId]; pass it as [sessionId] on every later call.
+  /// The answer is JSON ([McpResponse.json]) or, for a `tools/call`, an SSE
+  /// stream ([McpResponse.body]). [toolsets] filters `tools/list`, e.g.
+  /// `ai:campaigns,ai:project-context`. An AI service user key (`nbsu_...`)
+  /// as the client's key narrows the tools to that user's scope.
+  Future<McpResponse> sendMcpMessage({
+    required Map<String, Object?> message,
+    String? sessionId,
+    String? protocolVersion,
+    String? toolsets,
+    Map<String, String>? headers,
+  }) async {
+    return McpResponse(await transport.sendRaw(
+      route: '/{version}/account/mcp',
+      method: 'POST',
+      query: toolsets == null ? null : <String, Object?>{'toolsets': toolsets},
+      body: message,
+      headers: _mcpHeaders(sessionId, protocolVersion, null, headers),
+      accept: 'application/json, text/event-stream',
+    ));
+  }
+
+  /// `GET /{version}/account/mcp`
+  ///
+  /// Open the server-to-client SSE stream of the session [sessionId];
+  /// [lastEventId] resumes a dropped stream. This SDK has no SSE client: the
+  /// future completes only when the server closes the stream, and
+  /// [McpResponse.body] holds the raw SSE text.
+  Future<McpResponse> openMcpStream({
+    required String sessionId,
+    String? lastEventId,
+    Map<String, String>? headers,
+  }) async {
+    return McpResponse(await transport.sendRaw(
+      route: '/{version}/account/mcp',
+      method: 'GET',
+      headers: _mcpHeaders(sessionId, null, lastEventId, headers),
+      accept: 'text/event-stream',
+    ));
+  }
+
+  /// `DELETE /{version}/account/mcp`
+  ///
+  /// End the MCP session [sessionId].
+  Future<McpResponse> endMcpSession({
+    required String sessionId,
+    Map<String, String>? headers,
+  }) async {
+    return McpResponse(await transport.sendRaw(
+      route: '/{version}/account/mcp',
+      method: 'DELETE',
+      headers: _mcpHeaders(sessionId, null, null, headers),
+    ));
+  }
+
+  Map<String, String> _mcpHeaders(String? sessionId, String? protocolVersion,
+          String? lastEventId, Map<String, String>? extra) =>
+      <String, String>{
+        if (sessionId != null) 'mcp-session-id': sessionId,
+        if (protocolVersion != null) 'mcp-protocol-version': protocolVersion,
+        if (lastEventId != null) 'last-event-id': lastEventId,
+        ...?extra,
+      };
+
+  /// `POST /{version}/account/ai/service-users`
+  ///
+  /// Create an AI service user (a scoped key for MCP and AI tools). Body: `{'name': '...', 'scope': {...}}`. The answer holds the key once — store it.
+  Future<Object?> createAiServiceUser(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/account/ai/service-users`
+  ///
+  /// List the account's AI service users and their keys (no secrets).
+  Future<Object?> listAiServiceUsers(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/ai/service-users/{Id}/keys`
+  ///
+  /// Issue a new key for the service user. Body may carry `{'revokeKeyId': '...'}` to revoke an old key in the same call.
+  Future<Object?> rotateAiServiceUserKey(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users/{Id}/keys',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// `DELETE /{version}/account/ai/service-users/{Id}/keys/{KeyId}`
+  ///
+  /// Revoke one key of the service user.
+  Future<Object?> revokeAiServiceUserKey(
+      {required Object id,
+      required Object keyId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users/{Id}/keys/{KeyId}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id, 'KeyId': keyId},
+    );
+  }
+
+  /// `DELETE /{version}/account/ai/service-users/{Id}`
+  ///
+  /// Delete the service user and all its keys.
+  Future<Object?> deleteAiServiceUser(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/ai/service-users/{Id}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
     );
   }
 }
