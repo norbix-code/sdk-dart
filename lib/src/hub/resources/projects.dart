@@ -558,6 +558,42 @@ class ProjectsResource extends Resource {
     );
   }
 
+  /// `PATCH /{version}/account/projects/{projectId}/settings/brand/expose`
+  ///
+  /// Show or hide the project brand (logo, colours) in the Admin Portal. Body: `{'exposed': true}`.
+  Future<Object?> updateProjectExposeBrand(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/settings/brand/expose',
+      method: 'PATCH',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
+  /// `PATCH /{version}/account/projects/{projectId}/settings/auth/expose`
+  ///
+  /// Show or hide the sign-in settings (auth flows) in the Admin Portal. Body: `{'exposed': true}`.
+  Future<Object?> updateProjectExposeAuth(
+      {required Object projectId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/projects/{projectId}/settings/auth/expose',
+      method: 'PATCH',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'projectId': projectId},
+    );
+  }
+
   /// `GET /{version}/account/projects/{projectId}/admin-portal/structure`
   ///
   /// The admin portal's structure (collections, sections) for the project.

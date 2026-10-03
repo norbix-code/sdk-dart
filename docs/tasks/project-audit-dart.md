@@ -16,6 +16,7 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 6. [done] docs(sdk-dart:readme): README section for the new methods and the module list
 7. [done] chore(sdk-dart:checks): `dart analyze` no issues, `dart test` passed (see step 8 for the final count); push and open the pull request
 8. [done] fix(sdk-dart:mcp): the MCP methods returned only the parsed body, so the session id from the `initialize` answer header was lost and every later call failed with 400; they now return an `McpResponse` with the session id, the JSON or the raw SSE text; `dart analyze` no issues, `dart test` 182 passed
+9. [done] feat(sdk-dart:projects): expose brand and expose auth switches (`updateProjectExposeBrand`, `updateProjectExposeAuth`) on `hub.projects`, twins of `updateProjectExposeLegal`, with route + body tests and README rows — item B3c, gateway routes from item B1; `dart analyze` no issues, `dart test` 184 passed
 
 ## Changes
 | file (absolute, branch audit/project) | what changed | step |
@@ -38,6 +39,10 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/accounts.dart | MCP methods take `message`, `sessionId`, `protocolVersion`, `toolsets`, `lastEventId` and return `McpResponse` | 8 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/accounts_mcp_service_users_test.dart | MCP tests: session id read from the header, SSE kept raw, GET asks for SSE, DELETE sends the session, 400 throws | 8 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/README.md | MCP example: initialize → session id → tools/list → end session | 8 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/projects.dart | 2 methods: updateProjectExposeBrand, updateProjectExposeAuth | 9 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/projects_settings_test.dart | 2 route tests (method, path, api key, `exposed` body) | 9 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/README.md | 2 rows in the project settings table + example lines | 9 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/docs/tasks/project-audit-dart.md | step 9 | 9 |
 
 ## Findings
 fix(sdk-dart:mcp): the gateway hands out the MCP session id only in the `Mcp-Session-Id` answer header and refuses every later call without it, so a body-only method cannot hold a session — done (fixed here, step 8)
@@ -111,6 +116,15 @@ docs(sdk-dart:readme): the README repo layout says lib/src/api and lib/src/hub a
 // README.md, "Repo layout" (main)
 │       ├── api/                  # GENERATED — gitignored     // <-- here: git ls-files lib/src/api lists 8 tracked files
 │       └── hub/                  # GENERATED — gitignored
+```
+
+chore(sdk-dart:references): `references/hub.dtos.dart` has no `UpdateProjectExposeBrand` / `UpdateProjectExposeAuth` DTOs — it was generated before gateway item B1 added the routes; the methods were written from the gateway source — left open (regenerate the references after B1 merges)
+    where: /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/references/hub.dtos.dart (branch audit/project)
+```dart
+// references/hub.dtos.dart:28422 (audit/project) — only the legal twin exists
+// @Route("/{version}/account/projects/{projectId}/settings/legal/expose", "PATCH")
+class UpdateProjectExposeLegal extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
+// <-- here: no settings/brand/expose or settings/auth/expose class
 ```
 
 ## Rejected / moved out

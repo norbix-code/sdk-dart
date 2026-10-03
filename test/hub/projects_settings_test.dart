@@ -44,6 +44,30 @@ void main() {
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
+        'updateProjectExposeBrand sends PATCH /{version}/account/projects/{projectId}/settings/brand/expose',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).projects.updateProjectExposeBrand(
+          projectId: 'projectId_1', body: {'exposed': true});
+      expect(driver.lastRequest!.method, equals('PATCH'));
+      expect(driver.lastRequest!.url.toString(),
+          endsWith('/v1/account/projects/projectId_1/settings/brand/expose'));
+      expect(driver.lastRequest!.body, contains('"exposed":true'));
+      expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
+    });
+    test(
+        'updateProjectExposeAuth sends PATCH /{version}/account/projects/{projectId}/settings/auth/expose',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).projects.updateProjectExposeAuth(
+          projectId: 'projectId_1', body: {'exposed': true});
+      expect(driver.lastRequest!.method, equals('PATCH'));
+      expect(driver.lastRequest!.url.toString(),
+          endsWith('/v1/account/projects/projectId_1/settings/auth/expose'));
+      expect(driver.lastRequest!.body, contains('"exposed":true'));
+      expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
+    });
+    test(
         'getAdminPortalStructure sends GET /{version}/account/projects/{projectId}/admin-portal/structure',
         () async {
       final driver = FakeHttpDriver();
