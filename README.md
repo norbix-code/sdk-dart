@@ -54,6 +54,11 @@ await hub.emailNotifications.createEmailTemplate(body: {...});
 
 There is no `client.api.xxx` or `client.hub.xxx` middle layer.
 
+| Client | Resources |
+|--------|-----------|
+| `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `database`, `files`, `publicProjects`, `userAuth`, `users` |
+| `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `internals`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
+
 ## Configuration
 
 Defaults to the public `*.norbix.ai` hosts. Override the URL when you
@@ -682,5 +687,68 @@ Project owners configure the assistant on the Hub: `hub.projects`
 `setAdminPortalEnabled`) and `hub.aiIntegrations` (`getEmbeddingIntegrations`,
 `saveEmbeddingIntegration`, `getEmbeddingIntegration`,
 `deleteEmbeddingIntegration`, `testEmbeddingIntegration`,
-`setLlmIntegrationAsDefault`).
+`setLlmIntegrationAsDefault`, and the LLM / MCP integration switches
+`enableLlmIntegration`, `disableLlmIntegration`, `deleteLlmIntegration`,
+`enableMcpIntegration`, `disableMcpIntegration`, `deleteMcpIntegration`).
 
+## Project settings, public config, MCP endpoint and AI service users
+
+Project settings on `hub.projects`:
+
+| Method | Route |
+|--------|-------|
+| `updateProjectAdminUrl` | `PATCH /{version}/account/projects/{projectId}/settings/admin-url` |
+| `updateProjectLegalDocuments` | `PATCH /{version}/account/projects/{projectId}/settings/legal` |
+| `updateProjectExposeLegal` | `PATCH /{version}/account/projects/{projectId}/settings/legal/expose` |
+| `getAdminPortalStructure` | `GET /{version}/account/projects/{projectId}/admin-portal/structure` |
+| `assignAdminPortalServiceUser` | `PUT /{version}/account/projects/{projectId}/settings/admin-portal/service-user` |
+
+```dart
+await hub.projects.updateProjectLegalDocuments(
+  projectId: projectId,
+  body: {'termsMarkdown': '# Terms', 'privacyMarkdown': '# Privacy'},
+);
+await hub.projects.updateProjectExposeLegal(projectId: projectId, body: {'exposed': true});
+```
+
+Public project routes on the API host, `api.publicProjects`. They need no
+sign-in and go out **without credentials**, even when the client has a key:
+
+| Method | Route |
+|--------|-------|
+| `getPublicProjectConfig` | `GET /{version}/public/projects/{ProjectId}/config` |
+| `getPublicProjectLegal` | `GET /{version}/public/projects/{ProjectId}/legal/{Kind}` (`terms` or `privacy`) |
+
+```dart
+final terms = await NorbixApi().publicProjects
+    .getPublicProjectLegal(projectId: projectId, kind: 'terms');
+// {kind: terms, title: ..., body: <markdown>, available: true}
+```
+
+The developer MCP endpoint and AI service users on `hub.accounts`:
+
+| Method | Route |
+|--------|-------|
+| `sendMcpMessage` | `POST /{version}/account/mcp` — one JSON-RPC 2.0 message |
+| `openMcpStream` | `GET /{version}/account/mcp` — server-to-client SSE stream |
+| `endMcpSession` | `DELETE /{version}/account/mcp` — ends the `mcp-session-id` session |
+| `createAiServiceUser` | `POST /{version}/account/ai/service-users` |
+| `listAiServiceUsers` | `GET /{version}/account/ai/service-users` |
+| `rotateAiServiceUserKey` | `POST /{version}/account/ai/service-users/{Id}/keys` |
+| `revokeAiServiceUserKey` | `DELETE /{version}/account/ai/service-users/{Id}/keys/{KeyId}` |
+| `deleteAiServiceUser` | `DELETE /{version}/account/ai/service-users/{Id}` |
+
+```dart
+final tools = await hub.accounts.sendMcpMessage(
+  body: {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'},
+  headers: {
+    'accept': 'application/json, text/event-stream',
+    'mcp-session-id': sessionId, // from the initialize answer
+  },
+);
+```
+
+The answer is parsed JSON, or the raw SSE text when the server streams. This
+SDK has no SSE client, so `openMcpStream` completes only when the server
+closes the stream. A service user key (`nbsu_...`) used as the client's key
+narrows the MCP tools to that user's scope.

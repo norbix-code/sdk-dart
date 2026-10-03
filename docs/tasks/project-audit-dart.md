@@ -13,7 +13,7 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 4. [done] feat(sdk-dart:accounts): developer MCP endpoint (send, open stream, end session) and AI service users (create, list, delete, rotate key, revoke key) on `hub.accounts`, with route tests
    decision(sdk-dart:mcp): the one gateway route with three verbs becomes three methods (`sendMcpMessage` POST, `openMcpStream` GET, `endMcpSession` DELETE); the TypeScript SDK has only the POST, named `mcp`
 5. [done] fix(sdk-dart:ai-integrations): LLM and MCP integration enable / disable / delete used `{id}` where the gateway route says `{Id}`, so the coverage scanner counted them as missing; routes aligned and tested
-6. [todo] docs(sdk-dart:readme): README section for the new methods and the module list
+6. [done] docs(sdk-dart:readme): README section for the new methods and the module list
 7. [todo] chore(sdk-dart:checks): `dart analyze` and `dart test` green; push and open the pull request
 
 ## Changes
@@ -30,6 +30,7 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/accounts_mcp_service_users_test.dart | new: one route test per method (8) plus one for the JSON-RPC body and session header | 4 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/lib/src/hub/resources/ai_integrations.dart | LLM / MCP enable, disable, delete: route placeholder `{id}` → `{Id}` (gateway spelling); Dart argument stays `id`, no caller change | 5 |
 | /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/test/hub/ai_integrations_llm_mcp_test.dart | new: one route test per method (6) — none existed | 5 |
+| /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/README.md | resource table per client; new section with the 15 new methods and examples; LLM / MCP switches named in the AI section | 6 |
 
 ## Findings
 fix(sdk-dart:ai-integrations): LLM and MCP enable / disable / delete existed but were counted "no" in the coverage matrix, because the scanner matches the route text exactly and Dart wrote `{id}` where the gateway writes `{Id}`; the URL on the wire was already right — done (fixed here, step 5)
