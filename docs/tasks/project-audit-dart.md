@@ -14,7 +14,7 @@ Not in scope: AI plans, knowledge and credits (decided internal); a streaming (S
    decision(sdk-dart:mcp): the one gateway route with three verbs becomes three methods (`sendMcpMessage` POST, `openMcpStream` GET, `endMcpSession` DELETE); the TypeScript SDK has only the POST, named `mcp`
 5. [done] fix(sdk-dart:ai-integrations): LLM and MCP integration enable / disable / delete used `{id}` where the gateway route says `{Id}`, so the coverage scanner counted them as missing; routes aligned and tested
 6. [done] docs(sdk-dart:readme): README section for the new methods and the module list
-7. [todo] chore(sdk-dart:checks): `dart analyze` and `dart test` green; push and open the pull request
+7. [done] chore(sdk-dart:checks): `dart analyze` no issues, `dart test` 181 passed (22 new); push and open the pull request
 
 ## Changes
 | file (absolute, branch audit/project) | what changed | step |
@@ -76,6 +76,14 @@ docs(sdk-dart:generator): resource files say "GENERATED FILE. Do not edit by han
 // Regenerate with: dart run tool/generate_resources.dart   // <-- here: tool/ has only stamp_release.sh; README says python3 tool/generate_resources.py
 ```
 
+
+docs(sdk-dart:readme): the README repo layout says lib/src/api and lib/src/hub are "GENERATED — gitignored", but they are tracked and hand-edited — left open
+    where: /Users/djovaisas/Projects/norbix/worktrees/sdks/norbix-dart/audit/project/README.md (section "Repo layout", branch audit/project)
+```text
+// README.md, "Repo layout" (main)
+│       ├── api/                  # GENERATED — gitignored     // <-- here: git ls-files lib/src/api lists 8 tracked files
+│       └── hub/                  # GENERATED — gitignored
+```
 
 ## Rejected / moved out
 - decision(sdk-dart:ai): AI plans, knowledge search and AI credits endpoints are not added — rejected — reason: decided internal by the campaign — new ticket/file: none
