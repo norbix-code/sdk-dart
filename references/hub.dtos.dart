@@ -10035,6 +10035,33 @@ abstract class SchedulerTaskRequest
     TypeContext? context = _ctx;
 }
 
+class EmailCampaignSchedulerTaskRequest extends SchedulerTaskRequest implements IConvertible
+{
+    SchedulerTaskType? type;
+    EmailCampaignRequest? campaign;
+    String? databaseIntegrationId;
+
+    EmailCampaignSchedulerTaskRequest({this.type,this.campaign,this.databaseIntegrationId});
+    EmailCampaignSchedulerTaskRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        type = JsonConverters.fromJson(json['type'],'SchedulerTaskType',context!);
+        campaign = JsonConverters.fromJson(json['campaign'],'EmailCampaignRequest',context!);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'type': JsonConverters.toJson(type,'SchedulerTaskType',context!),
+        'campaign': JsonConverters.toJson(campaign,'EmailCampaignRequest',context!),
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    getTypeName() => "EmailCampaignSchedulerTaskRequest";
+    TypeContext? context = _ctx;
+}
+
 enum ResourceKindDto
 {
     Contact,
@@ -42249,8 +42276,8 @@ class SaveWebhookDestinationRequest extends CodeMashRequestBase implements IRetu
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/scheduler/disable", "GET")
-class DisableScheduler extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/scheduler/disable", "PUT")
+class DisableScheduler extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableScheduler();
     DisableScheduler.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -42266,8 +42293,8 @@ class DisableScheduler extends CodeMashRequestBase implements IReturn<EmptyRespo
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/scheduler/enable", "GET")
-class EnableScheduler extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/scheduler/enable", "PUT")
+class EnableScheduler extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnableScheduler();
     EnableScheduler.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -44248,6 +44275,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmbeddingProvider': TypeInfo(TypeOf.Enum, enumValues:EmbeddingProvider.values),
     'EmbeddingIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SchedulerTaskRequest': TypeInfo(TypeOf.AbstractClass),
+    'EmailCampaignSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => EmailCampaignSchedulerTaskRequest()),
     'ResourceKindDto': TypeInfo(TypeOf.Enum, enumValues:ResourceKindDto.values),
     'ResourceRefDto': TypeInfo(TypeOf.AbstractClass),
     'CaseResolutionFixKind': TypeInfo(TypeOf.Enum, enumValues:CaseResolutionFixKind.values),
