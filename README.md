@@ -601,6 +601,63 @@ calls `POST /{version}/notifications/sms/campaigns/{Id}/stop`, and
 The old `smsRazorSyntaxCheck` method is gone: its route no longer exists on
 the gateway (`renderSms` is the replacement).
 
+## Scheduler
+
+`hub.scheduler` runs a task on a cron schedule. **Only `EmailCampaign`
+tasks run today**: each run sends an email campaign. The 8 methods:
+
+| Method | Call |
+|--------|------|
+| `enableScheduler()` | `PUT /{version}/scheduler/enable` — turn the module on |
+| `disableScheduler()` | `PUT /{version}/scheduler/disable` — turn the module off |
+| `getSchedulerTasks(query:)` | `GET /{version}/scheduler/tasks` — optional `type`, `enabled`, `pageSize`, `startingAfter` in the query |
+| `getSchedulerTask(id:)` | `GET /{version}/scheduler/tasks/{id}` |
+| `saveSchedulerTask(body:)` | `POST /{version}/scheduler/tasks` — create, or update when `taskId` is set |
+| `deleteSchedulerTask(id:)` | `DELETE /{version}/scheduler/tasks/{id}` |
+| `enableSchedulerTask(id:)` | `PUT /{version}/scheduler/tasks/{id}/enable` |
+| `disableSchedulerTask(id:)` | `PUT /{version}/scheduler/tasks/{id}/disable` |
+
+```dart
+final hub = NorbixHub(config: NorbixConfig(baseUrl: 'https://hub.norbix.ai', apiKey: 'k'));
+
+await hub.scheduler.enableScheduler();
+
+// Every Monday at 09:00 UTC, email every project user with template tmpl_1.
+final saved = await hub.scheduler.saveSchedulerTask(body: {
+  'name': 'Weekly digest',
+  'cron': '0 9 * * 1',            // 5 fields, evaluated in UTC
+  'initiatorUserId': 'usr_1',     // you, or a project service user
+  'isEnabled': true,
+  'stopOnError': false,
+  'task': {
+    'type': 'EmailCampaign',      // the only task type today
+    'campaign': {
+      'source': 'AllUsers',
+      'templateId': 'tmpl_1',
+    },
+    // 'databaseIntegrationId': '...', // optional
+  },
+});
+// saved == {'id': 'tsk_…', ...}
+
+final tasks = await hub.scheduler.getSchedulerTasks(
+  query: {'type': 'EmailCampaign', 'enabled': true},
+);
+```
+
+Good to know:
+
+- `cron` has exactly 5 fields (minute, hour, day of month, month, day of
+  week) and runs in UTC. A 6-field (seconds) expression is refused.
+- `initiatorUserId` (`usr_…`) is required: the task runs as this user. It
+  must be the caller or a service user of the project.
+- `task.type` is the discriminator. `task.campaign` takes the same shape as
+  an email campaign (`source` + `templateId` + the source's own fields, for
+  example `rolesNames` / `userTags` for `AllUsers`). The typed shape is
+  `EmailCampaignSchedulerTaskRequest` in `references/hub.dtos.dart`.
+- Module `enableScheduler` / `disableScheduler` send **PUT** since this
+  version (they sent GET before; the gateway changed the route).
+
 ## Repo layout
 
 ```
