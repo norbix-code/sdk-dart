@@ -23,13 +23,16 @@ class SchedulerResource extends Resource {
     );
   }
 
-  /// `GET /{version}/scheduler/disable`
+  /// `PUT /{version}/scheduler/disable`
   Future<Object?> disableScheduler(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -51,13 +54,16 @@ class SchedulerResource extends Resource {
     );
   }
 
-  /// `GET /{version}/scheduler/enable`
+  /// `PUT /{version}/scheduler/enable`
   Future<Object?> enableScheduler(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/scheduler/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
