@@ -626,6 +626,24 @@ calls `getSmsCampaignMessage`, `getEmailCampaignMessage` and
 read the campaign's messages with `get*CampaignMessages(campaignId:)`, or one
 message of a batch with `get*CampaignBatchNotification`.
 
+### Your own team-member record and phone
+
+Two calls on `hub.accounts` work on the signed-in person only — never on
+another member, so there is no user id:
+
+| Method | Call |
+|--------|------|
+| `getMyAccountUserProfile()` | `GET /{version}/account/me` — your own team-member (or owner) record in `item`; `item.generalInfo.phone` is your phone number. Not the organisation profile (`getAccountProfile`). |
+| `updateMyAccountUserPhone(body:)` | `PUT /{version}/account/me/phone` — save your phone number (`{'phone': '+37060000000'}`, E.164); an empty `phone` clears it |
+
+"Account users" SMS campaigns send to this number; a member without one is
+skipped.
+
+```dart
+final me = await hub.accounts.getMyAccountUserProfile();
+await hub.accounts.updateMyAccountUserPhone(body: {'phone': '+37060000000'});
+```
+
 ## Scheduler
 
 `hub.scheduler` runs a task on a cron schedule. **Only `EmailCampaign`
