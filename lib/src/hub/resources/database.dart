@@ -216,13 +216,16 @@ class DatabaseResource extends Resource {
     );
   }
 
-  /// `GET /{version}/database/disable`
+  /// `PUT /{version}/database/disable`
   Future<Object?> disableDatabase(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -290,13 +293,16 @@ class DatabaseResource extends Resource {
     );
   }
 
-  /// `GET /{version}/database/enable`
+  /// `PUT /{version}/database/enable`
   Future<Object?> enableDatabase(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );

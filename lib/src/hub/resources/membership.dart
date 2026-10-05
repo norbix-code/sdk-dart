@@ -99,13 +99,16 @@ class MembershipResource extends Resource {
     );
   }
 
-  /// `GET /{version}/membership/disable`
+  /// `PUT /{version}/membership/disable`
   Future<Object?> disableMembership(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -143,13 +146,16 @@ class MembershipResource extends Resource {
     );
   }
 
-  /// `GET /{version}/membership/enable`
+  /// `PUT /{version}/membership/enable`
   Future<Object?> enableMembership(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/membership/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );

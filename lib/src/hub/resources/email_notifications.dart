@@ -180,13 +180,16 @@ class EmailNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/email/disable`
+  /// `PUT /{version}/notifications/email/disable`
   Future<Object?> disableEmail(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/email/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -208,13 +211,16 @@ class EmailNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/email/enable`
+  /// `PUT /{version}/notifications/email/enable`
   Future<Object?> enableEmail(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/email/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );

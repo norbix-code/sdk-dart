@@ -23,13 +23,16 @@ class LogsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/logs/disable`
+  /// `PUT /{version}/logs/disable`
   Future<Object?> disableLogging(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -51,13 +54,16 @@ class LogsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/logs/enable`
+  /// `PUT /{version}/logs/enable`
   Future<Object?> enableLogging(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/logs/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );

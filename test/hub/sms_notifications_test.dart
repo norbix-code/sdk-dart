@@ -14,22 +14,22 @@ NorbixHub _client(FakeHttpDriver driver) => NorbixHub(
 
 void main() {
   group('hub.smsNotifications — module', () {
-    test('enableSms → GET /v1/notifications/sms/enable', () async {
+    test('enableSms → PUT /v1/notifications/sms/enable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.enableSms();
 
-      expect(driver.lastRequest!.method, equals('GET'));
+      expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
         endsWith('/v1/notifications/sms/enable'),
       );
     });
 
-    test('disableSms → GET /v1/notifications/sms/disable', () async {
+    test('disableSms → PUT /v1/notifications/sms/disable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.disableSms();
 
-      expect(driver.lastRequest!.method, equals('GET'));
+      expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
         endsWith('/v1/notifications/sms/disable'),

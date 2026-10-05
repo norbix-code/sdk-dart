@@ -133,13 +133,16 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/disable`
+  /// `PUT /{version}/notifications/push/disable`
   Future<Object?> disablePush(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/push/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -161,13 +164,16 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/enable`
+  /// `PUT /{version}/notifications/push/enable`
   Future<Object?> enablePush(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/push/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
