@@ -318,4 +318,32 @@ class DatabaseResource extends Resource {
       pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
     );
   }
+
+  /// `GET /{version}/database/collections/{collectionName}/own`
+  Future<Object?> findOwn(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/own',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
+  /// `GET /{version}/database/taxonomies/{taxonomyName}/merged-tree`
+  Future<Object?> findMergedTermTree(
+      {required Object taxonomyName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/taxonomies/{taxonomyName}/merged-tree',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'taxonomyName': taxonomyName},
+    );
+  }
 }
