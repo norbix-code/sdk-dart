@@ -124,6 +124,23 @@ class AccountsResource extends Resource {
     );
   }
 
+  /// `GET /{version}/account/me`
+  ///
+  /// The signed-in team member's (or owner's) own record — not the
+  /// organisation's profile (`getAccountProfile`). The response carries
+  /// `item`; `item.generalInfo.phone` is the number "Account users" SMS
+  /// campaigns send to.
+  Future<Object?> getMyAccountUserProfile(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/me',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `POST /{version}/account/stripe/get-portal-url`
   Future<Object?> getStripeBillingPortalUrl(
       {Map<String, Object?>? query,
@@ -188,6 +205,27 @@ class AccountsResource extends Resource {
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/profile',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `PUT /{version}/account/me/phone`
+  ///
+  /// Saves or clears the signed-in team member's own phone number. Body:
+  /// `{'phone': '+37060000000'}` (E.164: `+`, the country code, then digits);
+  /// an empty or missing `phone` clears it. There is no user id: the user is
+  /// always the caller. Members without a phone are skipped by "Account
+  /// users" SMS campaigns.
+  Future<Object?> updateMyAccountUserPhone(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/me/phone',
       method: 'PUT',
       query: query,
       body: body,
