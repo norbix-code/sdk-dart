@@ -23,21 +23,6 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/integrations/app/check`
-  Future<Object?> checkIntegrationAvailability(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/notifications/push/integrations/app/check',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
   /// `POST /{version}/notifications/push/templates/{id}/clone`
   Future<Object?> clonePushTemplate(
       {required Object id,
@@ -403,21 +388,6 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `POST /{version}/notifications/push/integrations/app/request`
-  Future<Object?> registerCodeMashAppPushIntegration(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/notifications/push/integrations/app/request',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
   /// `POST /{version}/notifications/push/devices`
   Future<Object?> registerDevice(
       {Map<String, Object?>? query,
@@ -461,21 +431,6 @@ class PushNotificationsResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'id': id},
-    );
-  }
-
-  /// `POST /{version}/notifications/push/integrations/test/codemash-app`
-  Future<Object?> testCodeMashIosAppIntegration(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/notifications/push/integrations/test/codemash-app',
-      method: 'POST',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
     );
   }
 
