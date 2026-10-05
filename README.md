@@ -197,6 +197,59 @@ check into a `try / catch`. Endpoints that answer with raw bytes rather than a
 document (`sendBytes` — file download, the public file link) are not JSON and
 are unchanged.
 
+## Database
+
+`NorbixApi.database` is for your app's end users (records, their own records,
+term reading). `NorbixHub.database` is for your back office: it manages the
+schemas, taxonomies, integrations, schema triggers and saved aggregates, and it
+reads and writes records with the project's rights. Every method takes the path
+values as named arguments plus optional `query`, `body` (not on GET) and
+`headers`, and returns the decoded JSON.
+
+```dart
+final api = NorbixApi();
+final hub = NorbixHub();
+
+// Records — the same calls exist on both clients
+await hub.database.insertRecord(
+  collectionName: 'orders',
+  body: {'document': '{"title":"First"}'},
+);
+await hub.database.findRecords(
+  collectionName: 'orders',
+  query: {'pageSize': 20, 'pageNumber': 0},
+);
+await api.database.findOwn(collectionName: 'orders'); // only the caller's records
+
+// Schemas
+await hub.database.getDatabaseSchemaListSettings(id: schemaId);
+await hub.database.updateDatabaseSchemaListSettings(id: schemaId, body: {...});
+await hub.database.updateDatabaseSchemaEmbed(id: schemaId, body: {...});
+await hub.database.applyDatabaseSchemaBundle(body: {...});
+
+// Taxonomy trees
+await hub.database.getDatabaseTaxonomyTree();
+await hub.database.getDatabaseTaxonomyTermTree(taxonomyName: 'services');
+await hub.database.getDatabaseMergedTermTree(taxonomyName: 'services');
+await api.database.findMergedTermTree(taxonomyName: 'services');
+
+// Try an aggregation pipeline before you save it
+await hub.database.testDatabaseAggregate(body: {...});
+```
+
+| Area | `NorbixHub.database` | `NorbixApi.database` |
+| --- | --- | --- |
+| Records | `findRecords`, `findOneRecord`, `insertRecord`, `insertManyRecords`, `updateOneRecord`, `updateManyRecords`, `replaceRecord`, `deleteRecord`, `deleteManyRecords`, `countRecords`, `distinctRecordValues`, `aggregateRecords`, `executeRecordsAggregate`, `changeRecordResponsibility`, `seedCollectionRecords`, `getCollectionIndexes` | `find`, `findOne`, `findOwn`, `insertOne`, `insertMany`, `updateOne`, `updateMany`, `replaceOne`, `deleteOne`, `deleteMany`, `count`, `distinct`, `aggregate`, `executeAggregate`, `changeResponsibility` |
+| Schemas | `getDatabaseSchemas`, `getDatabaseSchema`, `saveDatabaseSchema`, `renameDatabaseSchema`, `deleteDatabaseSchema`, `getDatabaseSchemaDraft`, `updateDatabaseSchemaDraft`, `discardDatabaseSchemaDraft`, `publishDatabaseSchema`, `getDatabaseSchemaVersions`, `getDatabaseSchemaVersionDiff`, `updateDatabaseSchemaSettings`, `getDatabaseSchemaListSettings`, `updateDatabaseSchemaListSettings`, `updateDatabaseSchemaEmbed`, `applyDatabaseSchemaBundle` | `getDatabaseSchemas`, `getDatabaseSchema` |
+| Taxonomies and terms | `getDatabaseTaxonomies`, `getDatabaseTaxonomy`, `saveDatabaseTaxonomy`, `deleteDatabaseTaxonomy`, `getDatabaseTaxonomyTerm`, `saveDatabaseTaxonomyTerm`, `updateDatabaseTaxonomyTerm`, `deleteDatabaseTaxonomyTerm`, `deleteManyDatabaseTaxonomyTerms`, `getDatabaseTaxonomyTree`, `getDatabaseTaxonomyTermTree`, `getDatabaseMergedTermTree` | `findTerms`, `findTermsChildren`, `findTermTree`, `findTaxonomyTree`, `findMergedTermTree` |
+| Schema triggers | `getSchemaTriggers`, `getSchemaTrigger`, `saveSchemaTrigger`, `enableSchemaTrigger`, `disableSchemaTrigger`, `deleteSchemaTrigger` | — |
+| Integrations | `getDatabaseIntegrations`, `getDatabaseIntegration`, `saveDatabaseIntegration`, `testDatabaseIntegration`, `enableDatabaseIntegration`, `disableDatabaseIntegration`, `setDatabaseIntegrationAsDefault`, `deleteDatabaseIntegration`, `getAllowedFlexTiers`, `revealManagedFlexConnectionString` | — |
+| Saved aggregates | `getDatabaseAggregates`, `getDatabaseAggregate`, `saveDatabaseAggregate`, `testDatabaseAggregate`, `deleteDatabaseAggregate` | — |
+| Module | `enableDatabase`, `disableDatabase` | — |
+
+Each taxonomy in `getDatabaseTaxonomies` now also carries `description`,
+`dependencies`, `parentName` and `dependencyNames`.
+
 ## Working with terms
 
 A **taxonomy** is a named tree of **terms** (labels). A term can have one parent (a clean hierarchy) or several parents (the same item under many categories). Pick the call that matches what you want:
@@ -223,7 +276,7 @@ Outdoors
 ### List a taxonomy's terms (flat)
 **Goal:** show every term of `services` in a simple list, in display order.
 ```dart
-final res = await hub.database.findTerms(taxonomyName: 'services');
+final res = await api.database.findTerms(taxonomyName: 'services');
 ```
 ```json
 {
@@ -247,7 +300,7 @@ The list is flat — every term is one row, with its `parentId` telling you wher
 ### List only top-level terms (filtered)
 **Goal:** show just the roots (no parent) — for the first level of a menu.
 ```dart
-final res = await hub.database.findTerms(
+final res = await api.database.findTerms(
   taxonomyName: 'services',
   query: {'filter': '{ "parentId": null }'},
 );
@@ -271,7 +324,7 @@ final res = await hub.database.findTerms(
 ### Get a term's children
 **Goal:** the user expanded *Indoors* — load what is directly under it.
 ```dart
-final res = await hub.database.findTermsChildren(
+final res = await api.database.findTermsChildren(
   taxonomyName: 'services',
   parentId: 'term_indoors',
 );
@@ -304,7 +357,7 @@ This returns **both** direct children (their `parentId` is `term_indoors`) **and
 ### Multi-parent: one product in several categories
 **Goal:** in a `products` taxonomy, a *Relaxing massage oil* belongs to *For couples*, *Gift ideas*, **and** *Body care*. Listing the children of **any** of those categories returns it.
 ```dart
-final res = await hub.database.findTermsChildren(
+final res = await api.database.findTermsChildren(
   taxonomyName: 'products',
   parentId: 'term_gift_ideas',
 );
@@ -336,7 +389,7 @@ One product, three category links — no duplicate listings. The same product wo
 ### Get the whole term tree in one call
 **Goal:** render the full `services` tree at once, already nested.
 ```dart
-final res = await hub.database.findTermTree(taxonomyName: 'services');
+final res = await api.database.findTermTree(taxonomyName: 'services');
 ```
 ```json
 {
@@ -375,7 +428,7 @@ Roots are in `tree`; each node carries its own `children`; a leaf has `children:
 ### Get only a sub-tree, capped by depth
 **Goal:** start from *Indoors* and go at most 2 levels deep.
 ```dart
-final res = await hub.database.findTermTree(
+final res = await api.database.findTermTree(
   taxonomyName: 'services',
   query: {'rootTermId': 'term_indoors', 'depth': 2},
 );
@@ -402,7 +455,7 @@ With `depth` 2 you get *Indoors* (level 1) and *Air conditioning* (level 2); *Wa
 ### Get the taxonomy structure tree — without terms
 **Goal:** see how taxonomies relate to each other (e.g. a `Cities` taxonomy whose parent is `Countries`), structure only.
 ```dart
-final res = await hub.database.findTaxonomyTree();
+final res = await api.database.findTaxonomyTree();
 ```
 ```json
 {
@@ -428,7 +481,7 @@ This is the **taxonomy** tree, not the term tree: nodes are taxonomies. Every `t
 ### Get the taxonomy structure tree — with terms
 **Goal:** same structure, but also pull each taxonomy's terms in the same call.
 ```dart
-final res = await hub.database.findTaxonomyTree(
+final res = await api.database.findTaxonomyTree(
   query: {'includeTerms': true},
 );
 ```
