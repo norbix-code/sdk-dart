@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-05 08:07:07
+Date: 2026-10-05 16:13:41
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -7595,6 +7595,265 @@ class EmailCampaignSchedulerTaskRequest extends SchedulerTaskRequest implements 
     TypeContext? context = _ctx;
 }
 
+// @DataContract(Namespace="http://codemash.io/types/")
+class CodeMashRequestBase extends RequestBase implements IHasProjectId, IHasEnv, IConvertible
+{
+    /**
+    * ID of your project. Can be passed in a header as norbix-project-id.
+    */
+    // @DataMember
+    // @ApiMember(DataType="string", Description="ID of your project. Can be passed in a header as norbix-project-id.", IsRequired=true, Name="norbix-project-id", ParameterType="header")
+    String projectId = "";
+
+    /**
+    * Target environment for this request (e.g. TEST, STAGING). Optional — when omitted the request runs against PROD. Can be passed in a header as norbix-env.
+    */
+    // @DataMember
+    // @ApiMember(DataType="string", Description="Target environment for this request (e.g. TEST, STAGING). Optional — when omitted the request runs against PROD. Can be passed in a header as norbix-env.", Name="norbix-env", ParameterType="header")
+    String? env;
+
+    CodeMashRequestBase({this.projectId="",this.env});
+    CodeMashRequestBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        projectId = json['projectId'] ?? "";
+        env = json['env'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'projectId': projectId,
+        'env': env
+    });
+
+    getTypeName() => "CodeMashRequestBase";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Create SMS campaign
+*/
+// @Route("/{version}/notifications/sms/campaigns", "POST")
+// @Api(Description="Create SMS campaign")
+// @DataContract
+class CreateSmsCampaignRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * SMS template id to send — pick one with get_sms_templates. Never invent it.
+    */
+    // @DataMember
+    // @ApiMember(Description="SMS template id to send — pick one with get_sms_templates. Never invent it.")
+    String templateId = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * SMS provider integration id the campaign sends through — pick one with get_sms_integrations (the project default unless the user named another). Required; never invent it.
+    */
+    // @DataMember
+    // @ApiMember(Description="SMS provider integration id the campaign sends through — pick one with get_sms_integrations (the project default unless the user named another). Required; never invent it.", IsRequired=true)
+    String integrationId = "";
+
+    /**
+    * Optional language code forcing one template translation for every recipient.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional language code forcing one template translation for every recipient.")
+    String? language;
+
+    // @DataMember
+    String? initiatorId;
+
+    /**
+    * Audience type: 'AllUsers' (every project member subscribed to the SMS channel — role-based delivery can address MILLIONS of contacts), 'SpecifiedUsers' (exact member ids), or 'PhoneNumbers' (raw phone numbers). Fill EXACTLY the settings object matching this value. 'Collection' delivery is not available from chat.
+    */
+    // @DataMember
+    // @ApiMember(Description="Audience type: 'AllUsers' (every project member subscribed to the SMS channel — role-based delivery can address MILLIONS of contacts), 'SpecifiedUsers' (exact member ids), or 'PhoneNumbers' (raw phone numbers). Fill EXACTLY the settings object matching this value. 'Collection' delivery is not available from chat.")
+    SmsCampaignRecipientsSourceTypes? deliveryType;
+
+    /**
+    * For deliveryType 'AllUsers'. JSON object: {"recipientsSourceType":"AllUsers","rolesNames":["authenticated"],"userTags":[],"campaignTime":<unix seconds UTC>}. rolesNames/userTags are optional narrowing filters — verify exact role names with get_roles.
+    */
+    // @DataMember
+    // @ApiMember(Description="For deliveryType 'AllUsers'. JSON object: {\"recipientsSourceType\":\"AllUsers\",\"rolesNames\":[\"authenticated\"],\"userTags\":[],\"campaignTime\":<unix seconds UTC>}. rolesNames/userTags are optional narrowing filters — verify exact role names with get_roles.")
+    SmsToAllUsersDeliverySettingsDto? allUsers;
+
+    /**
+    * For deliveryType 'SpecifiedUsers'. JSON object: {"recipientsSourceType":"SpecifiedUsers","recipients":[<member ids>],"campaignTime":<unix seconds UTC>}.
+    */
+    // @DataMember
+    // @ApiMember(Description="For deliveryType 'SpecifiedUsers'. JSON object: {\"recipientsSourceType\":\"SpecifiedUsers\",\"recipients\":[<member ids>],\"campaignTime\":<unix seconds UTC>}.")
+    SmsToUsersDeliverySettingsDto? specifiedUsers;
+
+    /**
+    * For deliveryType 'AccountUsers'. JSON object: {"recipientsSourceType":"AccountUsers","recipients":[<account owner / team member ids>],"campaignTime":<unix seconds UTC>}. Members without a phone number are skipped.
+    */
+    // @DataMember
+    // @ApiMember(Description="For deliveryType 'AccountUsers'. JSON object: {\"recipientsSourceType\":\"AccountUsers\",\"recipients\":[<account owner / team member ids>],\"campaignTime\":<unix seconds UTC>}. Members without a phone number are skipped.")
+    SmsToAccountUsersDeliverySettingsDto? accountUsers;
+
+    // @DataMember
+    SmsToCollectionRecordsDeliverySettingsDto? collection;
+
+    /**
+    * For deliveryType 'PhoneNumbers'. JSON object: {"recipientsSourceType":"PhoneNumbers","phoneNumbers":["+37060000000"],"campaignTime":<unix seconds UTC>}. Numbers in international format.
+    */
+    // @DataMember
+    // @ApiMember(Description="For deliveryType 'PhoneNumbers'. JSON object: {\"recipientsSourceType\":\"PhoneNumbers\",\"phoneNumbers\":[\"+37060000000\"],\"campaignTime\":<unix seconds UTC>}. Numbers in international format.")
+    SmsToPhoneNumbersDeliverySettingsDto? phoneNumbers;
+
+    /**
+    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.")
+    bool? sendNow;
+
+    CreateSmsCampaignRequest({this.templateId="",this.databaseIntegrationId,this.integrationId="",this.language,this.initiatorId,this.deliveryType,this.allUsers,this.specifiedUsers,this.accountUsers,this.collection,this.phoneNumbers,this.sendNow});
+    CreateSmsCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        templateId = json['templateId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        integrationId = json['integrationId'] ?? "";
+        language = json['language'];
+        initiatorId = json['initiatorId'];
+        deliveryType = JsonConverters.fromJson(json['deliveryType'],'SmsCampaignRecipientsSourceTypes',context!);
+        allUsers = JsonConverters.fromJson(json['allUsers'],'SmsToAllUsersDeliverySettingsDto',context!);
+        specifiedUsers = JsonConverters.fromJson(json['specifiedUsers'],'SmsToUsersDeliverySettingsDto',context!);
+        accountUsers = JsonConverters.fromJson(json['accountUsers'],'SmsToAccountUsersDeliverySettingsDto',context!);
+        collection = JsonConverters.fromJson(json['collection'],'SmsToCollectionRecordsDeliverySettingsDto',context!);
+        phoneNumbers = JsonConverters.fromJson(json['phoneNumbers'],'SmsToPhoneNumbersDeliverySettingsDto',context!);
+        sendNow = json['sendNow'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'templateId': templateId,
+        'databaseIntegrationId': databaseIntegrationId,
+        'integrationId': integrationId,
+        'language': language,
+        'initiatorId': initiatorId,
+        'deliveryType': JsonConverters.toJson(deliveryType,'SmsCampaignRecipientsSourceTypes',context!),
+        'allUsers': JsonConverters.toJson(allUsers,'SmsToAllUsersDeliverySettingsDto',context!),
+        'specifiedUsers': JsonConverters.toJson(specifiedUsers,'SmsToUsersDeliverySettingsDto',context!),
+        'accountUsers': JsonConverters.toJson(accountUsers,'SmsToAccountUsersDeliverySettingsDto',context!),
+        'collection': JsonConverters.toJson(collection,'SmsToCollectionRecordsDeliverySettingsDto',context!),
+        'phoneNumbers': JsonConverters.toJson(phoneNumbers,'SmsToPhoneNumbersDeliverySettingsDto',context!),
+        'sendNow': sendNow
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CreateSmsCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+class SmsCampaignSchedulerTaskRequest extends SchedulerTaskRequest implements IConvertible
+{
+    SchedulerTaskType? type;
+    CreateSmsCampaignRequest? campaign;
+    String? databaseIntegrationId;
+
+    SmsCampaignSchedulerTaskRequest({this.type,this.campaign,this.databaseIntegrationId});
+    SmsCampaignSchedulerTaskRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        type = JsonConverters.fromJson(json['type'],'SchedulerTaskType',context!);
+        campaign = JsonConverters.fromJson(json['campaign'],'CreateSmsCampaignRequest',context!);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'type': JsonConverters.toJson(type,'SchedulerTaskType',context!),
+        'campaign': JsonConverters.toJson(campaign,'CreateSmsCampaignRequest',context!),
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    getTypeName() => "SmsCampaignSchedulerTaskRequest";
+    TypeContext? context = _ctx;
+}
+
+abstract class PushCampaignRequest
+{
+    PushCampaignRecipientsSourceTypes? source;
+    String templateId = "";
+    String? integrationId;
+    String? language;
+    String? initiatorId;
+    String? notes;
+    // @DataMember
+    List<TokenMappingDto>? mappedTokens;
+
+    // @DataMember
+    int? campaignTime;
+
+    PushCampaignRequest({this.source,this.templateId="",this.integrationId,this.language,this.initiatorId,this.notes,this.mappedTokens,this.campaignTime});
+    PushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        source = JsonConverters.fromJson(json['source'],'PushCampaignRecipientsSourceTypes',context!);
+        templateId = json['templateId'] ?? "";
+        integrationId = json['integrationId'];
+        language = json['language'];
+        initiatorId = json['initiatorId'];
+        notes = json['notes'];
+        mappedTokens = JsonConverters.fromJson(json['mappedTokens'],'List<TokenMappingDto>',context!);
+        campaignTime = json['campaignTime'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'source': JsonConverters.toJson(source,'PushCampaignRecipientsSourceTypes',context!),
+        'templateId': templateId,
+        'integrationId': integrationId,
+        'language': language,
+        'initiatorId': initiatorId,
+        'notes': notes,
+        'mappedTokens': JsonConverters.toJson(mappedTokens,'List<TokenMappingDto>',context!),
+        'campaignTime': campaignTime
+    };
+
+    getTypeName() => "PushCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+class PushCampaignSchedulerTaskRequest extends SchedulerTaskRequest implements IConvertible
+{
+    SchedulerTaskType? type;
+    PushCampaignRequest? campaign;
+    String? databaseIntegrationId;
+
+    PushCampaignSchedulerTaskRequest({this.type,this.campaign,this.databaseIntegrationId});
+    PushCampaignSchedulerTaskRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        type = JsonConverters.fromJson(json['type'],'SchedulerTaskType',context!);
+        campaign = JsonConverters.fromJson(json['campaign'],'PushCampaignRequest',context!);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'type': JsonConverters.toJson(type,'SchedulerTaskType',context!),
+        'campaign': JsonConverters.toJson(campaign,'PushCampaignRequest',context!),
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    getTypeName() => "PushCampaignSchedulerTaskRequest";
+    TypeContext? context = _ctx;
+}
+
 class MongoDbAggregateDto implements IHasViewId, IConvertible
 {
     // @DataMember
@@ -8913,42 +9172,6 @@ abstract class IHasCorrelationIdRequest
     String? correlationId;
 }
 
-// @DataContract(Namespace="http://codemash.io/types/")
-class CodeMashRequestBase extends RequestBase implements IHasProjectId, IHasEnv, IConvertible
-{
-    /**
-    * ID of your project. Can be passed in a header as norbix-project-id.
-    */
-    // @DataMember
-    // @ApiMember(DataType="string", Description="ID of your project. Can be passed in a header as norbix-project-id.", IsRequired=true, Name="norbix-project-id", ParameterType="header")
-    String projectId = "";
-
-    /**
-    * Target environment for this request (e.g. TEST, STAGING). Optional — when omitted the request runs against PROD. Can be passed in a header as norbix-env.
-    */
-    // @DataMember
-    // @ApiMember(DataType="string", Description="Target environment for this request (e.g. TEST, STAGING). Optional — when omitted the request runs against PROD. Can be passed in a header as norbix-env.", Name="norbix-env", ParameterType="header")
-    String? env;
-
-    CodeMashRequestBase({this.projectId="",this.env});
-    CodeMashRequestBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        projectId = json['projectId'] ?? "";
-        env = json['env'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'projectId': projectId,
-        'env': env
-    });
-
-    getTypeName() => "CodeMashRequestBase";
-    TypeContext? context = _ctx;
-}
-
 abstract class IHasProjectId
 {
     String projectId = "";
@@ -10203,50 +10426,6 @@ class PushDeviceDto implements IConvertible
     };
 
     getTypeName() => "PushDeviceDto";
-    TypeContext? context = _ctx;
-}
-
-abstract class PushCampaignRequest
-{
-    PushCampaignRecipientsSourceTypes? source;
-    String templateId = "";
-    String? integrationId;
-    String? language;
-    String? initiatorId;
-    String? notes;
-    // @DataMember
-    List<TokenMappingDto>? mappedTokens;
-
-    // @DataMember
-    int? campaignTime;
-
-    PushCampaignRequest({this.source,this.templateId="",this.integrationId,this.language,this.initiatorId,this.notes,this.mappedTokens,this.campaignTime});
-    PushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        source = JsonConverters.fromJson(json['source'],'PushCampaignRecipientsSourceTypes',context!);
-        templateId = json['templateId'] ?? "";
-        integrationId = json['integrationId'];
-        language = json['language'];
-        initiatorId = json['initiatorId'];
-        notes = json['notes'];
-        mappedTokens = JsonConverters.fromJson(json['mappedTokens'],'List<TokenMappingDto>',context!);
-        campaignTime = json['campaignTime'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'source': JsonConverters.toJson(source,'PushCampaignRecipientsSourceTypes',context!),
-        'templateId': templateId,
-        'integrationId': integrationId,
-        'language': language,
-        'initiatorId': initiatorId,
-        'notes': notes,
-        'mappedTokens': JsonConverters.toJson(mappedTokens,'List<TokenMappingDto>',context!),
-        'campaignTime': campaignTime
-    };
-
-    getTypeName() => "PushCampaignRequest";
     TypeContext? context = _ctx;
 }
 
@@ -14539,7 +14718,19 @@ class TaxonomyListProjection implements IHasViewId, IConvertible
     // @DataMember
     String? parentId;
 
-    TaxonomyListProjection({this.viewId="",this.taxonomyName="",this.taxonomySlug="",this.parentId});
+    // @DataMember
+    String? description;
+
+    // @DataMember
+    List<String>? dependencies;
+
+    // @DataMember
+    String? parentName;
+
+    // @DataMember
+    List<String>? dependencyNames;
+
+    TaxonomyListProjection({this.viewId="",this.taxonomyName="",this.taxonomySlug="",this.parentId,this.description,this.dependencies,this.parentName,this.dependencyNames});
     TaxonomyListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14547,6 +14738,10 @@ class TaxonomyListProjection implements IHasViewId, IConvertible
         taxonomyName = json['taxonomyName'] ?? "";
         taxonomySlug = json['taxonomySlug'] ?? "";
         parentId = json['parentId'];
+        description = json['description'];
+        dependencies = JsonConverters.fromJson(json['dependencies'],'List<String>',context!);
+        parentName = json['parentName'];
+        dependencyNames = JsonConverters.fromJson(json['dependencyNames'],'List<String>',context!);
         return this;
     }
 
@@ -14554,7 +14749,11 @@ class TaxonomyListProjection implements IHasViewId, IConvertible
         'viewId': viewId,
         'taxonomyName': taxonomyName,
         'taxonomySlug': taxonomySlug,
-        'parentId': parentId
+        'parentId': parentId,
+        'description': description,
+        'dependencies': JsonConverters.toJson(dependencies,'List<String>',context!),
+        'parentName': parentName,
+        'dependencyNames': JsonConverters.toJson(dependencyNames,'List<String>',context!)
     };
 
     getTypeName() => "TaxonomyListProjection";
@@ -14983,7 +15182,10 @@ class SchemaListProjection implements IHasViewId, IConvertible
     // @DataMember
     String? description;
 
-    SchemaListProjection({this.viewId="",this.schemaName="",this.schemaTitle="",this.latestVersion,this.hasDraft,this.metaSchemaVersion=0,this.description});
+    // @DataMember
+    String? env;
+
+    SchemaListProjection({this.viewId="",this.schemaName="",this.schemaTitle="",this.latestVersion,this.hasDraft,this.metaSchemaVersion=0,this.description,this.env});
     SchemaListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14994,6 +15196,7 @@ class SchemaListProjection implements IHasViewId, IConvertible
         hasDraft = json['hasDraft'];
         metaSchemaVersion = json['metaSchemaVersion'] ?? 0;
         description = json['description'];
+        env = json['env'];
         return this;
     }
 
@@ -15004,7 +15207,8 @@ class SchemaListProjection implements IHasViewId, IConvertible
         'latestVersion': latestVersion,
         'hasDraft': hasDraft,
         'metaSchemaVersion': metaSchemaVersion,
-        'description': description
+        'description': description,
+        'env': env
     };
 
     getTypeName() => "SchemaListProjection";
@@ -16206,12 +16410,18 @@ class CampaignDto implements IHasResponsibleUserId, IHasDatabaseId, IConvertible
     String? notes;
 
     // @DataMember
+    String? createdById;
+
+    // @DataMember
+    String? timeZoneId;
+
+    // @DataMember
     String userId = "";
 
     // @DataMember
     String? id;
 
-    CampaignDto({this.viewId="",this.createdOn,this.language="",this.forceCampaignLanguage,this.campaignProcessingIntegrationId,this.statusHistory=const [],this.status,this.tokenMappingValues,this.notes,this.userId="",this.id});
+    CampaignDto({this.viewId="",this.createdOn,this.language="",this.forceCampaignLanguage,this.campaignProcessingIntegrationId,this.statusHistory=const [],this.status,this.tokenMappingValues,this.notes,this.createdById,this.timeZoneId,this.userId="",this.id});
     CampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16224,6 +16434,8 @@ class CampaignDto implements IHasResponsibleUserId, IHasDatabaseId, IConvertible
         status = JsonConverters.fromJson(json['status'],'CampaignStatusChangeEntryDto',context!);
         tokenMappingValues = JsonConverters.fromJson(json['tokenMappingValues'],'List<TokenMappingDto>',context!);
         notes = json['notes'];
+        createdById = json['createdById'];
+        timeZoneId = json['timeZoneId'];
         userId = json['userId'] ?? "";
         id = json['id'];
         return this;
@@ -16239,6 +16451,8 @@ class CampaignDto implements IHasResponsibleUserId, IHasDatabaseId, IConvertible
         'status': JsonConverters.toJson(status,'CampaignStatusChangeEntryDto',context!),
         'tokenMappingValues': JsonConverters.toJson(tokenMappingValues,'List<TokenMappingDto>',context!),
         'notes': notes,
+        'createdById': createdById,
+        'timeZoneId': timeZoneId,
         'userId': userId,
         'id': id
     };
@@ -16757,24 +16971,19 @@ class SmsCampaignDto extends CampaignDto implements IConvertible
     // @DataMember
     SmsTemplateDto? template;
 
-    // @DataMember
-    String? createdById;
-
-    SmsCampaignDto({this.recipients,this.template,this.createdById});
+    SmsCampaignDto({this.recipients,this.template});
     SmsCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         recipients = JsonConverters.fromJson(json['recipients'],'SmsCampaignDeliverySettingsDto',context!);
         template = JsonConverters.fromJson(json['template'],'SmsTemplateDto',context!);
-        createdById = json['createdById'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'recipients': JsonConverters.toJson(recipients,'SmsCampaignDeliverySettingsDto',context!),
-        'template': JsonConverters.toJson(template,'SmsTemplateDto',context!),
-        'createdById': createdById
+        'template': JsonConverters.toJson(template,'SmsTemplateDto',context!)
     });
 
     getTypeName() => "SmsCampaignDto";
@@ -26123,8 +26332,8 @@ class RunDiagnosticHealthCheckResponse extends ResponseBase implements IConverti
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/code/enable", "GET")
-class EnableCode extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/code/enable", "PUT")
+class EnableCode extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnableCode();
     EnableCode.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -26140,8 +26349,8 @@ class EnableCode extends CodeMashRequestBase implements IReturn<EmptyResponse>, 
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/code/disable", "GET")
-class DisableCode extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/code/disable", "PUT")
+class DisableCode extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableCode();
     DisableCode.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -27181,6 +27390,8 @@ class InternalsTypeGen implements IConvertible, IGet
     WebhookDestinationDto? typegen_193_WebhookDestinationDto;
     SchedulerTaskDto? typegen_194_SchedulerTaskDto;
     EmailCampaignSchedulerTaskRequest? typegen_249_EmailCampaignSchedulerTaskRequest;
+    SmsCampaignSchedulerTaskRequest? typegen_250_SmsCampaignSchedulerTaskRequest;
+    PushCampaignSchedulerTaskRequest? typegen_251_PushCampaignSchedulerTaskRequest;
     MongoDbAggregateDto? typegen_195_MongoDbAggregateDto;
     MarketplaceIntegrationDto? typegen_196_MarketplaceIntegrationDto;
     MarketplaceFunctionDto? typegen_197_MarketplaceFunctionDto;
@@ -27231,7 +27442,7 @@ class InternalsTypeGen implements IConvertible, IGet
     NoticeEntryWireDto? typegen_244_NoticeEntryWireDto;
     ConversationSnapshotEntryWireDto? typegen_245_ConversationSnapshotEntryWireDto;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_208_SetCodeIntegrationAsDefault,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_208_SetCodeIntegrationAsDefault,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -27429,6 +27640,8 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_193_WebhookDestinationDto = JsonConverters.fromJson(json['typegen_193_WebhookDestinationDto'],'WebhookDestinationDto',context!);
         typegen_194_SchedulerTaskDto = JsonConverters.fromJson(json['typegen_194_SchedulerTaskDto'],'SchedulerTaskDto',context!);
         typegen_249_EmailCampaignSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_249_EmailCampaignSchedulerTaskRequest'],'EmailCampaignSchedulerTaskRequest',context!);
+        typegen_250_SmsCampaignSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_250_SmsCampaignSchedulerTaskRequest'],'SmsCampaignSchedulerTaskRequest',context!);
+        typegen_251_PushCampaignSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_251_PushCampaignSchedulerTaskRequest'],'PushCampaignSchedulerTaskRequest',context!);
         typegen_195_MongoDbAggregateDto = JsonConverters.fromJson(json['typegen_195_MongoDbAggregateDto'],'MongoDbAggregateDto',context!);
         typegen_196_MarketplaceIntegrationDto = JsonConverters.fromJson(json['typegen_196_MarketplaceIntegrationDto'],'MarketplaceIntegrationDto',context!);
         typegen_197_MarketplaceFunctionDto = JsonConverters.fromJson(json['typegen_197_MarketplaceFunctionDto'],'MarketplaceFunctionDto',context!);
@@ -27676,6 +27889,8 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_193_WebhookDestinationDto': JsonConverters.toJson(typegen_193_WebhookDestinationDto,'WebhookDestinationDto',context!),
         'typegen_194_SchedulerTaskDto': JsonConverters.toJson(typegen_194_SchedulerTaskDto,'SchedulerTaskDto',context!),
         'typegen_249_EmailCampaignSchedulerTaskRequest': JsonConverters.toJson(typegen_249_EmailCampaignSchedulerTaskRequest,'EmailCampaignSchedulerTaskRequest',context!),
+        'typegen_250_SmsCampaignSchedulerTaskRequest': JsonConverters.toJson(typegen_250_SmsCampaignSchedulerTaskRequest,'SmsCampaignSchedulerTaskRequest',context!),
+        'typegen_251_PushCampaignSchedulerTaskRequest': JsonConverters.toJson(typegen_251_PushCampaignSchedulerTaskRequest,'PushCampaignSchedulerTaskRequest',context!),
         'typegen_195_MongoDbAggregateDto': JsonConverters.toJson(typegen_195_MongoDbAggregateDto,'MongoDbAggregateDto',context!),
         'typegen_196_MarketplaceIntegrationDto': JsonConverters.toJson(typegen_196_MarketplaceIntegrationDto,'MarketplaceIntegrationDto',context!),
         'typegen_197_MarketplaceFunctionDto': JsonConverters.toJson(typegen_197_MarketplaceFunctionDto,'MarketplaceFunctionDto',context!),
@@ -31050,8 +31265,8 @@ class DeleteAiServiceUserRequest extends RequestBase implements IReturn<EmptyRes
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/membership/disable", "GET")
-class DisableMembership extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/membership/disable", "PUT")
+class DisableMembership extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableMembership();
     DisableMembership.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -31067,8 +31282,8 @@ class DisableMembership extends CodeMashRequestBase implements IReturn<EmptyResp
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/membership/enable", "GET")
-class EnableMembership extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/membership/enable", "PUT")
+class EnableMembership extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnableMembership();
     EnableMembership.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -32315,9 +32530,9 @@ class UpdateAuthenticationSettings extends CodeMashRequestBase implements IRetur
 /**
 * Disable database service
 */
-// @Route("/{version}/database/disable", "GET")
+// @Route("/{version}/database/disable", "PUT")
 // @Api(Description="Disable database service")
-class DisableDatabase extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class DisableDatabase extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableDatabase();
     DisableDatabase.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -32333,8 +32548,8 @@ class DisableDatabase extends CodeMashRequestBase implements IReturn<EmptyRespon
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/database/enable", "GET")
-class EnableDatabase extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/database/enable", "PUT")
+class EnableDatabase extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnableDatabase();
     EnableDatabase.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -35487,8 +35702,8 @@ class TermsDeleted implements IConvertible, IPost
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/files/disable", "GET")
-class DisableFiles extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/files/disable", "PUT")
+class DisableFiles extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableFiles();
     DisableFiles.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -35504,8 +35719,8 @@ class DisableFiles extends CodeMashRequestBase implements IReturn<EmptyResponse>
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/files/enable", "GET")
-class EnableFiles extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/files/enable", "PUT")
+class EnableFiles extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnableFiles();
     EnableFiles.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -36037,9 +36252,9 @@ class GetFolderFiles extends CodeMashListPaginationRequestBase implements IRetur
 /**
 * Disable email service
 */
-// @Route("/{version}/notifications/email/disable", "GET")
+// @Route("/{version}/notifications/email/disable", "PUT")
 // @Api(Description="Disable email service")
-class DisableEmail extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class DisableEmail extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableEmail();
     DisableEmail.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -36079,9 +36294,9 @@ class GetEmailDisableDependencies extends CodeMashRequestBase implements IReturn
 /**
 * Enable email service
 */
-// @Route("/{version}/notifications/email/enable", "GET")
+// @Route("/{version}/notifications/email/enable", "PUT")
 // @Api(Description="Enable email service")
-class EnableEmail extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class EnableEmail extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnableEmail();
     EnableEmail.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -37830,9 +38045,9 @@ class GetEmailCampaignMessagesRequest extends CodeMashListPaginationRequestBase 
 /**
 * Disable SMS service
 */
-// @Route("/{version}/notifications/sms/disable", "GET")
+// @Route("/{version}/notifications/sms/disable", "PUT")
 // @Api(Description="Disable SMS service")
-class DisableSms extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class DisableSms extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableSms();
     DisableSms.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -37872,9 +38087,9 @@ class GetSmsDisableDependencies extends CodeMashRequestBase implements IReturn<G
 /**
 * Enable SMS service
 */
-// @Route("/{version}/notifications/sms/enable", "GET")
+// @Route("/{version}/notifications/sms/enable", "PUT")
 // @Api(Description="Enable SMS service")
-class EnableSms extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class EnableSms extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnableSms();
     EnableSms.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -38537,131 +38752,6 @@ class TestSmsIntegration extends CodeMashRequestBase implements IReturn<TestSmsI
 }
 
 /**
-* Create SMS campaign
-*/
-// @Route("/{version}/notifications/sms/campaigns", "POST")
-// @Api(Description="Create SMS campaign")
-// @DataContract
-class CreateSmsCampaignRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    /**
-    * SMS template id to send — pick one with get_sms_templates. Never invent it.
-    */
-    // @DataMember
-    // @ApiMember(Description="SMS template id to send — pick one with get_sms_templates. Never invent it.")
-    String templateId = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    /**
-    * SMS provider integration id the campaign sends through — pick one with get_sms_integrations (the project default unless the user named another). Required; never invent it.
-    */
-    // @DataMember
-    // @ApiMember(Description="SMS provider integration id the campaign sends through — pick one with get_sms_integrations (the project default unless the user named another). Required; never invent it.", IsRequired=true)
-    String integrationId = "";
-
-    /**
-    * Optional language code forcing one template translation for every recipient.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional language code forcing one template translation for every recipient.")
-    String? language;
-
-    // @DataMember
-    String? initiatorId;
-
-    /**
-    * Audience type: 'AllUsers' (every project member subscribed to the SMS channel — role-based delivery can address MILLIONS of contacts), 'SpecifiedUsers' (exact member ids), or 'PhoneNumbers' (raw phone numbers). Fill EXACTLY the settings object matching this value. 'Collection' delivery is not available from chat.
-    */
-    // @DataMember
-    // @ApiMember(Description="Audience type: 'AllUsers' (every project member subscribed to the SMS channel — role-based delivery can address MILLIONS of contacts), 'SpecifiedUsers' (exact member ids), or 'PhoneNumbers' (raw phone numbers). Fill EXACTLY the settings object matching this value. 'Collection' delivery is not available from chat.")
-    SmsCampaignRecipientsSourceTypes? deliveryType;
-
-    /**
-    * For deliveryType 'AllUsers'. JSON object: {"recipientsSourceType":"AllUsers","rolesNames":["authenticated"],"userTags":[],"campaignTime":<unix seconds UTC>}. rolesNames/userTags are optional narrowing filters — verify exact role names with get_roles.
-    */
-    // @DataMember
-    // @ApiMember(Description="For deliveryType 'AllUsers'. JSON object: {\"recipientsSourceType\":\"AllUsers\",\"rolesNames\":[\"authenticated\"],\"userTags\":[],\"campaignTime\":<unix seconds UTC>}. rolesNames/userTags are optional narrowing filters — verify exact role names with get_roles.")
-    SmsToAllUsersDeliverySettingsDto? allUsers;
-
-    /**
-    * For deliveryType 'SpecifiedUsers'. JSON object: {"recipientsSourceType":"SpecifiedUsers","recipients":[<member ids>],"campaignTime":<unix seconds UTC>}.
-    */
-    // @DataMember
-    // @ApiMember(Description="For deliveryType 'SpecifiedUsers'. JSON object: {\"recipientsSourceType\":\"SpecifiedUsers\",\"recipients\":[<member ids>],\"campaignTime\":<unix seconds UTC>}.")
-    SmsToUsersDeliverySettingsDto? specifiedUsers;
-
-    /**
-    * For deliveryType 'AccountUsers'. JSON object: {"recipientsSourceType":"AccountUsers","recipients":[<account owner / team member ids>],"campaignTime":<unix seconds UTC>}. Members without a phone number are skipped.
-    */
-    // @DataMember
-    // @ApiMember(Description="For deliveryType 'AccountUsers'. JSON object: {\"recipientsSourceType\":\"AccountUsers\",\"recipients\":[<account owner / team member ids>],\"campaignTime\":<unix seconds UTC>}. Members without a phone number are skipped.")
-    SmsToAccountUsersDeliverySettingsDto? accountUsers;
-
-    // @DataMember
-    SmsToCollectionRecordsDeliverySettingsDto? collection;
-
-    /**
-    * For deliveryType 'PhoneNumbers'. JSON object: {"recipientsSourceType":"PhoneNumbers","phoneNumbers":["+37060000000"],"campaignTime":<unix seconds UTC>}. Numbers in international format.
-    */
-    // @DataMember
-    // @ApiMember(Description="For deliveryType 'PhoneNumbers'. JSON object: {\"recipientsSourceType\":\"PhoneNumbers\",\"phoneNumbers\":[\"+37060000000\"],\"campaignTime\":<unix seconds UTC>}. Numbers in international format.")
-    SmsToPhoneNumbersDeliverySettingsDto? phoneNumbers;
-
-    /**
-    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.")
-    bool? sendNow;
-
-    CreateSmsCampaignRequest({this.templateId="",this.databaseIntegrationId,this.integrationId="",this.language,this.initiatorId,this.deliveryType,this.allUsers,this.specifiedUsers,this.accountUsers,this.collection,this.phoneNumbers,this.sendNow});
-    CreateSmsCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        templateId = json['templateId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        integrationId = json['integrationId'] ?? "";
-        language = json['language'];
-        initiatorId = json['initiatorId'];
-        deliveryType = JsonConverters.fromJson(json['deliveryType'],'SmsCampaignRecipientsSourceTypes',context!);
-        allUsers = JsonConverters.fromJson(json['allUsers'],'SmsToAllUsersDeliverySettingsDto',context!);
-        specifiedUsers = JsonConverters.fromJson(json['specifiedUsers'],'SmsToUsersDeliverySettingsDto',context!);
-        accountUsers = JsonConverters.fromJson(json['accountUsers'],'SmsToAccountUsersDeliverySettingsDto',context!);
-        collection = JsonConverters.fromJson(json['collection'],'SmsToCollectionRecordsDeliverySettingsDto',context!);
-        phoneNumbers = JsonConverters.fromJson(json['phoneNumbers'],'SmsToPhoneNumbersDeliverySettingsDto',context!);
-        sendNow = json['sendNow'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'templateId': templateId,
-        'databaseIntegrationId': databaseIntegrationId,
-        'integrationId': integrationId,
-        'language': language,
-        'initiatorId': initiatorId,
-        'deliveryType': JsonConverters.toJson(deliveryType,'SmsCampaignRecipientsSourceTypes',context!),
-        'allUsers': JsonConverters.toJson(allUsers,'SmsToAllUsersDeliverySettingsDto',context!),
-        'specifiedUsers': JsonConverters.toJson(specifiedUsers,'SmsToUsersDeliverySettingsDto',context!),
-        'accountUsers': JsonConverters.toJson(accountUsers,'SmsToAccountUsersDeliverySettingsDto',context!),
-        'collection': JsonConverters.toJson(collection,'SmsToCollectionRecordsDeliverySettingsDto',context!),
-        'phoneNumbers': JsonConverters.toJson(phoneNumbers,'SmsToPhoneNumbersDeliverySettingsDto',context!),
-        'sendNow': sendNow
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "CreateSmsCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
 * Deletes sms campaign from queue
 */
 // @Route("/{version}/notifications/sms/campaigns/{id}", "DELETE")
@@ -39256,9 +39346,9 @@ class GetMarketplaceFunctionCatalog extends CodeMashRequestBase implements IRetu
 /**
 * Disable push service
 */
-// @Route("/{version}/notifications/push/disable", "GET")
+// @Route("/{version}/notifications/push/disable", "PUT")
 // @Api(Description="Disable push service")
-class DisablePush extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class DisablePush extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisablePush();
     DisablePush.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -39298,9 +39388,9 @@ class GetPushDisableDependencies extends CodeMashRequestBase implements IReturn<
 /**
 * Enable push service
 */
-// @Route("/{version}/notifications/push/enable", "GET")
+// @Route("/{version}/notifications/push/enable", "PUT")
 // @Api(Description="Enable push service")
-class EnablePush extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class EnablePush extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnablePush();
     EnablePush.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -40695,9 +40785,9 @@ class GetPushCampaignMessagesRequest extends CodeMashListPaginationRequestBase i
 /**
 * Disable payments service
 */
-// @Route("/{version}/payments/disable", "GET")
+// @Route("/{version}/payments/disable", "PUT")
 // @Api(Description="Disable payments service")
-class DisablePayments extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class DisablePayments extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisablePayments();
     DisablePayments.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -40716,9 +40806,9 @@ class DisablePayments extends CodeMashRequestBase implements IReturn<EmptyRespon
 /**
 * Enable payments service
 */
-// @Route("/{version}/payments/enable", "GET")
+// @Route("/{version}/payments/enable", "PUT")
 // @Api(Description="Enable payments service")
-class EnablePayments extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class EnablePayments extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     EnablePayments();
     EnablePayments.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -41148,9 +41238,9 @@ class TestPaymentsIntegration extends CodeMashRequestBase implements IReturn<Tes
 /**
 * Disable logging service
 */
-// @Route("/{version}/logs/disable", "GET")
+// @Route("/{version}/logs/disable", "PUT")
 // @Api(Description="Disable logging service")
-class DisableLogging extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+class DisableLogging extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     DisableLogging();
     DisableLogging.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -41166,8 +41256,8 @@ class DisableLogging extends CodeMashRequestBase implements IReturn<EmptyRespons
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/logs/enable", "GET")
-class EnableLogging extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IGet
+// @Route("/{version}/logs/enable", "PUT")
+class EnableLogging extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     /**
     * When true, also create a Norbix Logging integration backed by the project's default database.
@@ -45657,6 +45747,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SchedulerTaskDto': TypeInfo(TypeOf.Class, create:() => SchedulerTaskDto()),
     'SchedulerTaskRequest': TypeInfo(TypeOf.AbstractClass),
     'EmailCampaignSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => EmailCampaignSchedulerTaskRequest()),
+    'CodeMashRequestBase': TypeInfo(TypeOf.Class, create:() => CodeMashRequestBase()),
+    'CreateSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreateSmsCampaignRequest()),
+    'SmsCampaignSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => SmsCampaignSchedulerTaskRequest()),
+    'PushCampaignRequest': TypeInfo(TypeOf.AbstractClass),
+    'PushCampaignSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => PushCampaignSchedulerTaskRequest()),
     'MongoDbAggregateDto': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateDto()),
     'MarketplaceTransport': TypeInfo(TypeOf.Enum, enumValues:MarketplaceTransport.values),
     'MarketplaceCategory': TypeInfo(TypeOf.Enum, enumValues:MarketplaceCategory.values),
@@ -45710,7 +45805,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ICultureBasedRequest': TypeInfo(TypeOf.Interface),
     'IVersionBasedRequest': TypeInfo(TypeOf.Interface),
     'IHasCorrelationIdRequest': TypeInfo(TypeOf.Interface),
-    'CodeMashRequestBase': TypeInfo(TypeOf.Class, create:() => CodeMashRequestBase()),
     'IHasProjectId': TypeInfo(TypeOf.Interface),
     'IHasEnv': TypeInfo(TypeOf.Interface),
     'SubscriptionType': TypeInfo(TypeOf.Enum, enumValues:SubscriptionType.values),
@@ -45759,7 +45853,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SavePushTemplate': TypeInfo(TypeOf.Class, create:() => SavePushTemplate()),
     'DeviceType': TypeInfo(TypeOf.Enum, enumValues:DeviceType.values),
     'PushDeviceDto': TypeInfo(TypeOf.Class, create:() => PushDeviceDto()),
-    'PushCampaignRequest': TypeInfo(TypeOf.AbstractClass),
     'ChatScreenContextDto': TypeInfo(TypeOf.AbstractClass),
     'EmbeddingProvider': TypeInfo(TypeOf.Enum, enumValues:EmbeddingProvider.values),
     'EmbeddingIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
@@ -46824,7 +46917,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveSmsIntegration': TypeInfo(TypeOf.Class, create:() => SaveSmsIntegration()),
     'SetSmsIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetSmsIntegrationAsDefaultRequest()),
     'TestSmsIntegration': TypeInfo(TypeOf.Class, create:() => TestSmsIntegration()),
-    'CreateSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreateSmsCampaignRequest()),
     'DeleteSmsCampaign': TypeInfo(TypeOf.Class, create:() => DeleteSmsCampaign()),
     'GetSmsCampaign': TypeInfo(TypeOf.Class, create:() => GetSmsCampaign()),
     'GetSmsCampaigns': TypeInfo(TypeOf.Class, create:() => GetSmsCampaigns()),

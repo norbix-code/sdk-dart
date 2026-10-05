@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-05 07:55:06
+Date: 2026-10-05 16:14:10
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -1871,7 +1871,10 @@ class SchemaListProjection implements IHasViewId, IConvertible
     // @DataMember
     String? description;
 
-    SchemaListProjection({this.viewId="",this.schemaName="",this.schemaTitle="",this.latestVersion,this.hasDraft,this.metaSchemaVersion=0,this.description});
+    // @DataMember
+    String? env;
+
+    SchemaListProjection({this.viewId="",this.schemaName="",this.schemaTitle="",this.latestVersion,this.hasDraft,this.metaSchemaVersion=0,this.description,this.env});
     SchemaListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1882,6 +1885,7 @@ class SchemaListProjection implements IHasViewId, IConvertible
         hasDraft = json['hasDraft'];
         metaSchemaVersion = json['metaSchemaVersion'] ?? 0;
         description = json['description'];
+        env = json['env'];
         return this;
     }
 
@@ -1892,7 +1896,8 @@ class SchemaListProjection implements IHasViewId, IConvertible
         'latestVersion': latestVersion,
         'hasDraft': hasDraft,
         'metaSchemaVersion': metaSchemaVersion,
-        'description': description
+        'description': description,
+        'env': env
     };
 
     getTypeName() => "SchemaListProjection";
