@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.smsNotifications` — all 35 SMS Hub endpoints, one test per method,
+/// `hub.smsNotifications` — all 34 SMS Hub endpoints, one test per method,
 /// against the fake driver (never a real server, never a real provider):
 /// verb, full path with the ids substituted in the gateway's own spelling,
 /// and the body for the writes that carry one.
@@ -476,21 +476,6 @@ void main() {
       expect(
         driver.lastRequest!.url.toString(),
         endsWith('/v1/notifications/sms/campaigns/cmp_1/messages'),
-      );
-    });
-
-    test(
-        'getSmsCampaignMessage → GET /v1/notifications/sms/campaigns/cmp_1/messages/n_1',
-        () async {
-      final driver = FakeHttpDriver();
-      await _client(driver)
-          .smsNotifications
-          .getSmsCampaignMessage(campaignId: 'cmp_1', id: 'n_1');
-
-      expect(driver.lastRequest!.method, equals('GET'));
-      expect(
-        driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1/messages/n_1'),
       );
     });
   });
