@@ -235,6 +235,22 @@ await api.database.findMergedTermTree(taxonomyName: 'services');
 
 // Try an aggregation pipeline before you save it
 await hub.database.testDatabaseAggregate(body: {...});
+
+// Update or delete EVERY record: an empty filter needs allRecords
+await api.database.updateMany(
+  collectionName: 'orders',
+  body: {'filter': '{}', 'update': '{"archived":true}', 'allRecords': true},
+);
+await hub.database.deleteManyRecords(
+  collectionName: 'orders',
+  body: {'filter': '{}', 'allRecords': true},
+);
+
+// Import a CSV / JSON file into a collection
+final upload = await hub.database.requestImportUploadUrl(body: {...});
+await hub.database.analyzeImportFile(body: {...});
+final created = await hub.database.createCollectionImport(body: {...});
+await hub.database.getCollectionImport(id: importId);
 ```
 
 | Area | `NorbixHub.database` | `NorbixApi.database` |
@@ -245,10 +261,63 @@ await hub.database.testDatabaseAggregate(body: {...});
 | Schema triggers | `getSchemaTriggers`, `getSchemaTrigger`, `saveSchemaTrigger`, `enableSchemaTrigger`, `disableSchemaTrigger`, `deleteSchemaTrigger` | — |
 | Integrations | `getDatabaseIntegrations`, `getDatabaseIntegration`, `saveDatabaseIntegration`, `testDatabaseIntegration`, `enableDatabaseIntegration`, `disableDatabaseIntegration`, `setDatabaseIntegrationAsDefault`, `deleteDatabaseIntegration`, `getAllowedFlexTiers`, `revealManagedFlexConnectionString` | — |
 | Saved aggregates | `getDatabaseAggregates`, `getDatabaseAggregate`, `saveDatabaseAggregate`, `testDatabaseAggregate`, `deleteDatabaseAggregate` | — |
+| Collection imports | `requestImportUploadUrl`, `analyzeImportFile`, `createCollectionImport`, `getCollectionImports`, `getCollectionImport`, `deleteCollectionImport` | — |
 | Module | `enableDatabase`, `disableDatabase` | — |
 
-Each taxonomy in `getDatabaseTaxonomies` now also carries `description`,
-`dependencies`, `parentName` and `dependencyNames`.
+Each taxonomy in `getDatabaseTaxonomies` also carries `description`,
+`dependencies`, `parentName` and `dependencyRefs`. `dependencyRefs` is a list
+of `{ "id": ..., "name": ... }` pairs in the same order as `dependencies`; a
+dependency whose taxonomy no longer exists keeps its place with
+`"name": null`. (It replaces the old `dependencyNames` list of plain names.)
+
+Each saved aggregate (`getDatabaseAggregate`, `getDatabaseAggregates`) carries
+`joinedCollections`: the collections its pipeline joins (`$lookup`). A schema
+whose collection a saved aggregate joins cannot be deleted — see
+`CM-ERRORS-SCHEMA-018` below.
+
+Schema triggers are kept per environment. `getSchemaTriggers` lists only the
+triggers of the client's env (`NorbixConfig.env`, PROD when not set), and
+each row and `getSchemaTrigger` carry `env`. `getSchemaTrigger` returns the
+owning schema id (`sch_…`) in `schemaId`. Enable, disable and delete act on
+the copy in the client's env; when that env has no copy the call fails with
+`CM-ERRORS-TRIGGERS-002`. Saving a trigger id that belongs to another schema
+fails the same way.
+
+`renameDatabaseSchema` takes `{ "title": ... }` only. A rename to a name that
+another schema in the same env already uses is always refused
+(`CM-ERRORS-SCHEMA-002`); there is no flag to skip that check.
+
+### Database rules and error codes
+
+| Situation | What happens |
+| --- | --- |
+| `updateMany` / `deleteMany` (and Hub `updateManyRecords` / `deleteManyRecords`) with an empty filter `{}` and no `allRecords: true` | refused, `CM-ERRORS-DATABASE-037`. For update-many a missing filter counts as `{}`. |
+| `updateOne` / `updateMany` body with `$` operators (`$inc`, `$set`, …) | refused, `CM-ERRORS-DATABASE-035`. Send the new field values, not operators. |
+| `insertOne` / `insertMany` / `replaceOne` with a broken document | `CM-ERRORS-DATABASE-036` "Invalid record document"; for insert-many `error.errors.first.context['Index']` names the bad document. |
+| `findTerms` / `findTermsChildren` filter with `$where`, `$function` or `$accumulator` | refused, `CM-ERRORS-DATABASE-031`. |
+| `changeResponsibility` to someone who is not a user of the project in that env | refused, `CM-ERRORS-MEMBERSHIP-USERS-012`. |
+| Deleting a schema that a saved aggregate joins | refused, `CM-ERRORS-SCHEMA-018`; `context['BlockerAggregateNames']` lists the aggregates. |
+| A term read by an unknown taxonomy name | `CM-ERRORS-TAXONOMIES-010` (the merged tree used to answer `-003`). |
+| A term read with a taxonomy name over 40 characters | `CM-ERRORS-TAXONOMIES-005`. |
+| A whole-taxonomy, merged or `includeTerms` tree with more than 5000 terms | `CM-ERRORS-TAXONOMIES-011`. `getDatabaseTaxonomyTree(query: {'includeTerms': true})` now fails when the term read fails, instead of returning taxonomies without terms. |
+| Update, replace or change-owner on a soft-deleted record | "not found"; update-many skips soft-deleted records. |
+
+Rights that changed:
+
+- A caller with only own-record rights (`createAsUser`, `updateOwn`,
+  `deleteOwn`) may call `insertMany`, `updateMany` and `deleteMany`; the call
+  touches only that caller's own records (it used to be a 403).
+- `testDatabaseAggregate` needs `database:create` or `database:update` on the
+  aggregate, plus read. A key with read only is refused.
+- `saveDatabaseTaxonomy` with the `viewId` of an existing taxonomy is an
+  update and needs `database:update` on that taxonomy; without a `viewId` it
+  is a create and needs `database:create`.
+- Term reads by taxonomy name (term list, children, term tree, merged tree)
+  need `database:read` on `database:term:<taxonomy id>`; the merged tree also
+  needs it on every nested taxonomy.
+
+Each of these errors arrives as a `NorbixError` (see [Errors](#errors)):
+read `error.errorCode` and `error.errors`.
 
 ## Working with terms
 
