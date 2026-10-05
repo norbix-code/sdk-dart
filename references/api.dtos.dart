@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-02 15:52:04
+Date: 2026-10-05 07:55:06
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -778,6 +778,301 @@ class ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class EndUserChatAttachment implements IConvertible
+{
+    String id = "";
+    String sessionId = "";
+    String fileName = "";
+    String contentType = "";
+    String kind = "";
+    int size = 0;
+    String? summary;
+    DateTime? createdAtUtc;
+
+    EndUserChatAttachment({this.id="",this.sessionId="",this.fileName="",this.contentType="",this.kind="",this.size=0,this.summary,this.createdAtUtc});
+    EndUserChatAttachment.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        sessionId = json['sessionId'] ?? "";
+        fileName = json['fileName'] ?? "";
+        contentType = json['contentType'] ?? "";
+        kind = json['kind'] ?? "";
+        size = json['size'] ?? 0;
+        summary = json['summary'];
+        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'sessionId': sessionId,
+        'fileName': fileName,
+        'contentType': contentType,
+        'kind': kind,
+        'size': size,
+        'summary': summary,
+        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "EndUserChatAttachment";
+    TypeContext? context = _ctx;
+}
+
+class EndUserChatMemoryNote implements IConvertible
+{
+    String id = "";
+    String sessionId = "";
+    String kind = "";
+    String text = "";
+    DateTime? createdAtUtc;
+
+    EndUserChatMemoryNote({this.id="",this.sessionId="",this.kind="",this.text="",this.createdAtUtc});
+    EndUserChatMemoryNote.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        sessionId = json['sessionId'] ?? "";
+        kind = json['kind'] ?? "";
+        text = json['text'] ?? "";
+        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'sessionId': sessionId,
+        'kind': kind,
+        'text': text,
+        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "EndUserChatMemoryNote";
+    TypeContext? context = _ctx;
+}
+
+class EndUserChatAssistant implements IConvertible
+{
+    String id = "";
+    String name = "";
+    String? welcomeMessage;
+    bool? isDefault;
+    bool? memoryEnabled;
+
+    EndUserChatAssistant({this.id="",this.name="",this.welcomeMessage,this.isDefault,this.memoryEnabled});
+    EndUserChatAssistant.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        welcomeMessage = json['welcomeMessage'];
+        isDefault = json['isDefault'];
+        memoryEnabled = json['memoryEnabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'welcomeMessage': welcomeMessage,
+        'isDefault': isDefault,
+        'memoryEnabled': memoryEnabled
+    };
+
+    getTypeName() => "EndUserChatAssistant";
+    TypeContext? context = _ctx;
+}
+
+class EndUserChatPlan implements IConvertible
+{
+    String id = "";
+    String name = "";
+    String quotaUnit = "";
+    int monthlyQuota = 0;
+    int used = 0;
+    int remaining = 0;
+    bool? attachments;
+    bool? rag;
+    bool? memory;
+
+    EndUserChatPlan({this.id="",this.name="",this.quotaUnit="",this.monthlyQuota=0,this.used=0,this.remaining=0,this.attachments,this.rag,this.memory});
+    EndUserChatPlan.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        quotaUnit = json['quotaUnit'] ?? "";
+        monthlyQuota = json['monthlyQuota'] ?? 0;
+        used = json['used'] ?? 0;
+        remaining = json['remaining'] ?? 0;
+        attachments = json['attachments'];
+        rag = json['rag'];
+        memory = json['memory'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'quotaUnit': quotaUnit,
+        'monthlyQuota': monthlyQuota,
+        'used': used,
+        'remaining': remaining,
+        'attachments': attachments,
+        'rag': rag,
+        'memory': memory
+    };
+
+    getTypeName() => "EndUserChatPlan";
+    TypeContext? context = _ctx;
+}
+
+class EndUserChatSession implements IConvertible
+{
+    String id = "";
+    String? assistantId;
+    String? title;
+    bool? isPinned;
+    bool? isArchived;
+    int lastSeq = 0;
+    DateTime? createdAtUtc;
+    DateTime? updatedAtUtc;
+
+    EndUserChatSession({this.id="",this.assistantId,this.title,this.isPinned,this.isArchived,this.lastSeq=0,this.createdAtUtc,this.updatedAtUtc});
+    EndUserChatSession.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        assistantId = json['assistantId'];
+        title = json['title'];
+        isPinned = json['isPinned'];
+        isArchived = json['isArchived'];
+        lastSeq = json['lastSeq'] ?? 0;
+        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
+        updatedAtUtc = JsonConverters.fromJson(json['updatedAtUtc'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'assistantId': assistantId,
+        'title': title,
+        'isPinned': isPinned,
+        'isArchived': isArchived,
+        'lastSeq': lastSeq,
+        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!),
+        'updatedAtUtc': JsonConverters.toJson(updatedAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "EndUserChatSession";
+    TypeContext? context = _ctx;
+}
+
+abstract class AiChatEntryWireDto
+{
+    String kind = "";
+    String id = "";
+    int seq = 0;
+    DateTime? atUtc;
+    String? refEntryId;
+    String? workItemId;
+    String? feedback;
+    DateTime? feedbackAtUtc;
+    String? feedbackByUserAuthId;
+
+    AiChatEntryWireDto({this.kind="",this.id="",this.seq=0,this.atUtc,this.refEntryId,this.workItemId,this.feedback,this.feedbackAtUtc,this.feedbackByUserAuthId});
+    AiChatEntryWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        kind = json['kind'] ?? "";
+        id = json['id'] ?? "";
+        seq = json['seq'] ?? 0;
+        atUtc = JsonConverters.fromJson(json['atUtc'],'DateTime',context!) ?? DateTime(0);
+        refEntryId = json['refEntryId'];
+        workItemId = json['workItemId'];
+        feedback = json['feedback'];
+        feedbackAtUtc = JsonConverters.fromJson(json['feedbackAtUtc'],'DateTime',context!);
+        feedbackByUserAuthId = json['feedbackByUserAuthId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'kind': kind,
+        'id': id,
+        'seq': seq,
+        'atUtc': JsonConverters.toJson(atUtc,'DateTime',context!),
+        'refEntryId': refEntryId,
+        'workItemId': workItemId,
+        'feedback': feedback,
+        'feedbackAtUtc': JsonConverters.toJson(feedbackAtUtc,'DateTime',context!),
+        'feedbackByUserAuthId': feedbackByUserAuthId
+    };
+
+    getTypeName() => "AiChatEntryWireDto";
+    TypeContext? context = _ctx;
+}
+
+class EndUserAiToolParameter implements IConvertible
+{
+    String name = "";
+    String type = "";
+    bool? Required;
+    String? description;
+
+    EndUserAiToolParameter({this.name="",this.type="",this.Required,this.description});
+    EndUserAiToolParameter.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        name = json['name'] ?? "";
+        type = json['type'] ?? "";
+        Required = json['required'];
+        description = json['description'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'name': name,
+        'type': type,
+        'required': Required,
+        'description': description
+    };
+
+    getTypeName() => "EndUserAiToolParameter";
+    TypeContext? context = _ctx;
+}
+
+class EndUserAiTool implements IConvertible
+{
+    String name = "";
+    String description = "";
+    List<String> toolsets = [];
+    bool? requiresConfirmation;
+    List<EndUserAiToolParameter> parameters = [];
+
+    EndUserAiTool({this.name="",this.description="",this.toolsets=const [],this.requiresConfirmation,this.parameters=const []});
+    EndUserAiTool.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        name = json['name'] ?? "";
+        description = json['description'] ?? "";
+        toolsets = JsonConverters.fromJson(json['toolsets'],'List<String>',context!) ?? [];
+        requiresConfirmation = json['requiresConfirmation'];
+        parameters = JsonConverters.fromJson(json['parameters'],'List<EndUserAiToolParameter>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'name': name,
+        'description': description,
+        'toolsets': JsonConverters.toJson(toolsets,'List<String>',context!),
+        'requiresConfirmation': requiresConfirmation,
+        'parameters': JsonConverters.toJson(parameters,'List<EndUserAiToolParameter>',context!)
+    };
+
+    getTypeName() => "EndUserAiTool";
+    TypeContext? context = _ctx;
+}
+
 enum AuthType
 {
     Service,
@@ -1342,12 +1637,49 @@ class SchemaSettingsDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class SchemaEmbedSettingsDto implements IConvertible
+{
+    // @DataMember
+    bool? enabled;
+
+    // @DataMember
+    List<String> fields = [];
+
+    // @DataMember
+    String? embeddingIntegrationId;
+
+    // @DataMember
+    bool? perUser;
+
+    SchemaEmbedSettingsDto({this.enabled,this.fields=const [],this.embeddingIntegrationId,this.perUser});
+    SchemaEmbedSettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        enabled = json['enabled'];
+        fields = JsonConverters.fromJson(json['fields'],'List<String>',context!) ?? [];
+        embeddingIntegrationId = json['embeddingIntegrationId'];
+        perUser = json['perUser'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'enabled': enabled,
+        'fields': JsonConverters.toJson(fields,'List<String>',context!),
+        'embeddingIntegrationId': embeddingIntegrationId,
+        'perUser': perUser
+    };
+
+    getTypeName() => "SchemaEmbedSettingsDto";
+    TypeContext? context = _ctx;
+}
+
 enum TriggerType
 {
     Membership,
     Schema,
     Files,
     Payments,
+    Ai,
 }
 
 enum TriggerActionType
@@ -1475,9 +1807,12 @@ class SchemaDto implements IHasViewId, IConvertible
     SchemaSettingsDto? settings;
 
     // @DataMember
+    SchemaEmbedSettingsDto? embed;
+
+    // @DataMember
     List<TriggerDto>? triggers;
 
-    SchemaDto({this.viewId="",this.schemaName="",this.schemaSlug,this.version=0,this.metaSchemaVersion=0,this.dataSchema,this.visualSchema,this.publishedAt,this.settings,this.triggers});
+    SchemaDto({this.viewId="",this.schemaName="",this.schemaSlug,this.version=0,this.metaSchemaVersion=0,this.dataSchema,this.visualSchema,this.publishedAt,this.settings,this.embed,this.triggers});
     SchemaDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1490,6 +1825,7 @@ class SchemaDto implements IHasViewId, IConvertible
         visualSchema = JsonConverters.fromJson(json['visualSchema'],'VisualSchemaDto',context!);
         publishedAt = JsonConverters.fromJson(json['publishedAt'],'DateTime',context!) ?? DateTime(0);
         settings = JsonConverters.fromJson(json['settings'],'SchemaSettingsDto',context!);
+        embed = JsonConverters.fromJson(json['embed'],'SchemaEmbedSettingsDto',context!);
         triggers = JsonConverters.fromJson(json['triggers'],'List<TriggerDto>',context!);
         return this;
     }
@@ -1504,6 +1840,7 @@ class SchemaDto implements IHasViewId, IConvertible
         'visualSchema': JsonConverters.toJson(visualSchema,'VisualSchemaDto',context!),
         'publishedAt': JsonConverters.toJson(publishedAt,'DateTime',context!),
         'settings': JsonConverters.toJson(settings,'SchemaSettingsDto',context!),
+        'embed': JsonConverters.toJson(embed,'SchemaEmbedSettingsDto',context!),
         'triggers': JsonConverters.toJson(triggers,'List<TriggerDto>',context!)
     };
 
@@ -1761,257 +2098,6 @@ class IntegrationTestResultItemDto implements IConvertible
     };
 
     getTypeName() => "IntegrationTestResultItemDto";
-    TypeContext? context = _ctx;
-}
-
-class EndUserChatAttachment implements IConvertible
-{
-    String id = "";
-    String sessionId = "";
-    String fileName = "";
-    String contentType = "";
-    String kind = "";
-    int size = 0;
-    String? summary;
-    DateTime? createdAtUtc;
-
-    EndUserChatAttachment({this.id="",this.sessionId="",this.fileName="",this.contentType="",this.kind="",this.size=0,this.summary,this.createdAtUtc});
-    EndUserChatAttachment.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        sessionId = json['sessionId'] ?? "";
-        fileName = json['fileName'] ?? "";
-        contentType = json['contentType'] ?? "";
-        kind = json['kind'] ?? "";
-        size = json['size'] ?? 0;
-        summary = json['summary'];
-        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'sessionId': sessionId,
-        'fileName': fileName,
-        'contentType': contentType,
-        'kind': kind,
-        'size': size,
-        'summary': summary,
-        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "EndUserChatAttachment";
-    TypeContext? context = _ctx;
-}
-
-class EndUserChatMemoryNote implements IConvertible
-{
-    String id = "";
-    String sessionId = "";
-    String kind = "";
-    String text = "";
-    DateTime? createdAtUtc;
-
-    EndUserChatMemoryNote({this.id="",this.sessionId="",this.kind="",this.text="",this.createdAtUtc});
-    EndUserChatMemoryNote.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        sessionId = json['sessionId'] ?? "";
-        kind = json['kind'] ?? "";
-        text = json['text'] ?? "";
-        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'sessionId': sessionId,
-        'kind': kind,
-        'text': text,
-        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "EndUserChatMemoryNote";
-    TypeContext? context = _ctx;
-}
-
-class EndUserChatAssistant implements IConvertible
-{
-    String id = "";
-    String name = "";
-    String? welcomeMessage;
-    bool? isDefault;
-    bool? memoryEnabled;
-
-    EndUserChatAssistant({this.id="",this.name="",this.welcomeMessage,this.isDefault,this.memoryEnabled});
-    EndUserChatAssistant.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        name = json['name'] ?? "";
-        welcomeMessage = json['welcomeMessage'];
-        isDefault = json['isDefault'];
-        memoryEnabled = json['memoryEnabled'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'welcomeMessage': welcomeMessage,
-        'isDefault': isDefault,
-        'memoryEnabled': memoryEnabled
-    };
-
-    getTypeName() => "EndUserChatAssistant";
-    TypeContext? context = _ctx;
-}
-
-class EndUserChatSession implements IConvertible
-{
-    String id = "";
-    String? assistantId;
-    String? title;
-    bool? isPinned;
-    bool? isArchived;
-    int lastSeq = 0;
-    DateTime? createdAtUtc;
-    DateTime? updatedAtUtc;
-
-    EndUserChatSession({this.id="",this.assistantId,this.title,this.isPinned,this.isArchived,this.lastSeq=0,this.createdAtUtc,this.updatedAtUtc});
-    EndUserChatSession.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        assistantId = json['assistantId'];
-        title = json['title'];
-        isPinned = json['isPinned'];
-        isArchived = json['isArchived'];
-        lastSeq = json['lastSeq'] ?? 0;
-        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
-        updatedAtUtc = JsonConverters.fromJson(json['updatedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'assistantId': assistantId,
-        'title': title,
-        'isPinned': isPinned,
-        'isArchived': isArchived,
-        'lastSeq': lastSeq,
-        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!),
-        'updatedAtUtc': JsonConverters.toJson(updatedAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "EndUserChatSession";
-    TypeContext? context = _ctx;
-}
-
-abstract class AiChatEntryWireDto
-{
-    String kind = "";
-    String id = "";
-    int seq = 0;
-    DateTime? atUtc;
-    String? refEntryId;
-    String? workItemId;
-    String? feedback;
-    DateTime? feedbackAtUtc;
-    String? feedbackByUserAuthId;
-
-    AiChatEntryWireDto({this.kind="",this.id="",this.seq=0,this.atUtc,this.refEntryId,this.workItemId,this.feedback,this.feedbackAtUtc,this.feedbackByUserAuthId});
-    AiChatEntryWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        kind = json['kind'] ?? "";
-        id = json['id'] ?? "";
-        seq = json['seq'] ?? 0;
-        atUtc = JsonConverters.fromJson(json['atUtc'],'DateTime',context!) ?? DateTime(0);
-        refEntryId = json['refEntryId'];
-        workItemId = json['workItemId'];
-        feedback = json['feedback'];
-        feedbackAtUtc = JsonConverters.fromJson(json['feedbackAtUtc'],'DateTime',context!);
-        feedbackByUserAuthId = json['feedbackByUserAuthId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'kind': kind,
-        'id': id,
-        'seq': seq,
-        'atUtc': JsonConverters.toJson(atUtc,'DateTime',context!),
-        'refEntryId': refEntryId,
-        'workItemId': workItemId,
-        'feedback': feedback,
-        'feedbackAtUtc': JsonConverters.toJson(feedbackAtUtc,'DateTime',context!),
-        'feedbackByUserAuthId': feedbackByUserAuthId
-    };
-
-    getTypeName() => "AiChatEntryWireDto";
-    TypeContext? context = _ctx;
-}
-
-class EndUserAiToolParameter implements IConvertible
-{
-    String name = "";
-    String type = "";
-    bool? Required;
-    String? description;
-
-    EndUserAiToolParameter({this.name="",this.type="",this.Required,this.description});
-    EndUserAiToolParameter.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        name = json['name'] ?? "";
-        type = json['type'] ?? "";
-        Required = json['required'];
-        description = json['description'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'name': name,
-        'type': type,
-        'required': Required,
-        'description': description
-    };
-
-    getTypeName() => "EndUserAiToolParameter";
-    TypeContext? context = _ctx;
-}
-
-class EndUserAiTool implements IConvertible
-{
-    String name = "";
-    String description = "";
-    List<String> toolsets = [];
-    bool? requiresConfirmation;
-    List<EndUserAiToolParameter> parameters = [];
-
-    EndUserAiTool({this.name="",this.description="",this.toolsets=const [],this.requiresConfirmation,this.parameters=const []});
-    EndUserAiTool.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        name = json['name'] ?? "";
-        description = json['description'] ?? "";
-        toolsets = JsonConverters.fromJson(json['toolsets'],'List<String>',context!) ?? [];
-        requiresConfirmation = json['requiresConfirmation'];
-        parameters = JsonConverters.fromJson(json['parameters'],'List<EndUserAiToolParameter>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'toolsets': JsonConverters.toJson(toolsets,'List<String>',context!),
-        'requiresConfirmation': requiresConfirmation,
-        'parameters': JsonConverters.toJson(parameters,'List<EndUserAiToolParameter>',context!)
-    };
-
-    getTypeName() => "EndUserAiTool";
     TypeContext? context = _ctx;
 }
 
@@ -2526,6 +2612,225 @@ class PublicLegalDocumentDto implements IConvertible
     };
 
     getTypeName() => "PublicLegalDocumentDto";
+    TypeContext? context = _ctx;
+}
+
+class ListEndUserChatAttachmentsResponse extends ResponseBase implements IConvertible
+{
+    List<EndUserChatAttachment> attachments = [];
+
+    ListEndUserChatAttachmentsResponse({this.attachments=const []});
+    ListEndUserChatAttachmentsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        attachments = JsonConverters.fromJson(json['attachments'],'List<EndUserChatAttachment>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'attachments': JsonConverters.toJson(attachments,'List<EndUserChatAttachment>',context!)
+    });
+
+    getTypeName() => "ListEndUserChatAttachmentsResponse";
+    TypeContext? context = _ctx;
+}
+
+class ListEndUserChatMemoryResponse extends ResponseBase implements IConvertible
+{
+    List<EndUserChatMemoryNote> notes = [];
+
+    ListEndUserChatMemoryResponse({this.notes=const []});
+    ListEndUserChatMemoryResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        notes = JsonConverters.fromJson(json['notes'],'List<EndUserChatMemoryNote>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'notes': JsonConverters.toJson(notes,'List<EndUserChatMemoryNote>',context!)
+    });
+
+    getTypeName() => "ListEndUserChatMemoryResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEndUserChatAvailabilityResponse extends ResponseBase implements IConvertible
+{
+    bool? enabled;
+    bool? available;
+    String? reason;
+    String? defaultAssistantId;
+    List<EndUserChatAssistant> assistants = [];
+    EndUserChatPlan? plan;
+
+    GetEndUserChatAvailabilityResponse({this.enabled,this.available,this.reason,this.defaultAssistantId,this.assistants=const [],this.plan});
+    GetEndUserChatAvailabilityResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        enabled = json['enabled'];
+        available = json['available'];
+        reason = json['reason'];
+        defaultAssistantId = json['defaultAssistantId'];
+        assistants = JsonConverters.fromJson(json['assistants'],'List<EndUserChatAssistant>',context!) ?? [];
+        plan = JsonConverters.fromJson(json['plan'],'EndUserChatPlan',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'enabled': enabled,
+        'available': available,
+        'reason': reason,
+        'defaultAssistantId': defaultAssistantId,
+        'assistants': JsonConverters.toJson(assistants,'List<EndUserChatAssistant>',context!),
+        'plan': JsonConverters.toJson(plan,'EndUserChatPlan',context!)
+    });
+
+    getTypeName() => "GetEndUserChatAvailabilityResponse";
+    TypeContext? context = _ctx;
+}
+
+class ListEndUserChatSessionsResponse extends ResponseBase implements IConvertible
+{
+    List<EndUserChatSession> sessions = [];
+
+    ListEndUserChatSessionsResponse({this.sessions=const []});
+    ListEndUserChatSessionsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessions = JsonConverters.fromJson(json['sessions'],'List<EndUserChatSession>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessions': JsonConverters.toJson(sessions,'List<EndUserChatSession>',context!)
+    });
+
+    getTypeName() => "ListEndUserChatSessionsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEndUserChatSessionResponse extends ResponseBase implements IConvertible
+{
+    EndUserChatSession? session;
+
+    GetEndUserChatSessionResponse({this.session});
+    GetEndUserChatSessionResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        session = JsonConverters.fromJson(json['session'],'EndUserChatSession',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'session': JsonConverters.toJson(session,'EndUserChatSession',context!)
+    });
+
+    getTypeName() => "GetEndUserChatSessionResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEndUserChatEntriesResponse extends ResponseBase implements IConvertible
+{
+    String? sessionId;
+    List<AiChatEntryWireDto> entries = [];
+    int lastSeq = 0;
+    bool? hasMore;
+
+    GetEndUserChatEntriesResponse({this.sessionId,this.entries=const [],this.lastSeq=0,this.hasMore});
+    GetEndUserChatEntriesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'];
+        entries = JsonConverters.fromJson(json['entries'],'List<AiChatEntryWireDto>',context!) ?? [];
+        lastSeq = json['lastSeq'] ?? 0;
+        hasMore = json['hasMore'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'entries': JsonConverters.toJson(entries,'List<AiChatEntryWireDto>',context!),
+        'lastSeq': lastSeq,
+        'hasMore': hasMore
+    });
+
+    getTypeName() => "GetEndUserChatEntriesResponse";
+    TypeContext? context = _ctx;
+}
+
+class StartEndUserChatTurnResponse extends ResponseBase implements IConvertible
+{
+    String? turnId;
+    String? sessionId;
+    String? channel;
+
+    StartEndUserChatTurnResponse({this.turnId,this.sessionId,this.channel});
+    StartEndUserChatTurnResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        turnId = json['turnId'];
+        sessionId = json['sessionId'];
+        channel = json['channel'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'turnId': turnId,
+        'sessionId': sessionId,
+        'channel': channel
+    });
+
+    getTypeName() => "StartEndUserChatTurnResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEndUserAiToolsResponse extends ResponseBase implements IConvertible
+{
+    List<EndUserAiTool>? tools;
+
+    GetEndUserAiToolsResponse({this.tools});
+    GetEndUserAiToolsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        tools = JsonConverters.fromJson(json['tools'],'List<EndUserAiTool>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'tools': JsonConverters.toJson(tools,'List<EndUserAiTool>',context!)
+    });
+
+    getTypeName() => "GetEndUserAiToolsResponse";
+    TypeContext? context = _ctx;
+}
+
+class InvokeEndUserAiToolResponse extends ResponseBase implements IConvertible
+{
+    String? result;
+
+    InvokeEndUserAiToolResponse({this.result});
+    InvokeEndUserAiToolResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = json['result'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': result
+    });
+
+    getTypeName() => "InvokeEndUserAiToolResponse";
     TypeContext? context = _ctx;
 }
 
@@ -3124,222 +3429,6 @@ class TestFilesIntegrationResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class ListEndUserChatAttachmentsResponse extends ResponseBase implements IConvertible
-{
-    List<EndUserChatAttachment> attachments = [];
-
-    ListEndUserChatAttachmentsResponse({this.attachments=const []});
-    ListEndUserChatAttachmentsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        attachments = JsonConverters.fromJson(json['attachments'],'List<EndUserChatAttachment>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'attachments': JsonConverters.toJson(attachments,'List<EndUserChatAttachment>',context!)
-    });
-
-    getTypeName() => "ListEndUserChatAttachmentsResponse";
-    TypeContext? context = _ctx;
-}
-
-class ListEndUserChatMemoryResponse extends ResponseBase implements IConvertible
-{
-    List<EndUserChatMemoryNote> notes = [];
-
-    ListEndUserChatMemoryResponse({this.notes=const []});
-    ListEndUserChatMemoryResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        notes = JsonConverters.fromJson(json['notes'],'List<EndUserChatMemoryNote>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'notes': JsonConverters.toJson(notes,'List<EndUserChatMemoryNote>',context!)
-    });
-
-    getTypeName() => "ListEndUserChatMemoryResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEndUserChatAvailabilityResponse extends ResponseBase implements IConvertible
-{
-    bool? enabled;
-    bool? available;
-    String? reason;
-    String? defaultAssistantId;
-    List<EndUserChatAssistant> assistants = [];
-
-    GetEndUserChatAvailabilityResponse({this.enabled,this.available,this.reason,this.defaultAssistantId,this.assistants=const []});
-    GetEndUserChatAvailabilityResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        enabled = json['enabled'];
-        available = json['available'];
-        reason = json['reason'];
-        defaultAssistantId = json['defaultAssistantId'];
-        assistants = JsonConverters.fromJson(json['assistants'],'List<EndUserChatAssistant>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'enabled': enabled,
-        'available': available,
-        'reason': reason,
-        'defaultAssistantId': defaultAssistantId,
-        'assistants': JsonConverters.toJson(assistants,'List<EndUserChatAssistant>',context!)
-    });
-
-    getTypeName() => "GetEndUserChatAvailabilityResponse";
-    TypeContext? context = _ctx;
-}
-
-class ListEndUserChatSessionsResponse extends ResponseBase implements IConvertible
-{
-    List<EndUserChatSession> sessions = [];
-
-    ListEndUserChatSessionsResponse({this.sessions=const []});
-    ListEndUserChatSessionsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessions = JsonConverters.fromJson(json['sessions'],'List<EndUserChatSession>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessions': JsonConverters.toJson(sessions,'List<EndUserChatSession>',context!)
-    });
-
-    getTypeName() => "ListEndUserChatSessionsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEndUserChatSessionResponse extends ResponseBase implements IConvertible
-{
-    EndUserChatSession? session;
-
-    GetEndUserChatSessionResponse({this.session});
-    GetEndUserChatSessionResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        session = JsonConverters.fromJson(json['session'],'EndUserChatSession',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'session': JsonConverters.toJson(session,'EndUserChatSession',context!)
-    });
-
-    getTypeName() => "GetEndUserChatSessionResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEndUserChatEntriesResponse extends ResponseBase implements IConvertible
-{
-    String? sessionId;
-    List<AiChatEntryWireDto> entries = [];
-    int lastSeq = 0;
-    bool? hasMore;
-
-    GetEndUserChatEntriesResponse({this.sessionId,this.entries=const [],this.lastSeq=0,this.hasMore});
-    GetEndUserChatEntriesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'];
-        entries = JsonConverters.fromJson(json['entries'],'List<AiChatEntryWireDto>',context!) ?? [];
-        lastSeq = json['lastSeq'] ?? 0;
-        hasMore = json['hasMore'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'entries': JsonConverters.toJson(entries,'List<AiChatEntryWireDto>',context!),
-        'lastSeq': lastSeq,
-        'hasMore': hasMore
-    });
-
-    getTypeName() => "GetEndUserChatEntriesResponse";
-    TypeContext? context = _ctx;
-}
-
-class StartEndUserChatTurnResponse extends ResponseBase implements IConvertible
-{
-    String? turnId;
-    String? sessionId;
-    String? channel;
-
-    StartEndUserChatTurnResponse({this.turnId,this.sessionId,this.channel});
-    StartEndUserChatTurnResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        turnId = json['turnId'];
-        sessionId = json['sessionId'];
-        channel = json['channel'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'turnId': turnId,
-        'sessionId': sessionId,
-        'channel': channel
-    });
-
-    getTypeName() => "StartEndUserChatTurnResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEndUserAiToolsResponse extends ResponseBase implements IConvertible
-{
-    List<EndUserAiTool>? tools;
-
-    GetEndUserAiToolsResponse({this.tools});
-    GetEndUserAiToolsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        tools = JsonConverters.fromJson(json['tools'],'List<EndUserAiTool>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'tools': JsonConverters.toJson(tools,'List<EndUserAiTool>',context!)
-    });
-
-    getTypeName() => "GetEndUserAiToolsResponse";
-    TypeContext? context = _ctx;
-}
-
-class InvokeEndUserAiToolResponse extends ResponseBase implements IConvertible
-{
-    String? result;
-
-    InvokeEndUserAiToolResponse({this.result});
-    InvokeEndUserAiToolResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = json['result'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': result
-    });
-
-    getTypeName() => "InvokeEndUserAiToolResponse";
-    TypeContext? context = _ctx;
-}
-
 // @Route("/{version}/echo", "GET")
 class Echo extends RequestBase implements IReturn<EchoResponse>, IConvertible, IGet
 {
@@ -3354,6 +3443,36 @@ class Echo extends RequestBase implements IReturn<EchoResponse>, IConvertible, I
     createResponse() => EchoResponse();
     getResponseTypeName() => "EchoResponse";
     getTypeName() => "Echo";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/public/projects/{ProjectId}/brand/{Kind}", "GET")
+class GetPublicProjectBrandAsset extends RequestBase implements IReturn<Uint8List>, IConvertible, IGet
+{
+    String? projectId;
+    String? kind;
+    String? v;
+
+    GetPublicProjectBrandAsset({this.projectId,this.kind,this.v});
+    GetPublicProjectBrandAsset.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        projectId = json['projectId'];
+        kind = json['kind'];
+        v = json['v'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'projectId': projectId,
+        'kind': kind,
+        'v': v
+    });
+
+    createResponse() => Uint8List(0);
+    getResponseTypeName() => "Uint8List";
+    getTypeName() => "GetPublicProjectBrandAsset";
     TypeContext? context = _ctx;
 }
 
@@ -3405,6 +3524,541 @@ class GetPublicProjectLegal extends RequestBase implements IReturn<PublicLegalDo
     createResponse() => PublicLegalDocumentDto();
     getResponseTypeName() => "PublicLegalDocumentDto";
     getTypeName() => "GetPublicProjectLegal";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Adds a file to one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}/attachments", "POST")
+// @Api(Description="Adds a file to one of the caller's own AI chats.")
+class UploadEndUserChatAttachmentRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    String sessionId = "";
+    String fileName = "";
+    String contentType = "";
+    String base64Content = "";
+
+    UploadEndUserChatAttachmentRequest({this.sessionId="",this.fileName="",this.contentType="",this.base64Content=""});
+    UploadEndUserChatAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        fileName = json['fileName'] ?? "";
+        contentType = json['contentType'] ?? "";
+        base64Content = json['base64Content'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'fileName': fileName,
+        'contentType': contentType,
+        'base64Content': base64Content
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "UploadEndUserChatAttachmentRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists the files in one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}/attachments", "GET")
+// @Api(Description="Lists the files in one of the caller's own AI chats.")
+class ListEndUserChatAttachmentsRequest extends CodeMashRequestBase implements IReturn<ListEndUserChatAttachmentsResponse>, IConvertible, IGet
+{
+    String sessionId = "";
+
+    ListEndUserChatAttachmentsRequest({this.sessionId=""});
+    ListEndUserChatAttachmentsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId
+    });
+
+    createResponse() => ListEndUserChatAttachmentsResponse();
+    getResponseTypeName() => "ListEndUserChatAttachmentsResponse";
+    getTypeName() => "ListEndUserChatAttachmentsRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Removes a file from one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/attachments/{AttachmentId}", "DELETE")
+// @Api(Description="Removes a file from one of the caller's own AI chats.")
+class DeleteEndUserChatAttachmentRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    String attachmentId = "";
+
+    DeleteEndUserChatAttachmentRequest({this.attachmentId=""});
+    DeleteEndUserChatAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        attachmentId = json['attachmentId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'attachmentId': attachmentId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteEndUserChatAttachmentRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Likes, dislikes or clears one message of the caller's own AI chat.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}/entries/{EntryId}/feedback", "PUT")
+// @Api(Description="Likes, dislikes or clears one message of the caller's own AI chat.")
+class SetEndUserChatEntryFeedbackRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    String sessionId = "";
+    String entryId = "";
+    String? feedback;
+
+    SetEndUserChatEntryFeedbackRequest({this.sessionId="",this.entryId="",this.feedback});
+    SetEndUserChatEntryFeedbackRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        entryId = json['entryId'] ?? "";
+        feedback = json['feedback'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'entryId': entryId,
+        'feedback': feedback
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "SetEndUserChatEntryFeedbackRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists what the AI chat remembers about the caller.
+*/
+// @Route("/{version}/ai/chat/memory", "GET")
+// @Api(Description="Lists what the AI chat remembers about the caller.")
+class ListEndUserChatMemoryRequest extends CodeMashRequestBase implements IReturn<ListEndUserChatMemoryResponse>, IConvertible, IGet
+{
+    int? take;
+
+    ListEndUserChatMemoryRequest({this.take});
+    ListEndUserChatMemoryRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        take = json['take'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'take': take
+    });
+
+    createResponse() => ListEndUserChatMemoryResponse();
+    getResponseTypeName() => "ListEndUserChatMemoryResponse";
+    getTypeName() => "ListEndUserChatMemoryRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Forgets one thing the AI chat remembers about the caller.
+*/
+// @Route("/{version}/ai/chat/memory/{NoteId}", "DELETE")
+// @Api(Description="Forgets one thing the AI chat remembers about the caller.")
+class ForgetEndUserChatMemoryRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    String noteId = "";
+
+    ForgetEndUserChatMemoryRequest({this.noteId=""});
+    ForgetEndUserChatMemoryRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        noteId = json['noteId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'noteId': noteId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "ForgetEndUserChatMemoryRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Whether the AI chat can run for the caller, and which assistants it offers.
+*/
+// @Route("/{version}/ai/chat/availability", "GET")
+// @Api(Description="Whether the AI chat can run for the caller, and which assistants it offers.")
+class GetEndUserChatAvailabilityRequest extends CodeMashRequestBase implements IReturn<GetEndUserChatAvailabilityResponse>, IConvertible, IGet
+{
+    GetEndUserChatAvailabilityRequest();
+    GetEndUserChatAvailabilityRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetEndUserChatAvailabilityResponse();
+    getResponseTypeName() => "GetEndUserChatAvailabilityResponse";
+    getTypeName() => "GetEndUserChatAvailabilityRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions", "GET")
+// @Api(Description="Lists the caller's own AI chats.")
+class ListEndUserChatSessionsRequest extends CodeMashRequestBase implements IReturn<ListEndUserChatSessionsResponse>, IConvertible, IGet
+{
+    int? take;
+    bool? includeArchived;
+
+    ListEndUserChatSessionsRequest({this.take,this.includeArchived});
+    ListEndUserChatSessionsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        take = json['take'];
+        includeArchived = json['includeArchived'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'take': take,
+        'includeArchived': includeArchived
+    });
+
+    createResponse() => ListEndUserChatSessionsResponse();
+    getResponseTypeName() => "ListEndUserChatSessionsResponse";
+    getTypeName() => "ListEndUserChatSessionsRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Opens a new AI chat for the caller.
+*/
+// @Route("/{version}/ai/chat/sessions", "POST")
+// @Api(Description="Opens a new AI chat for the caller.")
+class CreateEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    String? assistantId;
+    String? title;
+
+    CreateEndUserChatSessionRequest({this.assistantId,this.title});
+    CreateEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        assistantId = json['assistantId'];
+        title = json['title'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'assistantId': assistantId,
+        'title': title
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CreateEndUserChatSessionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Returns one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}", "GET")
+// @Api(Description="Returns one of the caller's own AI chats.")
+class GetEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<GetEndUserChatSessionResponse>, IConvertible, IGet
+{
+    String sessionId = "";
+
+    GetEndUserChatSessionRequest({this.sessionId=""});
+    GetEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId
+    });
+
+    createResponse() => GetEndUserChatSessionResponse();
+    getResponseTypeName() => "GetEndUserChatSessionResponse";
+    getTypeName() => "GetEndUserChatSessionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Renames one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}", "PATCH")
+// @Api(Description="Renames one of the caller's own AI chats.")
+class RenameEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
+{
+    String sessionId = "";
+    String? title;
+
+    RenameEndUserChatSessionRequest({this.sessionId="",this.title});
+    RenameEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        title = json['title'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'title': title
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "RenameEndUserChatSessionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Pins or unpins one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}/pin", "PUT")
+// @Api(Description="Pins or unpins one of the caller's own AI chats.")
+class PinEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    String sessionId = "";
+    bool? pinned;
+
+    PinEndUserChatSessionRequest({this.sessionId="",this.pinned});
+    PinEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        pinned = json['pinned'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'pinned': pinned
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "PinEndUserChatSessionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Archives or unarchives one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}/archive", "PUT")
+// @Api(Description="Archives or unarchives one of the caller's own AI chats.")
+class ArchiveEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    String sessionId = "";
+    bool? archived;
+
+    ArchiveEndUserChatSessionRequest({this.sessionId="",this.archived});
+    ArchiveEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        archived = json['archived'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'archived': archived
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "ArchiveEndUserChatSessionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Deletes one of the caller's own AI chats.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}", "DELETE")
+// @Api(Description="Deletes one of the caller's own AI chats.")
+class DeleteEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    String sessionId = "";
+
+    DeleteEndUserChatSessionRequest({this.sessionId=""});
+    DeleteEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteEndUserChatSessionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Returns a page of one of the caller's own AI chat transcripts.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}/entries", "GET")
+// @Api(Description="Returns a page of one of the caller's own AI chat transcripts.")
+class GetEndUserChatEntriesRequest extends CodeMashRequestBase implements IReturn<GetEndUserChatEntriesResponse>, IConvertible, IGet
+{
+    String sessionId = "";
+    int? afterSeq;
+    int? take;
+
+    GetEndUserChatEntriesRequest({this.sessionId="",this.afterSeq,this.take});
+    GetEndUserChatEntriesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        afterSeq = json['afterSeq'];
+        take = json['take'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'afterSeq': afterSeq,
+        'take': take
+    });
+
+    createResponse() => GetEndUserChatEntriesResponse();
+    getResponseTypeName() => "GetEndUserChatEntriesResponse";
+    getTypeName() => "GetEndUserChatEntriesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Sends a message to the AI chat; the answer streams on the caller's channel.
+*/
+// @Route("/{version}/ai/chat/turn", "POST")
+// @Api(Description="Sends a message to the AI chat; the answer streams on the caller's channel.")
+class StartEndUserChatTurnRequest extends CodeMashRequestBase implements IReturn<StartEndUserChatTurnResponse>, IConvertible, IPost
+{
+    String? sessionId;
+    String? assistantId;
+    String message = "";
+
+    StartEndUserChatTurnRequest({this.sessionId,this.assistantId,this.message=""});
+    StartEndUserChatTurnRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'];
+        assistantId = json['assistantId'];
+        message = json['message'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'assistantId': assistantId,
+        'message': message
+    });
+
+    createResponse() => StartEndUserChatTurnResponse();
+    getResponseTypeName() => "StartEndUserChatTurnResponse";
+    getTypeName() => "StartEndUserChatTurnRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists the AI tools a project user may use: only their own data (own:* toolsets).
+*/
+// @Route("/{version}/ai/tools", "GET")
+// @Api(Description="Lists the AI tools a project user may use: only their own data (own:* toolsets).")
+class GetEndUserAiToolsRequest extends RequestBase implements IReturn<GetEndUserAiToolsResponse>, IConvertible, IGet
+{
+    GetEndUserAiToolsRequest();
+    GetEndUserAiToolsRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetEndUserAiToolsResponse();
+    getResponseTypeName() => "GetEndUserAiToolsResponse";
+    getTypeName() => "GetEndUserAiToolsRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Invokes one own-scope AI tool as the calling project user.
+*/
+// @Route("/{version}/ai/tools/{ToolName}", "POST")
+// @Api(Description="Invokes one own-scope AI tool as the calling project user.")
+class InvokeEndUserAiToolRequest extends RequestBase implements IReturn<InvokeEndUserAiToolResponse>, IConvertible, IPost
+{
+    String toolName = "";
+    String? argumentsJson;
+
+    InvokeEndUserAiToolRequest({this.toolName="",this.argumentsJson});
+    InvokeEndUserAiToolRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        toolName = json['toolName'] ?? "";
+        argumentsJson = json['argumentsJson'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'toolName': toolName,
+        'argumentsJson': argumentsJson
+    });
+
+    createResponse() => InvokeEndUserAiToolResponse();
+    getResponseTypeName() => "InvokeEndUserAiToolResponse";
+    getTypeName() => "InvokeEndUserAiToolRequest";
     TypeContext? context = _ctx;
 }
 
@@ -6476,541 +7130,6 @@ class TestFilesIntegrationRequest extends CodeMashRequestBase implements IReturn
     TypeContext? context = _ctx;
 }
 
-/**
-* Adds a file to one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}/attachments", "POST")
-// @Api(Description="Adds a file to one of the caller's own AI chats.")
-class UploadEndUserChatAttachmentRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    String sessionId = "";
-    String fileName = "";
-    String contentType = "";
-    String base64Content = "";
-
-    UploadEndUserChatAttachmentRequest({this.sessionId="",this.fileName="",this.contentType="",this.base64Content=""});
-    UploadEndUserChatAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        fileName = json['fileName'] ?? "";
-        contentType = json['contentType'] ?? "";
-        base64Content = json['base64Content'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'fileName': fileName,
-        'contentType': contentType,
-        'base64Content': base64Content
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "UploadEndUserChatAttachmentRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Lists the files in one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}/attachments", "GET")
-// @Api(Description="Lists the files in one of the caller's own AI chats.")
-class ListEndUserChatAttachmentsRequest extends CodeMashRequestBase implements IReturn<ListEndUserChatAttachmentsResponse>, IConvertible, IGet
-{
-    String sessionId = "";
-
-    ListEndUserChatAttachmentsRequest({this.sessionId=""});
-    ListEndUserChatAttachmentsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId
-    });
-
-    createResponse() => ListEndUserChatAttachmentsResponse();
-    getResponseTypeName() => "ListEndUserChatAttachmentsResponse";
-    getTypeName() => "ListEndUserChatAttachmentsRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Removes a file from one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/attachments/{AttachmentId}", "DELETE")
-// @Api(Description="Removes a file from one of the caller's own AI chats.")
-class DeleteEndUserChatAttachmentRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    String attachmentId = "";
-
-    DeleteEndUserChatAttachmentRequest({this.attachmentId=""});
-    DeleteEndUserChatAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        attachmentId = json['attachmentId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'attachmentId': attachmentId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DeleteEndUserChatAttachmentRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Likes, dislikes or clears one message of the caller's own AI chat.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}/entries/{EntryId}/feedback", "PUT")
-// @Api(Description="Likes, dislikes or clears one message of the caller's own AI chat.")
-class SetEndUserChatEntryFeedbackRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    String sessionId = "";
-    String entryId = "";
-    String? feedback;
-
-    SetEndUserChatEntryFeedbackRequest({this.sessionId="",this.entryId="",this.feedback});
-    SetEndUserChatEntryFeedbackRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        entryId = json['entryId'] ?? "";
-        feedback = json['feedback'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'entryId': entryId,
-        'feedback': feedback
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "SetEndUserChatEntryFeedbackRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Lists what the AI chat remembers about the caller.
-*/
-// @Route("/{version}/ai/chat/memory", "GET")
-// @Api(Description="Lists what the AI chat remembers about the caller.")
-class ListEndUserChatMemoryRequest extends CodeMashRequestBase implements IReturn<ListEndUserChatMemoryResponse>, IConvertible, IGet
-{
-    int? take;
-
-    ListEndUserChatMemoryRequest({this.take});
-    ListEndUserChatMemoryRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        take = json['take'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'take': take
-    });
-
-    createResponse() => ListEndUserChatMemoryResponse();
-    getResponseTypeName() => "ListEndUserChatMemoryResponse";
-    getTypeName() => "ListEndUserChatMemoryRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Forgets one thing the AI chat remembers about the caller.
-*/
-// @Route("/{version}/ai/chat/memory/{NoteId}", "DELETE")
-// @Api(Description="Forgets one thing the AI chat remembers about the caller.")
-class ForgetEndUserChatMemoryRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    String noteId = "";
-
-    ForgetEndUserChatMemoryRequest({this.noteId=""});
-    ForgetEndUserChatMemoryRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        noteId = json['noteId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'noteId': noteId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "ForgetEndUserChatMemoryRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Whether the AI chat can run for the caller, and which assistants it offers.
-*/
-// @Route("/{version}/ai/chat/availability", "GET")
-// @Api(Description="Whether the AI chat can run for the caller, and which assistants it offers.")
-class GetEndUserChatAvailabilityRequest extends CodeMashRequestBase implements IReturn<GetEndUserChatAvailabilityResponse>, IConvertible, IGet
-{
-    GetEndUserChatAvailabilityRequest();
-    GetEndUserChatAvailabilityRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => GetEndUserChatAvailabilityResponse();
-    getResponseTypeName() => "GetEndUserChatAvailabilityResponse";
-    getTypeName() => "GetEndUserChatAvailabilityRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Lists the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions", "GET")
-// @Api(Description="Lists the caller's own AI chats.")
-class ListEndUserChatSessionsRequest extends CodeMashRequestBase implements IReturn<ListEndUserChatSessionsResponse>, IConvertible, IGet
-{
-    int? take;
-    bool? includeArchived;
-
-    ListEndUserChatSessionsRequest({this.take,this.includeArchived});
-    ListEndUserChatSessionsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        take = json['take'];
-        includeArchived = json['includeArchived'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'take': take,
-        'includeArchived': includeArchived
-    });
-
-    createResponse() => ListEndUserChatSessionsResponse();
-    getResponseTypeName() => "ListEndUserChatSessionsResponse";
-    getTypeName() => "ListEndUserChatSessionsRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Opens a new AI chat for the caller.
-*/
-// @Route("/{version}/ai/chat/sessions", "POST")
-// @Api(Description="Opens a new AI chat for the caller.")
-class CreateEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    String? assistantId;
-    String? title;
-
-    CreateEndUserChatSessionRequest({this.assistantId,this.title});
-    CreateEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        assistantId = json['assistantId'];
-        title = json['title'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'assistantId': assistantId,
-        'title': title
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "CreateEndUserChatSessionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Returns one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}", "GET")
-// @Api(Description="Returns one of the caller's own AI chats.")
-class GetEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<GetEndUserChatSessionResponse>, IConvertible, IGet
-{
-    String sessionId = "";
-
-    GetEndUserChatSessionRequest({this.sessionId=""});
-    GetEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId
-    });
-
-    createResponse() => GetEndUserChatSessionResponse();
-    getResponseTypeName() => "GetEndUserChatSessionResponse";
-    getTypeName() => "GetEndUserChatSessionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Renames one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}", "PATCH")
-// @Api(Description="Renames one of the caller's own AI chats.")
-class RenameEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
-{
-    String sessionId = "";
-    String? title;
-
-    RenameEndUserChatSessionRequest({this.sessionId="",this.title});
-    RenameEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        title = json['title'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'title': title
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "RenameEndUserChatSessionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Pins or unpins one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}/pin", "PUT")
-// @Api(Description="Pins or unpins one of the caller's own AI chats.")
-class PinEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    String sessionId = "";
-    bool? pinned;
-
-    PinEndUserChatSessionRequest({this.sessionId="",this.pinned});
-    PinEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        pinned = json['pinned'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'pinned': pinned
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "PinEndUserChatSessionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Archives or unarchives one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}/archive", "PUT")
-// @Api(Description="Archives or unarchives one of the caller's own AI chats.")
-class ArchiveEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    String sessionId = "";
-    bool? archived;
-
-    ArchiveEndUserChatSessionRequest({this.sessionId="",this.archived});
-    ArchiveEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        archived = json['archived'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'archived': archived
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "ArchiveEndUserChatSessionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Deletes one of the caller's own AI chats.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}", "DELETE")
-// @Api(Description="Deletes one of the caller's own AI chats.")
-class DeleteEndUserChatSessionRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    String sessionId = "";
-
-    DeleteEndUserChatSessionRequest({this.sessionId=""});
-    DeleteEndUserChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DeleteEndUserChatSessionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Returns a page of one of the caller's own AI chat transcripts.
-*/
-// @Route("/{version}/ai/chat/sessions/{SessionId}/entries", "GET")
-// @Api(Description="Returns a page of one of the caller's own AI chat transcripts.")
-class GetEndUserChatEntriesRequest extends CodeMashRequestBase implements IReturn<GetEndUserChatEntriesResponse>, IConvertible, IGet
-{
-    String sessionId = "";
-    int? afterSeq;
-    int? take;
-
-    GetEndUserChatEntriesRequest({this.sessionId="",this.afterSeq,this.take});
-    GetEndUserChatEntriesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        afterSeq = json['afterSeq'];
-        take = json['take'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'afterSeq': afterSeq,
-        'take': take
-    });
-
-    createResponse() => GetEndUserChatEntriesResponse();
-    getResponseTypeName() => "GetEndUserChatEntriesResponse";
-    getTypeName() => "GetEndUserChatEntriesRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Sends a message to the AI chat; the answer streams on the caller's channel.
-*/
-// @Route("/{version}/ai/chat/turn", "POST")
-// @Api(Description="Sends a message to the AI chat; the answer streams on the caller's channel.")
-class StartEndUserChatTurnRequest extends CodeMashRequestBase implements IReturn<StartEndUserChatTurnResponse>, IConvertible, IPost
-{
-    String? sessionId;
-    String? assistantId;
-    String message = "";
-
-    StartEndUserChatTurnRequest({this.sessionId,this.assistantId,this.message=""});
-    StartEndUserChatTurnRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'];
-        assistantId = json['assistantId'];
-        message = json['message'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'assistantId': assistantId,
-        'message': message
-    });
-
-    createResponse() => StartEndUserChatTurnResponse();
-    getResponseTypeName() => "StartEndUserChatTurnResponse";
-    getTypeName() => "StartEndUserChatTurnRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Lists the AI tools a project user may use: only their own data (own:* toolsets).
-*/
-// @Route("/{version}/ai/tools", "GET")
-// @Api(Description="Lists the AI tools a project user may use: only their own data (own:* toolsets).")
-class GetEndUserAiToolsRequest extends RequestBase implements IReturn<GetEndUserAiToolsResponse>, IConvertible, IGet
-{
-    GetEndUserAiToolsRequest();
-    GetEndUserAiToolsRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => GetEndUserAiToolsResponse();
-    getResponseTypeName() => "GetEndUserAiToolsResponse";
-    getTypeName() => "GetEndUserAiToolsRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Invokes one own-scope AI tool as the calling project user.
-*/
-// @Route("/{version}/ai/tools/{ToolName}", "POST")
-// @Api(Description="Invokes one own-scope AI tool as the calling project user.")
-class InvokeEndUserAiToolRequest extends RequestBase implements IReturn<InvokeEndUserAiToolResponse>, IConvertible, IPost
-{
-    String toolName = "";
-    String? argumentsJson;
-
-    InvokeEndUserAiToolRequest({this.toolName="",this.argumentsJson});
-    InvokeEndUserAiToolRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        toolName = json['toolName'] ?? "";
-        argumentsJson = json['argumentsJson'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'toolName': toolName,
-        'argumentsJson': argumentsJson
-    });
-
-    createResponse() => InvokeEndUserAiToolResponse();
-    getResponseTypeName() => "InvokeEndUserAiToolResponse";
-    getTypeName() => "InvokeEndUserAiToolRequest";
-    TypeContext? context = _ctx;
-}
-
 TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RequestBase': TypeInfo(TypeOf.Class, create:() => RequestBase()),
     'ICultureBasedRequest': TypeInfo(TypeOf.Interface),
@@ -7046,6 +7165,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<ErrorDto>': TypeInfo(TypeOf.Class, create:() => <ErrorDto>[]),
     'CodeMashResponseStatus': TypeInfo(TypeOf.Class, create:() => CodeMashResponseStatus()),
     'ResponseBase': TypeInfo(TypeOf.Class, create:() => ResponseBase()),
+    'EndUserChatAttachment': TypeInfo(TypeOf.Class, create:() => EndUserChatAttachment()),
+    'EndUserChatMemoryNote': TypeInfo(TypeOf.Class, create:() => EndUserChatMemoryNote()),
+    'EndUserChatAssistant': TypeInfo(TypeOf.Class, create:() => EndUserChatAssistant()),
+    'EndUserChatPlan': TypeInfo(TypeOf.Class, create:() => EndUserChatPlan()),
+    'EndUserChatSession': TypeInfo(TypeOf.Class, create:() => EndUserChatSession()),
+    'AiChatEntryWireDto': TypeInfo(TypeOf.AbstractClass),
+    'EndUserAiToolParameter': TypeInfo(TypeOf.Class, create:() => EndUserAiToolParameter()),
+    'EndUserAiTool': TypeInfo(TypeOf.Class, create:() => EndUserAiTool()),
+    'List<EndUserAiToolParameter>': TypeInfo(TypeOf.Class, create:() => <EndUserAiToolParameter>[]),
     'AuthType': TypeInfo(TypeOf.Enum, enumValues:AuthType.values),
     'AccessInformationDto': TypeInfo(TypeOf.Class, create:() => AccessInformationDto()),
     'RegistrationDto': TypeInfo(TypeOf.Class, create:() => RegistrationDto()),
@@ -7067,6 +7195,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<JsonSchemaFieldDto>': TypeInfo(TypeOf.Class, create:() => <JsonSchemaFieldDto>[]),
     'VisualSchemaDto': TypeInfo(TypeOf.Class, create:() => VisualSchemaDto()),
     'SchemaSettingsDto': TypeInfo(TypeOf.Class, create:() => SchemaSettingsDto()),
+    'SchemaEmbedSettingsDto': TypeInfo(TypeOf.Class, create:() => SchemaEmbedSettingsDto()),
     'TriggerType': TypeInfo(TypeOf.Enum, enumValues:TriggerType.values),
     'TriggerActionType': TypeInfo(TypeOf.Enum, enumValues:TriggerActionType.values),
     'TriggerActionDto': TypeInfo(TypeOf.AbstractClass),
@@ -7081,14 +7210,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PublicFolderDto': TypeInfo(TypeOf.Class, create:() => PublicFolderDto()),
     'IntegrationTestResultItemDto': TypeInfo(TypeOf.Class, create:() => IntegrationTestResultItemDto()),
     'IReadOnlyList<String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<String>()),
-    'EndUserChatAttachment': TypeInfo(TypeOf.Class, create:() => EndUserChatAttachment()),
-    'EndUserChatMemoryNote': TypeInfo(TypeOf.Class, create:() => EndUserChatMemoryNote()),
-    'EndUserChatAssistant': TypeInfo(TypeOf.Class, create:() => EndUserChatAssistant()),
-    'EndUserChatSession': TypeInfo(TypeOf.Class, create:() => EndUserChatSession()),
-    'AiChatEntryWireDto': TypeInfo(TypeOf.AbstractClass),
-    'EndUserAiToolParameter': TypeInfo(TypeOf.Class, create:() => EndUserAiToolParameter()),
-    'EndUserAiTool': TypeInfo(TypeOf.Class, create:() => EndUserAiTool()),
-    'List<EndUserAiToolParameter>': TypeInfo(TypeOf.Class, create:() => <EndUserAiToolParameter>[]),
     'IBindableContract': TypeInfo(TypeOf.Interface),
     'IHasViewId': TypeInfo(TypeOf.Interface),
     'ICursorArgs': TypeInfo(TypeOf.Interface),
@@ -7111,6 +7232,21 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<EchoRegionDto>': TypeInfo(TypeOf.Class, create:() => <EchoRegionDto>[]),
     'PublicProjectConfigDto': TypeInfo(TypeOf.Class, create:() => PublicProjectConfigDto()),
     'PublicLegalDocumentDto': TypeInfo(TypeOf.Class, create:() => PublicLegalDocumentDto()),
+    'ListEndUserChatAttachmentsResponse': TypeInfo(TypeOf.Class, create:() => ListEndUserChatAttachmentsResponse()),
+    'List<EndUserChatAttachment>': TypeInfo(TypeOf.Class, create:() => <EndUserChatAttachment>[]),
+    'ListEndUserChatMemoryResponse': TypeInfo(TypeOf.Class, create:() => ListEndUserChatMemoryResponse()),
+    'List<EndUserChatMemoryNote>': TypeInfo(TypeOf.Class, create:() => <EndUserChatMemoryNote>[]),
+    'GetEndUserChatAvailabilityResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserChatAvailabilityResponse()),
+    'List<EndUserChatAssistant>': TypeInfo(TypeOf.Class, create:() => <EndUserChatAssistant>[]),
+    'ListEndUserChatSessionsResponse': TypeInfo(TypeOf.Class, create:() => ListEndUserChatSessionsResponse()),
+    'List<EndUserChatSession>': TypeInfo(TypeOf.Class, create:() => <EndUserChatSession>[]),
+    'GetEndUserChatSessionResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserChatSessionResponse()),
+    'GetEndUserChatEntriesResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserChatEntriesResponse()),
+    'List<AiChatEntryWireDto>': TypeInfo(TypeOf.Class, create:() => <AiChatEntryWireDto>[]),
+    'StartEndUserChatTurnResponse': TypeInfo(TypeOf.Class, create:() => StartEndUserChatTurnResponse()),
+    'GetEndUserAiToolsResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserAiToolsResponse()),
+    'List<EndUserAiTool>': TypeInfo(TypeOf.Class, create:() => <EndUserAiTool>[]),
+    'InvokeEndUserAiToolResponse': TypeInfo(TypeOf.Class, create:() => InvokeEndUserAiToolResponse()),
     'GetUserResponse': TypeInfo(TypeOf.Class, create:() => GetUserResponse()),
     'GetUsersResponse': TypeInfo(TypeOf.Class, create:() => GetUsersResponse()),
     'PaginatedResponse<AuthDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AuthDto>()),
@@ -7147,24 +7283,28 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RequestUploadUrlResponse': TypeInfo(TypeOf.Class, create:() => RequestUploadUrlResponse()),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
     'IReadOnlyList<IntegrationTestResultItemDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<IntegrationTestResultItemDto>()),
-    'ListEndUserChatAttachmentsResponse': TypeInfo(TypeOf.Class, create:() => ListEndUserChatAttachmentsResponse()),
-    'List<EndUserChatAttachment>': TypeInfo(TypeOf.Class, create:() => <EndUserChatAttachment>[]),
-    'ListEndUserChatMemoryResponse': TypeInfo(TypeOf.Class, create:() => ListEndUserChatMemoryResponse()),
-    'List<EndUserChatMemoryNote>': TypeInfo(TypeOf.Class, create:() => <EndUserChatMemoryNote>[]),
-    'GetEndUserChatAvailabilityResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserChatAvailabilityResponse()),
-    'List<EndUserChatAssistant>': TypeInfo(TypeOf.Class, create:() => <EndUserChatAssistant>[]),
-    'ListEndUserChatSessionsResponse': TypeInfo(TypeOf.Class, create:() => ListEndUserChatSessionsResponse()),
-    'List<EndUserChatSession>': TypeInfo(TypeOf.Class, create:() => <EndUserChatSession>[]),
-    'GetEndUserChatSessionResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserChatSessionResponse()),
-    'GetEndUserChatEntriesResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserChatEntriesResponse()),
-    'List<AiChatEntryWireDto>': TypeInfo(TypeOf.Class, create:() => <AiChatEntryWireDto>[]),
-    'StartEndUserChatTurnResponse': TypeInfo(TypeOf.Class, create:() => StartEndUserChatTurnResponse()),
-    'GetEndUserAiToolsResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserAiToolsResponse()),
-    'List<EndUserAiTool>': TypeInfo(TypeOf.Class, create:() => <EndUserAiTool>[]),
-    'InvokeEndUserAiToolResponse': TypeInfo(TypeOf.Class, create:() => InvokeEndUserAiToolResponse()),
     'Echo': TypeInfo(TypeOf.Class, create:() => Echo()),
+    'GetPublicProjectBrandAsset': TypeInfo(TypeOf.Class, create:() => GetPublicProjectBrandAsset()),
     'GetPublicProjectConfig': TypeInfo(TypeOf.Class, create:() => GetPublicProjectConfig()),
     'GetPublicProjectLegal': TypeInfo(TypeOf.Class, create:() => GetPublicProjectLegal()),
+    'UploadEndUserChatAttachmentRequest': TypeInfo(TypeOf.Class, create:() => UploadEndUserChatAttachmentRequest()),
+    'ListEndUserChatAttachmentsRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatAttachmentsRequest()),
+    'DeleteEndUserChatAttachmentRequest': TypeInfo(TypeOf.Class, create:() => DeleteEndUserChatAttachmentRequest()),
+    'SetEndUserChatEntryFeedbackRequest': TypeInfo(TypeOf.Class, create:() => SetEndUserChatEntryFeedbackRequest()),
+    'ListEndUserChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatMemoryRequest()),
+    'ForgetEndUserChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => ForgetEndUserChatMemoryRequest()),
+    'GetEndUserChatAvailabilityRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserChatAvailabilityRequest()),
+    'ListEndUserChatSessionsRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatSessionsRequest()),
+    'CreateEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => CreateEndUserChatSessionRequest()),
+    'GetEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserChatSessionRequest()),
+    'RenameEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => RenameEndUserChatSessionRequest()),
+    'PinEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => PinEndUserChatSessionRequest()),
+    'ArchiveEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => ArchiveEndUserChatSessionRequest()),
+    'DeleteEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => DeleteEndUserChatSessionRequest()),
+    'GetEndUserChatEntriesRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserChatEntriesRequest()),
+    'StartEndUserChatTurnRequest': TypeInfo(TypeOf.Class, create:() => StartEndUserChatTurnRequest()),
+    'GetEndUserAiToolsRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserAiToolsRequest()),
+    'InvokeEndUserAiToolRequest': TypeInfo(TypeOf.Class, create:() => InvokeEndUserAiToolRequest()),
     'BlockUserRequest': TypeInfo(TypeOf.Class, create:() => BlockUserRequest()),
     'SaveSystemUserWithPermissions': TypeInfo(TypeOf.Class, create:() => SaveSystemUserWithPermissions()),
     'SaveGuestUser': TypeInfo(TypeOf.Class, create:() => SaveGuestUser()),
@@ -7241,23 +7381,5 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPublicFileRequest': TypeInfo(TypeOf.Class, create:() => GetPublicFileRequest()),
     'RequestUploadUrlRequest': TypeInfo(TypeOf.Class, create:() => RequestUploadUrlRequest()),
     'TestFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationRequest()),
-    'UploadEndUserChatAttachmentRequest': TypeInfo(TypeOf.Class, create:() => UploadEndUserChatAttachmentRequest()),
-    'ListEndUserChatAttachmentsRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatAttachmentsRequest()),
-    'DeleteEndUserChatAttachmentRequest': TypeInfo(TypeOf.Class, create:() => DeleteEndUserChatAttachmentRequest()),
-    'SetEndUserChatEntryFeedbackRequest': TypeInfo(TypeOf.Class, create:() => SetEndUserChatEntryFeedbackRequest()),
-    'ListEndUserChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatMemoryRequest()),
-    'ForgetEndUserChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => ForgetEndUserChatMemoryRequest()),
-    'GetEndUserChatAvailabilityRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserChatAvailabilityRequest()),
-    'ListEndUserChatSessionsRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatSessionsRequest()),
-    'CreateEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => CreateEndUserChatSessionRequest()),
-    'GetEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserChatSessionRequest()),
-    'RenameEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => RenameEndUserChatSessionRequest()),
-    'PinEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => PinEndUserChatSessionRequest()),
-    'ArchiveEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => ArchiveEndUserChatSessionRequest()),
-    'DeleteEndUserChatSessionRequest': TypeInfo(TypeOf.Class, create:() => DeleteEndUserChatSessionRequest()),
-    'GetEndUserChatEntriesRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserChatEntriesRequest()),
-    'StartEndUserChatTurnRequest': TypeInfo(TypeOf.Class, create:() => StartEndUserChatTurnRequest()),
-    'GetEndUserAiToolsRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserAiToolsRequest()),
-    'InvokeEndUserAiToolRequest': TypeInfo(TypeOf.Class, create:() => InvokeEndUserAiToolRequest()),
 });
 
