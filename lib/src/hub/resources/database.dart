@@ -7,6 +7,69 @@ import '../../core/resource.dart';
 class DatabaseResource extends Resource {
   DatabaseResource(super.transport);
 
+  /// `POST /{version}/database/collections/{collectionName}/aggregate`
+  Future<Object?> aggregateRecords(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/aggregate',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
+  /// `POST /{version}/database/schemas/apply-bundle`
+  Future<Object?> applyDatabaseSchemaBundle(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/schemas/apply-bundle',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `PUT /{version}/database/collections/{collectionName}/{id}/responsibility`
+  Future<Object?> changeRecordResponsibility(
+      {required Object collectionName,
+      required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/database/collections/{collectionName}/{id}/responsibility',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
+    );
+  }
+
+  /// `GET /{version}/database/collections/{collectionName}/count`
+  Future<Object?> countRecords(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/count',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
   /// `DELETE /{version}/database/aggregates/{id}`
   Future<Object?> deleteDatabaseAggregate(
       {required Object id,
@@ -104,6 +167,39 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `DELETE /{version}/database/collections/{collectionName}/many`
+  Future<Object?> deleteManyRecords(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/many',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
+  /// `DELETE /{version}/database/collections/{collectionName}/{id}`
+  Future<Object?> deleteRecord(
+      {required Object collectionName,
+      required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/{id}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
+    );
+  }
+
   /// `DELETE /{version}/database/schemas/triggers/{triggerId}`
   Future<Object?> deleteSchemaTrigger(
       {required Object triggerId,
@@ -180,6 +276,20 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `GET /{version}/database/collections/{collectionName}/distinct`
+  Future<Object?> distinctRecordValues(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/distinct',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
   /// `GET /{version}/database/enable`
   Future<Object?> enableDatabase(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
@@ -224,6 +334,56 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `POST /{version}/database/collections/{collectionName}/aggregates/{aggregateId}/execute`
+  Future<Object?> executeRecordsAggregate(
+      {required Object collectionName,
+      required Object aggregateId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/database/collections/{collectionName}/aggregates/{aggregateId}/execute',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{
+        'collectionName': collectionName,
+        'aggregateId': aggregateId
+      },
+    );
+  }
+
+  /// `GET /{version}/database/collections/{collectionName}/{id}`
+  Future<Object?> findOneRecord(
+      {required Object collectionName,
+      required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/{id}',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
+    );
+  }
+
+  /// `GET /{version}/database/collections/{collectionName}`
+  Future<Object?> findRecords(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
   /// `GET /{version}/database/integrations/flex-tiers`
   Future<Object?> getAllowedFlexTiers(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
@@ -233,6 +393,20 @@ class DatabaseResource extends Resource {
       query: query,
       headers: headers,
       pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/database/collections/{collectionName}/indexes`
+  Future<Object?> getCollectionIndexes(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/indexes',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
     );
   }
 
@@ -288,6 +462,20 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `GET /{version}/database/taxonomies/{taxonomyName}/merged-tree`
+  Future<Object?> getDatabaseMergedTermTree(
+      {required Object taxonomyName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/taxonomies/{taxonomyName}/merged-tree',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'taxonomyName': taxonomyName},
+    );
+  }
+
   /// `GET /{version}/database/schemas/{id}`
   Future<Object?> getDatabaseSchema(
       {required Object id,
@@ -309,6 +497,20 @@ class DatabaseResource extends Resource {
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/schemas/{id}/draft',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
+    );
+  }
+
+  /// `GET /{version}/database/schemas/{id}/list-settings`
+  Future<Object?> getDatabaseSchemaListSettings(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/schemas/{id}/list-settings',
       method: 'GET',
       query: query,
       headers: headers,
@@ -397,6 +599,32 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `GET /{version}/database/taxonomies/{taxonomyName}/terms/tree`
+  Future<Object?> getDatabaseTaxonomyTermTree(
+      {required Object taxonomyName,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/taxonomies/{taxonomyName}/terms/tree',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'taxonomyName': taxonomyName},
+    );
+  }
+
+  /// `GET /{version}/database/taxonomies/tree`
+  Future<Object?> getDatabaseTaxonomyTree(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/taxonomies/tree',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/database/schemas/triggers/{id}`
   Future<Object?> getSchemaTrigger(
       {required Object id,
@@ -420,6 +648,38 @@ class DatabaseResource extends Resource {
       query: query,
       headers: headers,
       pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/database/collections/{collectionName}/many`
+  Future<Object?> insertManyRecords(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/many',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
+  /// `POST /{version}/database/collections/{collectionName}`
+  Future<Object?> insertRecord(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
     );
   }
 
@@ -452,6 +712,23 @@ class DatabaseResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'id': id},
+    );
+  }
+
+  /// `PUT /{version}/database/collections/{collectionName}/{id}/replace`
+  Future<Object?> replaceRecord(
+      {required Object collectionName,
+      required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/{id}/replace',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
     );
   }
 
@@ -560,6 +837,21 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `POST /{version}/database/collections/seed`
+  Future<Object?> seedCollectionRecords(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/seed',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `PUT /{version}/database/integrations/{id}/default`
   Future<Object?> setDatabaseIntegrationAsDefault(
       {required Object id,
@@ -573,6 +865,21 @@ class DatabaseResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'id': id},
+    );
+  }
+
+  /// `POST /{version}/database/aggregates/test`
+  Future<Object?> testDatabaseAggregate(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/aggregates/test',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
     );
   }
 
@@ -599,6 +906,38 @@ class DatabaseResource extends Resource {
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/schemas/{id}/draft',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
+    );
+  }
+
+  /// `PUT /{version}/database/schemas/{id}/embed`
+  Future<Object?> updateDatabaseSchemaEmbed(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/schemas/{id}/embed',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
+    );
+  }
+
+  /// `PUT /{version}/database/schemas/{id}/list-settings`
+  Future<Object?> updateDatabaseSchemaListSettings(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/schemas/{id}/list-settings',
       method: 'PUT',
       query: query,
       body: body,
@@ -637,6 +976,39 @@ class DatabaseResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'taxonomyId': taxonomyId, 'id': id},
+    );
+  }
+
+  /// `PUT /{version}/database/collections/{collectionName}/many`
+  Future<Object?> updateManyRecords(
+      {required Object collectionName,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/many',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
+  /// `PUT /{version}/database/collections/{collectionName}/{id}`
+  Future<Object?> updateOneRecord(
+      {required Object collectionName,
+      required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/collections/{collectionName}/{id}',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
     );
   }
 }
