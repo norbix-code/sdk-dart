@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-05 16:13:41
+Date: 2026-10-05 20:52:42
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -3323,7 +3323,10 @@ class TemplateDto implements IHasViewId, IHasDatabaseId, IConvertible
     // @DataMember
     List<String>? tags;
 
-    TemplateDto({this.id,this.viewId="",this.templateName="",this.description,this.communicationChannel,this.medium,this.isActive,this.tags});
+    // @DataMember
+    String? env;
+
+    TemplateDto({this.id,this.viewId="",this.templateName="",this.description,this.communicationChannel,this.medium,this.isActive,this.tags,this.env});
     TemplateDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -3335,6 +3338,7 @@ class TemplateDto implements IHasViewId, IHasDatabaseId, IConvertible
         medium = JsonConverters.fromJson(json['medium'],'NotificationMedium',context!);
         isActive = json['isActive'];
         tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
+        env = json['env'];
         return this;
     }
 
@@ -3346,7 +3350,8 @@ class TemplateDto implements IHasViewId, IHasDatabaseId, IConvertible
         'communicationChannel': JsonConverters.toJson(communicationChannel,'CommunicationChannel',context!),
         'medium': JsonConverters.toJson(medium,'NotificationMedium',context!),
         'isActive': isActive,
-        'tags': JsonConverters.toJson(tags,'List<String>',context!)
+        'tags': JsonConverters.toJson(tags,'List<String>',context!),
+        'env': env
     };
 
     getTypeName() => "TemplateDto";
@@ -6714,18 +6719,21 @@ class LocalFilesIntegrationDto extends FilesIntegrationDto implements IConvertib
 class DatabaseIntegrationDto extends IntegrationDto implements IConvertible
 {
     DatabaseProvider? provider;
+    bool? isSystemOwned;
 
-    DatabaseIntegrationDto({this.provider});
+    DatabaseIntegrationDto({this.provider,this.isSystemOwned});
     DatabaseIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'DatabaseProvider',context!);
+        isSystemOwned = json['isSystemOwned'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'DatabaseProvider',context!)
+        'provider': JsonConverters.toJson(provider,'DatabaseProvider',context!),
+        'isSystemOwned': isSystemOwned
     });
 
     getTypeName() => "DatabaseIntegrationDto";
@@ -7505,12 +7513,15 @@ class SchedulerTaskDto implements IConvertible
     bool? stopOnError;
 
     // @DataMember
+    String? env;
+
+    // @DataMember
     int? createdAtUnix;
 
     // @DataMember
     int? updatedAtUnix;
 
-    SchedulerTaskDto({this.projectId="",this.taskId="",this.name="",this.description,this.cron="",this.type,this.payloadJson="",this.initiatorId="",this.isEnabled,this.stopOnError,this.createdAtUnix,this.updatedAtUnix});
+    SchedulerTaskDto({this.projectId="",this.taskId="",this.name="",this.description,this.cron="",this.type,this.payloadJson="",this.initiatorId="",this.isEnabled,this.stopOnError,this.env,this.createdAtUnix,this.updatedAtUnix});
     SchedulerTaskDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -7524,6 +7535,7 @@ class SchedulerTaskDto implements IConvertible
         initiatorId = json['initiatorId'] ?? "";
         isEnabled = json['isEnabled'];
         stopOnError = json['stopOnError'];
+        env = json['env'];
         createdAtUnix = json['createdAtUnix'];
         updatedAtUnix = json['updatedAtUnix'];
         return this;
@@ -7540,6 +7552,7 @@ class SchedulerTaskDto implements IConvertible
         'initiatorId': initiatorId,
         'isEnabled': isEnabled,
         'stopOnError': stopOnError,
+        'env': env,
         'createdAtUnix': createdAtUnix,
         'updatedAtUnix': updatedAtUnix
     };
@@ -7871,7 +7884,10 @@ class MongoDbAggregateDto implements IHasViewId, IConvertible
     // @DataMember
     String pipeline = "";
 
-    MongoDbAggregateDto({this.viewId="",this.displayName="",this.description,this.schemaViewId="",this.pipeline=""});
+    // @DataMember
+    List<String>? joinedCollections;
+
+    MongoDbAggregateDto({this.viewId="",this.displayName="",this.description,this.schemaViewId="",this.pipeline="",this.joinedCollections});
     MongoDbAggregateDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -7880,6 +7896,7 @@ class MongoDbAggregateDto implements IHasViewId, IConvertible
         description = json['description'];
         schemaViewId = json['schemaViewId'] ?? "";
         pipeline = json['pipeline'] ?? "";
+        joinedCollections = JsonConverters.fromJson(json['joinedCollections'],'List<String>',context!);
         return this;
     }
 
@@ -7888,7 +7905,8 @@ class MongoDbAggregateDto implements IHasViewId, IConvertible
         'displayName': displayName,
         'description': description,
         'schemaViewId': schemaViewId,
-        'pipeline': pipeline
+        'pipeline': pipeline,
+        'joinedCollections': JsonConverters.toJson(joinedCollections,'List<String>',context!)
     };
 
     getTypeName() => "MongoDbAggregateDto";
@@ -10012,68 +10030,6 @@ class ImportColumnMappingDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-abstract class AggregateId
-{
-    String value = "";
-
-    AggregateId({this.value=""});
-    AggregateId.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = json['value'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value
-    };
-
-    getTypeName() => "AggregateId";
-    TypeContext? context = _ctx;
-}
-
-class ProjectId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    ProjectId();
-    ProjectId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "ProjectId";
-    TypeContext? context = _ctx;
-}
-
-class IntegrationId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    IntegrationId();
-    IntegrationId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "IntegrationId";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomyId extends AggregateId implements IHasDomainEntityId, IConvertible
-{
-    TaxonomyId();
-    TaxonomyId.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "TaxonomyId";
-    TypeContext? context = _ctx;
-}
-
 // @DataContract
 enum EmailValidationProvider
 {
@@ -11258,6 +11214,9 @@ class PromotionResultDto implements IConvertible
     List<PromotionItemDto> integrationsSeeded = [];
 
     // @DataMember
+    List<PromotionItemDto> integrationsToProvision = [];
+
+    // @DataMember
     List<PromotionItemDto> integrationsSkipped = [];
 
     // @DataMember
@@ -11269,13 +11228,14 @@ class PromotionResultDto implements IConvertible
     // @DataMember
     bool? wasDryRun;
 
-    PromotionResultDto({this.contentMirrored=const [],this.contentDeleted=const [],this.integrationsSeeded=const [],this.integrationsSkipped=const [],this.blockers=const [],this.fromVersion,this.wasDryRun});
+    PromotionResultDto({this.contentMirrored=const [],this.contentDeleted=const [],this.integrationsSeeded=const [],this.integrationsToProvision=const [],this.integrationsSkipped=const [],this.blockers=const [],this.fromVersion,this.wasDryRun});
     PromotionResultDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         contentMirrored = JsonConverters.fromJson(json['contentMirrored'],'List<PromotionItemDto>',context!) ?? [];
         contentDeleted = JsonConverters.fromJson(json['contentDeleted'],'List<PromotionItemDto>',context!) ?? [];
         integrationsSeeded = JsonConverters.fromJson(json['integrationsSeeded'],'List<PromotionItemDto>',context!) ?? [];
+        integrationsToProvision = JsonConverters.fromJson(json['integrationsToProvision'],'List<PromotionItemDto>',context!) ?? [];
         integrationsSkipped = JsonConverters.fromJson(json['integrationsSkipped'],'List<PromotionItemDto>',context!) ?? [];
         blockers = JsonConverters.fromJson(json['blockers'],'List<PromotionBlockerDto>',context!) ?? [];
         fromVersion = json['fromVersion'];
@@ -11287,6 +11247,7 @@ class PromotionResultDto implements IConvertible
         'contentMirrored': JsonConverters.toJson(contentMirrored,'List<PromotionItemDto>',context!),
         'contentDeleted': JsonConverters.toJson(contentDeleted,'List<PromotionItemDto>',context!),
         'integrationsSeeded': JsonConverters.toJson(integrationsSeeded,'List<PromotionItemDto>',context!),
+        'integrationsToProvision': JsonConverters.toJson(integrationsToProvision,'List<PromotionItemDto>',context!),
         'integrationsSkipped': JsonConverters.toJson(integrationsSkipped,'List<PromotionItemDto>',context!),
         'blockers': JsonConverters.toJson(blockers,'List<PromotionBlockerDto>',context!),
         'fromVersion': fromVersion,
@@ -11763,7 +11724,10 @@ class SchemaTriggerDto extends TriggerDto implements IConvertible
     // @DataMember
     String? configurationCode;
 
-    SchemaTriggerDto({this.schemaId="",this.when,this.configurationCode});
+    // @DataMember
+    String? env;
+
+    SchemaTriggerDto({this.schemaId="",this.when,this.configurationCode,this.env});
     SchemaTriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -11771,13 +11735,15 @@ class SchemaTriggerDto extends TriggerDto implements IConvertible
         schemaId = json['schemaId'] ?? "";
         when = JsonConverters.fromJson(json['when'],'SchemaTriggerType',context!);
         configurationCode = json['configurationCode'];
+        env = json['env'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'schemaId': schemaId,
         'when': JsonConverters.toJson(when,'SchemaTriggerType',context!),
-        'configurationCode': configurationCode
+        'configurationCode': configurationCode,
+        'env': env
     });
 
     getTypeName() => "SchemaTriggerDto";
@@ -14563,17 +14529,22 @@ class SchemaTriggerProjectionList extends TriggerProjectionList implements IConv
     // @DataMember
     SchemaTriggerType? type;
 
-    SchemaTriggerProjectionList({this.type});
+    // @DataMember
+    String? env;
+
+    SchemaTriggerProjectionList({this.type,this.env});
     SchemaTriggerProjectionList.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         type = JsonConverters.fromJson(json['type'],'SchemaTriggerType',context!);
+        env = json['env'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'type': JsonConverters.toJson(type,'SchemaTriggerType',context!)
+        'type': JsonConverters.toJson(type,'SchemaTriggerType',context!),
+        'env': env
     });
 
     getTypeName() => "SchemaTriggerProjectionList";
@@ -14704,6 +14675,32 @@ class TaxonomyDto implements IHasViewId, IConvertible
     TypeContext? context = _ctx;
 }
 
+class TaxonomyRef implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String? name;
+
+    TaxonomyRef({this.id="",this.name});
+    TaxonomyRef.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name
+    };
+
+    getTypeName() => "TaxonomyRef";
+    TypeContext? context = _ctx;
+}
+
 class TaxonomyListProjection implements IHasViewId, IConvertible
 {
     // @DataMember
@@ -14728,9 +14725,9 @@ class TaxonomyListProjection implements IHasViewId, IConvertible
     String? parentName;
 
     // @DataMember
-    List<String>? dependencyNames;
+    List<TaxonomyRef>? dependencyRefs;
 
-    TaxonomyListProjection({this.viewId="",this.taxonomyName="",this.taxonomySlug="",this.parentId,this.description,this.dependencies,this.parentName,this.dependencyNames});
+    TaxonomyListProjection({this.viewId="",this.taxonomyName="",this.taxonomySlug="",this.parentId,this.description,this.dependencies,this.parentName,this.dependencyRefs});
     TaxonomyListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14741,7 +14738,7 @@ class TaxonomyListProjection implements IHasViewId, IConvertible
         description = json['description'];
         dependencies = JsonConverters.fromJson(json['dependencies'],'List<String>',context!);
         parentName = json['parentName'];
-        dependencyNames = JsonConverters.fromJson(json['dependencyNames'],'List<String>',context!);
+        dependencyRefs = JsonConverters.fromJson(json['dependencyRefs'],'List<TaxonomyRef>',context!);
         return this;
     }
 
@@ -14753,7 +14750,7 @@ class TaxonomyListProjection implements IHasViewId, IConvertible
         'description': description,
         'dependencies': JsonConverters.toJson(dependencies,'List<String>',context!),
         'parentName': parentName,
-        'dependencyNames': JsonConverters.toJson(dependencyNames,'List<String>',context!)
+        'dependencyRefs': JsonConverters.toJson(dependencyRefs,'List<TaxonomyRef>',context!)
     };
 
     getTypeName() => "TaxonomyListProjection";
@@ -15449,17 +15446,22 @@ class DatabaseIntegrationListProjection extends IntegrationListProjection implem
     // @DataMember
     DatabaseProvider? provider;
 
-    DatabaseIntegrationListProjection({this.provider});
+    // @DataMember
+    String? env;
+
+    DatabaseIntegrationListProjection({this.provider,this.env});
     DatabaseIntegrationListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'DatabaseProvider',context!);
+        env = json['env'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'DatabaseProvider',context!)
+        'provider': JsonConverters.toJson(provider,'DatabaseProvider',context!),
+        'env': env
     });
 
     getTypeName() => "DatabaseIntegrationListProjection";
@@ -15996,7 +15998,10 @@ class TemplateListProjection implements IHasViewId, IHasDatabaseId, IConvertible
     // @DataMember
     List<String>? tags;
 
-    TemplateListProjection({this.id,this.viewId="",this.templateName="",this.isActive,this.type,this.tags});
+    // @DataMember
+    String? env;
+
+    TemplateListProjection({this.id,this.viewId="",this.templateName="",this.isActive,this.type,this.tags,this.env});
     TemplateListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16006,6 +16011,7 @@ class TemplateListProjection implements IHasViewId, IHasDatabaseId, IConvertible
         isActive = json['isActive'];
         type = JsonConverters.fromJson(json['type'],'CommunicationChannel',context!);
         tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
+        env = json['env'];
         return this;
     }
 
@@ -16015,7 +16021,8 @@ class TemplateListProjection implements IHasViewId, IHasDatabaseId, IConvertible
         'templateName': templateName,
         'isActive': isActive,
         'type': JsonConverters.toJson(type,'CommunicationChannel',context!),
-        'tags': JsonConverters.toJson(tags,'List<String>',context!)
+        'tags': JsonConverters.toJson(tags,'List<String>',context!),
+        'env': env
     };
 
     getTypeName() => "TemplateListProjection";
@@ -20474,11 +20481,6 @@ abstract class IBindableContract
 
 abstract class IHasRazorTemplateCode
 {
-}
-
-abstract class IHasDomainEntityId
-{
-    String viewId = "";
 }
 
 abstract class IHasResponsibleUserId
@@ -32835,10 +32837,10 @@ class GetDatabaseTaxonomyTreeRequest extends CodeMashRequestBase implements IRet
 class SaveDatabaseTaxonomyRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
 {
     /**
-    * Empty to create a new taxonomy; set to an existing taxonomy id (from get_database_taxonomies) to update it.
+    * Empty to create a new taxonomy; set to an existing taxonomy id (from get_database_taxonomies) to update it. An update replaces the whole taxonomy: send every field you want to keep (parentId, dependencies, description, schemas).
     */
     // @DataMember
-    // @ApiMember(Description="Empty to create a new taxonomy; set to an existing taxonomy id (from get_database_taxonomies) to update it.")
+    // @ApiMember(Description="Empty to create a new taxonomy; set to an existing taxonomy id (from get_database_taxonomies) to update it. An update replaces the whole taxonomy: send every field you want to keep (parentId, dependencies, description, schemas).")
     String? viewId;
 
     /**
@@ -33701,28 +33703,19 @@ class RenameDatabaseSchemaRequest extends CodeMashRequestBase implements IReturn
     // @ApiMember(Description="New human-entered title (e.g. \"Company Employees\"); the slug is derived server-side.", IsRequired=true)
     String title = "";
 
-    /**
-    * When true (default), rejects the rename if another schema already owns the derived slug. Leave true unless explicitly asked to bypass the uniqueness check.
-    */
-    // @DataMember
-    // @ApiMember(Description="When true (default), rejects the rename if another schema already owns the derived slug. Leave true unless explicitly asked to bypass the uniqueness check.")
-    bool? renameUniqueName;
-
-    RenameDatabaseSchemaRequest({this.id="",this.title="",this.renameUniqueName});
+    RenameDatabaseSchemaRequest({this.id="",this.title=""});
     RenameDatabaseSchemaRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         id = json['id'] ?? "";
         title = json['title'] ?? "";
-        renameUniqueName = json['renameUniqueName'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'id': id,
-        'title': title,
-        'renameUniqueName': renameUniqueName
+        'title': title
     });
 
     createResponse() => EmptyResponse();
@@ -33820,10 +33813,10 @@ class UpdateDatabaseSchemaDraftRequest extends CodeMashRequestBase implements IR
     String? dataSchema;
 
     /**
-    * Raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form.
+    * OPTIONAL raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form. If omitted or invalid, the backend auto-generates a flat-list form from the data schema.
     */
     // @DataMember
-    // @ApiMember(Description="Raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form.")
+    // @ApiMember(Description="OPTIONAL raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form. If omitted or invalid, the backend auto-generates a flat-list form from the data schema.")
     String? visualSchema;
 
     UpdateDatabaseSchemaDraftRequest({this.id="",this.dataSchema,this.visualSchema});
@@ -34134,12 +34127,18 @@ class DeleteManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
 
     String? databaseIntegrationId;
     /**
-    * The match filter as a MongoDB extended-JSON document. Required.
+    * The match filter as a MongoDB extended-JSON document. Required. An empty object ({}) matches every record and is refused unless AllRecords is true.
     */
-    // @ApiMember(Description="The match filter as a MongoDB extended-JSON document. Required.", IsRequired=true)
+    // @ApiMember(Description="The match filter as a MongoDB extended-JSON document. Required. An empty object ({}) matches every record and is refused unless AllRecords is true.", IsRequired=true)
     String filter = "";
 
-    DeleteManyRecords({this.collectionName="",this.databaseIntegrationId,this.filter=""});
+    /**
+    * Set to true to delete EVERY record of the collection with an empty filter ({}). Without it an empty filter is refused (CM-ERRORS-DATABASE-037).
+    */
+    // @ApiMember(Description="Set to true to delete EVERY record of the collection with an empty filter ({}). Without it an empty filter is refused (CM-ERRORS-DATABASE-037).")
+    bool? allRecords;
+
+    DeleteManyRecords({this.collectionName="",this.databaseIntegrationId,this.filter="",this.allRecords});
     DeleteManyRecords.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -34147,13 +34146,15 @@ class DeleteManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
         collectionName = json['collectionName'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         filter = json['filter'] ?? "";
+        allRecords = json['allRecords'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'collectionName': collectionName,
         'databaseIntegrationId': databaseIntegrationId,
-        'filter': filter
+        'filter': filter,
+        'allRecords': allRecords
     });
 
     createResponse() => EmptyResponse();
@@ -34654,10 +34655,16 @@ class UpdateManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
 
     String? databaseIntegrationId;
     /**
-    * The match filter as a MongoDB extended-JSON document. Empty object means match all.
+    * The match filter as a MongoDB extended-JSON document. An empty object ({}) matches every record and is refused unless AllRecords is true.
     */
-    // @ApiMember(Description="The match filter as a MongoDB extended-JSON document. Empty object means match all.", IsRequired=true)
+    // @ApiMember(Description="The match filter as a MongoDB extended-JSON document. An empty object ({}) matches every record and is refused unless AllRecords is true.", IsRequired=true)
     String filter = "";
+
+    /**
+    * Set to true to update EVERY record of the collection with an empty filter ({}). Without it an empty filter is refused (CM-ERRORS-DATABASE-037).
+    */
+    // @ApiMember(Description="Set to true to update EVERY record of the collection with an empty filter ({}). Without it an empty filter is refused (CM-ERRORS-DATABASE-037).")
+    bool? allRecords;
 
     /**
     * The partial update document (applied with $set), as MongoDB extended-JSON.
@@ -34665,7 +34672,7 @@ class UpdateManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
     // @ApiMember(Description="The partial update document (applied with $set), as MongoDB extended-JSON.", IsRequired=true)
     String update = "";
 
-    UpdateManyRecords({this.collectionName="",this.databaseIntegrationId,this.filter="",this.update=""});
+    UpdateManyRecords({this.collectionName="",this.databaseIntegrationId,this.filter="",this.allRecords,this.update=""});
     UpdateManyRecords.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -34673,6 +34680,7 @@ class UpdateManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
         collectionName = json['collectionName'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         filter = json['filter'] ?? "";
+        allRecords = json['allRecords'];
         update = json['update'] ?? "";
         return this;
     }
@@ -34681,6 +34689,7 @@ class UpdateManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
         'collectionName': collectionName,
         'databaseIntegrationId': databaseIntegrationId,
         'filter': filter,
+        'allRecords': allRecords,
         'update': update
     });
 
@@ -35536,169 +35545,6 @@ class TestDatabaseAggregateRequest extends CodeMashRequestBase implements IRetur
     createResponse() => TestDatabaseAggregateResponse();
     getResponseTypeName() => "TestDatabaseAggregateResponse";
     getTypeName() => "TestDatabaseAggregateRequest";
-    TypeContext? context = _ctx;
-}
-
-class ProcessCollectionImport implements IConvertible, IPost
-{
-    String importId = "";
-    String projectId = "";
-    String accountId = "";
-    String databaseIntegrationId = "";
-    String? env;
-
-    ProcessCollectionImport({this.importId="",this.projectId="",this.accountId="",this.databaseIntegrationId="",this.env});
-    ProcessCollectionImport.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        importId = json['importId'] ?? "";
-        projectId = json['projectId'] ?? "";
-        accountId = json['accountId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'] ?? "";
-        env = json['env'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'importId': importId,
-        'projectId': projectId,
-        'accountId': accountId,
-        'databaseIntegrationId': databaseIntegrationId,
-        'env': env
-    };
-
-    getTypeName() => "ProcessCollectionImport";
-    TypeContext? context = _ctx;
-}
-
-class TermInserted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    TaxonomyId? taxonomyId;
-    String id = "";
-    dynamic? document;
-
-    TermInserted({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.id="",this.document});
-    TermInserted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
-        id = json['id'] ?? "";
-        document = JsonConverters.fromJson(json['document'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
-        'id': id,
-        'document': JsonConverters.toJson(document,'dynamic',context!)
-    };
-
-    getTypeName() => "TermInserted";
-    TypeContext? context = _ctx;
-}
-
-class TermUpdated implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    TaxonomyId? taxonomyId;
-    String id = "";
-    dynamic? from;
-    dynamic? to;
-
-    TermUpdated({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.id="",this.from,this.to});
-    TermUpdated.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
-        id = json['id'] ?? "";
-        from = JsonConverters.fromJson(json['from'],'dynamic',context!);
-        to = JsonConverters.fromJson(json['to'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
-        'id': id,
-        'from': JsonConverters.toJson(from,'dynamic',context!),
-        'to': JsonConverters.toJson(to,'dynamic',context!)
-    };
-
-    getTypeName() => "TermUpdated";
-    TypeContext? context = _ctx;
-}
-
-class TermDeleted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    TaxonomyId? taxonomyId;
-    String id = "";
-    dynamic? document;
-
-    TermDeleted({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.id="",this.document});
-    TermDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
-        id = json['id'] ?? "";
-        document = JsonConverters.fromJson(json['document'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
-        'id': id,
-        'document': JsonConverters.toJson(document,'dynamic',context!)
-    };
-
-    getTypeName() => "TermDeleted";
-    TypeContext? context = _ctx;
-}
-
-class TermsDeleted implements IConvertible, IPost
-{
-    ProjectId? projectId;
-    IntegrationId? databaseIntegrationId;
-    TaxonomyId? taxonomyId;
-    int deletedCount = 0;
-    dynamic? filter;
-
-    TermsDeleted({this.projectId,this.databaseIntegrationId,this.taxonomyId,this.deletedCount=0,this.filter});
-    TermsDeleted.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = JsonConverters.fromJson(json['projectId'],'ProjectId',context!);
-        databaseIntegrationId = JsonConverters.fromJson(json['databaseIntegrationId'],'IntegrationId',context!);
-        taxonomyId = JsonConverters.fromJson(json['taxonomyId'],'TaxonomyId',context!);
-        deletedCount = json['deletedCount'] ?? 0;
-        filter = JsonConverters.fromJson(json['filter'],'dynamic',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': JsonConverters.toJson(projectId,'ProjectId',context!),
-        'databaseIntegrationId': JsonConverters.toJson(databaseIntegrationId,'IntegrationId',context!),
-        'taxonomyId': JsonConverters.toJson(taxonomyId,'TaxonomyId',context!),
-        'deletedCount': deletedCount,
-        'filter': JsonConverters.toJson(filter,'dynamic',context!)
-    };
-
-    getTypeName() => "TermsDeleted";
     TypeContext? context = _ctx;
 }
 
@@ -37711,9 +37557,9 @@ class GetEmailCampaigns extends CodeMashListPaginationRequestBase implements IRe
 class GetEmailCampaignBatches extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchesResponse>, IConvertible, IGet
 {
     /**
-    * The email campaign id to list batches for. Get it from get_all_email_campaigns.
+    * The email campaign id to list batches for. Get it from get_email_campaigns.
     */
-    // @ApiMember(Description="The email campaign id to list batches for. Get it from get_all_email_campaigns.", IsRequired=true)
+    // @ApiMember(Description="The email campaign id to list batches for. Get it from get_email_campaigns.", IsRequired=true)
     String id = "";
 
     /**
@@ -37767,9 +37613,9 @@ class GetEmailCampaignBatches extends CodeMashListPaginationRequestBase implemen
 class GetEmailCampaignBatchNotification extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchNotificationResponse>, IConvertible, IGet
 {
     /**
-    * The email campaign id. Get it from get_all_email_campaigns.
+    * The email campaign id. Get it from get_email_campaigns.
     */
-    // @ApiMember(Description="The email campaign id. Get it from get_all_email_campaigns.", IsRequired=true)
+    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
     String id = "";
 
     /**
@@ -37823,9 +37669,9 @@ class GetEmailCampaignBatchNotification extends CodeMashListPaginationRequestBas
 class GetEmailCampaignBatchNotifications extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchNotificationsResponse>, IConvertible, IGet
 {
     /**
-    * The email campaign id. Get it from get_all_email_campaigns.
+    * The email campaign id. Get it from get_email_campaigns.
     */
-    // @ApiMember(Description="The email campaign id. Get it from get_all_email_campaigns.", IsRequired=true)
+    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
     String id = "";
 
     /**
@@ -37871,9 +37717,9 @@ class GetEmailCampaignBatchNotifications extends CodeMashListPaginationRequestBa
 class GetEmailCampaignStatistics extends CodeMashRequestBase implements IReturn<GetEmailCampaignStatisticsResponse>, IConvertible, IGet
 {
     /**
-    * The email campaign id to get statistics for. Get it from get_all_email_campaigns.
+    * The email campaign id to get statistics for. Get it from get_email_campaigns.
     */
-    // @ApiMember(Description="The email campaign id to get statistics for. Get it from get_all_email_campaigns.", IsRequired=true)
+    // @ApiMember(Description="The email campaign id to get statistics for. Get it from get_email_campaigns.", IsRequired=true)
     String id = "";
 
     /**
@@ -38002,9 +37848,9 @@ class StopEmailCampaignRequest extends CodeMashRequestBase implements IReturn<Em
 class GetEmailCampaignMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignMessagesResponse>, IConvertible, IGet
 {
     /**
-    * The email campaign id. Get it from get_all_email_campaigns.
+    * The email campaign id. Get it from get_email_campaigns.
     */
-    // @ApiMember(Description="The email campaign id. Get it from get_all_email_campaigns.", IsRequired=true)
+    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
     String campaignId = "";
 
     /**
@@ -43481,59 +43327,6 @@ class TestMcpIntegration extends CodeMashRequestBase implements IReturn<TestLlmI
     TypeContext? context = _ctx;
 }
 
-class IngestSourceMessage implements IConvertible, IPost
-{
-    String projectId = "";
-    String? env;
-    String? ownerAuthId;
-    String sourceKind = "";
-    String sourceId = "";
-    String? title;
-    String? contentType;
-    String? content;
-    String? embeddingIntegrationId;
-    bool? removed;
-    Map<String,String?>? metadata;
-    bool? ownerRequired;
-
-    IngestSourceMessage({this.projectId="",this.env,this.ownerAuthId,this.sourceKind="",this.sourceId="",this.title,this.contentType,this.content,this.embeddingIntegrationId,this.removed,this.metadata,this.ownerRequired});
-    IngestSourceMessage.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        projectId = json['projectId'] ?? "";
-        env = json['env'];
-        ownerAuthId = json['ownerAuthId'];
-        sourceKind = json['sourceKind'] ?? "";
-        sourceId = json['sourceId'] ?? "";
-        title = json['title'];
-        contentType = json['contentType'];
-        content = json['content'];
-        embeddingIntegrationId = json['embeddingIntegrationId'];
-        removed = json['removed'];
-        metadata = JsonConverters.toStringMap(json['metadata']);
-        ownerRequired = json['ownerRequired'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'projectId': projectId,
-        'env': env,
-        'ownerAuthId': ownerAuthId,
-        'sourceKind': sourceKind,
-        'sourceId': sourceId,
-        'title': title,
-        'contentType': contentType,
-        'content': content,
-        'embeddingIntegrationId': embeddingIntegrationId,
-        'removed': removed,
-        'metadata': metadata,
-        'ownerRequired': ownerRequired
-    };
-
-    getTypeName() => "IngestSourceMessage";
-    TypeContext? context = _ctx;
-}
-
 /**
 * Gets the project's webhook integration
 */
@@ -45840,10 +45633,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SchemaListSettingsDto': TypeInfo(TypeOf.Class, create:() => SchemaListSettingsDto()),
     'List<SchemaListColumnDto>': TypeInfo(TypeOf.Class, create:() => <SchemaListColumnDto>[]),
     'ImportColumnMappingDto': TypeInfo(TypeOf.Class, create:() => ImportColumnMappingDto()),
-    'AggregateId': TypeInfo(TypeOf.AbstractClass),
-    'ProjectId': TypeInfo(TypeOf.Class, create:() => ProjectId()),
-    'IntegrationId': TypeInfo(TypeOf.Class, create:() => IntegrationId()),
-    'TaxonomyId': TypeInfo(TypeOf.Class, create:() => TaxonomyId()),
     'EmailValidationProvider': TypeInfo(TypeOf.Enum, enumValues:EmailValidationProvider.values),
     'EmailValidationIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SaveEmailTemplate': TypeInfo(TypeOf.Class, create:() => SaveEmailTemplate()),
@@ -46004,7 +45793,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<JsonSchemaFieldDto>': TypeInfo(TypeOf.Class, create:() => <JsonSchemaFieldDto>[]),
     'VisualSchemaDto': TypeInfo(TypeOf.Class, create:() => VisualSchemaDto()),
     'TaxonomyDto': TypeInfo(TypeOf.Class, create:() => TaxonomyDto()),
+    'TaxonomyRef': TypeInfo(TypeOf.Class, create:() => TaxonomyRef()),
     'TaxonomyListProjection': TypeInfo(TypeOf.Class, create:() => TaxonomyListProjection()),
+    'List<TaxonomyRef>': TypeInfo(TypeOf.Class, create:() => <TaxonomyRef>[]),
     'TermMultiParentDto': TypeInfo(TypeOf.Class, create:() => TermMultiParentDto()),
     'TermTreeDto': TypeInfo(TypeOf.Class, create:() => TermTreeDto()),
     'List<TermMultiParentDto>': TypeInfo(TypeOf.Class, create:() => <TermMultiParentDto>[]),
@@ -46222,7 +46013,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'IHasDatabaseId': TypeInfo(TypeOf.Interface),
     'IBindableContract': TypeInfo(TypeOf.Interface),
     'IHasRazorTemplateCode': TypeInfo(TypeOf.Interface),
-    'IHasDomainEntityId': TypeInfo(TypeOf.Interface),
     'IHasResponsibleUserId': TypeInfo(TypeOf.Interface),
     'ICursorArgs': TypeInfo(TypeOf.Interface),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
@@ -46818,11 +46608,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetDatabaseAggregates': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregates()),
     'SaveDatabaseAggregateRequest': TypeInfo(TypeOf.Class, create:() => SaveDatabaseAggregateRequest()),
     'TestDatabaseAggregateRequest': TypeInfo(TypeOf.Class, create:() => TestDatabaseAggregateRequest()),
-    'ProcessCollectionImport': TypeInfo(TypeOf.Class, create:() => ProcessCollectionImport()),
-    'TermInserted': TypeInfo(TypeOf.Class, create:() => TermInserted()),
-    'TermUpdated': TypeInfo(TypeOf.Class, create:() => TermUpdated()),
-    'TermDeleted': TypeInfo(TypeOf.Class, create:() => TermDeleted()),
-    'TermsDeleted': TypeInfo(TypeOf.Class, create:() => TermsDeleted()),
     'DisableFiles': TypeInfo(TypeOf.Class, create:() => DisableFiles()),
     'EnableFiles': TypeInfo(TypeOf.Class, create:() => EnableFiles()),
     'DeleteFilesTrigger': TypeInfo(TypeOf.Class, create:() => DeleteFilesTrigger()),
@@ -47060,7 +46845,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMcpIntegrations': TypeInfo(TypeOf.Class, create:() => GetMcpIntegrations()),
     'SaveMcpIntegration': TypeInfo(TypeOf.Class, create:() => SaveMcpIntegration()),
     'TestMcpIntegration': TypeInfo(TypeOf.Class, create:() => TestMcpIntegration()),
-    'IngestSourceMessage': TypeInfo(TypeOf.Class, create:() => IngestSourceMessage()),
     'GetWebhookIntegration': TypeInfo(TypeOf.Class, create:() => GetWebhookIntegration()),
     'RevealWebhookIntegrationSecretRequest': TypeInfo(TypeOf.Class, create:() => RevealWebhookIntegrationSecretRequest()),
     'RotateWebhookIntegrationSecretRequest': TypeInfo(TypeOf.Class, create:() => RotateWebhookIntegrationSecretRequest()),
