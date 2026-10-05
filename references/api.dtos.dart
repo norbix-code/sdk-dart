@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-05 16:14:10
+Date: 2026-10-05 20:52:43
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -6157,7 +6157,10 @@ class DeleteManyRequest extends CodeMashRequestBase implements IReturn<EmptyResp
     // @DataMember
     String filter = "";
 
-    DeleteManyRequest({this.collectionName="",this.databaseIntegrationId,this.filter=""});
+    // @DataMember
+    bool? allRecords;
+
+    DeleteManyRequest({this.collectionName="",this.databaseIntegrationId,this.filter="",this.allRecords});
     DeleteManyRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -6165,13 +6168,15 @@ class DeleteManyRequest extends CodeMashRequestBase implements IReturn<EmptyResp
         collectionName = json['collectionName'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         filter = json['filter'] ?? "";
+        allRecords = json['allRecords'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'collectionName': collectionName,
         'databaseIntegrationId': databaseIntegrationId,
-        'filter': filter
+        'filter': filter,
+        'allRecords': allRecords
     });
 
     createResponse() => EmptyResponse();
@@ -6608,9 +6613,12 @@ class UpdateManyRequest extends CodeMashRequestBase implements IReturn<EmptyResp
     String filter = "";
 
     // @DataMember
+    bool? allRecords;
+
+    // @DataMember
     String update = "";
 
-    UpdateManyRequest({this.collectionName="",this.databaseIntegrationId,this.filter="",this.update=""});
+    UpdateManyRequest({this.collectionName="",this.databaseIntegrationId,this.filter="",this.allRecords,this.update=""});
     UpdateManyRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -6618,6 +6626,7 @@ class UpdateManyRequest extends CodeMashRequestBase implements IReturn<EmptyResp
         collectionName = json['collectionName'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         filter = json['filter'] ?? "";
+        allRecords = json['allRecords'];
         update = json['update'] ?? "";
         return this;
     }
@@ -6626,6 +6635,7 @@ class UpdateManyRequest extends CodeMashRequestBase implements IReturn<EmptyResp
         'collectionName': collectionName,
         'databaseIntegrationId': databaseIntegrationId,
         'filter': filter,
+        'allRecords': allRecords,
         'update': update
     });
 
