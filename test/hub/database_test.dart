@@ -191,11 +191,11 @@ void main() {
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
-    test('disableDatabase sends GET /{version}/database/disable', () async {
+    test('disableDatabase sends PUT /{version}/database/disable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).database.disableDatabase(query: {'q': 'v'});
       final req = driver.lastRequest!;
-      expect(req.method, equals('GET'));
+      expect(req.method, equals('PUT'));
       expect(req.url.path, equals('/v1/database/disable'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
@@ -250,11 +250,11 @@ void main() {
           equals('/v1/database/collections/collectionName_1/distinct'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
-    test('enableDatabase sends GET /{version}/database/enable', () async {
+    test('enableDatabase sends PUT /{version}/database/enable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).database.enableDatabase(query: {'q': 'v'});
       final req = driver.lastRequest!;
-      expect(req.method, equals('GET'));
+      expect(req.method, equals('PUT'));
       expect(req.url.path, equals('/v1/database/enable'));
       expect(req.url.queryParameters['q'], equals('v'));
     });

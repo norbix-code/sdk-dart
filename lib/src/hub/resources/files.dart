@@ -39,13 +39,16 @@ class FilesResource extends Resource {
     );
   }
 
-  /// `GET /{version}/files/disable`
+  /// `PUT /{version}/files/disable`
   Future<Object?> disableFiles(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -83,13 +86,16 @@ class FilesResource extends Resource {
     );
   }
 
-  /// `GET /{version}/files/enable`
+  /// `PUT /{version}/files/enable`
   Future<Object?> enableFiles(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/files/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );

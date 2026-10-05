@@ -132,13 +132,16 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/sms/disable`
+  /// `PUT /{version}/notifications/sms/disable`
   Future<Object?> disableSms(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/sms/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -160,13 +163,16 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/sms/enable`
+  /// `PUT /{version}/notifications/sms/enable`
   Future<Object?> enableSms(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/notifications/sms/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );

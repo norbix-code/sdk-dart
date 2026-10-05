@@ -54,13 +54,16 @@ class PaymentsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/payments/disable`
+  /// `PUT /{version}/payments/disable`
   Future<Object?> disablePayments(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/disable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
@@ -98,13 +101,16 @@ class PaymentsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/payments/enable`
+  /// `PUT /{version}/payments/enable`
   Future<Object?> enablePayments(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/payments/enable',
-      method: 'GET',
+      method: 'PUT',
       query: query,
+      body: body,
       headers: headers,
       pathParams: null,
     );
