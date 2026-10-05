@@ -23,6 +23,23 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `POST /{version}/database/imports/analyze`
+  ///
+  /// Reads an uploaded import file and suggests the field mapping (`AnalyzeImportFileRequest`).
+  Future<Object?> analyzeImportFile(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/imports/analyze',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `POST /{version}/database/schemas/apply-bundle`
   Future<Object?> applyDatabaseSchemaBundle(
       {Map<String, Object?>? query,
@@ -67,6 +84,41 @@ class DatabaseResource extends Resource {
       query: query,
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName},
+    );
+  }
+
+  /// `POST /{version}/database/imports`
+  ///
+  /// Starts a collection import from an uploaded file (`CreateCollectionImport`); returns its id.
+  Future<Object?> createCollectionImport(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/imports',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `DELETE /{version}/database/imports/{id}`
+  ///
+  /// Deletes one collection import (`DeleteCollectionImportRequest`).
+  Future<Object?> deleteCollectionImport(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/imports/{id}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
     );
   }
 
@@ -395,6 +447,36 @@ class DatabaseResource extends Resource {
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/integrations/flex-tiers',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/database/imports/{id}`
+  ///
+  /// One collection import with its status and counts (`GetCollectionImport`).
+  Future<Object?> getCollectionImport(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/imports/{id}',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
+    );
+  }
+
+  /// `GET /{version}/database/imports`
+  ///
+  /// The project's collection imports (`GetCollectionImports`).
+  Future<Object?> getCollectionImports(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/imports',
       method: 'GET',
       query: query,
       headers: headers,
@@ -735,6 +817,23 @@ class DatabaseResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
+    );
+  }
+
+  /// `POST /{version}/database/imports/upload-url`
+  ///
+  /// Returns a signed URL to upload an import file to (`RequestImportUploadUrlRequest`).
+  Future<Object?> requestImportUploadUrl(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/imports/upload-url',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
     );
   }
 
