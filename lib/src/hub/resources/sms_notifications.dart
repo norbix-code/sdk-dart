@@ -252,29 +252,6 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/sms/campaigns/{campaignId}/messages/{notificationId}`
-  ///
-  /// One message (notification) of a campaign. `id` is the notification id
-  /// from `getSmsCampaignMessages`; it travels in the path under the
-  /// gateway's own name `notificationId`.
-  Future<Object?> getSmsCampaignMessage(
-      {required Object campaignId,
-      required Object id,
-      Map<String, Object?>? query,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route:
-          '/{version}/notifications/sms/campaigns/{campaignId}/messages/{notificationId}',
-      method: 'GET',
-      query: query,
-      headers: headers,
-      pathParams: <String, Object?>{
-        'campaignId': campaignId,
-        'notificationId': id
-      },
-    );
-  }
-
   /// `GET /{version}/notifications/sms/campaigns/{campaignId}/messages`
   Future<Object?> getSmsCampaignMessages(
       {required Object campaignId,

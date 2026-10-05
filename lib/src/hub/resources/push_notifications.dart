@@ -268,22 +268,6 @@ class PushNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/push/campaigns/{campaignId}/messages/{id}`
-  Future<Object?> getPushCampaignMessage(
-      {required Object campaignId,
-      required Object id,
-      Map<String, Object?>? query,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route:
-          '/{version}/notifications/push/campaigns/{campaignId}/messages/{id}',
-      method: 'GET',
-      query: query,
-      headers: headers,
-      pathParams: <String, Object?>{'campaignId': campaignId, 'id': id},
-    );
-  }
-
   /// `GET /{version}/notifications/push/campaigns/{campaignId}/messages`
   Future<Object?> getPushCampaignMessages(
       {required Object campaignId,

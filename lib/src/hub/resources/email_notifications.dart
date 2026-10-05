@@ -300,22 +300,6 @@ class EmailNotificationsResource extends Resource {
     );
   }
 
-  /// `GET /{version}/notifications/emails/campaigns/{campaignId}/messages/{id}`
-  Future<Object?> getEmailCampaignMessage(
-      {required Object campaignId,
-      required Object id,
-      Map<String, Object?>? query,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route:
-          '/{version}/notifications/emails/campaigns/{campaignId}/messages/{id}',
-      method: 'GET',
-      query: query,
-      headers: headers,
-      pathParams: <String, Object?>{'campaignId': campaignId, 'id': id},
-    );
-  }
-
   /// `GET /{version}/notifications/emails/campaigns/{campaignId}/messages`
   Future<Object?> getEmailCampaignMessages(
       {required Object campaignId,

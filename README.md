@@ -557,7 +557,7 @@ instead of `hash`. A bad or expired link throws `NorbixAuthError` (401).
 
 ### SMS
 
-`hub.smsNotifications` covers every SMS Hub endpoint (35): the module
+`hub.smsNotifications` covers every SMS Hub endpoint (34): the module
 switch (`enableSms`, `disableSms`, `getSmsDisableDependencies`,
 `getSmsSettings`), integrations (`getSmsIntegrations`, `getSmsIntegration`,
 `saveSmsIntegration`, `testSmsIntegration`,
@@ -570,8 +570,8 @@ switch (`enableSms`, `disableSms`, `getSmsDisableDependencies`,
 (`getSmsCampaigns`, `createSmsCampaign`, `getSmsCampaign`,
 `deleteSmsCampaign`, `stopSmsCampaign`, `getSmsCampaignStatistics`,
 `getSmsCampaignBatches`, `getSmsCampaignBatchNotifications`,
-`getSmsCampaignBatchNotification`, `getSmsCampaignMessages`,
-`getSmsCampaignMessage`), plus `previewSmsNotification` above.
+`getSmsCampaignBatchNotification`, `getSmsCampaignMessages`), plus
+`previewSmsNotification` above.
 
 ```dart
 final hub = NorbixHub(config: NorbixConfig(baseUrl: 'https://hub.norbix.ai', apiKey: 'k'));
@@ -590,16 +590,41 @@ final text = await hub.smsNotifications.renderSms(
   },
 );
 
+// Send to account users (the owner and team members). Members without a
+// phone number are skipped — each member saves their own with
+// hub.accounts.updateMyAccountUserPhone (see Account below).
+await hub.smsNotifications.createSmsCampaign(body: {
+  'templateId': 'tmpl_1',
+  'integrationId': 'nbin_1',
+  'deliveryType': 'AccountUsers',
+  'accountUsers': {
+    'recipientsSourceType': 'AccountUsers',
+    'recipients': ['usr_owner', 'usr_member'],
+    'campaignTime': 1767225600, // unix seconds, UTC
+  },
+});
+
+// Only one campaign: filter the list by its id.
+final one = await hub.smsNotifications.getSmsCampaigns(
+  query: {'campaignId': 'cmp_1'},
+);
+
 // Stop a running campaign — no further messages go out; this cannot be undone.
 await hub.smsNotifications.stopSmsCampaign(id: 'cmp_1');
 ```
 
+The SMS template content has a `body` only — there is no `subject` (the
+sender is the integration). A campaign lists `createdById`, the user who
+created it.
+
 Ids travel in the path under the gateway's own names: `stopSmsCampaign(id:)`
-calls `POST /{version}/notifications/sms/campaigns/{Id}/stop`, and
-`getSmsCampaignMessage(campaignId:, id:)` calls
-`GET /{version}/notifications/sms/campaigns/{campaignId}/messages/{notificationId}`.
-The old `smsRazorSyntaxCheck` method is gone: its route no longer exists on
-the gateway (`renderSms` is the replacement).
+calls `POST /{version}/notifications/sms/campaigns/{Id}/stop`.
+Gone because their routes no longer exist on the gateway:
+`smsRazorSyntaxCheck` (`renderSms` is the replacement) and the one-message
+calls `getSmsCampaignMessage`, `getEmailCampaignMessage` and
+`getPushCampaignMessage` (`GET …/campaigns/{campaignId}/messages/{id}`) —
+read the campaign's messages with `get*CampaignMessages(campaignId:)`, or one
+message of a batch with `get*CampaignBatchNotification`.
 
 ## Scheduler
 
