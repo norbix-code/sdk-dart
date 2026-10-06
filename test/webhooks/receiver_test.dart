@@ -9,10 +9,12 @@ String body(
   String id = 'dlv_1',
   String accountId = 'acc_1',
   String projectId = 'pr_1',
-  String triggerId = 'trg_1',
+  String? triggerId = 'trg_1',
+  String? eventId,
 }) =>
     jsonEncode({
       'id': id,
+      if (eventId != null) 'eventId': eventId,
       'event': event,
       'createdOn': '2026-01-01T00:00:00Z',
       'accountId': accountId,
@@ -197,6 +199,90 @@ void main() {
         ),
         throwsA(isA<NorbixWebhookSignatureError>()),
       );
+    });
+
+    test('eventId from the envelope is on event, envelope and result',
+        () async {
+      final receiver = NorbixWebhookReceiver();
+      WebhookEvent? capturedEvent;
+      WebhookEnvelope? capturedEnvelope;
+      receiver.on<Map<String, dynamic>>(
+          NorbixWebhookEvents.databaseRecordInserted,
+          (doc, event) => capturedEvent = event);
+      receiver.onAll([NorbixWebhookEvents.databaseRecordInserted],
+          (envelope, ctx) => capturedEnvelope = envelope);
+
+      final result = await receiver.handle(
+        rawBody: body(
+          'database.record.inserted',
+          {
+            'schemaName': 'users',
+            'id': 'rec_1',
+            'document': {'id': 'rec_1'}
+          },
+          id: 'dlv_7',
+          eventId: 'evt_7',
+        ),
+        headers: const {},
+      );
+
+      expect(capturedEvent!.deliveryId, equals('dlv_7'));
+      expect(capturedEvent!.eventId, equals('evt_7'));
+      expect(capturedEnvelope!.id, equals('dlv_7'));
+      expect(capturedEnvelope!.eventId, equals('evt_7'));
+      expect(result.deliveryId, equals('dlv_7'));
+      expect(result.eventId, equals('evt_7'));
+    });
+
+    test('eventId falls back to id when the envelope has none', () async {
+      final receiver = NorbixWebhookReceiver();
+      WebhookEvent? capturedEvent;
+      receiver.on<FileResourceRef>(NorbixWebhookEvents.filesFileUploaded,
+          (file, event) => capturedEvent = event);
+
+      final result = await receiver.handle(
+        rawBody: body('files.file.uploaded', {'file': {}}, id: 'dlv_old'),
+        headers: const {},
+      );
+
+      expect(capturedEvent!.eventId, equals('dlv_old'));
+      expect(result.eventId, equals('dlv_old'));
+      expect(
+        WebhookEnvelope.fromJson({'id': 'd', 'event': 'e', 'eventId': ''})
+            .eventId,
+        equals('d'),
+      );
+    });
+
+    test('two deliveries of one change share eventId, differ in id', () async {
+      final receiver = NorbixWebhookReceiver();
+      final seen = <String>{};
+      final applied = <String>[];
+      receiver.on<Map<String, dynamic>>(
+          NorbixWebhookEvents.databaseRecordInserted, (doc, event) {
+        if (seen.add(event.eventId)) applied.add(event.deliveryId);
+      });
+      final data = {
+        'schemaName': 'users',
+        'id': 'rec_1',
+        'document': {'id': 'rec_1'},
+      };
+
+      final plain = await receiver.handle(
+        rawBody: body('database.record.inserted', data,
+            id: 'dlv_a', eventId: 'evt_1', triggerId: null),
+        headers: const {},
+      );
+      final viaTrigger = await receiver.handle(
+        rawBody: body('database.record.inserted', data,
+            id: 'dlv_b', eventId: 'evt_1', triggerId: 'trg_9'),
+        headers: const {},
+      );
+
+      expect(plain.triggerId, isNull);
+      expect(viaTrigger.triggerId, equals('trg_9'));
+      expect(plain.eventId, equals(viaTrigger.eventId));
+      expect(applied, equals(['dlv_a']));
     });
   });
 }

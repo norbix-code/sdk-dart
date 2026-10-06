@@ -62,7 +62,8 @@ class FileResourceRef {
     this.raw = const {},
   });
 
-  factory FileResourceRef.fromJson(Map<String, dynamic> json) => FileResourceRef(
+  factory FileResourceRef.fromJson(Map<String, dynamic> json) =>
+      FileResourceRef(
         path: json['path'] as String?,
         name: json['name'] as String?,
         size: json['size'] as int?,
@@ -133,8 +134,20 @@ class WebhookEventMetadata {
 }
 
 /// The raw JSON envelope POSTed to a destination.
+///
+/// `id` is one per delivery: a retry of the same delivery keeps it, so use it
+/// to drop retries. `eventId` is one per change: every delivery made for the
+/// same record change (the plain webhook delivery and each schema
+/// Webhook-trigger delivery) carries the same `eventId`, so use it to handle
+/// one change only once. A gateway that does not send `eventId` yet gives
+/// `eventId == id`.
 class WebhookEnvelope {
+  /// The delivery id (one per delivery; a retry keeps it).
   final String id;
+
+  /// The change id, shared by every delivery made for one change.
+  /// Falls back to [id] when the wire envelope has no `eventId`.
+  final String eventId;
   final String event;
   final String? createdOn;
   final String? accountId;
@@ -144,16 +157,22 @@ class WebhookEnvelope {
 
   const WebhookEnvelope({
     required this.id,
+    String? eventId,
     required this.event,
     this.createdOn,
     this.accountId,
     this.projectId,
     this.triggerId,
     this.data,
-  });
+  }) : eventId = eventId ?? id;
 
-  factory WebhookEnvelope.fromJson(Map<String, dynamic> json) => WebhookEnvelope(
+  factory WebhookEnvelope.fromJson(Map<String, dynamic> json) =>
+      WebhookEnvelope(
         id: json['id'] as String,
+        eventId: switch (json['eventId']) {
+          final String v when v.isNotEmpty => v,
+          _ => null,
+        },
         event: json['event'] as String,
         createdOn: json['createdOn'] as String?,
         accountId: json['accountId'] as String?,
@@ -166,7 +185,13 @@ class WebhookEnvelope {
 /// Metadata object passed as the 2nd argument to a typed handler.
 class WebhookEvent {
   final String name;
+
+  /// The delivery id (envelope `id`). Use it to drop retries.
   final String deliveryId;
+
+  /// The change id (envelope `eventId`, or `deliveryId` when absent). Use it
+  /// to handle one change once when it arrives through several deliveries.
+  final String eventId;
   final String? createdOn;
   final String? triggerId;
   final String? correlationId;
@@ -181,6 +206,7 @@ class WebhookEvent {
   const WebhookEvent({
     required this.name,
     required this.deliveryId,
+    String? eventId,
     this.createdOn,
     this.triggerId,
     this.correlationId,
@@ -191,7 +217,7 @@ class WebhookEvent {
     this.verified,
     required this.metadata,
     required this.raw,
-  });
+  }) : eventId = eventId ?? deliveryId;
 }
 
 /// Context passed to `onAll` handlers alongside the envelope.
@@ -218,6 +244,9 @@ class WebhookHandleResult {
   final bool received;
   final String event;
   final String deliveryId;
+
+  /// The change id (envelope `eventId`, or [deliveryId] when absent).
+  final String eventId;
   final bool? verified;
   final bool handled;
   final String? triggerId;
@@ -226,8 +255,9 @@ class WebhookHandleResult {
     this.received = true,
     required this.event,
     required this.deliveryId,
+    String? eventId,
     this.verified,
     this.handled = false,
     this.triggerId,
-  });
+  }) : eventId = eventId ?? deliveryId;
 }

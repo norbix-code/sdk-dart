@@ -77,6 +77,35 @@ receiver.on<Mutation<UserDto>>(NorbixWebhookEvents.membershipUserUpdated, (m, ev
 > The `on<T>` payload is cast to `T`. Pick the type from the table above —
 > a wrong `T` throws a clear cast error at dispatch time.
 
+## Delivery id vs event id — de-duplicate on `eventId`
+
+Every envelope carries two ids:
+
+| Field | On the receiver | One per | Use it to |
+|-------|-----------------|---------|-----------|
+| `id` | `event.deliveryId`, `envelope.id`, `result.deliveryId` | delivery (a retry of the same delivery keeps it) | drop **retries** |
+| `eventId` | `event.eventId`, `envelope.eventId`, `result.eventId` | change (every delivery made for one record change shares it) | handle **one change once** |
+
+A destination that is subscribed to an event **and** targeted by a schema
+Webhook trigger gets **two deliveries** for one record change: one with
+`triggerId` null, one with `triggerId` set. They have two different `id`s and
+the **same** `eventId`. When a publisher has no shared event id (Files,
+Membership, Payments, AI triggers) `eventId` equals `id`. An older gateway that
+does not send `eventId` yet: the receiver falls back to `id`, so `eventId` is
+never null.
+
+```dart
+final seen = <String>{}; // use a shared store (DB / Redis) in production
+
+receiver.on<Map<String, dynamic>>(
+  NorbixWebhookEvents.databaseRecordInserted,
+  (record, event) {
+    if (!seen.add(event.eventId)) return; // same change, already handled
+    // ... handle the change once
+  },
+);
+```
+
 ## Signature verification
 
 Norbix signs each delivery with `X-Norbix-Signature: sha256=<hex>` over
