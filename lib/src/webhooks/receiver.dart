@@ -124,6 +124,7 @@ class NorbixWebhookReceiver {
     final event = WebhookEvent(
       name: envelope.event,
       deliveryId: envelope.id,
+      eventId: envelope.eventId,
       createdOn: envelope.createdOn,
       triggerId: envelope.triggerId,
       correlationId: null,
@@ -157,6 +158,7 @@ class NorbixWebhookReceiver {
     return WebhookHandleResult(
       event: envelope.event,
       deliveryId: envelope.id,
+      eventId: envelope.eventId,
       verified: verified,
       handled: handled,
       triggerId: envelope.triggerId,
