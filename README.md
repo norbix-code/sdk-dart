@@ -283,6 +283,13 @@ the copy in the client's env; when that env has no copy the call fails with
 `CM-ERRORS-TRIGGERS-002`. Saving a trigger id that belongs to another schema
 fails the same way.
 
+`deleteDatabaseSchema` also drops the schema's records: its MongoDB
+collection, with its indexes, in the request env (in every active database
+integration of that env). For a schema with AI embed on, its records are also
+removed from the AI knowledge. The delete is still refused when a saved
+aggregate or a schema trigger uses the schema — nothing is dropped then. The
+request and response shape did not change, and a retry is safe.
+
 `renameDatabaseSchema` takes `{ "title": ... }` only. A rename to a name that
 another schema in the same env already uses is always refused
 (`CM-ERRORS-SCHEMA-002`); there is no flag to skip that check.
