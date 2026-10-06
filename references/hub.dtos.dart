@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-05 20:52:42
+Date: 2026-10-06 11:14:00
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -17689,18 +17689,20 @@ class PaymentsWebhookLogEntry implements IConvertible
 {
     String integrationId = "";
     String source = "";
+    String? env;
     String? eventName;
     String? providerEventId;
     int statusCode = 0;
     String description = "";
     DateTime? receivedOn;
 
-    PaymentsWebhookLogEntry({this.integrationId="",this.source="",this.eventName,this.providerEventId,this.statusCode=0,this.description="",this.receivedOn});
+    PaymentsWebhookLogEntry({this.integrationId="",this.source="",this.env,this.eventName,this.providerEventId,this.statusCode=0,this.description="",this.receivedOn});
     PaymentsWebhookLogEntry.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         integrationId = json['integrationId'] ?? "";
         source = json['source'] ?? "";
+        env = json['env'];
         eventName = json['eventName'];
         providerEventId = json['providerEventId'];
         statusCode = json['statusCode'] ?? 0;
@@ -17712,6 +17714,7 @@ class PaymentsWebhookLogEntry implements IConvertible
     Map<String, dynamic> toJson() => {
         'integrationId': integrationId,
         'source': source,
+        'env': env,
         'eventName': eventName,
         'providerEventId': providerEventId,
         'statusCode': statusCode,
@@ -17834,9 +17837,12 @@ class TenantLogEntryDto implements IConvertible
     String? spanId;
 
     // @DataMember
+    String env = "";
+
+    // @DataMember
     IReadOnlyDictionary<String,String>? meta;
 
-    TenantLogEntryDto({this.id="",this.timestamp,this.module="",this.level="",this.eventCode="",this.title="",this.message="",this.correlationId,this.traceId,this.spanId,this.meta});
+    TenantLogEntryDto({this.id="",this.timestamp,this.module="",this.level="",this.eventCode="",this.title="",this.message="",this.correlationId,this.traceId,this.spanId,this.env="",this.meta});
     TenantLogEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -17850,6 +17856,7 @@ class TenantLogEntryDto implements IConvertible
         correlationId = json['correlationId'];
         traceId = json['traceId'];
         spanId = json['spanId'];
+        env = json['env'] ?? "";
         meta = JsonConverters.fromJson(json['meta'],'IReadOnlyDictionary<String,String>',context!);
         return this;
     }
@@ -17865,6 +17872,7 @@ class TenantLogEntryDto implements IConvertible
         'correlationId': correlationId,
         'traceId': traceId,
         'spanId': spanId,
+        'env': env,
         'meta': JsonConverters.toJson(meta,'IReadOnlyDictionary<String,String>',context!)
     };
 
