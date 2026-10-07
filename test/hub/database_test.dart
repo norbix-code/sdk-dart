@@ -426,6 +426,19 @@ void main() {
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
+        'getDatabaseSchemaIndexStatus sends GET /{version}/database/schemas/{id}/index-status',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver)
+          .database
+          .getDatabaseSchemaIndexStatus(id: 'id_1', query: {'q': 'v'});
+      final req = driver.lastRequest!;
+      expect(req.method, equals('GET'));
+      expect(req.url.path, equals('/v3/database/schemas/id_1/index-status'));
+      expect(req.url.queryParameters['q'], equals('v'));
+    });
+
+    test(
         'getDatabaseSchemaListSettings sends GET /{version}/database/schemas/{id}/list-settings',
         () async {
       final driver = FakeHttpDriver();

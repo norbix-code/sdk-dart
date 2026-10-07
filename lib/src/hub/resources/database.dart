@@ -607,6 +607,22 @@ class DatabaseResource extends Resource {
   }
 
   /// `GET /{version}/database/schemas/{id}/list-settings`
+  /// `GET /{version}/database/schemas/{id}/index-status` — the last
+  /// schema-index run of the collection (state building | ready | refused |
+  /// partial, one entry per database).
+  Future<Object?> getDatabaseSchemaIndexStatus(
+      {required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/schemas/{id}/index-status',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'id': id},
+    );
+  }
+
   Future<Object?> getDatabaseSchemaListSettings(
       {required Object id,
       Map<String, Object?>? query,
