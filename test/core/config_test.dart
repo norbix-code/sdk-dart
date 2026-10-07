@@ -41,7 +41,7 @@ void main() {
       expect(cfg.baseUrl, equals('http://localhost:5000'));
       expect(cfg.apiKey, equals('nbx_test'));
       expect(cfg.bearerToken, isNull);
-      expect(cfg.apiVersion, equals('v1'));
+      expect(cfg.apiVersion, equals('v3'));
       expect(cfg.maxRetries, equals(3));
       expect(cfg.timeout, equals(const Duration(milliseconds: 15000)));
     });

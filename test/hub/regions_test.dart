@@ -54,7 +54,7 @@ void main() {
       );
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/echo'),
+        equals('https://hub.norbix.ai/v3/echo'),
       );
     });
   });
@@ -66,7 +66,7 @@ void main() {
       await t.send(route: '/{version}/echo', method: 'GET');
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://nb-eu-germany.hub.norbix.ai/v1/echo'),
+        equals('https://nb-eu-germany.hub.norbix.ai/v3/echo'),
       );
     });
 
@@ -79,7 +79,7 @@ void main() {
       await t.send(route: '/{version}/echo', method: 'GET');
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://nb-eu-germany.api.norbix.ai/v1/echo'),
+        equals('https://nb-eu-germany.api.norbix.ai/v3/echo'),
       );
     });
 
@@ -92,7 +92,7 @@ void main() {
       await t.send(route: '/{version}/echo', method: 'GET');
       expect(
         driver.lastRequest!.url.toString(),
-        equals('http://localhost:5000/v1/echo'),
+        equals('http://localhost:5000/v3/echo'),
       );
       expect(
         driver.lastRequest!.headers['nb-region'],
@@ -113,7 +113,7 @@ void main() {
       expect(driver.lastRequest!.headers.containsKey('nb-region'), isFalse);
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/account/regions'),
+        equals('https://hub.norbix.ai/v3/account/regions'),
       );
     });
 
@@ -132,7 +132,7 @@ void main() {
       );
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://nb-eu-germany.hub.norbix.ai/v1/account/regions'),
+        equals('https://nb-eu-germany.hub.norbix.ai/v3/account/regions'),
       );
 
       client.setRegion('nb-us-east');
@@ -140,7 +140,7 @@ void main() {
       expect(driver.lastRequest!.headers['nb-region'], equals('nb-us-east'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://nb-us-east.hub.norbix.ai/v1/account/regions'),
+        equals('https://nb-us-east.hub.norbix.ai/v3/account/regions'),
       );
 
       client.setRegion(null);
@@ -149,7 +149,7 @@ void main() {
       expect(driver.lastRequest!.headers.containsKey('nb-region'), isFalse);
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/account/regions'),
+        equals('https://hub.norbix.ai/v3/account/regions'),
       );
     });
 
@@ -174,7 +174,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/account/regions'),
+        endsWith('/v3/account/regions'),
       );
 
       await client.projects.updateProjectRegions(
@@ -187,7 +187,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('PATCH'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/account/projects/p1/settings/regions'),
+        endsWith('/v3/account/projects/p1/settings/regions'),
       );
     });
 
@@ -209,7 +209,7 @@ void main() {
       );
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://nb-eu-germany.hub.norbix.ai/v1/account/regions'),
+        equals('https://nb-eu-germany.hub.norbix.ai/v3/account/regions'),
       );
     });
   });

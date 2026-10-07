@@ -40,7 +40,7 @@ void main() {
 
         final request = driver.lastRequest!;
         expect(request.method, equals('GET'));
-        expect(request.url.path, equals('/v1/notifications/$kind/preview'));
+        expect(request.url.path, equals('/v3/notifications/$kind/preview'));
         expect(
             request.url.queryParameters, equals({'hash': 'signed-link-abc'}));
         expect(request.headers.containsKey('authorization'), isFalse);

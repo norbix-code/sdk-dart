@@ -58,7 +58,7 @@ void main() {
 
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/account/projects/prj_1'),
+        equals('https://hub.norbix.ai/v3/account/projects/prj_1'),
       );
       expect(
         driver.lastRequest!.headers['authorization'],
@@ -66,13 +66,13 @@ void main() {
       );
     });
 
-    test('database.getDatabaseSchemas hits /v1/database/schemas', () async {
+    test('database.getDatabaseSchemas hits /v3/database/schemas', () async {
       final driver = FakeHttpDriver();
       final client = NorbixHub(driver: driver);
       await client.database.getDatabaseSchemas();
       expect(
         driver.lastRequest!.url.path,
-        equals('/v1/database/schemas'),
+        equals('/v3/database/schemas'),
       );
     });
 
@@ -83,7 +83,7 @@ void main() {
           .createEmailTemplate(body: {'name': 'welcome'});
       expect(driver.lastRequest!.method, equals('POST'));
       expect(driver.lastRequest!.url.path,
-          equals('/v1/notifications/email/templates'));
+          equals('/v3/notifications/email/templates'));
       expect(driver.lastRequest!.body, equals('{"name":"welcome"}'));
     });
 

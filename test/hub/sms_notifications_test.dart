@@ -14,30 +14,30 @@ NorbixHub _client(FakeHttpDriver driver) => NorbixHub(
 
 void main() {
   group('hub.smsNotifications — module', () {
-    test('enableSms → PUT /v1/notifications/sms/enable', () async {
+    test('enableSms → PUT /v3/notifications/sms/enable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.enableSms();
 
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/enable'),
+        endsWith('/v3/notifications/sms/enable'),
       );
     });
 
-    test('disableSms → PUT /v1/notifications/sms/disable', () async {
+    test('disableSms → PUT /v3/notifications/sms/disable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.disableSms();
 
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/disable'),
+        endsWith('/v3/notifications/sms/disable'),
       );
     });
 
     test(
-        'getSmsDisableDependencies → GET /v1/notifications/sms/disable-dependencies',
+        'getSmsDisableDependencies → GET /v3/notifications/sms/disable-dependencies',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsDisableDependencies();
@@ -45,22 +45,22 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/disable-dependencies'),
+        endsWith('/v3/notifications/sms/disable-dependencies'),
       );
     });
 
-    test('getSmsSettings → GET /v1/notifications/sms/settings', () async {
+    test('getSmsSettings → GET /v3/notifications/sms/settings', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsSettings();
 
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/settings'),
+        endsWith('/v3/notifications/sms/settings'),
       );
     });
 
-    test('previewSmsNotification → GET /v1/notifications/sms/preview',
+    test('previewSmsNotification → GET /v3/notifications/sms/preview',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -70,13 +70,13 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/preview?hash=abc.def'),
+        endsWith('/v3/notifications/sms/preview?hash=abc.def'),
       );
     });
   });
 
   group('hub.smsNotifications — integrations', () {
-    test('getSmsIntegrations → GET /v1/notifications/sms/integrations',
+    test('getSmsIntegrations → GET /v3/notifications/sms/integrations',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsIntegrations();
@@ -84,11 +84,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations'),
+        endsWith('/v3/notifications/sms/integrations'),
       );
     });
 
-    test('getSmsIntegration → GET /v1/notifications/sms/integrations/nbin_1',
+    test('getSmsIntegration → GET /v3/notifications/sms/integrations/nbin_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsIntegration(id: 'nbin_1');
@@ -96,11 +96,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations/nbin_1'),
+        endsWith('/v3/notifications/sms/integrations/nbin_1'),
       );
     });
 
-    test('saveSmsIntegration → POST /v1/notifications/sms/integrations',
+    test('saveSmsIntegration → POST /v3/notifications/sms/integrations',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.saveSmsIntegration(body: {
@@ -113,12 +113,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations'),
+        endsWith('/v3/notifications/sms/integrations'),
       );
       expect(driver.lastRequest!.body, contains('"smsType":"Fake"'));
     });
 
-    test('testSmsIntegration → POST /v1/notifications/sms/integrations/test',
+    test('testSmsIntegration → POST /v3/notifications/sms/integrations/test',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.testSmsIntegration(
@@ -127,13 +127,13 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations/test'),
+        endsWith('/v3/notifications/sms/integrations/test'),
       );
       expect(driver.lastRequest!.body, contains('"integrationId":"nbin_1"'));
     });
 
     test(
-        'confirmSmsIntegrationHumanDelivery → POST /v1/notifications/sms/integrations/confirm-human-delivery',
+        'confirmSmsIntegrationHumanDelivery → POST /v3/notifications/sms/integrations/confirm-human-delivery',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.confirmSmsIntegrationHumanDelivery(
@@ -142,13 +142,13 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations/confirm-human-delivery'),
+        endsWith('/v3/notifications/sms/integrations/confirm-human-delivery'),
       );
       expect(driver.lastRequest!.body, contains('"integrationId":"nbin_1"'));
     });
 
     test(
-        'deleteSmsIntegration → DELETE /v1/notifications/sms/integrations/nbin_1',
+        'deleteSmsIntegration → DELETE /v3/notifications/sms/integrations/nbin_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.deleteSmsIntegration(id: 'nbin_1');
@@ -156,12 +156,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations/nbin_1'),
+        endsWith('/v3/notifications/sms/integrations/nbin_1'),
       );
     });
 
     test(
-        'setSmsIntegrationAsDefault → PUT /v1/notifications/sms/integrations/nbin_1/default',
+        'setSmsIntegrationAsDefault → PUT /v3/notifications/sms/integrations/nbin_1/default',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -171,12 +171,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations/nbin_1/default'),
+        endsWith('/v3/notifications/sms/integrations/nbin_1/default'),
       );
     });
 
     test(
-        'enableSmsIntegration → PUT /v1/notifications/sms/integrations/nbin_1/enable',
+        'enableSmsIntegration → PUT /v3/notifications/sms/integrations/nbin_1/enable',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.enableSmsIntegration(id: 'nbin_1');
@@ -184,12 +184,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations/nbin_1/enable'),
+        endsWith('/v3/notifications/sms/integrations/nbin_1/enable'),
       );
     });
 
     test(
-        'disableSmsIntegration → PUT /v1/notifications/sms/integrations/nbin_1/disable',
+        'disableSmsIntegration → PUT /v3/notifications/sms/integrations/nbin_1/disable',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -199,13 +199,13 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/integrations/nbin_1/disable'),
+        endsWith('/v3/notifications/sms/integrations/nbin_1/disable'),
       );
     });
   });
 
   group('hub.smsNotifications — templates', () {
-    test('getSmsTemplates → GET /v1/notifications/sms/templates', () async {
+    test('getSmsTemplates → GET /v3/notifications/sms/templates', () async {
       final driver = FakeHttpDriver();
       await _client(driver)
           .smsNotifications
@@ -214,11 +214,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates?pageSize=20'),
+        endsWith('/v3/notifications/sms/templates?pageSize=20'),
       );
     });
 
-    test('getSmsTemplate → GET /v1/notifications/sms/templates/tpl_1',
+    test('getSmsTemplate → GET /v3/notifications/sms/templates/tpl_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsTemplate(id: 'tpl_1');
@@ -226,11 +226,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates/tpl_1'),
+        endsWith('/v3/notifications/sms/templates/tpl_1'),
       );
     });
 
-    test('createSmsTemplate → POST /v1/notifications/sms/templates', () async {
+    test('createSmsTemplate → POST /v3/notifications/sms/templates', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.createSmsTemplate(body: {
         'name': 'sms-sdk-secondary-t1',
@@ -240,13 +240,13 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates'),
+        endsWith('/v3/notifications/sms/templates'),
       );
       expect(
           driver.lastRequest!.body, contains('"name":"sms-sdk-secondary-t1"'));
     });
 
-    test('updateSmsTemplate → PUT /v1/notifications/sms/templates', () async {
+    test('updateSmsTemplate → PUT /v3/notifications/sms/templates', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.updateSmsTemplate(
           body: {'id': 'tpl_1', 'name': 'sms-sdk-secondary-t1'});
@@ -254,12 +254,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates'),
+        endsWith('/v3/notifications/sms/templates'),
       );
       expect(driver.lastRequest!.body, contains('"id":"tpl_1"'));
     });
 
-    test('deleteSmsTemplate → DELETE /v1/notifications/sms/templates/tpl_1',
+    test('deleteSmsTemplate → DELETE /v3/notifications/sms/templates/tpl_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.deleteSmsTemplate(id: 'tpl_1');
@@ -267,12 +267,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates/tpl_1'),
+        endsWith('/v3/notifications/sms/templates/tpl_1'),
       );
     });
 
     test(
-        'archiveSmsTemplate → PUT /v1/notifications/sms/templates/tpl_1/archive',
+        'archiveSmsTemplate → PUT /v3/notifications/sms/templates/tpl_1/archive',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.archiveSmsTemplate(id: 'tpl_1');
@@ -280,12 +280,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates/tpl_1/archive'),
+        endsWith('/v3/notifications/sms/templates/tpl_1/archive'),
       );
     });
 
     test(
-        'unArchiveSmsTemplate → PUT /v1/notifications/sms/templates/tpl_1/unarchive',
+        'unArchiveSmsTemplate → PUT /v3/notifications/sms/templates/tpl_1/unarchive',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.unArchiveSmsTemplate(id: 'tpl_1');
@@ -293,11 +293,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates/tpl_1/unarchive'),
+        endsWith('/v3/notifications/sms/templates/tpl_1/unarchive'),
       );
     });
 
-    test('cloneSmsTemplate → POST /v1/notifications/sms/templates/tpl_1/clone',
+    test('cloneSmsTemplate → POST /v3/notifications/sms/templates/tpl_1/clone',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.cloneSmsTemplate(id: 'tpl_1');
@@ -305,12 +305,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates/tpl_1/clone'),
+        endsWith('/v3/notifications/sms/templates/tpl_1/clone'),
       );
     });
 
     test(
-        'getSmsMessageContentTokens → GET /v1/notifications/sms/templates/tpl_1/tokens',
+        'getSmsMessageContentTokens → GET /v3/notifications/sms/templates/tpl_1/tokens',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -320,11 +320,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates/tpl_1/tokens'),
+        endsWith('/v3/notifications/sms/templates/tpl_1/tokens'),
       );
     });
 
-    test('renderSms → POST /v1/notifications/sms/templates/render', () async {
+    test('renderSms → POST /v3/notifications/sms/templates/render', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.renderSms(body: {
         'code': 'Hi @Model.FirstName',
@@ -336,7 +336,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/templates/render'),
+        endsWith('/v3/notifications/sms/templates/render'),
       );
       expect(
           driver.lastRequest!.body, contains('"code":"Hi @Model.FirstName"'));
@@ -345,7 +345,7 @@ void main() {
   });
 
   group('hub.smsNotifications — campaigns', () {
-    test('getSmsCampaigns → GET /v1/notifications/sms/campaigns', () async {
+    test('getSmsCampaigns → GET /v3/notifications/sms/campaigns', () async {
       final driver = FakeHttpDriver();
       await _client(driver)
           .smsNotifications
@@ -354,11 +354,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns?templateId=tpl_1'),
+        endsWith('/v3/notifications/sms/campaigns?templateId=tpl_1'),
       );
     });
 
-    test('createSmsCampaign → POST /v1/notifications/sms/campaigns', () async {
+    test('createSmsCampaign → POST /v3/notifications/sms/campaigns', () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.createSmsCampaign(
           body: {'templateId': 'tpl_1', 'deliveryStrategy': 'AllUsers'});
@@ -366,12 +366,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns'),
+        endsWith('/v3/notifications/sms/campaigns'),
       );
       expect(driver.lastRequest!.body, contains('"templateId":"tpl_1"'));
     });
 
-    test('getSmsCampaign → GET /v1/notifications/sms/campaigns/cmp_1',
+    test('getSmsCampaign → GET /v3/notifications/sms/campaigns/cmp_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsCampaign(id: 'cmp_1');
@@ -379,11 +379,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1'),
       );
     });
 
-    test('deleteSmsCampaign → DELETE /v1/notifications/sms/campaigns/cmp_1',
+    test('deleteSmsCampaign → DELETE /v3/notifications/sms/campaigns/cmp_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.deleteSmsCampaign(id: 'cmp_1');
@@ -391,11 +391,11 @@ void main() {
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1'),
       );
     });
 
-    test('stopSmsCampaign → POST /v1/notifications/sms/campaigns/cmp_1/stop',
+    test('stopSmsCampaign → POST /v3/notifications/sms/campaigns/cmp_1/stop',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.stopSmsCampaign(id: 'cmp_1');
@@ -403,12 +403,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1/stop'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1/stop'),
       );
     });
 
     test(
-        'getSmsCampaignStatistics → GET /v1/notifications/sms/campaigns/cmp_1/stats',
+        'getSmsCampaignStatistics → GET /v3/notifications/sms/campaigns/cmp_1/stats',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -418,12 +418,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1/stats'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1/stats'),
       );
     });
 
     test(
-        'getSmsCampaignBatches → GET /v1/notifications/sms/campaigns/cmp_1/batches',
+        'getSmsCampaignBatches → GET /v3/notifications/sms/campaigns/cmp_1/batches',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsCampaignBatches(id: 'cmp_1');
@@ -431,12 +431,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1/batches'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1/batches'),
       );
     });
 
     test(
-        'getSmsCampaignBatchNotifications → GET /v1/notifications/sms/campaigns/cmp_1/batches/b_1',
+        'getSmsCampaignBatchNotifications → GET /v3/notifications/sms/campaigns/cmp_1/batches/b_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -446,12 +446,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1/batches/b_1'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1/batches/b_1'),
       );
     });
 
     test(
-        'getSmsCampaignBatchNotification → GET /v1/notifications/sms/campaigns/cmp_1/batches/b_1/n_1',
+        'getSmsCampaignBatchNotification → GET /v3/notifications/sms/campaigns/cmp_1/batches/b_1/n_1',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).smsNotifications.getSmsCampaignBatchNotification(
@@ -460,12 +460,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1/batches/b_1/n_1'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1/batches/b_1/n_1'),
       );
     });
 
     test(
-        'getSmsCampaignMessages → GET /v1/notifications/sms/campaigns/cmp_1/messages',
+        'getSmsCampaignMessages → GET /v3/notifications/sms/campaigns/cmp_1/messages',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -475,7 +475,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/notifications/sms/campaigns/cmp_1/messages'),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1/messages'),
       );
     });
   });

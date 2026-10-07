@@ -36,7 +36,7 @@ void main() {
       (
         name: 'createAccount',
         method: 'POST',
-        url: 'https://hub.norbix.ai/v1/account',
+        url: 'https://hub.norbix.ai/v3/account',
         body: {'email': 'owner@example.com', 'password': 'p'},
         call: (hub) => hub.accounts.createAccount(
               body: {'email': 'owner@example.com', 'password': 'p'},
@@ -45,7 +45,7 @@ void main() {
       (
         name: 'createTeamMemberFromInvitation',
         method: 'POST',
-        url: 'https://hub.norbix.ai/v1/account/team/member',
+        url: 'https://hub.norbix.ai/v3/account/team/member',
         body: {'token': 'invite-token', 'password': 'p'},
         call: (hub) => hub.accounts.createTeamMemberFromInvitation(
               body: {'token': 'invite-token', 'password': 'p'},
@@ -54,14 +54,14 @@ void main() {
       (
         name: 'getAccountRegions',
         method: 'GET',
-        url: 'https://hub.norbix.ai/v1/account/regions',
+        url: 'https://hub.norbix.ai/v3/account/regions',
         body: null,
         call: (hub) => hub.accounts.getAccountRegions(),
       ),
       (
         name: 'verifyAccount',
         method: 'GET',
-        url: 'https://hub.norbix.ai/v1/account/verify'
+        url: 'https://hub.norbix.ai/v3/account/verify'
             '?accountId=acc-1&token=verify-token',
         body: null,
         call: (hub) => hub.accounts.verifyAccount(

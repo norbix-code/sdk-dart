@@ -81,14 +81,14 @@ void main() {
   group('hub module on / off switches send PUT', () {
     cases.forEach((name, c) {
       final (path, call) = c;
-      test('$name → PUT /v1/$path', () async {
+      test('$name → PUT /v3/$path', () async {
         final driver = FakeHttpDriver();
         await call(_client(driver));
 
         expect(driver.lastRequest!.method, equals('PUT'));
         expect(
           driver.lastRequest!.url.toString(),
-          equals('https://hub.norbix.ai/v1/$path'),
+          equals('https://hub.norbix.ai/v3/$path'),
         );
       });
     });

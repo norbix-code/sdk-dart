@@ -19,7 +19,7 @@ void main() {
           .deleteLlmIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/llms/id_1'));
+          endsWith('/v3/ai/integrations/llms/id_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -31,7 +31,7 @@ void main() {
           .enableLlmIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/llms/id_1/enable'));
+          endsWith('/v3/ai/integrations/llms/id_1/enable'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -43,7 +43,7 @@ void main() {
           .disableLlmIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/llms/id_1/disable'));
+          endsWith('/v3/ai/integrations/llms/id_1/disable'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -55,7 +55,7 @@ void main() {
           .deleteMcpIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/mcp/id_1'));
+          endsWith('/v3/ai/integrations/mcp/id_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -67,7 +67,7 @@ void main() {
           .enableMcpIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/mcp/id_1/enable'));
+          endsWith('/v3/ai/integrations/mcp/id_1/enable'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -79,7 +79,7 @@ void main() {
           .disableMcpIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/mcp/id_1/disable'));
+          endsWith('/v3/ai/integrations/mcp/id_1/disable'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
   });

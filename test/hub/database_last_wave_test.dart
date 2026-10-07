@@ -56,7 +56,7 @@ void main() {
           body: {'fileName': 'cars.csv', 'contentType': 'text/csv'});
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
-      expect(req.url.path, equals('/v1/database/imports/upload-url'));
+      expect(req.url.path, equals('/v3/database/imports/upload-url'));
       expect(jsonDecode(req.body!),
           equals({'fileName': 'cars.csv', 'contentType': 'text/csv'}));
     });
@@ -67,7 +67,7 @@ void main() {
       await _hub(driver).database.analyzeImportFile(body: {'fileKey': 'k_1'});
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
-      expect(req.url.path, equals('/v1/database/imports/analyze'));
+      expect(req.url.path, equals('/v3/database/imports/analyze'));
       expect(jsonDecode(req.body!), equals({'fileKey': 'k_1'}));
     });
 
@@ -78,7 +78,7 @@ void main() {
           body: {'collectionName': 'cars', 'fileKey': 'k_1'});
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
-      expect(req.url.path, equals('/v1/database/imports'));
+      expect(req.url.path, equals('/v3/database/imports'));
       expect(jsonDecode(req.body!),
           equals({'collectionName': 'cars', 'fileKey': 'k_1'}));
     });
@@ -91,7 +91,7 @@ void main() {
           .getCollectionImports(query: {'pageSize': 10, 'pageNumber': 0});
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/database/imports'));
+      expect(req.url.path, equals('/v3/database/imports'));
       expect(req.url.queryParameters,
           equals({'pageSize': '10', 'pageNumber': '0'}));
     });
@@ -102,7 +102,7 @@ void main() {
       await _hub(driver).database.getCollectionImport(id: 'imp_1');
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/database/imports/imp_1'));
+      expect(req.url.path, equals('/v3/database/imports/imp_1'));
     });
 
     test('deleteCollectionImport sends DELETE /{version}/database/imports/{id}',
@@ -111,7 +111,7 @@ void main() {
       await _hub(driver).database.deleteCollectionImport(id: 'imp_1');
       final req = driver.lastRequest!;
       expect(req.method, equals('DELETE'));
-      expect(req.url.path, equals('/v1/database/imports/imp_1'));
+      expect(req.url.path, equals('/v3/database/imports/imp_1'));
     });
   });
 
@@ -128,7 +128,7 @@ void main() {
           });
       final req = driver.lastRequest!;
       expect(req.method, equals('PUT'));
-      expect(req.url.path, equals('/v1/database/collections/cars/many'));
+      expect(req.url.path, equals('/v3/database/collections/cars/many'));
       expect(
           jsonDecode(req.body!),
           equals(
@@ -142,7 +142,7 @@ void main() {
           collectionName: 'cars', body: {'filter': '{}', 'allRecords': true});
       final req = driver.lastRequest!;
       expect(req.method, equals('DELETE'));
-      expect(req.url.path, equals('/v1/database/collections/cars/many'));
+      expect(req.url.path, equals('/v3/database/collections/cars/many'));
       expect(
           jsonDecode(req.body!), equals({'filter': '{}', 'allRecords': true}));
     });
@@ -160,8 +160,8 @@ void main() {
       expect(
           driver.requests.map((r) => '${r.method} ${r.url.path}').toList(),
           equals([
-            'PUT /v1/database/collections/cars/many',
-            'DELETE /v1/database/collections/cars/many',
+            'PUT /v3/database/collections/cars/many',
+            'DELETE /v3/database/collections/cars/many',
           ]));
       expect(jsonDecode(driver.requests[0].body!)['allRecords'], isTrue);
       expect(jsonDecode(driver.requests[1].body!)['allRecords'], isTrue);

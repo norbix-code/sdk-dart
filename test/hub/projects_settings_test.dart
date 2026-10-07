@@ -18,7 +18,7 @@ void main() {
           projectId: 'projectId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PATCH'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/projects/projectId_1/settings/admin-url'));
+          endsWith('/v3/account/projects/projectId_1/settings/admin-url'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -29,7 +29,7 @@ void main() {
           projectId: 'projectId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PATCH'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/projects/projectId_1/settings/legal'));
+          endsWith('/v3/account/projects/projectId_1/settings/legal'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -40,7 +40,7 @@ void main() {
           projectId: 'projectId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PATCH'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/projects/projectId_1/settings/legal/expose'));
+          endsWith('/v3/account/projects/projectId_1/settings/legal/expose'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -51,7 +51,7 @@ void main() {
           projectId: 'projectId_1', body: {'exposed': true});
       expect(driver.lastRequest!.method, equals('PATCH'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/projects/projectId_1/settings/brand/expose'));
+          endsWith('/v3/account/projects/projectId_1/settings/brand/expose'));
       expect(driver.lastRequest!.body, contains('"exposed":true'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
@@ -63,7 +63,7 @@ void main() {
           projectId: 'projectId_1', body: {'exposed': true});
       expect(driver.lastRequest!.method, equals('PATCH'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/projects/projectId_1/settings/auth/expose'));
+          endsWith('/v3/account/projects/projectId_1/settings/auth/expose'));
       expect(driver.lastRequest!.body, contains('"exposed":true'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
@@ -75,7 +75,7 @@ void main() {
           projectId: 'projectId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/projects/projectId_1/admin-portal/structure'));
+          endsWith('/v3/account/projects/projectId_1/admin-portal/structure'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -88,7 +88,7 @@ void main() {
       expect(
           driver.lastRequest!.url.toString(),
           endsWith(
-              '/v1/account/projects/projectId_1/settings/admin-portal/service-user'));
+              '/v3/account/projects/projectId_1/settings/admin-portal/service-user'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
   });
