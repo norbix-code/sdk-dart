@@ -246,6 +246,25 @@ await hub.database.deleteManyRecords(
   body: {'filter': '{}', 'allRecords': true},
 );
 
+// Read references as { id, display } instead of bare ids
+final page = await api.database.find(
+  collectionName: 'orders',
+  expandReferences: true,
+) as Map<String, dynamic>;
+final order = jsonDecode((page['result'] as List).first as String) as Map<String, dynamic>;
+final customer = ExpandedReference.maybeFrom(order['customer']);
+print(customer?.displayText()); // "Jane Doe", or null when the customer is gone
+
+// Nested forms and arrays: dotted paths, and arrayFilters for $[name]
+await api.database.updateOne(
+  collectionName: 'orders',
+  id: orderId,
+  body: {'update': '{"address.city":"Vilnius","lines.$[line].qty":3}'},
+  arrayFilters: [
+    {'line.sku': 'A-1'},
+  ],
+);
+
 // Import a CSV / JSON file into a collection
 final upload = await hub.database.requestImportUploadUrl(body: {...});
 await hub.database.analyzeImportFile(body: {...});
@@ -294,6 +313,64 @@ request and response shape did not change, and a retry is safe.
 another schema in the same env already uses is always refused
 (`CM-ERRORS-SCHEMA-002`); there is no flag to skip that check.
 
+### Nested forms, arrays and references
+
+The data schema (`getDatabaseSchema` / `getDatabaseSchemas`, the `$fieldType`
+union) grew for the schema-content contract. The SDK hands the schema back as
+decoded JSON; the shapes are in `references/hub.dtos.dart` and
+`references/api.dtos.dart`:
+
+| Field type | What it is | Keys |
+| --- | --- | --- |
+| `ObjectFieldDto` | a nested form — a closed sub-document with its own fields | `properties` (a list of fields, recursive), `required` |
+| `ArrayFieldDto` | a list of one item type — a primitive, a reference, a nested form, another list | `items` (one field, recursive), `minItems`, `maxItems`, `uniqueItems` |
+| `JsonFieldDto` | a free-form JSON object (`type: object`, `additionalProperties: true`, no `properties`) | `maxBytes` (BSON size cap, up to 1 MiB) |
+| `CurrencyDefaultDto` | the `default` of a currency field | `value`, `currency` |
+
+Nesting goes up to 5 levels (`CM-ERRORS-SCHEMA-036` beyond). Existing field
+types gained keys: `default` and `unique` on string, decimal and integer;
+`default` on date, boolean, currency, tags and enum; `minItems` / `maxItems`
+on tags and file; `allowedFileType` / `maxSizeMb` on file; `multipleOf`,
+`minimum` / `maximum` on currency; `displayField` on every reference kind
+(required for collection and user references, `title` | `slug` for a
+taxonomy, `name` for a role). A role reference stores the role **id**
+(`pr_…_nr_…`), never its name.
+
+**Reading references.** `find`, `findOne`, `findOwn` (API) and
+`findRecords`, `findOneRecord` (Hub) take `expandReferences: true`. Every
+reference value then comes back as `{ "id": ..., "display": ... }` — a list
+of them for a `multiple` field, in place inside nested forms and array items.
+`display` is the target's `displayField` (a user property, the role name,
+the term's name or slug, the named field of the target record); it is `null`
+when the target is gone. `ExpandedReference.maybeFrom(value)`,
+`ExpandedReference.listFrom(value)`, `isMissing` and
+`displayText(language: 'en')` read the value out of the decoded record. The
+caller needs read permission on **every** source the schema links to
+(users, roles, the taxonomy, the target collection, the files integration);
+otherwise the read is refused with `CM-ERRORS-DATABASE-056` naming the
+source — read again without the flag to get the ids. Left unset, nothing is
+added to the request and the response is what it was.
+
+**Writing nested data.** The `update` document of `updateOne` / `updateMany`
+(and the Hub pair) reaches nested data through dotted paths:
+`{"address.city": "Vilnius"}` (a member), `{"lines.2.qty": 3}` (an element by
+index), `{"lines.$[].qty": 1}` (every element), `{"lines.$[line].qty": 3}`
+together with `arrayFilters: [{'line.sku': 'A-1'}]` (the elements a filter
+matches; one filter per `$[name]`). `arrayFilters` takes a Dart list (encoded
+for you) or the JSON string, and is added to the map `body` as
+`arrayFilters`. A record's nested form is closed — an undeclared member is
+refused (`-047`); the root stays open. Filters pass through to MongoDB
+(`{"address.city": "Vilnius"}`, `$elemMatch`), `sortBy` and `distinct` take a
+dotted path through nested forms (`address.city`) but not through a list
+(`lines.qty`, `tags` — `-039`: a list cannot be paged on).
+
+**Terms.** Every term row (`findTerms`, `findTermsChildren`, the trees;
+Hub term reads) carries `slug` — lower-case, derived from the name on insert
+and on rename, unique within the taxonomy (`springfield`, `springfield-2`).
+`saveDatabaseTaxonomyTerm` / `updateDatabaseTaxonomyTerm` accept an explicit
+`slug` in the document; one another term already has is refused
+(`CM-ERRORS-TAXONOMIES-012`). A legacy term shows `slug: null`.
+
 ### Database rules and error codes
 
 | Situation | What happens |
@@ -308,6 +385,13 @@ another schema in the same env already uses is always refused
 | A term read with a taxonomy name over 40 characters | `CM-ERRORS-TAXONOMIES-005`. |
 | A whole-taxonomy, merged or `includeTerms` tree with more than 5000 terms | `CM-ERRORS-TAXONOMIES-011`. `getDatabaseTaxonomyTree(query: {'includeTerms': true})` now fails when the term read fails, instead of returning taxonomies without terms. |
 | Update, replace or change-owner on a soft-deleted record | "not found"; update-many skips soft-deleted records. |
+| A record value that breaks a schema keyword | one code per keyword, `context['FieldName']` is the full path (`customer.address.zip`, `lines[0].qty`) and `context['Keyword']` names the rule: `CM-ERRORS-DATABASE-030` required · `-039` type (also a single value on a `multiple` field, a sort through a list) · `-040` length (`minLength` / `maxLength`, `minItems` / `maxItems`, a JSON field over `maxBytes`) · `-041` pattern · `-042` format (email / uri / uuid, a file id, a currency code) · `-043` range (`minimum` / `maximum`) · `-044` multipleOf · `-045` enum · `-046` uniqueItems · `-047` properties (a currency / geolocation member missing or unknown, an undeclared member in a nested form) · `-048` coordinates · `-049` translateOptions. |
+| A reference id whose target does not exist | `CM-ERRORS-DATABASE-050` user · `-051` role (a role **name** is refused too — store the id) · `-052` taxonomy term · `-053` record of the target collection · `-054` file; `context['MissingId']` names it. `-055` when the target itself cannot be read (the taxonomy is not in the project, the files integration cannot be opened). |
+| `expandReferences: true` by a caller without read on a linked source | refused, `CM-ERRORS-DATABASE-056`; `context` carries `SourceKind`, `Source`, `Fields`, `MissingPermissions` — one error per source. |
+| `arrayFilters` that do not pair with the `$[name]` paths of the update, or an update whose paths overlap (`address` and `address.city`) | refused, `CM-ERRORS-DATABASE-014` (wrapped in `CM-ERRORS-PROPERTY-002` on `Update` / `ArrayFilters`). |
+| Saving a schema nested deeper than 5 levels / whose `default` breaks the field's own rules / whose nested `required` names an undeclared field | `CM-ERRORS-SCHEMA-036` / `-037` / `-038`. A schema key the meta schema does not know is `-010` with the key named; a numeric keyword outside what its type holds is `-022`. |
+| A collection reference whose `displayField` is not a field of the target schema; a draft, rename or delete on a schema another schema's reference shows | `CM-ERRORS-SCHEMA-039` / `-040` / `-041`; the dependents are named. |
+| A term saved with an explicit `slug` another term of the taxonomy has / a slug with no letter or digit left | `CM-ERRORS-TAXONOMIES-012` / `-013`. |
 
 Rights that changed:
 
@@ -640,6 +724,27 @@ final bytes = await api.files.getPublicFile(
 Every miss — unknown id, wrong name, made private again, file gone — is the
 same plain `404`, on purpose: a more precise answer would tell a stranger that
 the file exists.
+
+### A file by its id
+
+A file's id is stable: every listing, `getFileInfo`, this call and a record's
+file field name the same file by the same id (a moved file gets a new id).
+`id` is the `nbfl_…` value the Files endpoints return, or its bare UUID —
+a record's file field accepts both.
+
+```dart
+// API — the path carries both values
+final info = await api.files.getFileById(
+  filesIntegrationId: 'nbin_1',
+  id: 'nbfl_abc',
+) as Map<String, dynamic>;
+print(info['file']['fileName']); // the getFileInfo shape: file, isPublic, publicUrl
+
+// Hub — the same answer, the values go as query parameters
+await hub.files.getFileById(filesIntegrationId: 'nbin_1', id: 'nbfl_abc');
+```
+
+An id no file of the integration has is a `404` (`NorbixNotFoundError`).
 
 ### Testing an integration before you save it
 
