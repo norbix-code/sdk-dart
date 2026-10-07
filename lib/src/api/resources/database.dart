@@ -1,6 +1,8 @@
 // GENERATED FILE. Do not edit by hand.
 // Regenerate with: dart run tool/generate_resources.dart
 
+import '../../core/expanded_reference.dart' show ExpandedReference;
+import '../../core/record_requests.dart';
 import '../../core/resource.dart';
 
 /// Project database: collection CRUD, aggregates, schemas and taxonomy terms.
@@ -124,29 +126,41 @@ class DatabaseResource extends Resource {
   }
 
   /// `GET /{version}/database/collections/{collectionName}`
+  ///
+  /// [expandReferences] — set true to get every reference value as
+  /// `{ id, display }` (see [ExpandedReference]); left unset, the stored ids
+  /// come back as before. Needs read permission on every source the schema
+  /// links to, else the read is refused with `CM-ERRORS-DATABASE-056`.
   Future<Object?> find(
       {required Object collectionName,
       Map<String, Object?>? query,
+      bool? expandReferences,
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/collections/{collectionName}',
       method: 'GET',
-      query: query,
+      query: withExpandReferences(query, expandReferences),
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName},
     );
   }
 
   /// `GET /{version}/database/collections/{collectionName}/{id}`
+  ///
+  /// [expandReferences] — set true to get every reference value as
+  /// `{ id, display }` (see [ExpandedReference]); left unset, the stored ids
+  /// come back as before. Needs read permission on every source the schema
+  /// links to, else the read is refused with `CM-ERRORS-DATABASE-056`.
   Future<Object?> findOne(
       {required Object collectionName,
       required Object id,
       Map<String, Object?>? query,
+      bool? expandReferences,
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/collections/{collectionName}/{id}',
       method: 'GET',
-      query: query,
+      query: withExpandReferences(query, expandReferences),
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
     );
@@ -287,47 +301,65 @@ class DatabaseResource extends Resource {
   }
 
   /// `PUT /{version}/database/collections/{collectionName}/many`
+  ///
+  /// [arrayFilters] — MongoDB `arrayFilters` for `$[name]` paths in the
+  /// update (`{"lines.$[line].qty": 3}` with `[{'line.sku': 'A-1'}]`): a
+  /// list of filter documents, encoded to the JSON string the gateway reads,
+  /// or that string itself. Added to the map [body] as `arrayFilters`.
   Future<Object?> updateMany(
       {required Object collectionName,
       Map<String, Object?>? query,
       Object? body,
+      Object? arrayFilters,
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/collections/{collectionName}/many',
       method: 'PUT',
       query: query,
-      body: body,
+      body: withArrayFilters(body, arrayFilters),
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName},
     );
   }
 
   /// `PUT /{version}/database/collections/{collectionName}/{id}`
+  ///
+  /// [arrayFilters] — MongoDB `arrayFilters` for `$[name]` paths in the
+  /// update (`{"lines.$[line].qty": 3}` with `[{'line.sku': 'A-1'}]`): a
+  /// list of filter documents, encoded to the JSON string the gateway reads,
+  /// or that string itself. Added to the map [body] as `arrayFilters`.
   Future<Object?> updateOne(
       {required Object collectionName,
       required Object id,
       Map<String, Object?>? query,
       Object? body,
+      Object? arrayFilters,
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/collections/{collectionName}/{id}',
       method: 'PUT',
       query: query,
-      body: body,
+      body: withArrayFilters(body, arrayFilters),
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName, 'id': id},
     );
   }
 
   /// `GET /{version}/database/collections/{collectionName}/own`
+  ///
+  /// [expandReferences] — set true to get every reference value as
+  /// `{ id, display }` (see [ExpandedReference]); left unset, the stored ids
+  /// come back as before. Needs read permission on every source the schema
+  /// links to, else the read is refused with `CM-ERRORS-DATABASE-056`.
   Future<Object?> findOwn(
       {required Object collectionName,
       Map<String, Object?>? query,
+      bool? expandReferences,
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/database/collections/{collectionName}/own',
       method: 'GET',
-      query: query,
+      query: withExpandReferences(query, expandReferences),
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName},
     );

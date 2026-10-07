@@ -12,6 +12,7 @@ library;
 // Re-export shared core types so callers don't need a separate import.
 export 'src/core/config.dart';
 export 'src/core/errors.dart';
+export 'src/core/expanded_reference.dart';
 export 'src/core/http_driver.dart';
 export 'src/core/resource.dart';
 export 'src/core/transport.dart';

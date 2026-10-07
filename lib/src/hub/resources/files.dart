@@ -145,6 +145,34 @@ class FilesResource extends Resource {
     );
   }
 
+  /// `GET /{version}/files/item/by-id`
+  ///
+  /// Reads one file's info by its id instead of its path ([getFile] reads
+  /// by path). A file's id is stable: every listing, [getFile], this call
+  /// and a record's file field name the same file by the same id (a moved
+  /// file gets a new id). [id] is the `nbfl_…` id the Files endpoints
+  /// return, or its bare UUID. Both values go out as query parameters.
+  ///
+  /// Answers the [getFile] shape — `file`, `isPublic`, `publicUrl`. An id
+  /// no file of the integration has is a `404` (`NorbixNotFoundError`).
+  Future<Object?> getFileById(
+      {required Object filesIntegrationId,
+      required Object id,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/files/item/by-id',
+      method: 'GET',
+      query: <String, Object?>{
+        ...?query,
+        'filesIntegrationId': filesIntegrationId,
+        'id': id,
+      },
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/files/integrations/{id}`
   Future<Object?> getFilesIntegration(
       {required Object id,
@@ -346,5 +374,4 @@ class FilesResource extends Resource {
       pathParams: null,
     );
   }
-
 }
