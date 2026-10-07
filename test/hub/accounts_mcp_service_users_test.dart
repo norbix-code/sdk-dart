@@ -26,7 +26,7 @@ void main() {
           toolsets: 'ai:campaigns');
       expect(driver.lastRequest!.method, equals('POST'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/mcp?toolsets=ai%3Acampaigns'));
+          endsWith('/v3/account/mcp?toolsets=ai%3Acampaigns'));
       expect(driver.lastRequest!.headers['accept'],
           equals('application/json, text/event-stream'));
       expect(driver.lastRequest!.body, contains('"method":"initialize"'));
@@ -54,7 +54,7 @@ void main() {
           .accounts
           .openMcpStream(sessionId: 'sess_1', lastEventId: 'ev_9');
       expect(driver.lastRequest!.method, equals('GET'));
-      expect(driver.lastRequest!.url.toString(), endsWith('/v1/account/mcp'));
+      expect(driver.lastRequest!.url.toString(), endsWith('/v3/account/mcp'));
       expect(
           driver.lastRequest!.headers['accept'], equals('text/event-stream'));
       expect(driver.lastRequest!.headers['mcp-session-id'], equals('sess_1'));
@@ -65,7 +65,7 @@ void main() {
       final driver = FakeHttpDriver();
       await _client(driver).accounts.endMcpSession(sessionId: 'sess_1');
       expect(driver.lastRequest!.method, equals('DELETE'));
-      expect(driver.lastRequest!.url.toString(), endsWith('/v1/account/mcp'));
+      expect(driver.lastRequest!.url.toString(), endsWith('/v3/account/mcp'));
       expect(driver.lastRequest!.headers['mcp-session-id'], equals('sess_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
@@ -89,7 +89,7 @@ void main() {
           .createAiServiceUser(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('POST'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/ai/service-users'));
+          endsWith('/v3/account/ai/service-users'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test('listAiServiceUsers sends GET /{version}/account/ai/service-users',
@@ -100,7 +100,7 @@ void main() {
           .listAiServiceUsers(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/ai/service-users'));
+          endsWith('/v3/account/ai/service-users'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -112,7 +112,7 @@ void main() {
           .rotateAiServiceUserKey(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('POST'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/ai/service-users/id_1/keys'));
+          endsWith('/v3/account/ai/service-users/id_1/keys'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -123,7 +123,7 @@ void main() {
           id: 'id_1', keyId: 'keyId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/ai/service-users/id_1/keys/keyId_1'));
+          endsWith('/v3/account/ai/service-users/id_1/keys/keyId_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -135,7 +135,7 @@ void main() {
           .deleteAiServiceUser(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/account/ai/service-users/id_1'));
+          endsWith('/v3/account/ai/service-users/id_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
   });

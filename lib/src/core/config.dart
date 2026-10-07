@@ -70,7 +70,7 @@ class NorbixConfig {
 
   NorbixConfig({
     required String baseUrl,
-    this.apiVersion = 'v1',
+    this.apiVersion = 'v3',
     this.apiKey,
     this.bearerToken,
     this.timeout = const Duration(seconds: 30),
@@ -114,7 +114,7 @@ class NorbixConfig {
 
     return NorbixConfig(
       baseUrl: read(baseUrlVar) ?? defaultBaseUrl,
-      apiVersion: read(apiVersionVar) ?? 'v1',
+      apiVersion: read(apiVersionVar) ?? 'v3',
       apiKey: read(apiKeyVar),
       bearerToken: read(bearerTokenVar),
       timeout: Duration(milliseconds: timeoutMs ?? 30000),

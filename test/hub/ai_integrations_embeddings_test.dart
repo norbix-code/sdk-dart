@@ -19,7 +19,7 @@ void main() {
           .getEmbeddingIntegrations(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/embeddings'));
+          endsWith('/v3/ai/integrations/embeddings'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -31,7 +31,7 @@ void main() {
           .saveEmbeddingIntegration(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('POST'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/embeddings'));
+          endsWith('/v3/ai/integrations/embeddings'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -43,7 +43,7 @@ void main() {
           .getEmbeddingIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/embeddings/id_1'));
+          endsWith('/v3/ai/integrations/embeddings/id_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -55,7 +55,7 @@ void main() {
           .deleteEmbeddingIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/embeddings/id_1'));
+          endsWith('/v3/ai/integrations/embeddings/id_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -67,7 +67,7 @@ void main() {
           .testEmbeddingIntegration(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('POST'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/embeddings/id_1/test'));
+          endsWith('/v3/ai/integrations/embeddings/id_1/test'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -79,7 +79,7 @@ void main() {
           .setLlmIntegrationAsDefault(id: 'id_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/integrations/llms/id_1/default'));
+          endsWith('/v3/ai/integrations/llms/id_1/default'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
   });

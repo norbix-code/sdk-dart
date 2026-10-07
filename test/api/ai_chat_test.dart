@@ -18,7 +18,7 @@ void main() {
           .getEndUserChatAvailability(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/availability'));
+          endsWith('/v3/ai/chat/availability'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test('listEndUserChatSessions sends GET /{version}/ai/chat/sessions',
@@ -29,7 +29,7 @@ void main() {
           .listEndUserChatSessions(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
-          driver.lastRequest!.url.toString(), endsWith('/v1/ai/chat/sessions'));
+          driver.lastRequest!.url.toString(), endsWith('/v3/ai/chat/sessions'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test('createEndUserChatSession sends POST /{version}/ai/chat/sessions',
@@ -40,7 +40,7 @@ void main() {
           .createEndUserChatSession(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
-          driver.lastRequest!.url.toString(), endsWith('/v1/ai/chat/sessions'));
+          driver.lastRequest!.url.toString(), endsWith('/v3/ai/chat/sessions'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -51,7 +51,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -62,7 +62,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PATCH'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -73,7 +73,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -84,7 +84,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1/pin'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1/pin'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -95,7 +95,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1/archive'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1/archive'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -106,7 +106,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1/entries'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1/entries'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -121,7 +121,7 @@ void main() {
       expect(
           driver.lastRequest!.url.toString(),
           endsWith(
-              '/v1/ai/chat/sessions/sessionId_1/entries/entryId_1/feedback'));
+              '/v3/ai/chat/sessions/sessionId_1/entries/entryId_1/feedback'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -132,7 +132,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1/attachments'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1/attachments'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -143,7 +143,7 @@ void main() {
           sessionId: 'sessionId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('POST'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/sessions/sessionId_1/attachments'));
+          endsWith('/v3/ai/chat/sessions/sessionId_1/attachments'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -154,7 +154,7 @@ void main() {
           attachmentId: 'attachmentId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/attachments/attachmentId_1'));
+          endsWith('/v3/ai/chat/attachments/attachmentId_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test('listEndUserChatMemory sends GET /{version}/ai/chat/memory', () async {
@@ -164,7 +164,7 @@ void main() {
           .listEndUserChatMemory(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
-          driver.lastRequest!.url.toString(), endsWith('/v1/ai/chat/memory'));
+          driver.lastRequest!.url.toString(), endsWith('/v3/ai/chat/memory'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
@@ -175,7 +175,7 @@ void main() {
           noteId: 'noteId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/ai/chat/memory/noteId_1'));
+          endsWith('/v3/ai/chat/memory/noteId_1'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test('startEndUserChatTurn sends POST /{version}/ai/chat/turn', () async {
@@ -184,7 +184,7 @@ void main() {
           .aiChat
           .startEndUserChatTurn(body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('POST'));
-      expect(driver.lastRequest!.url.toString(), endsWith('/v1/ai/chat/turn'));
+      expect(driver.lastRequest!.url.toString(), endsWith('/v3/ai/chat/turn'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
   });

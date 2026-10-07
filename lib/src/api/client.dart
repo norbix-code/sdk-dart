@@ -59,7 +59,7 @@ class NorbixApi {
   ///   NORBIX_API_BASE_URL        (default https://api.norbix.ai)
   ///   NORBIX_API_KEY
   ///   NORBIX_API_BEARER_TOKEN
-  ///   NORBIX_API_VERSION        (default v1)
+  ///   NORBIX_API_VERSION        (default v3)
   ///   NORBIX_API_TIMEOUT_MS
   ///   NORBIX_API_MAX_RETRIES
   ///   NORBIX_API_REGION

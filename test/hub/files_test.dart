@@ -22,7 +22,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/integrations/test'),
+        endsWith('/v3/files/integrations/test'),
       );
       expect(driver.lastRequest!.body, contains('"provider":"AwsS3"'));
     });
@@ -35,26 +35,26 @@ void main() {
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/integrations/nbin_1'),
+        endsWith('/v3/files/integrations/nbin_1'),
       );
 
       await client.files.setFilesIntegrationAsDefault(id: 'nbin_1');
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/integrations/nbin_1/default'),
+        endsWith('/v3/files/integrations/nbin_1/default'),
       );
 
       await client.files.enableFilesIntegration(id: 'nbin_1');
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/integrations/nbin_1/enable'),
+        endsWith('/v3/files/integrations/nbin_1/enable'),
       );
 
       await client.files.disableFilesIntegration(id: 'nbin_1');
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/integrations/nbin_1/disable'),
+        endsWith('/v3/files/integrations/nbin_1/disable'),
       );
     });
   });
@@ -69,7 +69,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/item/public'),
+        endsWith('/v3/files/item/public'),
       );
       expect(driver.lastRequest!.body, contains('"path":"docs/a.pdf"'));
     });
@@ -83,7 +83,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/item/private'),
+        endsWith('/v3/files/item/private'),
       );
     });
 
@@ -96,7 +96,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/folder/public'),
+        endsWith('/v3/files/folder/public'),
       );
     });
 
@@ -109,7 +109,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/folder/private'),
+        endsWith('/v3/files/folder/private'),
       );
     });
 
@@ -134,7 +134,7 @@ void main() {
         query: {'filesIntegrationId': 'nbin_1', 'path': 'docs'},
       );
       expect(driver.lastRequest!.method, equals('GET'));
-      expect(driver.lastRequest!.url.path, equals('/v1/files/folder'));
+      expect(driver.lastRequest!.url.path, equals('/v3/files/folder'));
       expect(
         driver.lastRequest!.url.queryParameters['path'],
         equals('docs'),
@@ -143,7 +143,7 @@ void main() {
       await client.files.getFile(
         query: {'filesIntegrationId': 'nbin_1', 'path': 'docs/a.pdf'},
       );
-      expect(driver.lastRequest!.url.path, equals('/v1/files/item'));
+      expect(driver.lastRequest!.url.path, equals('/v3/files/item'));
     });
   });
 }

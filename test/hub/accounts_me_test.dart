@@ -15,19 +15,19 @@ NorbixHub _client(FakeHttpDriver driver) => NorbixHub(
 
 void main() {
   group('hub.accounts — me', () {
-    test('getMyAccountUserProfile → GET /v1/account/me', () async {
+    test('getMyAccountUserProfile → GET /v3/account/me', () async {
       final driver = FakeHttpDriver();
       await _client(driver).accounts.getMyAccountUserProfile();
 
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/account/me'),
+        equals('https://hub.norbix.ai/v3/account/me'),
       );
       expect(driver.lastRequest!.body, isNull);
     });
 
-    test('updateMyAccountUserPhone → PUT /v1/account/me/phone with the phone',
+    test('updateMyAccountUserPhone → PUT /v3/account/me/phone with the phone',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver)
@@ -37,7 +37,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/account/me/phone'),
+        equals('https://hub.norbix.ai/v3/account/me/phone'),
       );
       expect(
         jsonDecode(driver.lastRequest!.body as String),

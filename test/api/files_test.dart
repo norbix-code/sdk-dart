@@ -42,7 +42,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.path,
-        equals('/v1/files/public/nbpf_abc/report.pdf'),
+        equals('/v3/files/public/nbpf_abc/report.pdf'),
       );
       expect(utf8.decode(bytes), equals('PDF-BYTES'));
     });
@@ -58,7 +58,7 @@ void main() {
       // survive as slashes — percent-encoded they stop matching the route.
       expect(
         driver.lastRequest!.url.path,
-        equals('/v1/files/public/nbpf_folder/2026/q1/report.pdf'),
+        equals('/v3/files/public/nbpf_folder/2026/q1/report.pdf'),
       );
     });
 
@@ -71,7 +71,7 @@ void main() {
 
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/public/nbpf_folder/q1%20reports/a%20b.pdf'),
+        endsWith('/v3/files/public/nbpf_folder/q1%20reports/a%20b.pdf'),
       );
     });
 
@@ -137,7 +137,7 @@ void main() {
       expect(request.method, equals('POST'));
       expect(
         request.url.toString(),
-        equals('https://api.norbix.ai/v1/files/nbin_1/test'),
+        equals('https://api.norbix.ai/v3/files/nbin_1/test'),
       );
       // Not the Hub route — that one is /files/integrations/test.
       expect(request.url.path, isNot(contains('/integrations/')));
@@ -169,7 +169,7 @@ void main() {
 
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/a%2Fb/test'),
+        endsWith('/v3/files/a%2Fb/test'),
       );
     });
 

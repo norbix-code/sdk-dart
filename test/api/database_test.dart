@@ -21,7 +21,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/aggregate'));
+          equals('/v3/database/collections/collectionName_1/aggregate'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -39,7 +39,7 @@ void main() {
       expect(
           req.url.path,
           equals(
-              '/v1/database/collections/collectionName_1/id_1/responsibility'));
+              '/v3/database/collections/collectionName_1/id_1/responsibility'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -53,7 +53,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/count'));
+          equals('/v3/database/collections/collectionName_1/count'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -67,7 +67,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('DELETE'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/many'));
+          equals('/v3/database/collections/collectionName_1/many'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -83,7 +83,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('DELETE'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/id_1'));
+          equals('/v3/database/collections/collectionName_1/id_1'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -97,7 +97,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/distinct'));
+          equals('/v3/database/collections/collectionName_1/distinct'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -114,7 +114,7 @@ void main() {
       expect(
           req.url.path,
           equals(
-              '/v1/database/collections/collectionName_1/aggregates/aggregateId_1/execute'));
+              '/v3/database/collections/collectionName_1/aggregates/aggregateId_1/execute'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -126,7 +126,7 @@ void main() {
           .find(collectionName: 'collectionName_1', query: {'q': 'v'});
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/database/collections/collectionName_1'));
+      expect(req.url.path, equals('/v3/database/collections/collectionName_1'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -138,7 +138,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/id_1'));
+          equals('/v3/database/collections/collectionName_1/id_1'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -151,7 +151,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
       expect(
-          req.url.path, equals('/v1/database/taxonomies/taxonomyName_1/terms'));
+          req.url.path, equals('/v3/database/taxonomies/taxonomyName_1/terms'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -167,7 +167,7 @@ void main() {
       expect(
           req.url.path,
           equals(
-              '/v1/database/taxonomies/taxonomyName_1/terms/parentId_1/children'));
+              '/v3/database/taxonomies/taxonomyName_1/terms/parentId_1/children'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -180,7 +180,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
       expect(req.url.path,
-          equals('/v1/database/taxonomies/taxonomyName_1/terms/tree'));
+          equals('/v3/database/taxonomies/taxonomyName_1/terms/tree'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test('findTaxonomyTree sends GET /{version}/database/taxonomies/tree',
@@ -189,7 +189,7 @@ void main() {
       await _client(driver).database.findTaxonomyTree(query: {'q': 'v'});
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/database/taxonomies/tree'));
+      expect(req.url.path, equals('/v3/database/taxonomies/tree'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test('getDatabaseSchema sends GET /{version}/database/schemas/{id}',
@@ -200,7 +200,7 @@ void main() {
           .getDatabaseSchema(id: 'id_1', query: {'q': 'v'});
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/database/schemas/id_1'));
+      expect(req.url.path, equals('/v3/database/schemas/id_1'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test('getDatabaseSchemas sends GET /{version}/database/schemas', () async {
@@ -208,7 +208,7 @@ void main() {
       await _client(driver).database.getDatabaseSchemas(query: {'q': 'v'});
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/database/schemas'));
+      expect(req.url.path, equals('/v3/database/schemas'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -222,7 +222,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/many'));
+          equals('/v3/database/collections/collectionName_1/many'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -236,7 +236,7 @@ void main() {
           body: {'probe': 'value'});
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
-      expect(req.url.path, equals('/v1/database/collections/collectionName_1'));
+      expect(req.url.path, equals('/v3/database/collections/collectionName_1'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -252,7 +252,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('PUT'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/id_1/replace'));
+          equals('/v3/database/collections/collectionName_1/id_1/replace'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -267,7 +267,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('PUT'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/many'));
+          equals('/v3/database/collections/collectionName_1/many'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -283,7 +283,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('PUT'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/id_1'));
+          equals('/v3/database/collections/collectionName_1/id_1'));
       expect(req.url.queryParameters['q'], equals('v'));
       expect(req.body, contains('"probe":"value"'));
     });
@@ -297,7 +297,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
       expect(req.url.path,
-          equals('/v1/database/collections/collectionName_1/own'));
+          equals('/v3/database/collections/collectionName_1/own'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
     test(
@@ -309,7 +309,7 @@ void main() {
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
       expect(req.url.path,
-          equals('/v1/database/taxonomies/taxonomyName_1/merged-tree'));
+          equals('/v3/database/taxonomies/taxonomyName_1/merged-tree'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
   });
@@ -325,7 +325,7 @@ void main() {
       expect(
           driver.lastRequest!.url.toString(),
           endsWith(
-              '/v1/database/taxonomies/services/merged-tree?databaseIntegrationId=int_1'));
+              '/v3/database/taxonomies/services/merged-tree?databaseIntegrationId=int_1'));
     });
   });
 }

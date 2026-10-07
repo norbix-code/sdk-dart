@@ -16,31 +16,31 @@ NorbixHub _client(FakeHttpDriver driver) => NorbixHub(
 
 void main() {
   group('hub.scheduler — module', () {
-    test('enableScheduler → PUT /v1/scheduler/enable', () async {
+    test('enableScheduler → PUT /v3/scheduler/enable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.enableScheduler();
 
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/scheduler/enable'),
+        equals('https://hub.norbix.ai/v3/scheduler/enable'),
       );
     });
 
-    test('disableScheduler → PUT /v1/scheduler/disable', () async {
+    test('disableScheduler → PUT /v3/scheduler/disable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.disableScheduler();
 
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/scheduler/disable'),
+        equals('https://hub.norbix.ai/v3/scheduler/disable'),
       );
     });
   });
 
   group('hub.scheduler — tasks', () {
-    test('getSchedulerTasks → GET /v1/scheduler/tasks, filters in the query',
+    test('getSchedulerTasks → GET /v3/scheduler/tasks, filters in the query',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.getSchedulerTasks(query: {
@@ -52,7 +52,7 @@ void main() {
 
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/scheduler/tasks'));
+      expect(req.url.path, equals('/v3/scheduler/tasks'));
       expect(
         req.url.queryParameters,
         equals({
@@ -65,7 +65,7 @@ void main() {
       expect(req.body, isNull);
     });
 
-    test('getSchedulerTask → GET /v1/scheduler/tasks/{id}, id in the path',
+    test('getSchedulerTask → GET /v3/scheduler/tasks/{id}, id in the path',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.getSchedulerTask(id: 'tsk_1');
@@ -73,12 +73,12 @@ void main() {
       expect(driver.lastRequest!.method, equals('GET'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/scheduler/tasks/tsk_1'),
+        equals('https://hub.norbix.ai/v3/scheduler/tasks/tsk_1'),
       );
       expect(driver.lastRequest!.body, isNull);
     });
 
-    test('saveSchedulerTask → POST /v1/scheduler/tasks with the typed task',
+    test('saveSchedulerTask → POST /v3/scheduler/tasks with the typed task',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.saveSchedulerTask(body: {
@@ -100,7 +100,7 @@ void main() {
       expect(req.method, equals('POST'));
       expect(
         req.url.toString(),
-        equals('https://hub.norbix.ai/v1/scheduler/tasks'),
+        equals('https://hub.norbix.ai/v3/scheduler/tasks'),
       );
       expect(
         jsonDecode(req.body!),
@@ -118,29 +118,29 @@ void main() {
       );
     });
 
-    test('deleteSchedulerTask → DELETE /v1/scheduler/tasks/{id}', () async {
+    test('deleteSchedulerTask → DELETE /v3/scheduler/tasks/{id}', () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.deleteSchedulerTask(id: 'tsk_1');
 
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/scheduler/tasks/tsk_1'),
+        equals('https://hub.norbix.ai/v3/scheduler/tasks/tsk_1'),
       );
     });
 
-    test('enableSchedulerTask → PUT /v1/scheduler/tasks/{id}/enable', () async {
+    test('enableSchedulerTask → PUT /v3/scheduler/tasks/{id}/enable', () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.enableSchedulerTask(id: 'tsk_1');
 
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/scheduler/tasks/tsk_1/enable'),
+        equals('https://hub.norbix.ai/v3/scheduler/tasks/tsk_1/enable'),
       );
     });
 
-    test('disableSchedulerTask → PUT /v1/scheduler/tasks/{id}/disable',
+    test('disableSchedulerTask → PUT /v3/scheduler/tasks/{id}/disable',
         () async {
       final driver = FakeHttpDriver();
       await _client(driver).scheduler.disableSchedulerTask(id: 'tsk_1');
@@ -148,7 +148,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('PUT'));
       expect(
         driver.lastRequest!.url.toString(),
-        equals('https://hub.norbix.ai/v1/scheduler/tasks/tsk_1/disable'),
+        equals('https://hub.norbix.ai/v3/scheduler/tasks/tsk_1/disable'),
       );
     });
   });

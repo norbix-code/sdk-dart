@@ -34,7 +34,7 @@ void main() {
       expect(
         driver.lastRequest!.url.toString(),
         equals(
-            'https://api.norbix.ai/v1/membership/users/usr_123?take=20&skip=0'),
+            'https://api.norbix.ai/v3/membership/users/usr_123?take=20&skip=0'),
       );
       expect(driver.lastRequest!.method, equals('GET'));
     });
@@ -48,7 +48,7 @@ void main() {
       );
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/files/a%2Fb%20c'),
+        endsWith('/v3/files/a%2Fb%20c'),
       );
     });
 
@@ -58,7 +58,7 @@ void main() {
         config: _cfg(apiKey: 'k', bearerToken: 'b'),
         driver: driver,
       );
-      await t.send(route: '/v1/echo');
+      await t.send(route: '/v3/echo');
       expect(driver.lastRequest!.headers['authorization'], equals('Bearer b'));
       expect(driver.lastRequest!.headers.containsKey('x-api-key'), isFalse);
     });
@@ -66,7 +66,7 @@ void main() {
     test('sends api key when only api key is set', () async {
       final driver = FakeHttpDriver();
       final t = Transport(config: _cfg(apiKey: 'k'), driver: driver);
-      await t.send(route: '/v1/echo');
+      await t.send(route: '/v3/echo');
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
 
@@ -74,7 +74,7 @@ void main() {
       final driver = FakeHttpDriver();
       final t = Transport(config: _cfg(), driver: driver);
       await t.send(
-        route: '/v1/things',
+        route: '/v3/things',
         method: 'POST',
         body: {'name': 'a'},
       );
@@ -85,7 +85,7 @@ void main() {
     test('does not send body on GET even if provided', () async {
       final driver = FakeHttpDriver();
       final t = Transport(config: _cfg(), driver: driver);
-      await t.send(route: '/v1/echo', method: 'GET', body: {'x': 1});
+      await t.send(route: '/v3/echo', method: 'GET', body: {'x': 1});
       expect(driver.lastRequest!.body, isNull);
     });
 
@@ -98,7 +98,7 @@ void main() {
         ),
       );
       final t = Transport(config: _cfg(), driver: driver);
-      final out = await t.send(route: '/v1/users/1') as Map<String, Object?>;
+      final out = await t.send(route: '/v3/users/1') as Map<String, Object?>;
       expect(out['id'], equals('1'));
       expect(out['name'], equals('alice'));
     });
@@ -113,7 +113,7 @@ void main() {
       );
       final t = Transport(config: _cfg(), driver: driver);
       expect(
-        () => t.send(route: '/v1/users/0'),
+        () => t.send(route: '/v3/users/0'),
         throwsA(isA<NorbixNotFoundError>()
             .having((e) => e.code, 'code', 'NOT_FOUND')
             .having((e) => e.message, 'message', 'gone')),
@@ -129,7 +129,7 @@ void main() {
         ),
       );
       final t = Transport(config: _cfg(), driver: driver);
-      expect(() => t.send(route: '/v1/me'), throwsA(isA<NorbixAuthError>()));
+      expect(() => t.send(route: '/v3/me'), throwsA(isA<NorbixAuthError>()));
     });
 
     test('maps 429 to NorbixRateLimitError with retryAfter', () async {
@@ -142,7 +142,7 @@ void main() {
       );
       final t = Transport(config: _cfg(), driver: driver);
       try {
-        await t.send(route: '/v1/x');
+        await t.send(route: '/v3/x');
         fail('expected throw');
       } on NorbixRateLimitError catch (e) {
         expect(e.retryAfterSeconds, equals(7));
@@ -165,7 +165,7 @@ void main() {
         );
       });
       final t = Transport(config: _cfg(retries: 3), driver: driver);
-      final out = await t.send(route: '/v1/x') as Map<String, Object?>;
+      final out = await t.send(route: '/v3/x') as Map<String, Object?>;
       expect(out['ok'], isTrue);
       expect(driver.requests.length, equals(3));
     });
@@ -179,7 +179,7 @@ void main() {
         ),
       );
       final t = Transport(config: _cfg(retries: 1), driver: driver);
-      expect(() => t.send(route: '/v1/x'), throwsA(isA<NorbixServerError>()));
+      expect(() => t.send(route: '/v3/x'), throwsA(isA<NorbixServerError>()));
     });
   });
 }

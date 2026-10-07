@@ -42,7 +42,7 @@ void main() {
       expect(driver.lastRequest!.headers.containsKey('norbix-env'), isFalse);
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/account/projects/environments'),
+        endsWith('/v3/account/projects/environments'),
       );
     });
 
@@ -74,7 +74,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('POST'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/account/projects/environments'),
+        endsWith('/v3/account/projects/environments'),
       );
 
       await client.environments
@@ -82,7 +82,7 @@ void main() {
       expect(driver.lastRequest!.method, equals('DELETE'));
       expect(
         driver.lastRequest!.url.toString(),
-        endsWith('/v1/account/projects/environments/TEST'),
+        endsWith('/v3/account/projects/environments/TEST'),
       );
     });
   });

@@ -91,7 +91,7 @@ class NorbixHub {
   ///   NORBIX_HUB_BASE_URL        (default https://hub.norbix.ai)
   ///   NORBIX_HUB_API_KEY
   ///   NORBIX_HUB_BEARER_TOKEN
-  ///   NORBIX_HUB_VERSION        (default v1)
+  ///   NORBIX_HUB_VERSION        (default v3)
   ///   NORBIX_HUB_TIMEOUT_MS
   ///   NORBIX_HUB_MAX_RETRIES
   ///   NORBIX_HUB_PROJECT_ID

@@ -60,7 +60,7 @@ void main() {
           );
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/database/collections/orders'));
+      expect(req.url.path, equals('/v3/database/collections/orders'));
       expect(req.url.queryParameters['expandReferences'], equals('true'));
       expect(req.url.queryParameters['pageSize'], equals('20'));
     });
@@ -72,14 +72,14 @@ void main() {
       await api.database.findOne(
           collectionName: 'orders', id: 'rec_1', expandReferences: true);
       expect(driver.lastRequest!.url.path,
-          equals('/v1/database/collections/orders/rec_1'));
+          equals('/v3/database/collections/orders/rec_1'));
       expect(driver.lastRequest!.url.queryParameters['expandReferences'],
           equals('true'));
 
       await api.database
           .findOwn(collectionName: 'orders', expandReferences: true);
       expect(driver.lastRequest!.url.path,
-          equals('/v1/database/collections/orders/own'));
+          equals('/v3/database/collections/orders/own'));
       expect(driver.lastRequest!.url.queryParameters['expandReferences'],
           equals('true'));
     });
@@ -91,14 +91,14 @@ void main() {
       await hub.database
           .findRecords(collectionName: 'orders', expandReferences: true);
       expect(driver.lastRequest!.url.path,
-          equals('/v1/database/collections/orders'));
+          equals('/v3/database/collections/orders'));
       expect(driver.lastRequest!.url.queryParameters['expandReferences'],
           equals('true'));
 
       await hub.database.findOneRecord(
           collectionName: 'orders', id: 'rec_1', expandReferences: true);
       expect(driver.lastRequest!.url.path,
-          equals('/v1/database/collections/orders/rec_1'));
+          equals('/v3/database/collections/orders/rec_1'));
       expect(driver.lastRequest!.url.queryParameters['expandReferences'],
           equals('true'));
     });
@@ -219,7 +219,7 @@ void main() {
       );
       final req = driver.lastRequest!;
       expect(req.method, equals('PUT'));
-      expect(req.url.path, equals('/v1/database/collections/orders/rec_1'));
+      expect(req.url.path, equals('/v3/database/collections/orders/rec_1'));
       final body = _bodyOf(driver);
       expect(body['update'], equals('{"lines.\$[line].qty":3}'));
       expect(body['arrayFilters'], equals('[{"line.sku":"A-1"}]'));
@@ -233,7 +233,7 @@ void main() {
             arrayFilters: '[{"\$or":[{"line.sku":"A"},{"line.sku":"B"}]}]',
           );
       expect(driver.lastRequest!.url.path,
-          equals('/v1/database/collections/orders/many'));
+          equals('/v3/database/collections/orders/many'));
       expect(_bodyOf(driver)['arrayFilters'],
           equals('[{"\$or":[{"line.sku":"A"},{"line.sku":"B"}]}]'));
     });
@@ -251,7 +251,7 @@ void main() {
         ],
       );
       expect(driver.lastRequest!.url.path,
-          equals('/v1/database/collections/orders/rec_1'));
+          equals('/v3/database/collections/orders/rec_1'));
       expect(_bodyOf(driver)['arrayFilters'], equals('[{"line.sku":"A-1"}]'));
 
       await hub.database.updateManyRecords(
@@ -265,7 +265,7 @@ void main() {
         ],
       );
       expect(driver.lastRequest!.url.path,
-          equals('/v1/database/collections/orders/many'));
+          equals('/v3/database/collections/orders/many'));
       expect(_bodyOf(driver)['arrayFilters'], equals('[{"l.done":false}]'));
     });
 
@@ -312,7 +312,7 @@ void main() {
           .getFileById(filesIntegrationId: 'nbin_1', id: 'nbfl_1') as Map;
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/files/nbin_1/by-id/nbfl_1'));
+      expect(req.url.path, equals('/v3/files/nbin_1/by-id/nbfl_1'));
       expect((res['file'] as Map)['fileName'], equals('a.pdf'));
     });
 
@@ -324,7 +324,7 @@ void main() {
           id: '0f4b7e2a-3c1d-4e5f-8a9b-0c1d2e3f4a5b');
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path, equals('/v1/files/item/by-id'));
+      expect(req.url.path, equals('/v3/files/item/by-id'));
       expect(req.url.queryParameters['filesIntegrationId'], equals('nbin_1'));
       expect(req.url.queryParameters['id'],
           equals('0f4b7e2a-3c1d-4e5f-8a9b-0c1d2e3f4a5b'));

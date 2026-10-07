@@ -18,7 +18,7 @@ void main() {
           projectId: 'projectId_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/public/projects/projectId_1/config'));
+          endsWith('/v3/public/projects/projectId_1/config'));
       expect(driver.lastRequest!.headers['x-api-key'], isNull);
     });
     test(
@@ -29,7 +29,7 @@ void main() {
           projectId: 'projectId_1', kind: 'kind_1', body: {'probe': 'value'});
       expect(driver.lastRequest!.method, equals('GET'));
       expect(driver.lastRequest!.url.toString(),
-          endsWith('/v1/public/projects/projectId_1/legal/kind_1'));
+          endsWith('/v3/public/projects/projectId_1/legal/kind_1'));
       expect(driver.lastRequest!.headers['x-api-key'], isNull);
     });
   });
