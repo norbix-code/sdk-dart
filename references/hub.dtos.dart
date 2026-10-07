@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-06 11:14:00
+Date: 2026-10-07 10:34:37
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -14817,6 +14817,9 @@ class TermTreeDto implements IConvertible
     Map<String,String?>? names;
 
     // @DataMember
+    String? slug;
+
+    // @DataMember
     String? description;
 
     // @DataMember
@@ -14831,7 +14834,7 @@ class TermTreeDto implements IConvertible
     // @DataMember
     List<TermTreeDto>? children;
 
-    TermTreeDto({this.id="",this.taxonomyId,this.taxonomyName,this.parentId,this.order,this.name,this.names,this.description,this.descriptions,this.multiParents,this.meta,this.children});
+    TermTreeDto({this.id="",this.taxonomyId,this.taxonomyName,this.parentId,this.order,this.name,this.names,this.slug,this.description,this.descriptions,this.multiParents,this.meta,this.children});
     TermTreeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14842,6 +14845,7 @@ class TermTreeDto implements IConvertible
         order = json['order'];
         name = json['name'];
         names = JsonConverters.toStringMap(json['names']);
+        slug = json['slug'];
         description = json['description'];
         descriptions = JsonConverters.toStringMap(json['descriptions']);
         multiParents = JsonConverters.fromJson(json['multiParents'],'List<TermMultiParentDto>',context!);
@@ -14858,6 +14862,7 @@ class TermTreeDto implements IConvertible
         'order': order,
         'name': name,
         'names': names,
+        'slug': slug,
         'description': description,
         'descriptions': descriptions,
         'multiParents': JsonConverters.toJson(multiParents,'List<TermMultiParentDto>',context!),
@@ -14939,6 +14944,9 @@ class TermDto implements IConvertible
     Map<String,String?>? names;
 
     // @DataMember
+    String? slug;
+
+    // @DataMember
     String? description;
 
     // @DataMember
@@ -14950,7 +14958,7 @@ class TermDto implements IConvertible
     // @DataMember
     dynamic? meta;
 
-    TermDto({this.id="",this.taxonomyId,this.taxonomyName,this.parentId,this.order,this.name,this.names,this.description,this.descriptions,this.multiParents,this.meta});
+    TermDto({this.id="",this.taxonomyId,this.taxonomyName,this.parentId,this.order,this.name,this.names,this.slug,this.description,this.descriptions,this.multiParents,this.meta});
     TermDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14961,6 +14969,7 @@ class TermDto implements IConvertible
         order = json['order'];
         name = json['name'];
         names = JsonConverters.toStringMap(json['names']);
+        slug = json['slug'];
         description = json['description'];
         descriptions = JsonConverters.toStringMap(json['descriptions']);
         multiParents = JsonConverters.fromJson(json['multiParents'],'List<TermMultiParentDto>',context!);
@@ -14976,6 +14985,7 @@ class TermDto implements IConvertible
         'order': order,
         'name': name,
         'names': names,
+        'slug': slug,
         'description': description,
         'descriptions': descriptions,
         'multiParents': JsonConverters.toJson(multiParents,'List<TermMultiParentDto>',context!),
@@ -20519,7 +20529,13 @@ class StringFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     IReadOnlyDictionary<String,String>? translateOptions;
 
-    StringFieldDto({this.format,this.pattern,this.minLength,this.maxLength,this.translateOptions});
+    // @DataMember
+    String? Default;
+
+    // @DataMember
+    bool? unique;
+
+    StringFieldDto({this.format,this.pattern,this.minLength,this.maxLength,this.translateOptions,this.Default,this.unique});
     StringFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20529,6 +20545,8 @@ class StringFieldDto extends JsonSchemaFieldDto implements IConvertible
         minLength = json['minLength'];
         maxLength = json['maxLength'];
         translateOptions = JsonConverters.fromJson(json['translateOptions'],'IReadOnlyDictionary<String,String>',context!);
+        Default = json['default'];
+        unique = json['unique'];
         return this;
     }
 
@@ -20537,7 +20555,9 @@ class StringFieldDto extends JsonSchemaFieldDto implements IConvertible
         'pattern': pattern,
         'minLength': minLength,
         'maxLength': maxLength,
-        'translateOptions': JsonConverters.toJson(translateOptions,'IReadOnlyDictionary<String,String>',context!)
+        'translateOptions': JsonConverters.toJson(translateOptions,'IReadOnlyDictionary<String,String>',context!),
+        'default': Default,
+        'unique': unique
     });
 
     getTypeName() => "StringFieldDto";
@@ -20555,7 +20575,13 @@ class DecimalFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     double? multipleOf;
 
-    DecimalFieldDto({this.minimum,this.maximum,this.multipleOf});
+    // @DataMember
+    double? Default;
+
+    // @DataMember
+    bool? unique;
+
+    DecimalFieldDto({this.minimum,this.maximum,this.multipleOf,this.Default,this.unique});
     DecimalFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20563,16 +20589,46 @@ class DecimalFieldDto extends JsonSchemaFieldDto implements IConvertible
         minimum = JsonConverters.toDouble(json['minimum']);
         maximum = JsonConverters.toDouble(json['maximum']);
         multipleOf = JsonConverters.toDouble(json['multipleOf']);
+        Default = JsonConverters.toDouble(json['default']);
+        unique = json['unique'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'minimum': minimum,
         'maximum': maximum,
-        'multipleOf': multipleOf
+        'multipleOf': multipleOf,
+        'default': Default,
+        'unique': unique
     });
 
     getTypeName() => "DecimalFieldDto";
+    TypeContext? context = _ctx;
+}
+
+class CurrencyDefaultDto implements IConvertible
+{
+    // @DataMember
+    double value = 0;
+
+    // @DataMember
+    String currency = "";
+
+    CurrencyDefaultDto({this.value=0,this.currency=""});
+    CurrencyDefaultDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        value = JsonConverters.toDouble(json['value']) ?? 0;
+        currency = json['currency'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'value': value,
+        'currency': currency
+    };
+
+    getTypeName() => "CurrencyDefaultDto";
     TypeContext? context = _ctx;
 }
 
@@ -20581,17 +20637,37 @@ class CurrencyFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     IReadOnlyList<String>? allowedCurrencies;
 
-    CurrencyFieldDto({this.allowedCurrencies});
+    // @DataMember
+    double? multipleOf;
+
+    // @DataMember
+    double? minimum;
+
+    // @DataMember
+    double? maximum;
+
+    // @DataMember
+    CurrencyDefaultDto? Default;
+
+    CurrencyFieldDto({this.allowedCurrencies,this.multipleOf,this.minimum,this.maximum,this.Default});
     CurrencyFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         allowedCurrencies = JsonConverters.fromJson(json['allowedCurrencies'],'IReadOnlyList<String>',context!);
+        multipleOf = JsonConverters.toDouble(json['multipleOf']);
+        minimum = JsonConverters.toDouble(json['minimum']);
+        maximum = JsonConverters.toDouble(json['maximum']);
+        Default = JsonConverters.fromJson(json['default'],'CurrencyDefaultDto',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'allowedCurrencies': JsonConverters.toJson(allowedCurrencies,'IReadOnlyList<String>',context!)
+        'allowedCurrencies': JsonConverters.toJson(allowedCurrencies,'IReadOnlyList<String>',context!),
+        'multipleOf': multipleOf,
+        'minimum': minimum,
+        'maximum': maximum,
+        'default': JsonConverters.toJson(Default,'CurrencyDefaultDto',context!)
     });
 
     getTypeName() => "CurrencyFieldDto";
@@ -20600,14 +20676,22 @@ class CurrencyFieldDto extends JsonSchemaFieldDto implements IConvertible
 
 class BooleanFieldDto extends JsonSchemaFieldDto implements IConvertible
 {
-    BooleanFieldDto();
-    BooleanFieldDto.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    // @DataMember
+    bool? Default;
+
+    BooleanFieldDto({this.Default});
+    BooleanFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        Default = json['default'];
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'default': Default
+    });
+
     getTypeName() => "BooleanFieldDto";
     TypeContext? context = _ctx;
 }
@@ -20620,19 +20704,24 @@ class DateFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     int? maximum;
 
-    DateFieldDto({this.minimum,this.maximum});
+    // @DataMember
+    int? Default;
+
+    DateFieldDto({this.minimum,this.maximum,this.Default});
     DateFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         minimum = json['minimum'];
         maximum = json['maximum'];
+        Default = json['default'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'minimum': minimum,
-        'maximum': maximum
+        'maximum': maximum,
+        'default': Default
     });
 
     getTypeName() => "DateFieldDto";
@@ -20647,19 +20736,29 @@ class IntegerFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     int? maximum;
 
-    IntegerFieldDto({this.minimum,this.maximum});
+    // @DataMember
+    int? Default;
+
+    // @DataMember
+    bool? unique;
+
+    IntegerFieldDto({this.minimum,this.maximum,this.Default,this.unique});
     IntegerFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         minimum = json['minimum'];
         maximum = json['maximum'];
+        Default = json['default'];
+        unique = json['unique'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'minimum': minimum,
-        'maximum': maximum
+        'maximum': maximum,
+        'default': Default,
+        'unique': unique
     });
 
     getTypeName() => "IntegerFieldDto";
@@ -20690,14 +20789,32 @@ class GeolocationFieldDto extends JsonSchemaFieldDto implements IConvertible
 
 class TagsFieldDto extends JsonSchemaFieldDto implements IConvertible
 {
-    TagsFieldDto();
-    TagsFieldDto.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    // @DataMember
+    int? minItems;
+
+    // @DataMember
+    int? maxItems;
+
+    // @DataMember
+    IReadOnlyList<String>? Default;
+
+    TagsFieldDto({this.minItems,this.maxItems,this.Default});
+    TagsFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        minItems = json['minItems'];
+        maxItems = json['maxItems'];
+        Default = JsonConverters.fromJson(json['default'],'IReadOnlyList<String>',context!);
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'minItems': minItems,
+        'maxItems': maxItems,
+        'default': JsonConverters.toJson(Default,'IReadOnlyList<String>',context!)
+    });
+
     getTypeName() => "TagsFieldDto";
     TypeContext? context = _ctx;
 }
@@ -20707,17 +20824,37 @@ class FileFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     IReadOnlyList<String>? storages;
 
-    FileFieldDto({this.storages});
+    // @DataMember
+    int? minItems;
+
+    // @DataMember
+    int? maxItems;
+
+    // @DataMember
+    String? allowedFileType;
+
+    // @DataMember
+    double? maxSizeMb;
+
+    FileFieldDto({this.storages,this.minItems,this.maxItems,this.allowedFileType,this.maxSizeMb});
     FileFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         storages = JsonConverters.fromJson(json['storages'],'IReadOnlyList<String>',context!);
+        minItems = json['minItems'];
+        maxItems = json['maxItems'];
+        allowedFileType = json['allowedFileType'];
+        maxSizeMb = JsonConverters.toDouble(json['maxSizeMb']);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'storages': JsonConverters.toJson(storages,'IReadOnlyList<String>',context!)
+        'storages': JsonConverters.toJson(storages,'IReadOnlyList<String>',context!),
+        'minItems': minItems,
+        'maxItems': maxItems,
+        'allowedFileType': allowedFileType,
+        'maxSizeMb': maxSizeMb
     });
 
     getTypeName() => "FileFieldDto";
@@ -20732,19 +20869,24 @@ class TaxonomySelectionFieldDto extends JsonSchemaFieldDto implements IConvertib
     // @DataMember
     bool? multiple;
 
-    TaxonomySelectionFieldDto({this.taxonomyId,this.multiple});
+    // @DataMember
+    String? displayField;
+
+    TaxonomySelectionFieldDto({this.taxonomyId,this.multiple,this.displayField});
     TaxonomySelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         taxonomyId = json['taxonomyId'];
         multiple = json['multiple'];
+        displayField = json['displayField'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'taxonomyId': taxonomyId,
-        'multiple': multiple
+        'multiple': multiple,
+        'displayField': displayField
     });
 
     getTypeName() => "TaxonomySelectionFieldDto";
@@ -20788,17 +20930,22 @@ class UserSelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     bool? multiple;
 
-    UserSelectionFieldDto({this.multiple});
+    // @DataMember
+    String? displayField;
+
+    UserSelectionFieldDto({this.multiple,this.displayField});
     UserSelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         multiple = json['multiple'];
+        displayField = json['displayField'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'multiple': multiple
+        'multiple': multiple,
+        'displayField': displayField
     });
 
     getTypeName() => "UserSelectionFieldDto";
@@ -20810,17 +20957,22 @@ class RoleSelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     bool? multiple;
 
-    RoleSelectionFieldDto({this.multiple});
+    // @DataMember
+    String? displayField;
+
+    RoleSelectionFieldDto({this.multiple,this.displayField});
     RoleSelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         multiple = json['multiple'];
+        displayField = json['displayField'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'multiple': multiple
+        'multiple': multiple,
+        'displayField': displayField
     });
 
     getTypeName() => "RoleSelectionFieldDto";
@@ -20835,22 +20987,113 @@ class EnumSelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
     // @DataMember
     bool? multiple;
 
-    EnumSelectionFieldDto({this.values,this.multiple});
+    // @DataMember
+    IReadOnlyList<String>? Default;
+
+    EnumSelectionFieldDto({this.values,this.multiple,this.Default});
     EnumSelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         values = JsonConverters.fromJson(json['values'],'IReadOnlyList<String>',context!);
         multiple = json['multiple'];
+        Default = JsonConverters.fromJson(json['default'],'IReadOnlyList<String>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'values': JsonConverters.toJson(values,'IReadOnlyList<String>',context!),
-        'multiple': multiple
+        'multiple': multiple,
+        'default': JsonConverters.toJson(Default,'IReadOnlyList<String>',context!)
     });
 
     getTypeName() => "EnumSelectionFieldDto";
+    TypeContext? context = _ctx;
+}
+
+class ObjectFieldDto extends JsonSchemaFieldDto implements IConvertible
+{
+    // @DataMember
+    IReadOnlyList<JsonSchemaFieldDto>? properties;
+
+    // @DataMember
+    IReadOnlyList<String>? Required;
+
+    ObjectFieldDto({this.properties,this.Required});
+    ObjectFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        properties = JsonConverters.fromJson(json['properties'],'IReadOnlyList<JsonSchemaFieldDto>',context!);
+        Required = JsonConverters.fromJson(json['required'],'IReadOnlyList<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'properties': JsonConverters.toJson(properties,'IReadOnlyList<JsonSchemaFieldDto>',context!),
+        'required': JsonConverters.toJson(Required,'IReadOnlyList<String>',context!)
+    });
+
+    getTypeName() => "ObjectFieldDto";
+    TypeContext? context = _ctx;
+}
+
+class ArrayFieldDto extends JsonSchemaFieldDto implements IConvertible
+{
+    // @DataMember
+    JsonSchemaFieldDto? items;
+
+    // @DataMember
+    int? minItems;
+
+    // @DataMember
+    int? maxItems;
+
+    // @DataMember
+    bool? uniqueItems;
+
+    ArrayFieldDto({this.items,this.minItems,this.maxItems,this.uniqueItems});
+    ArrayFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        items = JsonConverters.fromJson(json['items'],'JsonSchemaFieldDto',context!);
+        minItems = json['minItems'];
+        maxItems = json['maxItems'];
+        uniqueItems = json['uniqueItems'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'items': JsonConverters.toJson(items,'JsonSchemaFieldDto',context!),
+        'minItems': minItems,
+        'maxItems': maxItems,
+        'uniqueItems': uniqueItems
+    });
+
+    getTypeName() => "ArrayFieldDto";
+    TypeContext? context = _ctx;
+}
+
+class JsonFieldDto extends JsonSchemaFieldDto implements IConvertible
+{
+    // @DataMember
+    int? maxBytes;
+
+    JsonFieldDto({this.maxBytes});
+    JsonFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        maxBytes = json['maxBytes'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'maxBytes': maxBytes
+    });
+
+    getTypeName() => "JsonFieldDto";
     TypeContext? context = _ctx;
 }
 
@@ -23117,6 +23360,33 @@ class TestFilesIntegrationResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "TestFilesIntegrationResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetFileByIdResponse extends ResponseBase implements IConvertible
+{
+    FileResourceRefDto? file;
+    bool? isPublic;
+    String? publicUrl;
+
+    GetFileByIdResponse({this.file,this.isPublic,this.publicUrl});
+    GetFileByIdResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
+        isPublic = json['isPublic'];
+        publicUrl = json['publicUrl'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
+        'isPublic': isPublic,
+        'publicUrl': publicUrl
+    });
+
+    getTypeName() => "GetFileByIdResponse";
     TypeContext? context = _ctx;
 }
 
@@ -33207,10 +33477,10 @@ class SaveDatabaseTaxonomyTermRequest extends CodeMashRequestBase implements IRe
     String? databaseIntegrationId;
 
     /**
-    * The term to insert, as a MongoDB extended-JSON document string (a raw JSON object). Supported term fields: name (string, or a {lang:value} map — required); description; order (integer sort position, lower shows first — omit for unordered); parentId (id of the single parent term); multiParents ("additional categories": array of {taxonomyId, parentId}). The server stamps taxonomyId/taxonomyName automatically — do not include them. Example: {"name":"France","order":1}.
+    * The term to insert, as a MongoDB extended-JSON document string (a raw JSON object). Supported term fields: name (string, or a {lang:value} map — required); description; slug (optional — the URL-safe name, unique inside the taxonomy; derived from name when omitted, e.g. 'France' → 'france', with a -2, -3… suffix when another term of the taxonomy already has that derived slug; an explicit slug another term has is refused, CM-ERRORS-TAXONOMIES-012); order (integer sort position, lower shows first — omit for unordered); parentId (id of the single parent term); multiParents ("additional categories": array of {taxonomyId, parentId}). The server stamps taxonomyId/taxonomyName automatically — do not include them. Example: {"name":"France","order":1}.
     */
     // @DataMember
-    // @ApiMember(Description="The term to insert, as a MongoDB extended-JSON document string (a raw JSON object). Supported term fields: name (string, or a {lang:value} map — required); description; order (integer sort position, lower shows first — omit for unordered); parentId (id of the single parent term); multiParents (\"additional categories\": array of {taxonomyId, parentId}). The server stamps taxonomyId/taxonomyName automatically — do not include them. Example: {\"name\":\"France\",\"order\":1}.", IsRequired=true)
+    // @ApiMember(Description="The term to insert, as a MongoDB extended-JSON document string (a raw JSON object). Supported term fields: name (string, or a {lang:value} map — required); description; slug (optional — the URL-safe name, unique inside the taxonomy; derived from name when omitted, e.g. 'France' → 'france', with a -2, -3… suffix when another term of the taxonomy already has that derived slug; an explicit slug another term has is refused, CM-ERRORS-TAXONOMIES-012); order (integer sort position, lower shows first — omit for unordered); parentId (id of the single parent term); multiParents (\"additional categories\": array of {taxonomyId, parentId}). The server stamps taxonomyId/taxonomyName automatically — do not include them. Example: {\"name\":\"France\",\"order\":1}.", IsRequired=true)
     String document = "";
 
     SaveDatabaseTaxonomyTermRequest({this.taxonomyId="",this.databaseIntegrationId,this.document=""});
@@ -33266,10 +33536,10 @@ class UpdateDatabaseTaxonomyTermRequest extends CodeMashRequestBase implements I
     String? databaseIntegrationId;
 
     /**
-    * Partial update document as MongoDB extended-JSON (a raw JSON object of fields to change), applied with $set — only the given fields change. Updatable term fields: name (string or {lang:value} map); description; order (integer sort position, lower shows first — use this to numerate/rank terms; set null to clear); parentId (single parent term id — a term from THIS taxonomy's parent taxonomy; e.g. link a country to its region by setting the country term's parentId to the region term id); multiParents ("additional categories": array of {taxonomyId, parentId}). Example to rank a term: {"order":1}.
+    * Partial update document as MongoDB extended-JSON (a raw JSON object of fields to change), applied with $set — only the given fields change. Updatable term fields: name (string or {lang:value} map — a new name re-derives the slug unless 'slug' is sent too; a derived slug another term has gets a -2, -3… suffix); slug (optional — set explicitly, unique inside the taxonomy, CM-ERRORS-TAXONOMIES-012 when another term has it); description; order (integer sort position, lower shows first — use this to numerate/rank terms; set null to clear); parentId (single parent term id — a term from THIS taxonomy's parent taxonomy; e.g. link a country to its region by setting the country term's parentId to the region term id); multiParents ("additional categories": array of {taxonomyId, parentId}). Example to rank a term: {"order":1}.
     */
     // @DataMember
-    // @ApiMember(Description="Partial update document as MongoDB extended-JSON (a raw JSON object of fields to change), applied with $set — only the given fields change. Updatable term fields: name (string or {lang:value} map); description; order (integer sort position, lower shows first — use this to numerate/rank terms; set null to clear); parentId (single parent term id — a term from THIS taxonomy's parent taxonomy; e.g. link a country to its region by setting the country term's parentId to the region term id); multiParents (\"additional categories\": array of {taxonomyId, parentId}). Example to rank a term: {\"order\":1}.", IsRequired=true)
+    // @ApiMember(Description="Partial update document as MongoDB extended-JSON (a raw JSON object of fields to change), applied with $set — only the given fields change. Updatable term fields: name (string or {lang:value} map — a new name re-derives the slug unless 'slug' is sent too; a derived slug another term has gets a -2, -3… suffix); slug (optional — set explicitly, unique inside the taxonomy, CM-ERRORS-TAXONOMIES-012 when another term has it); description; order (integer sort position, lower shows first — use this to numerate/rank terms; set null to clear); parentId (single parent term id — a term from THIS taxonomy's parent taxonomy; e.g. link a country to its region by setting the country term's parentId to the region term id); multiParents (\"additional categories\": array of {taxonomyId, parentId}). Example to rank a term: {\"order\":1}.", IsRequired=true)
     String update = "";
 
     UpdateDatabaseTaxonomyTermRequest({this.taxonomyId="",this.id="",this.databaseIntegrationId,this.update=""});
@@ -33821,10 +34091,10 @@ class UpdateDatabaseSchemaDraftRequest extends CodeMashRequestBase implements IR
     String? dataSchema;
 
     /**
-    * OPTIONAL raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form. If omitted or invalid, the backend auto-generates a flat-list form from the data schema.
+    * OPTIONAL raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form. If omitted or empty (no field cell), the backend auto-generates a flat-list form from the data schema; a layout that fails the meta-schema is refused with the key named.
     */
     // @DataMember
-    // @ApiMember(Description="OPTIONAL raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form. If omitted or invalid, the backend auto-generates a flat-list form from the data schema.")
+    // @ApiMember(Description="OPTIONAL raw JSON string matching the Norbix UI/visual meta-schema (https://norbix.ai/schemas/ui/v1.json) for the draft's record form. If omitted or empty (no field cell), the backend auto-generates a flat-list form from the data schema; a layout that fails the meta-schema is refused with the key named.")
     String? visualSchema;
 
     UpdateDatabaseSchemaDraftRequest({this.id="",this.dataSchema,this.visualSchema});
@@ -34351,8 +34621,13 @@ class FindRecords extends CodeMashListPaginationRequestBase implements IReturn<F
     PagingArgs? pagingArgs;
     String? sortBy;
     int? sortOrder;
+    /**
+    * Set true to get every reference value as { id, display } (display = the target's displayField per the schema; null when the target is gone). Needs read permission on every source the schema links to (users, roles, taxonomy, collection, files) — otherwise the read is refused with CM-ERRORS-DATABASE-056 naming the source. Default false returns the stored ids.
+    */
+    // @ApiMember(Description="Set true to get every reference value as { id, display } (display = the target's displayField per the schema; null when the target is gone). Needs read permission on every source the schema links to (users, roles, taxonomy, collection, files) — otherwise the read is refused with CM-ERRORS-DATABASE-056 naming the source. Default false returns the stored ids.")
+    bool? expandReferences;
 
-    FindRecords({this.collectionName="",this.databaseIntegrationId,this.filter,this.contactId,this.schemaVersion,this.pagingArgs,this.sortBy,this.sortOrder});
+    FindRecords({this.collectionName="",this.databaseIntegrationId,this.filter,this.contactId,this.schemaVersion,this.pagingArgs,this.sortBy,this.sortOrder,this.expandReferences});
     FindRecords.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -34365,6 +34640,7 @@ class FindRecords extends CodeMashListPaginationRequestBase implements IReturn<F
         pagingArgs = JsonConverters.fromJson(json['pagingArgs'],'PagingArgs',context!);
         sortBy = json['sortBy'];
         sortOrder = json['sortOrder'];
+        expandReferences = json['expandReferences'];
         return this;
     }
 
@@ -34376,7 +34652,8 @@ class FindRecords extends CodeMashListPaginationRequestBase implements IReturn<F
         'schemaVersion': schemaVersion,
         'pagingArgs': JsonConverters.toJson(pagingArgs,'PagingArgs',context!),
         'sortBy': sortBy,
-        'sortOrder': sortOrder
+        'sortOrder': sortOrder,
+        'expandReferences': expandReferences
     });
 
     createResponse() => FindRecordsResponse();
@@ -34405,8 +34682,13 @@ class FindOneRecord extends CodeMashRequestBase implements IReturn<FindOneRecord
     String id = "";
 
     String? databaseIntegrationId;
+    /**
+    * Set true to get every reference value as { id, display } (display = the target's displayField per the schema; null when the target is gone). Needs read permission on every source the schema links to (users, roles, taxonomy, collection, files) — otherwise the read is refused with CM-ERRORS-DATABASE-056 naming the source. Default false returns the stored ids.
+    */
+    // @ApiMember(Description="Set true to get every reference value as { id, display } (display = the target's displayField per the schema; null when the target is gone). Needs read permission on every source the schema links to (users, roles, taxonomy, collection, files) — otherwise the read is refused with CM-ERRORS-DATABASE-056 naming the source. Default false returns the stored ids.")
+    bool? expandReferences;
 
-    FindOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId});
+    FindOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId,this.expandReferences});
     FindOneRecord.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -34414,13 +34696,15 @@ class FindOneRecord extends CodeMashRequestBase implements IReturn<FindOneRecord
         collectionName = json['collectionName'] ?? "";
         id = json['id'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
+        expandReferences = json['expandReferences'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'collectionName': collectionName,
         'id': id,
-        'databaseIntegrationId': databaseIntegrationId
+        'databaseIntegrationId': databaseIntegrationId,
+        'expandReferences': expandReferences
     });
 
     createResponse() => FindOneRecordResponse();
@@ -34675,12 +34959,18 @@ class UpdateManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
     bool? allRecords;
 
     /**
-    * The partial update document (applied with $set), as MongoDB extended-JSON.
+    * The partial update document (applied with $set), as MongoDB extended-JSON. Dotted paths reach nested data: {"address.city":"Vilnius"}, {"lines.$[].qty":1}, or {"lines.$[line].qty":3} together with ArrayFilters.
     */
-    // @ApiMember(Description="The partial update document (applied with $set), as MongoDB extended-JSON.", IsRequired=true)
+    // @ApiMember(Description="The partial update document (applied with $set), as MongoDB extended-JSON. Dotted paths reach nested data: {\"address.city\":\"Vilnius\"}, {\"lines.$[].qty\":1}, or {\"lines.$[line].qty\":3} together with ArrayFilters.", IsRequired=true)
     String update = "";
 
-    UpdateManyRecords({this.collectionName="",this.databaseIntegrationId,this.filter="",this.allRecords,this.update=""});
+    /**
+    * Optional MongoDB arrayFilters — a JSON array of filter documents, one per $[name] identifier used in the Update paths, e.g. [{"line.sku":"A-1"}] for {"lines.$[line].qty":3}.
+    */
+    // @ApiMember(Description="Optional MongoDB arrayFilters — a JSON array of filter documents, one per $[name] identifier used in the Update paths, e.g. [{\"line.sku\":\"A-1\"}] for {\"lines.$[line].qty\":3}.")
+    String? arrayFilters;
+
+    UpdateManyRecords({this.collectionName="",this.databaseIntegrationId,this.filter="",this.allRecords,this.update="",this.arrayFilters});
     UpdateManyRecords.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -34690,6 +34980,7 @@ class UpdateManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
         filter = json['filter'] ?? "";
         allRecords = json['allRecords'];
         update = json['update'] ?? "";
+        arrayFilters = json['arrayFilters'];
         return this;
     }
 
@@ -34698,7 +34989,8 @@ class UpdateManyRecords extends CodeMashRequestBase implements IReturn<EmptyResp
         'databaseIntegrationId': databaseIntegrationId,
         'filter': filter,
         'allRecords': allRecords,
-        'update': update
+        'update': update,
+        'arrayFilters': arrayFilters
     });
 
     createResponse() => EmptyResponse();
@@ -34728,12 +35020,18 @@ class UpdateOneRecord extends CodeMashRequestBase implements IReturn<EmptyRespon
 
     String? databaseIntegrationId;
     /**
-    * The partial update document (applied with $set), as MongoDB extended-JSON.
+    * The partial update document (applied with $set), as MongoDB extended-JSON. Dotted paths reach nested data: {"address.city":"Vilnius"}, {"lines.2.qty":3}, {"lines.$[].qty":1}, or {"lines.$[line].qty":3} together with ArrayFilters.
     */
-    // @ApiMember(Description="The partial update document (applied with $set), as MongoDB extended-JSON.", IsRequired=true)
+    // @ApiMember(Description="The partial update document (applied with $set), as MongoDB extended-JSON. Dotted paths reach nested data: {\"address.city\":\"Vilnius\"}, {\"lines.2.qty\":3}, {\"lines.$[].qty\":1}, or {\"lines.$[line].qty\":3} together with ArrayFilters.", IsRequired=true)
     String update = "";
 
-    UpdateOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId,this.update=""});
+    /**
+    * Optional MongoDB arrayFilters — a JSON array of filter documents, one per $[name] identifier used in the Update paths, e.g. [{"line.sku":"A-1"}] for {"lines.$[line].qty":3}.
+    */
+    // @ApiMember(Description="Optional MongoDB arrayFilters — a JSON array of filter documents, one per $[name] identifier used in the Update paths, e.g. [{\"line.sku\":\"A-1\"}] for {\"lines.$[line].qty\":3}.")
+    String? arrayFilters;
+
+    UpdateOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId,this.update="",this.arrayFilters});
     UpdateOneRecord.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -34742,6 +35040,7 @@ class UpdateOneRecord extends CodeMashRequestBase implements IReturn<EmptyRespon
         id = json['id'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         update = json['update'] ?? "";
+        arrayFilters = json['arrayFilters'];
         return this;
     }
 
@@ -34749,7 +35048,8 @@ class UpdateOneRecord extends CodeMashRequestBase implements IReturn<EmptyRespon
         'collectionName': collectionName,
         'id': id,
         'databaseIntegrationId': databaseIntegrationId,
-        'update': update
+        'update': update,
+        'arrayFilters': arrayFilters
     });
 
     createResponse() => EmptyResponse();
@@ -36064,6 +36364,42 @@ class TestFilesIntegration extends CodeMashRequestBase implements IReturn<TestFi
     createResponse() => TestFilesIntegrationResponse();
     getResponseTypeName() => "TestFilesIntegrationResponse";
     getTypeName() => "TestFilesIntegration";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/item/by-id", "GET")
+class GetFileById extends CodeMashRequestBase implements IReturn<GetFileByIdResponse>, IConvertible, IGet
+{
+    /**
+    * The files integration id to read from, from get_files_integrations.
+    */
+    // @ApiMember(Description="The files integration id to read from, from get_files_integrations.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * The file id — nbfl_… as the Files endpoints return it, or its bare UUID.
+    */
+    // @ApiMember(Description="The file id — nbfl_… as the Files endpoints return it, or its bare UUID.", IsRequired=true)
+    String id = "";
+
+    GetFileById({this.filesIntegrationId="",this.id=""});
+    GetFileById.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'id': id
+    });
+
+    createResponse() => GetFileByIdResponse();
+    getResponseTypeName() => "GetFileByIdResponse";
+    getTypeName() => "GetFileById";
     TypeContext? context = _ctx;
 }
 
@@ -46025,6 +46361,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ICursorArgs': TypeInfo(TypeOf.Interface),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
     'DecimalFieldDto': TypeInfo(TypeOf.Class, create:() => DecimalFieldDto()),
+    'CurrencyDefaultDto': TypeInfo(TypeOf.Class, create:() => CurrencyDefaultDto()),
     'CurrencyFieldDto': TypeInfo(TypeOf.Class, create:() => CurrencyFieldDto()),
     'BooleanFieldDto': TypeInfo(TypeOf.Class, create:() => BooleanFieldDto()),
     'DateFieldDto': TypeInfo(TypeOf.Class, create:() => DateFieldDto()),
@@ -46037,6 +46374,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UserSelectionFieldDto': TypeInfo(TypeOf.Class, create:() => UserSelectionFieldDto()),
     'RoleSelectionFieldDto': TypeInfo(TypeOf.Class, create:() => RoleSelectionFieldDto()),
     'EnumSelectionFieldDto': TypeInfo(TypeOf.Class, create:() => EnumSelectionFieldDto()),
+    'ObjectFieldDto': TypeInfo(TypeOf.Class, create:() => ObjectFieldDto()),
+    'IReadOnlyList<JsonSchemaFieldDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<JsonSchemaFieldDto>()),
+    'ArrayFieldDto': TypeInfo(TypeOf.Class, create:() => ArrayFieldDto()),
+    'JsonFieldDto': TypeInfo(TypeOf.Class, create:() => JsonFieldDto()),
     'EchoResponse': TypeInfo(TypeOf.Class, create:() => EchoResponse()),
     'List<EchoRegionDto>': TypeInfo(TypeOf.Class, create:() => <EchoRegionDto>[]),
     'PublicProjectConfigDto': TypeInfo(TypeOf.Class, create:() => PublicProjectConfigDto()),
@@ -46168,6 +46509,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PaginatedResponse<FilesIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FilesIntegrationListProjection>()),
     'List<FileProvider>': TypeInfo(TypeOf.Class, create:() => <FileProvider>[]),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
+    'GetFileByIdResponse': TypeInfo(TypeOf.Class, create:() => GetFileByIdResponse()),
     'GetFolderFilesResponse': TypeInfo(TypeOf.Class, create:() => GetFolderFilesResponse()),
     'PaginatedResponse<FileResourceRefDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FileResourceRefDto>()),
     'List<PublicFolderDto>': TypeInfo(TypeOf.Class, create:() => <PublicFolderDto>[]),
@@ -46636,6 +46978,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveFilesIntegration': TypeInfo(TypeOf.Class, create:() => SaveFilesIntegration()),
     'SetFilesIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetFilesIntegrationAsDefaultRequest()),
     'TestFilesIntegration': TypeInfo(TypeOf.Class, create:() => TestFilesIntegration()),
+    'GetFileById': TypeInfo(TypeOf.Class, create:() => GetFileById()),
     'GetFolderFiles': TypeInfo(TypeOf.Class, create:() => GetFolderFiles()),
     'DisableEmail': TypeInfo(TypeOf.Class, create:() => DisableEmail()),
     'GetEmailDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetEmailDisableDependencies()),
