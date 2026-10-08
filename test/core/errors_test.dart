@@ -147,6 +147,97 @@ void main() {
       expect(error!.message, equals('Request failed (HTTP 404)'));
     });
 
+    // The shape every failed call has now: a real HTTP status and
+    // responseStatus.errors with message, errorCode and context.
+    test('a 403 gives the gateway code, message and context', () async {
+      final t = _transportAnswering(403, {
+        'responseStatus': {
+          'isSuccess': false,
+          'errors': [
+            {
+              'message':
+                  "Caller is missing required permission 'database:create on p_1'.",
+              'errorCode': 'CM-ERRORS-MEMBERSHIP-039',
+              'context': {'MissingPermissions': 'database:create on p_1'},
+            },
+          ],
+        },
+      });
+
+      final error = await _aCall(t).then<NorbixError?>(
+        (_) => null,
+        onError: (Object e) => e as NorbixError,
+      );
+
+      expect(error, isA<NorbixAuthError>());
+      expect(error!.httpStatus, equals(403));
+      expect(error.errorCode, equals('CM-ERRORS-MEMBERSHIP-039'));
+      expect(
+        error.message,
+        equals(
+          "Caller is missing required permission 'database:create on p_1'.",
+        ),
+      );
+      expect(error.errors, hasLength(1));
+      expect(
+        error.errors.single.context['MissingPermissions'],
+        equals('database:create on p_1'),
+      );
+    });
+
+    test(
+      'a 500 from our own bug gives the gateway code and reference',
+      () async {
+        final t = _transportAnswering(500, {
+          'responseStatus': {
+            'isSuccess': false,
+            'errors': [
+              {
+                'message':
+                    'A temporary internal error occurred. Reference: ref_1',
+                'errorCode': 'CM-ERRORS-INFRA-NORBIX-001',
+                'context': {'ReferenceId': 'ref_1'},
+              },
+            ],
+          },
+        });
+
+        final error = await _aCall(t).then<NorbixError?>(
+          (_) => null,
+          onError: (Object e) => e as NorbixError,
+        );
+
+        expect(error, isA<NorbixServerError>());
+        expect(error!.httpStatus, equals(500));
+        expect(error.errorCode, equals('CM-ERRORS-INFRA-NORBIX-001'));
+        expect(
+          error.message,
+          equals('A temporary internal error occurred. Reference: ref_1'),
+        );
+        expect(error.errors.single.context['ReferenceId'], equals('ref_1'));
+      },
+    );
+
+    test('a 502 that is not JSON uses the fallback text and code', () async {
+      final t = _transportAnswering(
+        502,
+        'Bad Gateway',
+        contentType: 'text/plain',
+      );
+
+      final error = await _aCall(t).then<NorbixError?>(
+        (_) => null,
+        onError: (Object e) => e as NorbixError,
+      );
+
+      expect(error, isA<NorbixServerError>());
+      expect(error!.httpStatus, equals(502));
+      expect(error.message, equals('Request failed (HTTP 502)'));
+      expect(error.errorCode, equals('NORBIX_HTTP_ERROR'));
+      expect(error.errors, isEmpty);
+      expect(error.body, equals('Bad Gateway'));
+    });
+
     test('reads the top of the body when there is no responseStatus',
         () async {
       final t = _transportAnswering(409, {
