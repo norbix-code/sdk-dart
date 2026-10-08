@@ -49,6 +49,9 @@ class NorbixConfig {
 
   /// How many times to retry transient (5xx, 429, network) failures.
   /// Defaults to 0 (no retry). Set to 2–3 for production.
+  ///
+  /// Only GET, HEAD, OPTIONS, PUT and DELETE are retried. A POST or a PATCH
+  /// is sent once: it may already have done its work when it failed.
   final int maxRetries;
 
   /// Extra headers added to every request.

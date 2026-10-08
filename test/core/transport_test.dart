@@ -182,4 +182,93 @@ void main() {
       expect(() => t.send(route: '/v3/x'), throwsA(isA<NorbixServerError>()));
     });
   });
+
+  // A write that failed may already have done its work, so it is never sent
+  // again; a read is safe to repeat.
+  group('retries only calls that are safe to send twice', () {
+    HttpDriverResponse answer(int status) => HttpDriverResponse(
+          statusCode: status,
+          headers: const {'content-type': 'application/json'},
+          body: '{"responseStatus":{"isSuccess":false,"errors":'
+              '[{"message":"failed","errorCode":"CM-ERRORS-INFRA-NORBIX-001"}]}}',
+        );
+
+    for (final method in ['POST', 'PATCH', 'post']) {
+      test('$method + 500 is sent once', () async {
+        final driver = FakeHttpDriver((_) => answer(500));
+        final t = Transport(config: _cfg(retries: 3), driver: driver);
+
+        await expectLater(
+          t.send(route: '/v3/x', method: method, body: {'a': 1}),
+          throwsA(isA<NorbixServerError>()),
+        );
+        expect(driver.requests, hasLength(1));
+      });
+    }
+
+    test('POST + 429 is sent once', () async {
+      final driver = FakeHttpDriver((_) => answer(429));
+      final t = Transport(config: _cfg(retries: 3), driver: driver);
+
+      await expectLater(
+        t.send(route: '/v3/x', method: 'POST', body: {'a': 1}),
+        throwsA(isA<NorbixRateLimitError>()),
+      );
+      expect(driver.requests, hasLength(1));
+    });
+
+    for (final method in ['GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE']) {
+      test('$method + 500 is retried maxRetries times', () async {
+        final driver = FakeHttpDriver((_) => answer(500));
+        final t = Transport(config: _cfg(retries: 2), driver: driver);
+
+        await expectLater(
+          t.send(route: '/v3/x', method: method),
+          throwsA(isA<NorbixServerError>()),
+        );
+        expect(driver.requests, hasLength(3));
+      });
+    }
+
+    test('GET + 429 is retried', () async {
+      final driver = FakeHttpDriver(
+        (i) => i == 0
+            ? answer(429)
+            : const HttpDriverResponse(
+                statusCode: 200,
+                headers: {'content-type': 'application/json'},
+                body: '{"ok":true}',
+              ),
+      );
+      final t = Transport(config: _cfg(retries: 1), driver: driver);
+
+      final out = await t.send(route: '/v3/x') as Map<String, Object?>;
+      expect(out['ok'], isTrue);
+      expect(driver.requests, hasLength(2));
+    });
+
+    test('POST that fails on the network is not sent again', () async {
+      final driver = _ThrowingDriver();
+      final t = Transport(config: _cfg(retries: 3), driver: driver);
+
+      await expectLater(
+        t.send(route: '/v3/x', method: 'POST', body: {'a': 1}),
+        throwsA(isA<NorbixTransportError>()),
+      );
+      expect(driver.calls, equals(1));
+    });
+  });
+}
+
+class _ThrowingDriver implements HttpDriver {
+  int calls = 0;
+
+  @override
+  Future<HttpDriverResponse> send(HttpDriverRequest request) async {
+    calls++;
+    throw Exception('connection reset');
+  }
+
+  @override
+  void close() {}
 }
