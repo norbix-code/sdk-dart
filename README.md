@@ -302,6 +302,29 @@ the copy in the client's env; when that env has no copy the call fails with
 `CM-ERRORS-TRIGGERS-002`. Saving a trigger id that belongs to another schema
 fails the same way.
 
+When several triggers fire for the same event they run as a queue. Two
+optional fields on `trigger` (every save: schema, membership, files and
+payments triggers) shape it: `order` — a whole number, 0 or more; lower runs
+earlier, a trigger without an order runs after the numbered ones, equal places
+run by name — and `breakOnError` — `true` stops the later triggers of the same
+event when this trigger's action fails (default `false`). Both come back on the
+get and list calls; a negative `order` fails with `CM-ERRORS-TRIGGERS-008`.
+
+```dart
+await hub.database.saveSchemaTrigger(body: {
+  'trigger': {
+    'type': 'Schema',
+    'schemaId': 'sch_orders',
+    'name': 'notify ops first',
+    'when': 'OnInserted',
+    'isEnabled': true,
+    'order': 1,
+    'breakOnError': true,
+    'action': {'type': 'WebhookCall'},
+  },
+});
+```
+
 `deleteDatabaseSchema` also drops the schema's records: its MongoDB
 collection, with its indexes, in the request env (in every active database
 integration of that env). For a schema with AI embed on, its records are also
