@@ -167,12 +167,19 @@ class Transport {
       timeout: config.timeout,
     );
 
+    // Only a call that is safe to send twice is ever sent again. A POST or a
+    // PATCH that failed may already have done its work on the server — a 500
+    // now really means the server failed part-way — so resending it could
+    // create the record twice. The SDK sends no idempotency key, so nothing
+    // makes a write safe to repeat.
+    final retries = _isIdempotent(method) ? config.maxRetries : 0;
+
     Object? lastError;
-    for (var attempt = 0; attempt <= config.maxRetries; attempt++) {
+    for (var attempt = 0; attempt <= retries; attempt++) {
       try {
         final response = await _driver.send(request);
         if (response.statusCode >= 500 || response.statusCode == 429) {
-          if (attempt < config.maxRetries) {
+          if (attempt < retries) {
             await Future<void>.delayed(_backoff(attempt));
             continue;
           }
@@ -185,7 +192,7 @@ class Transport {
           message: 'Network error: ${e.message}',
           details: {'osError': e.osError?.message},
         );
-        if (attempt < config.maxRetries) {
+        if (attempt < retries) {
           await Future<void>.delayed(_backoff(attempt));
           continue;
         }
@@ -195,7 +202,7 @@ class Transport {
           message: 'Transport failure: $e',
           details: const {},
         );
-        if (attempt < config.maxRetries) {
+        if (attempt < retries) {
           await Future<void>.delayed(_backoff(attempt));
           continue;
         }
@@ -204,6 +211,18 @@ class Transport {
     }
     throw lastError as Object;
   }
+
+  static const _idempotentMethods = {
+    'GET',
+    'HEAD',
+    'OPTIONS',
+    'PUT',
+    'DELETE',
+  };
+
+  /// `true` for the HTTP methods that may be sent again after a failure.
+  static bool _isIdempotent(String method) =>
+      _idempotentMethods.contains(method.toUpperCase());
 
   Duration _backoff(int attempt) {
     // 100ms, 200ms, 400ms, ... — capped at 5s.
