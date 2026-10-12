@@ -11,6 +11,7 @@ import 'resources/accounts.dart';
 import 'resources/ai_integrations.dart';
 import 'resources/api_keys.dart';
 import 'resources/auth.dart';
+import 'resources/code.dart';
 import 'resources/contacts.dart';
 import 'resources/database.dart';
 import 'resources/echo.dart';
@@ -189,6 +190,7 @@ class NorbixHub {
       AiIntegrationsResource(_transport);
   late final ApiKeysResource apiKeys = ApiKeysResource(_transport);
   late final AuthResource auth = AuthResource(_transport);
+  late final CodeResource code = CodeResource(_transport);
   late final ContactsResource contacts = ContactsResource(_transport);
   late final DatabaseResource database = DatabaseResource(_transport);
   late final EchoResource echo = EchoResource(_transport);
