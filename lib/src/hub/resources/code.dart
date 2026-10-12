@@ -494,6 +494,21 @@ class CodeResource extends Resource {
     );
   }
 
+  /// `GET /{version}/code/marketplace/functions/runs`
+  Future<Object?> getMarketplaceFunctionRuns(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/marketplace/functions/runs',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `PUT /{version}/code/marketplace/integrations/{IntegrationViewId}/secrets`
   Future<Object?> replaceMarketplaceIntegrationSecrets(
       {required Object integrationViewId,
