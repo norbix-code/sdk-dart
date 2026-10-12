@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-12 16:29:04
+Date: 2026-10-12 21:43:19
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -243,6 +243,17 @@ enum TokenMappingResolverType
     EmailFooters,
     Old,
     New,
+    RequestInput,
+    IntegrationConfig,
+    IntegrationSecret,
+}
+
+enum SecretValueFormat
+{
+    Raw,
+    Bearer,
+    Basic,
+    Prefixed,
 }
 
 // @DataContract
@@ -257,20 +268,30 @@ class TokenMappingDto implements IConvertible
     // @DataMember
     TokenMappingResolverType? resolver;
 
-    TokenMappingDto({this.key="",this.value="",this.resolver});
+    // @DataMember
+    List<String>? secretKeys;
+
+    // @DataMember
+    SecretValueFormat? secretFormat;
+
+    TokenMappingDto({this.key="",this.value="",this.resolver,this.secretKeys,this.secretFormat});
     TokenMappingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         key = json['key'] ?? "";
         value = json['value'] ?? "";
         resolver = JsonConverters.fromJson(json['resolver'],'TokenMappingResolverType',context!);
+        secretKeys = JsonConverters.fromJson(json['secretKeys'],'List<String>',context!);
+        secretFormat = JsonConverters.fromJson(json['secretFormat'],'SecretValueFormat',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'key': key,
         'value': value,
-        'resolver': JsonConverters.toJson(resolver,'TokenMappingResolverType',context!)
+        'resolver': JsonConverters.toJson(resolver,'TokenMappingResolverType',context!),
+        'secretKeys': JsonConverters.toJson(secretKeys,'List<String>',context!),
+        'secretFormat': JsonConverters.toJson(secretFormat,'SecretValueFormat',context!)
     };
 
     getTypeName() => "TokenMappingDto";
@@ -4417,19 +4438,24 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    TriggerActionMarketplaceDto({this.functionId="",this.payload});
+    // @DataMember
+    String? runAsUserId;
+
+    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
+        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
-        'payload': payload
+        'payload': payload,
+        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -7632,6 +7658,7 @@ enum SchedulerTaskType
     SmsCampaign,
     CodeFunctionalCall,
     WebhookCall,
+    MarketplaceFunctionCall,
 }
 
 // @DataContract
@@ -8112,6 +8139,53 @@ enum MarketplaceCategory
 }
 
 // @DataContract
+class MarketplaceValidationStepResultDto implements IConvertible
+{
+    // @DataMember
+    String key = "";
+
+    // @DataMember
+    String label = "";
+
+    // @DataMember
+    bool? requiredForFunctions;
+
+    // @DataMember
+    bool? succeeded;
+
+    // @DataMember
+    bool? skipped;
+
+    // @DataMember
+    String? message;
+
+    MarketplaceValidationStepResultDto({this.key="",this.label="",this.requiredForFunctions,this.succeeded,this.skipped,this.message});
+    MarketplaceValidationStepResultDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        key = json['key'] ?? "";
+        label = json['label'] ?? "";
+        requiredForFunctions = json['requiredForFunctions'];
+        succeeded = json['succeeded'];
+        skipped = json['skipped'];
+        message = json['message'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'key': key,
+        'label': label,
+        'requiredForFunctions': requiredForFunctions,
+        'succeeded': succeeded,
+        'skipped': skipped,
+        'message': message
+    };
+
+    getTypeName() => "MarketplaceValidationStepResultDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class MarketplaceIntegrationDto extends IntegrationDto implements IConvertible
 {
     // @DataMember
@@ -8132,7 +8206,10 @@ class MarketplaceIntegrationDto extends IntegrationDto implements IConvertible
     // @DataMember
     IReadOnlyDictionary<String,String>? config;
 
-    MarketplaceIntegrationDto({this.listingViewId="",this.transport,this.vendor="",this.category,this.description,this.config});
+    // @DataMember
+    List<MarketplaceValidationStepResultDto>? lastValidationSteps;
+
+    MarketplaceIntegrationDto({this.listingViewId="",this.transport,this.vendor="",this.category,this.description,this.config,this.lastValidationSteps});
     MarketplaceIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8143,6 +8220,7 @@ class MarketplaceIntegrationDto extends IntegrationDto implements IConvertible
         category = JsonConverters.fromJson(json['category'],'MarketplaceCategory',context!);
         description = json['description'];
         config = JsonConverters.fromJson(json['config'],'IReadOnlyDictionary<String,String>',context!);
+        lastValidationSteps = JsonConverters.fromJson(json['lastValidationSteps'],'List<MarketplaceValidationStepResultDto>',context!);
         return this;
     }
 
@@ -8152,71 +8230,53 @@ class MarketplaceIntegrationDto extends IntegrationDto implements IConvertible
         'vendor': vendor,
         'category': JsonConverters.toJson(category,'MarketplaceCategory',context!),
         'description': description,
-        'config': JsonConverters.toJson(config,'IReadOnlyDictionary<String,String>',context!)
+        'config': JsonConverters.toJson(config,'IReadOnlyDictionary<String,String>',context!),
+        'lastValidationSteps': JsonConverters.toJson(lastValidationSteps,'List<MarketplaceValidationStepResultDto>',context!)
     });
 
     getTypeName() => "MarketplaceIntegrationDto";
     TypeContext? context = _ctx;
 }
 
-enum MarketplaceTokenResolverKind
-{
-    Static,
-    Request,
-    Project,
-    Initiator,
-    Custom,
-    IntegrationConfig,
-    IntegrationSecret,
-}
-
-enum MarketplaceSecretValueFormat
-{
-    Raw,
-    Bearer,
-    Basic,
-    Prefixed,
-}
-
 // @DataContract
-class MarketplaceTokenMappingDto implements IConvertible
+class MarketplaceFunctionParameterDto implements IConvertible
 {
     // @DataMember
-    String token = "";
+    String name = "";
 
     // @DataMember
-    MarketplaceTokenResolverKind? resolver;
+    String type = "";
 
     // @DataMember
-    String? value;
+    String? description;
 
     // @DataMember
-    List<String>? secretKeys;
+    bool? isRequired;
 
     // @DataMember
-    MarketplaceSecretValueFormat? format;
+    String? defaultValue;
 
-    MarketplaceTokenMappingDto({this.token="",this.resolver,this.value,this.secretKeys,this.format});
-    MarketplaceTokenMappingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    MarketplaceFunctionParameterDto({this.name="",this.type="",this.description,this.isRequired,this.defaultValue});
+    MarketplaceFunctionParameterDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        token = json['token'] ?? "";
-        resolver = JsonConverters.fromJson(json['resolver'],'MarketplaceTokenResolverKind',context!);
-        value = json['value'];
-        secretKeys = JsonConverters.fromJson(json['secretKeys'],'List<String>',context!);
-        format = JsonConverters.fromJson(json['format'],'MarketplaceSecretValueFormat',context!);
+        name = json['name'] ?? "";
+        type = json['type'] ?? "";
+        description = json['description'];
+        isRequired = json['isRequired'];
+        defaultValue = json['defaultValue'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'token': token,
-        'resolver': JsonConverters.toJson(resolver,'MarketplaceTokenResolverKind',context!),
-        'value': value,
-        'secretKeys': JsonConverters.toJson(secretKeys,'List<String>',context!),
-        'format': JsonConverters.toJson(format,'MarketplaceSecretValueFormat',context!)
+        'name': name,
+        'type': type,
+        'description': description,
+        'isRequired': isRequired,
+        'defaultValue': defaultValue
     };
 
-    getTypeName() => "MarketplaceTokenMappingDto";
+    getTypeName() => "MarketplaceFunctionParameterDto";
     TypeContext? context = _ctx;
 }
 
@@ -8242,12 +8302,18 @@ class MarketplaceFunctionDto implements IHasViewId, IConvertible
     bool? isEnabled;
 
     // @DataMember
-    String requestTemplate = "";
+    String? requestTemplate;
 
     // @DataMember
-    List<MarketplaceTokenMappingDto> mappedTokens = [];
+    Map<String,String?> arguments = {};
 
-    MarketplaceFunctionDto({this.viewId="",this.integrationViewId="",this.functionKey="",this.displayName="",this.description,this.isEnabled,this.requestTemplate="",this.mappedTokens=const []});
+    // @DataMember
+    List<MarketplaceFunctionParameterDto> inputs = [];
+
+    // @DataMember
+    List<TokenMappingDto> mappedTokens = [];
+
+    MarketplaceFunctionDto({this.viewId="",this.integrationViewId="",this.functionKey="",this.displayName="",this.description,this.isEnabled,this.requestTemplate,this.arguments=const {},this.inputs=const [],this.mappedTokens=const []});
     MarketplaceFunctionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8257,8 +8323,10 @@ class MarketplaceFunctionDto implements IHasViewId, IConvertible
         displayName = json['displayName'] ?? "";
         description = json['description'];
         isEnabled = json['isEnabled'];
-        requestTemplate = json['requestTemplate'] ?? "";
-        mappedTokens = JsonConverters.fromJson(json['mappedTokens'],'List<MarketplaceTokenMappingDto>',context!) ?? [];
+        requestTemplate = json['requestTemplate'];
+        arguments = JsonConverters.toStringMap(json['arguments']) ?? {};
+        inputs = JsonConverters.fromJson(json['inputs'],'List<MarketplaceFunctionParameterDto>',context!) ?? [];
+        mappedTokens = JsonConverters.fromJson(json['mappedTokens'],'List<TokenMappingDto>',context!) ?? [];
         return this;
     }
 
@@ -8270,11 +8338,20 @@ class MarketplaceFunctionDto implements IHasViewId, IConvertible
         'description': description,
         'isEnabled': isEnabled,
         'requestTemplate': requestTemplate,
-        'mappedTokens': JsonConverters.toJson(mappedTokens,'List<MarketplaceTokenMappingDto>',context!)
+        'arguments': arguments,
+        'inputs': JsonConverters.toJson(inputs,'List<MarketplaceFunctionParameterDto>',context!),
+        'mappedTokens': JsonConverters.toJson(mappedTokens,'List<TokenMappingDto>',context!)
     };
 
     getTypeName() => "MarketplaceFunctionDto";
     TypeContext? context = _ctx;
+}
+
+enum MarketplaceAvailability
+{
+    Development,
+    Staging,
+    Production,
 }
 
 enum MarketplaceFieldType
@@ -8356,44 +8433,34 @@ class MarketplaceFieldDefinitionDto implements IConvertible
 }
 
 // @DataContract
-class MarketplaceFunctionParameterDto implements IConvertible
+class MarketplaceInstallFormDto implements IConvertible
 {
     // @DataMember
-    String name = "";
+    String dataSchema = "";
 
     // @DataMember
-    String type = "";
+    String uiSchema = "";
 
     // @DataMember
-    String? description;
+    List<String> secretKeys = [];
 
-    // @DataMember
-    bool? isRequired;
-
-    // @DataMember
-    String? defaultValue;
-
-    MarketplaceFunctionParameterDto({this.name="",this.type="",this.description,this.isRequired,this.defaultValue});
-    MarketplaceFunctionParameterDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    MarketplaceInstallFormDto({this.dataSchema="",this.uiSchema="",this.secretKeys=const []});
+    MarketplaceInstallFormDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        name = json['name'] ?? "";
-        type = json['type'] ?? "";
-        description = json['description'];
-        isRequired = json['isRequired'];
-        defaultValue = json['defaultValue'];
+        dataSchema = json['dataSchema'] ?? "";
+        uiSchema = json['uiSchema'] ?? "";
+        secretKeys = JsonConverters.fromJson(json['secretKeys'],'List<String>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'name': name,
-        'type': type,
-        'description': description,
-        'isRequired': isRequired,
-        'defaultValue': defaultValue
+        'dataSchema': dataSchema,
+        'uiSchema': uiSchema,
+        'secretKeys': JsonConverters.toJson(secretKeys,'List<String>',context!)
     };
 
-    getTypeName() => "MarketplaceFunctionParameterDto";
+    getTypeName() => "MarketplaceInstallFormDto";
     TypeContext? context = _ctx;
 }
 
@@ -8500,6 +8567,58 @@ class MarketplaceHttpRequestSpecDto implements IConvertible
 }
 
 // @DataContract
+class MarketplaceValidationStepDto implements IConvertible
+{
+    // @DataMember
+    String key = "";
+
+    // @DataMember
+    String label = "";
+
+    // @DataMember
+    String? description;
+
+    // @DataMember
+    bool? requiredForFunctions;
+
+    // @DataMember
+    MarketplaceHttpRequestSpecDto? probe;
+
+    MarketplaceValidationStepDto({this.key="",this.label="",this.description,this.requiredForFunctions,this.probe});
+    MarketplaceValidationStepDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        key = json['key'] ?? "";
+        label = json['label'] ?? "";
+        description = json['description'];
+        requiredForFunctions = json['requiredForFunctions'];
+        probe = JsonConverters.fromJson(json['probe'],'MarketplaceHttpRequestSpecDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'key': key,
+        'label': label,
+        'description': description,
+        'requiredForFunctions': requiredForFunctions,
+        'probe': JsonConverters.toJson(probe,'MarketplaceHttpRequestSpecDto',context!)
+    };
+
+    getTypeName() => "MarketplaceValidationStepDto";
+    TypeContext? context = _ctx;
+}
+
+enum MarketplaceFormKind
+{
+    Generic,
+    DatabaseQuery,
+    DatabaseWrite,
+    Message,
+    Prompt,
+    Web,
+}
+
+// @DataContract
 class MarketplaceFunctionDefinitionDto implements IConvertible
 {
     // @DataMember
@@ -8518,6 +8637,12 @@ class MarketplaceFunctionDefinitionDto implements IConvertible
     String? group;
 
     // @DataMember
+    MarketplaceFormKind? formKind;
+
+    // @DataMember
+    IReadOnlyList<MarketplaceFunctionParameterDto>? inputs;
+
+    // @DataMember
     IReadOnlyList<MarketplaceFunctionParameterDto>? parameters;
 
     // @DataMember
@@ -8530,9 +8655,9 @@ class MarketplaceFunctionDefinitionDto implements IConvertible
     MarketplaceHttpRequestSpecDto? request;
 
     // @DataMember
-    List<MarketplaceTokenMappingDto> defaultTokenMappings = [];
+    List<TokenMappingDto> defaultTokenMappings = [];
 
-    MarketplaceFunctionDefinitionDto({this.definitionId,this.functionKey="",this.displayName="",this.description,this.group,this.parameters,this.requestSchema,this.requestTemplate,this.request,this.defaultTokenMappings=const []});
+    MarketplaceFunctionDefinitionDto({this.definitionId,this.functionKey="",this.displayName="",this.description,this.group,this.formKind,this.inputs,this.parameters,this.requestSchema,this.requestTemplate,this.request,this.defaultTokenMappings=const []});
     MarketplaceFunctionDefinitionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8541,11 +8666,13 @@ class MarketplaceFunctionDefinitionDto implements IConvertible
         displayName = json['displayName'] ?? "";
         description = json['description'];
         group = json['group'];
+        formKind = JsonConverters.fromJson(json['formKind'],'MarketplaceFormKind',context!);
+        inputs = JsonConverters.fromJson(json['inputs'],'IReadOnlyList<MarketplaceFunctionParameterDto>',context!);
         parameters = JsonConverters.fromJson(json['parameters'],'IReadOnlyList<MarketplaceFunctionParameterDto>',context!);
         requestSchema = json['requestSchema'];
         requestTemplate = json['requestTemplate'];
         request = JsonConverters.fromJson(json['request'],'MarketplaceHttpRequestSpecDto',context!);
-        defaultTokenMappings = JsonConverters.fromJson(json['defaultTokenMappings'],'List<MarketplaceTokenMappingDto>',context!) ?? [];
+        defaultTokenMappings = JsonConverters.fromJson(json['defaultTokenMappings'],'List<TokenMappingDto>',context!) ?? [];
         return this;
     }
 
@@ -8555,11 +8682,13 @@ class MarketplaceFunctionDefinitionDto implements IConvertible
         'displayName': displayName,
         'description': description,
         'group': group,
+        'formKind': JsonConverters.toJson(formKind,'MarketplaceFormKind',context!),
+        'inputs': JsonConverters.toJson(inputs,'IReadOnlyList<MarketplaceFunctionParameterDto>',context!),
         'parameters': JsonConverters.toJson(parameters,'IReadOnlyList<MarketplaceFunctionParameterDto>',context!),
         'requestSchema': requestSchema,
         'requestTemplate': requestTemplate,
         'request': JsonConverters.toJson(request,'MarketplaceHttpRequestSpecDto',context!),
-        'defaultTokenMappings': JsonConverters.toJson(defaultTokenMappings,'List<MarketplaceTokenMappingDto>',context!)
+        'defaultTokenMappings': JsonConverters.toJson(defaultTokenMappings,'List<TokenMappingDto>',context!)
     };
 
     getTypeName() => "MarketplaceFunctionDefinitionDto";
@@ -8597,6 +8726,12 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
     String? documentationUrl;
 
     // @DataMember
+    String? videoUrl;
+
+    // @DataMember
+    MarketplaceAvailability? availability;
+
+    // @DataMember
     bool? isOfficial;
 
     // @DataMember
@@ -8612,9 +8747,15 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
     IReadOnlyList<MarketplaceFieldDefinitionDto>? secretFields;
 
     // @DataMember
+    MarketplaceInstallFormDto? installForm;
+
+    // @DataMember
+    IReadOnlyList<MarketplaceValidationStepDto>? validationSteps;
+
+    // @DataMember
     IReadOnlyList<MarketplaceFunctionDefinitionDto>? functions;
 
-    MarketplaceListingDto({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.description,this.iconUrl,this.documentationUrl,this.isOfficial,this.tags,this.specVersion=0,this.configFields,this.secretFields,this.functions});
+    MarketplaceListingDto({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.description,this.iconUrl,this.documentationUrl,this.videoUrl,this.availability,this.isOfficial,this.tags,this.specVersion=0,this.configFields,this.secretFields,this.installForm,this.validationSteps,this.functions});
     MarketplaceListingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8627,11 +8768,15 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
         description = json['description'];
         iconUrl = json['iconUrl'];
         documentationUrl = json['documentationUrl'];
+        videoUrl = json['videoUrl'];
+        availability = JsonConverters.fromJson(json['availability'],'MarketplaceAvailability',context!);
         isOfficial = json['isOfficial'];
         tags = JsonConverters.fromJson(json['tags'],'IReadOnlyList<String>',context!);
         specVersion = json['specVersion'] ?? 0;
         configFields = JsonConverters.fromJson(json['configFields'],'IReadOnlyList<MarketplaceFieldDefinitionDto>',context!);
         secretFields = JsonConverters.fromJson(json['secretFields'],'IReadOnlyList<MarketplaceFieldDefinitionDto>',context!);
+        installForm = JsonConverters.fromJson(json['installForm'],'MarketplaceInstallFormDto',context!);
+        validationSteps = JsonConverters.fromJson(json['validationSteps'],'IReadOnlyList<MarketplaceValidationStepDto>',context!);
         functions = JsonConverters.fromJson(json['functions'],'IReadOnlyList<MarketplaceFunctionDefinitionDto>',context!);
         return this;
     }
@@ -8646,11 +8791,15 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
         'description': description,
         'iconUrl': iconUrl,
         'documentationUrl': documentationUrl,
+        'videoUrl': videoUrl,
+        'availability': JsonConverters.toJson(availability,'MarketplaceAvailability',context!),
         'isOfficial': isOfficial,
         'tags': JsonConverters.toJson(tags,'IReadOnlyList<String>',context!),
         'specVersion': specVersion,
         'configFields': JsonConverters.toJson(configFields,'IReadOnlyList<MarketplaceFieldDefinitionDto>',context!),
         'secretFields': JsonConverters.toJson(secretFields,'IReadOnlyList<MarketplaceFieldDefinitionDto>',context!),
+        'installForm': JsonConverters.toJson(installForm,'MarketplaceInstallFormDto',context!),
+        'validationSteps': JsonConverters.toJson(validationSteps,'IReadOnlyList<MarketplaceValidationStepDto>',context!),
         'functions': JsonConverters.toJson(functions,'IReadOnlyList<MarketplaceFunctionDefinitionDto>',context!)
     };
 
@@ -10431,6 +10580,43 @@ class ScheduledTaskInfoDto implements IConvertible
 }
 
 // @DataContract
+class MarketplaceFunctionCallDto implements IConvertible
+{
+    // @DataMember
+    String functionId = "";
+
+    // @DataMember
+    String functionKey = "";
+
+    // @DataMember
+    String integrationId = "";
+
+    // @DataMember
+    Map<String,dynamic?> payload = {};
+
+    MarketplaceFunctionCallDto({this.functionId="",this.functionKey="",this.integrationId="",this.payload=const {}});
+    MarketplaceFunctionCallDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        functionId = json['functionId'] ?? "";
+        functionKey = json['functionKey'] ?? "";
+        integrationId = json['integrationId'] ?? "";
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!) ?? {};
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'functionId': functionId,
+        'functionKey': functionKey,
+        'integrationId': integrationId,
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+    };
+
+    getTypeName() => "MarketplaceFunctionCallDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class CodeFunctionDataDto implements IConvertible
 {
     // @DataMember
@@ -10454,7 +10640,10 @@ class CodeFunctionDataDto implements IConvertible
     // @DataMember
     Map<String,dynamic?>? payload;
 
-    CodeFunctionDataDto({this.database,this.user,this.file,this.payment,this.ai,this.task,this.payload});
+    // @DataMember
+    MarketplaceFunctionCallDto? marketplace;
+
+    CodeFunctionDataDto({this.database,this.user,this.file,this.payment,this.ai,this.task,this.payload,this.marketplace});
     CodeFunctionDataDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -10465,6 +10654,7 @@ class CodeFunctionDataDto implements IConvertible
         ai = JsonConverters.fromJson(json['ai'],'AiUsageEventDto',context!);
         task = JsonConverters.fromJson(json['task'],'ScheduledTaskInfoDto',context!);
         payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        marketplace = JsonConverters.fromJson(json['marketplace'],'MarketplaceFunctionCallDto',context!);
         return this;
     }
 
@@ -10475,7 +10665,8 @@ class CodeFunctionDataDto implements IConvertible
         'payment': JsonConverters.toJson(payment,'PaymentFactDto',context!),
         'ai': JsonConverters.toJson(ai,'AiUsageEventDto',context!),
         'task': JsonConverters.toJson(task,'ScheduledTaskInfoDto',context!),
-        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'marketplace': JsonConverters.toJson(marketplace,'MarketplaceFunctionCallDto',context!)
     };
 
     getTypeName() => "CodeFunctionDataDto";
@@ -10609,6 +10800,33 @@ class CodeFunctionSchedulerTaskRequest extends SchedulerTaskRequest implements I
     });
 
     getTypeName() => "CodeFunctionSchedulerTaskRequest";
+    TypeContext? context = _ctx;
+}
+
+class MarketplaceFunctionSchedulerTaskRequest extends SchedulerTaskRequest implements IConvertible
+{
+    SchedulerTaskType? type;
+    String? functionId;
+    Map<String,String?>? payload;
+
+    MarketplaceFunctionSchedulerTaskRequest({this.type,this.functionId,this.payload});
+    MarketplaceFunctionSchedulerTaskRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        type = JsonConverters.fromJson(json['type'],'SchedulerTaskType',context!);
+        functionId = json['functionId'];
+        payload = JsonConverters.toStringMap(json['payload']);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'type': JsonConverters.toJson(type,'SchedulerTaskType',context!),
+        'functionId': functionId,
+        'payload': payload
+    });
+
+    getTypeName() => "MarketplaceFunctionSchedulerTaskRequest";
     TypeContext? context = _ctx;
 }
 
@@ -15311,10 +15529,16 @@ class InstallationLicenseStatusDto implements IConvertible
     // @DataMember(Name="licenseExpireUtc")
     DateTime? licenseExpireUtc;
 
+    // @DataMember(Name="lastHeartbeatOutcome")
+    String? lastHeartbeatOutcome;
+
+    // @DataMember(Name="lastHeartbeatError")
+    String? lastHeartbeatError;
+
     // @DataMember(Name="message")
     String? message;
 
-    InstallationLicenseStatusDto({this.storedMode="",this.effectiveMode="",this.isProduction,this.graceDaysLeft,this.graceUntilUtc,this.lastProvenAtUtc,this.lastHeartbeatAtUtc,this.installationDomain,this.licensedDomain,this.hostKind,this.isTrialLicense,this.licenseExpireUtc,this.message});
+    InstallationLicenseStatusDto({this.storedMode="",this.effectiveMode="",this.isProduction,this.graceDaysLeft,this.graceUntilUtc,this.lastProvenAtUtc,this.lastHeartbeatAtUtc,this.installationDomain,this.licensedDomain,this.hostKind,this.isTrialLicense,this.licenseExpireUtc,this.lastHeartbeatOutcome,this.lastHeartbeatError,this.message});
     InstallationLicenseStatusDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -15330,6 +15554,8 @@ class InstallationLicenseStatusDto implements IConvertible
         hostKind = json['hostKind'];
         isTrialLicense = json['isTrialLicense'];
         licenseExpireUtc = JsonConverters.fromJson(json['licenseExpireUtc'],'DateTime',context!);
+        lastHeartbeatOutcome = json['lastHeartbeatOutcome'];
+        lastHeartbeatError = json['lastHeartbeatError'];
         message = json['message'];
         return this;
     }
@@ -15347,6 +15573,8 @@ class InstallationLicenseStatusDto implements IConvertible
         'hostKind': hostKind,
         'isTrialLicense': isTrialLicense,
         'licenseExpireUtc': JsonConverters.toJson(licenseExpireUtc,'DateTime',context!),
+        'lastHeartbeatOutcome': lastHeartbeatOutcome,
+        'lastHeartbeatError': lastHeartbeatError,
         'message': message
     };
 
@@ -18899,7 +19127,13 @@ class MarketplaceListingProjection implements IHasViewId, IConvertible
     // @DataMember
     int functionCount = 0;
 
-    MarketplaceListingProjection({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.iconUrl,this.isOfficial,this.tags,this.functionCount=0});
+    // @DataMember
+    MarketplaceAvailability? availability;
+
+    // @DataMember
+    String? videoUrl;
+
+    MarketplaceListingProjection({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.iconUrl,this.isOfficial,this.tags,this.functionCount=0,this.availability,this.videoUrl});
     MarketplaceListingProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -18913,6 +19147,8 @@ class MarketplaceListingProjection implements IHasViewId, IConvertible
         isOfficial = json['isOfficial'];
         tags = JsonConverters.fromJson(json['tags'],'IReadOnlyList<String>',context!);
         functionCount = json['functionCount'] ?? 0;
+        availability = JsonConverters.fromJson(json['availability'],'MarketplaceAvailability',context!);
+        videoUrl = json['videoUrl'];
         return this;
     }
 
@@ -18926,7 +19162,9 @@ class MarketplaceListingProjection implements IHasViewId, IConvertible
         'iconUrl': iconUrl,
         'isOfficial': isOfficial,
         'tags': JsonConverters.toJson(tags,'IReadOnlyList<String>',context!),
-        'functionCount': functionCount
+        'functionCount': functionCount,
+        'availability': JsonConverters.toJson(availability,'MarketplaceAvailability',context!),
+        'videoUrl': videoUrl
     };
 
     getTypeName() => "MarketplaceListingProjection";
@@ -19054,6 +19292,73 @@ class MarketplaceFunctionProjection implements IHasViewId, IConvertible
     };
 
     getTypeName() => "MarketplaceFunctionProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MarketplaceFunctionRunDto implements IConvertible
+{
+    // @DataMember
+    DateTime? firedAt;
+
+    // @DataMember
+    String event = "";
+
+    // @DataMember
+    String source = "";
+
+    // @DataMember
+    String functionId = "";
+
+    // @DataMember
+    String? runAsUserId;
+
+    // @DataMember
+    bool? succeeded;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    String? error;
+
+    // @DataMember
+    String? vendorRequestId;
+
+    // @DataMember
+    String? input;
+
+    MarketplaceFunctionRunDto({this.firedAt,this.event="",this.source="",this.functionId="",this.runAsUserId,this.succeeded,this.durationMs,this.error,this.vendorRequestId,this.input});
+    MarketplaceFunctionRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        firedAt = JsonConverters.fromJson(json['firedAt'],'DateTime',context!) ?? DateTime(0);
+        event = json['event'] ?? "";
+        source = json['source'] ?? "";
+        functionId = json['functionId'] ?? "";
+        runAsUserId = json['runAsUserId'];
+        succeeded = json['succeeded'];
+        durationMs = json['durationMs'];
+        error = json['error'];
+        vendorRequestId = json['vendorRequestId'];
+        input = json['input'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'firedAt': JsonConverters.toJson(firedAt,'DateTime',context!),
+        'event': event,
+        'source': source,
+        'functionId': functionId,
+        'runAsUserId': runAsUserId,
+        'succeeded': succeeded,
+        'durationMs': durationMs,
+        'error': error,
+        'vendorRequestId': vendorRequestId,
+        'input': input
+    };
+
+    getTypeName() => "MarketplaceFunctionRunDto";
     TypeContext? context = _ctx;
 }
 
@@ -25934,17 +26239,22 @@ class TestMarketplaceIntegrationResponse extends ResponseBase implements IConver
     // @DataMember
     IReadOnlyList<IntegrationTestResultItemDto>? items;
 
-    TestMarketplaceIntegrationResponse({this.items});
+    // @DataMember
+    IReadOnlyList<MarketplaceValidationStepResultDto>? steps;
+
+    TestMarketplaceIntegrationResponse({this.items,this.steps});
     TestMarketplaceIntegrationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         items = JsonConverters.fromJson(json['items'],'IReadOnlyList<IntegrationTestResultItemDto>',context!);
+        steps = JsonConverters.fromJson(json['steps'],'IReadOnlyList<MarketplaceValidationStepResultDto>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'items': JsonConverters.toJson(items,'IReadOnlyList<IntegrationTestResultItemDto>',context!)
+        'items': JsonConverters.toJson(items,'IReadOnlyList<IntegrationTestResultItemDto>',context!),
+        'steps': JsonConverters.toJson(steps,'IReadOnlyList<MarketplaceValidationStepResultDto>',context!)
     });
 
     getTypeName() => "TestMarketplaceIntegrationResponse";
@@ -26025,6 +26335,27 @@ class GetMarketplaceFunctionCatalogResponse extends ResponseBase implements ICon
     });
 
     getTypeName() => "GetMarketplaceFunctionCatalogResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetMarketplaceFunctionRunsResponse extends ResponseBase implements IConvertible
+{
+    List<MarketplaceFunctionRunDto> runs = [];
+
+    GetMarketplaceFunctionRunsResponse({this.runs=const []});
+    GetMarketplaceFunctionRunsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runs = JsonConverters.fromJson(json['runs'],'List<MarketplaceFunctionRunDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runs': JsonConverters.toJson(runs,'List<MarketplaceFunctionRunDto>',context!)
+    });
+
+    getTypeName() => "GetMarketplaceFunctionRunsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -29520,8 +29851,9 @@ class InternalsTypeGen implements IConvertible, IGet
     FakeCodeIntegrationDto? typegen_281_FakeCodeIntegrationDto;
     FakeCodeIntegrationRequest? typegen_282_FakeCodeIntegrationRequest;
     CodeFunctionSchedulerTaskRequest? typegen_283_CodeFunctionSchedulerTaskRequest;
+    MarketplaceFunctionSchedulerTaskRequest? typegen_284_MarketplaceFunctionSchedulerTaskRequest;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_252_StringFieldDto,this.typegen_253_DecimalFieldDto,this.typegen_254_CurrencyFieldDto,this.typegen_255_BooleanFieldDto,this.typegen_256_DateFieldDto,this.typegen_257_IntegerFieldDto,this.typegen_258_GeolocationFieldDto,this.typegen_259_TagsFieldDto,this.typegen_260_FileFieldDto,this.typegen_261_TaxonomySelectionFieldDto,this.typegen_262_CollectionSelectionFieldDto,this.typegen_263_UserSelectionFieldDto,this.typegen_264_RoleSelectionFieldDto,this.typegen_265_EnumSelectionFieldDto,this.typegen_266_ObjectFieldDto,this.typegen_267_ArrayFieldDto,this.typegen_268_JsonFieldDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_252_StringFieldDto,this.typegen_253_DecimalFieldDto,this.typegen_254_CurrencyFieldDto,this.typegen_255_BooleanFieldDto,this.typegen_256_DateFieldDto,this.typegen_257_IntegerFieldDto,this.typegen_258_GeolocationFieldDto,this.typegen_259_TagsFieldDto,this.typegen_260_FileFieldDto,this.typegen_261_TaxonomySelectionFieldDto,this.typegen_262_CollectionSelectionFieldDto,this.typegen_263_UserSelectionFieldDto,this.typegen_264_RoleSelectionFieldDto,this.typegen_265_EnumSelectionFieldDto,this.typegen_266_ObjectFieldDto,this.typegen_267_ArrayFieldDto,this.typegen_268_JsonFieldDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -29801,6 +30133,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_281_FakeCodeIntegrationDto = JsonConverters.fromJson(json['typegen_281_FakeCodeIntegrationDto'],'FakeCodeIntegrationDto',context!);
         typegen_282_FakeCodeIntegrationRequest = JsonConverters.fromJson(json['typegen_282_FakeCodeIntegrationRequest'],'FakeCodeIntegrationRequest',context!);
         typegen_283_CodeFunctionSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_283_CodeFunctionSchedulerTaskRequest'],'CodeFunctionSchedulerTaskRequest',context!);
+        typegen_284_MarketplaceFunctionSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_284_MarketplaceFunctionSchedulerTaskRequest'],'MarketplaceFunctionSchedulerTaskRequest',context!);
         return this;
     }
 
@@ -30080,7 +30413,8 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_280_ScheduledTaskInfoDto': JsonConverters.toJson(typegen_280_ScheduledTaskInfoDto,'ScheduledTaskInfoDto',context!),
         'typegen_281_FakeCodeIntegrationDto': JsonConverters.toJson(typegen_281_FakeCodeIntegrationDto,'FakeCodeIntegrationDto',context!),
         'typegen_282_FakeCodeIntegrationRequest': JsonConverters.toJson(typegen_282_FakeCodeIntegrationRequest,'FakeCodeIntegrationRequest',context!),
-        'typegen_283_CodeFunctionSchedulerTaskRequest': JsonConverters.toJson(typegen_283_CodeFunctionSchedulerTaskRequest,'CodeFunctionSchedulerTaskRequest',context!)
+        'typegen_283_CodeFunctionSchedulerTaskRequest': JsonConverters.toJson(typegen_283_CodeFunctionSchedulerTaskRequest,'CodeFunctionSchedulerTaskRequest',context!),
+        'typegen_284_MarketplaceFunctionSchedulerTaskRequest': JsonConverters.toJson(typegen_284_MarketplaceFunctionSchedulerTaskRequest,'MarketplaceFunctionSchedulerTaskRequest',context!)
     };
 
     getTypeName() => "InternalsTypeGen";
@@ -41445,7 +41779,7 @@ class SetMarketplaceIntegrationTokenMappingsRequest extends CodeMashRequestBase 
     String integrationViewId = "";
 
     // @DataMember
-    List<MarketplaceTokenMappingDto> tokenMappings = [];
+    List<TokenMappingDto> tokenMappings = [];
 
     SetMarketplaceIntegrationTokenMappingsRequest({this.integrationViewId="",this.tokenMappings=const []});
     SetMarketplaceIntegrationTokenMappingsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
@@ -41453,13 +41787,13 @@ class SetMarketplaceIntegrationTokenMappingsRequest extends CodeMashRequestBase 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         integrationViewId = json['integrationViewId'] ?? "";
-        tokenMappings = JsonConverters.fromJson(json['tokenMappings'],'List<MarketplaceTokenMappingDto>',context!) ?? [];
+        tokenMappings = JsonConverters.fromJson(json['tokenMappings'],'List<TokenMappingDto>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'integrationViewId': integrationViewId,
-        'tokenMappings': JsonConverters.toJson(tokenMappings,'List<MarketplaceTokenMappingDto>',context!)
+        'tokenMappings': JsonConverters.toJson(tokenMappings,'List<TokenMappingDto>',context!)
     });
 
     createResponse() => SetMarketplaceIntegrationTokenMappingsResponse();
@@ -41493,6 +41827,50 @@ class GetMarketplaceFunctionCatalog extends CodeMashRequestBase implements IRetu
     createResponse() => GetMarketplaceFunctionCatalogResponse();
     getResponseTypeName() => "GetMarketplaceFunctionCatalogResponse";
     getTypeName() => "GetMarketplaceFunctionCatalog";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/marketplace/functions/runs", "GET")
+class GetMarketplaceFunctionRuns extends CodeMashRequestBase implements IReturn<GetMarketplaceFunctionRunsResponse>, IConvertible, IGet
+{
+    /**
+    * The trigger whose marketplace function runs to list (trg_…). One of triggerId / taskId.
+    */
+    // @ApiMember(Description="The trigger whose marketplace function runs to list (trg_…). One of triggerId / taskId.")
+    String? triggerId;
+
+    /**
+    * The scheduler task whose marketplace function runs to list (tsk_…). One of triggerId / taskId.
+    */
+    // @ApiMember(Description="The scheduler task whose marketplace function runs to list (tsk_…). One of triggerId / taskId.")
+    String? taskId;
+
+    /**
+    * How many runs, newest first: 1-50. Default 20.
+    */
+    // @ApiMember(DataType="integer", Description="How many runs, newest first: 1-50. Default 20.")
+    int? limit;
+
+    GetMarketplaceFunctionRuns({this.triggerId,this.taskId,this.limit});
+    GetMarketplaceFunctionRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        triggerId = json['triggerId'];
+        taskId = json['taskId'];
+        limit = json['limit'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'triggerId': triggerId,
+        'taskId': taskId,
+        'limit': limit
+    });
+
+    createResponse() => GetMarketplaceFunctionRunsResponse();
+    getResponseTypeName() => "GetMarketplaceFunctionRunsResponse";
+    getTypeName() => "GetMarketplaceFunctionRuns";
     TypeContext? context = _ctx;
 }
 
@@ -48188,6 +48566,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MailGunEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => MailGunEmailIntegrationRequest()),
     'EmailCampaignRecipientsSourceTypes': TypeInfo(TypeOf.Enum, enumValues:EmailCampaignRecipientsSourceTypes.values),
     'TokenMappingResolverType': TypeInfo(TypeOf.Enum, enumValues:TokenMappingResolverType.values),
+    'SecretValueFormat': TypeInfo(TypeOf.Enum, enumValues:SecretValueFormat.values),
     'TokenMappingDto': TypeInfo(TypeOf.Class, create:() => TokenMappingDto()),
     'EmailCampaignRequest': TypeInfo(TypeOf.AbstractClass),
     'List<TokenMappingDto>': TypeInfo(TypeOf.Class, create:() => <TokenMappingDto>[]),
@@ -48490,23 +48869,27 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MongoDbAggregateDto': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateDto()),
     'MarketplaceTransport': TypeInfo(TypeOf.Enum, enumValues:MarketplaceTransport.values),
     'MarketplaceCategory': TypeInfo(TypeOf.Enum, enumValues:MarketplaceCategory.values),
+    'MarketplaceValidationStepResultDto': TypeInfo(TypeOf.Class, create:() => MarketplaceValidationStepResultDto()),
     'MarketplaceIntegrationDto': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationDto()),
-    'MarketplaceTokenResolverKind': TypeInfo(TypeOf.Enum, enumValues:MarketplaceTokenResolverKind.values),
-    'MarketplaceSecretValueFormat': TypeInfo(TypeOf.Enum, enumValues:MarketplaceSecretValueFormat.values),
-    'MarketplaceTokenMappingDto': TypeInfo(TypeOf.Class, create:() => MarketplaceTokenMappingDto()),
+    'List<MarketplaceValidationStepResultDto>': TypeInfo(TypeOf.Class, create:() => <MarketplaceValidationStepResultDto>[]),
+    'MarketplaceFunctionParameterDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionParameterDto()),
     'MarketplaceFunctionDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionDto()),
-    'List<MarketplaceTokenMappingDto>': TypeInfo(TypeOf.Class, create:() => <MarketplaceTokenMappingDto>[]),
+    'List<MarketplaceFunctionParameterDto>': TypeInfo(TypeOf.Class, create:() => <MarketplaceFunctionParameterDto>[]),
+    'MarketplaceAvailability': TypeInfo(TypeOf.Enum, enumValues:MarketplaceAvailability.values),
     'MarketplaceFieldType': TypeInfo(TypeOf.Enum, enumValues:MarketplaceFieldType.values),
     'MarketplaceFieldDefinitionDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFieldDefinitionDto()),
-    'MarketplaceFunctionParameterDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionParameterDto()),
+    'MarketplaceInstallFormDto': TypeInfo(TypeOf.Class, create:() => MarketplaceInstallFormDto()),
     'MarketplaceParameterLocation': TypeInfo(TypeOf.Enum, enumValues:MarketplaceParameterLocation.values),
     'MarketplaceParameterSpecDto': TypeInfo(TypeOf.Class, create:() => MarketplaceParameterSpecDto()),
     'MarketplaceHttpRequestSpecDto': TypeInfo(TypeOf.Class, create:() => MarketplaceHttpRequestSpecDto()),
     'IReadOnlyList<MarketplaceParameterSpecDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceParameterSpecDto>()),
+    'MarketplaceValidationStepDto': TypeInfo(TypeOf.Class, create:() => MarketplaceValidationStepDto()),
+    'MarketplaceFormKind': TypeInfo(TypeOf.Enum, enumValues:MarketplaceFormKind.values),
     'MarketplaceFunctionDefinitionDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionDefinitionDto()),
     'IReadOnlyList<MarketplaceFunctionParameterDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceFunctionParameterDto>()),
     'MarketplaceListingDto': TypeInfo(TypeOf.Class, create:() => MarketplaceListingDto()),
     'IReadOnlyList<MarketplaceFieldDefinitionDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceFieldDefinitionDto>()),
+    'IReadOnlyList<MarketplaceValidationStepDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceValidationStepDto>()),
     'IReadOnlyList<MarketplaceFunctionDefinitionDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceFunctionDefinitionDto>()),
     'AdminPortalModuleDto': TypeInfo(TypeOf.Class, create:() => AdminPortalModuleDto()),
     'AiChatEntryWireDto': TypeInfo(TypeOf.AbstractClass),
@@ -48572,11 +48955,13 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PaymentFactDto': TypeInfo(TypeOf.Class, create:() => PaymentFactDto()),
     'AiUsageEventDto': TypeInfo(TypeOf.Class, create:() => AiUsageEventDto()),
     'ScheduledTaskInfoDto': TypeInfo(TypeOf.Class, create:() => ScheduledTaskInfoDto()),
+    'MarketplaceFunctionCallDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionCallDto()),
     'CodeFunctionDataDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionDataDto()),
     'CodeFunctionEventDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionEventDto()),
     'FakeCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => FakeCodeIntegrationDto()),
     'FakeCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FakeCodeIntegrationRequest()),
     'CodeFunctionSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => CodeFunctionSchedulerTaskRequest()),
+    'MarketplaceFunctionSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionSchedulerTaskRequest()),
     'ICultureBasedRequest': TypeInfo(TypeOf.Interface),
     'IVersionBasedRequest': TypeInfo(TypeOf.Interface),
     'IHasCorrelationIdRequest': TypeInfo(TypeOf.Interface),
@@ -48876,6 +49261,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MarketplaceListingProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceListingProjection()),
     'MarketplaceIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationListProjection()),
     'MarketplaceFunctionProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionProjection()),
+    'MarketplaceFunctionRunDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionRunDto()),
     'CodeIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => CodeIntegrationListProjection()),
     'CodeFunctionDescriptorDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionDescriptorDto()),
     'CodeFunctionQualifierKindDto': TypeInfo(TypeOf.Enum, enumValues:CodeFunctionQualifierKindDto.values),
@@ -49216,11 +49602,14 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmptyMarketplaceSecretsResponse': TypeInfo(TypeOf.Class, create:() => EmptyMarketplaceSecretsResponse()),
     'RevealMarketplaceIntegrationSecretsResponse': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsResponse()),
     'TestMarketplaceIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestMarketplaceIntegrationResponse()),
+    'IReadOnlyList<MarketplaceValidationStepResultDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceValidationStepResultDto>()),
     'SetMarketplaceIntegrationTokenMappingsResponse': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationTokenMappingsResponse()),
     'GetMarketplaceFunctionResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionResponse()),
     'GetMarketplaceFunctionsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionsResponse()),
     'PaginatedResponse<MarketplaceFunctionProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MarketplaceFunctionProjection>()),
     'GetMarketplaceFunctionCatalogResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionCatalogResponse()),
+    'GetMarketplaceFunctionRunsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionRunsResponse()),
+    'List<MarketplaceFunctionRunDto>': TypeInfo(TypeOf.Class, create:() => <MarketplaceFunctionRunDto>[]),
     'InvokeMarketplaceFunctionResponse': TypeInfo(TypeOf.Class, create:() => InvokeMarketplaceFunctionResponse()),
     'GetCodeIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetCodeIntegrationResponse()),
     'GetCodeIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetCodeIntegrationsResponse()),
@@ -49723,6 +50112,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RevealMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsRequest()),
     'SetMarketplaceIntegrationTokenMappingsRequest': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationTokenMappingsRequest()),
     'GetMarketplaceFunctionCatalog': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionCatalog()),
+    'GetMarketplaceFunctionRuns': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionRuns()),
     'GetCodeFunctions': TypeInfo(TypeOf.Class, create:() => GetCodeFunctions()),
     'GetCodeFunctionEventSample': TypeInfo(TypeOf.Class, create:() => GetCodeFunctionEventSample()),
     'GetCodeFunctionQualifiers': TypeInfo(TypeOf.Class, create:() => GetCodeFunctionQualifiers()),
