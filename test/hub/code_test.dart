@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.code` — every Code Hub endpoint (38: the module switch, the
+/// `hub.code` — every Code Hub endpoint (37: the module switch, the
 /// integrations, the marketplace and the five cloud-function routes of
 /// `Code.Functions.md`), against the fake driver (never a real server): the
 /// verb and the full path with every id substituted; for the five
@@ -41,11 +41,6 @@ final _routes = <_Route>[
       'POST',
       '/v3/code/integrations/confirm-human-delivery',
       (c) => c.confirmCodeIntegrationHumanDelivery()),
-  _Route(
-      'setCodeIntegrationAsDefault',
-      'PUT',
-      '/v3/code/integrations/int_1/default',
-      (c) => c.setCodeIntegrationAsDefault(id: 'int_1')),
   _Route('deleteCodeIntegration', 'DELETE', '/v3/code/integrations/int_1',
       (c) => c.deleteCodeIntegration(id: 'int_1')),
   _Route('enableCodeIntegration', 'PUT', '/v3/code/integrations/int_1/enable',
@@ -178,9 +173,9 @@ final _routes = <_Route>[
 
 void main() {
   group('hub.code — every route: verb and path', () {
-    test('38 routes, no duplicate names', () {
-      expect(_routes.length, equals(38));
-      expect(_routes.map((r) => r.name).toSet().length, equals(38));
+    test('37 routes, no duplicate names', () {
+      expect(_routes.length, equals(37));
+      expect(_routes.map((r) => r.name).toSet().length, equals(37));
     });
 
     for (final route in _routes) {
