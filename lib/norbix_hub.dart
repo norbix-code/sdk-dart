@@ -23,6 +23,7 @@ export 'src/hub/resources/accounts.dart';
 export 'src/hub/resources/ai_integrations.dart';
 export 'src/hub/resources/api_keys.dart';
 export 'src/hub/resources/auth.dart';
+export 'src/hub/resources/code.dart';
 export 'src/hub/resources/contacts.dart';
 export 'src/hub/resources/database.dart';
 export 'src/hub/resources/echo.dart';

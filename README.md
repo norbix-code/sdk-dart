@@ -958,6 +958,45 @@ Good to know:
 - Module `enableScheduler` / `disableScheduler` send **PUT** since this
   version (they sent GET before; the gateway changed the route).
 
+## Code — cloud functions
+
+Norbix does not host code: a trigger's `Code` action, a scheduler
+`CodeFunctionalCall` task or a manual call runs a function in **your** cloud
+(AWS Lambda, Azure Functions, Google Cloud Functions) through a Code
+integration (`hub.code.getCodeIntegrations`, `saveCodeIntegration`,
+`testCodeIntegration`, `setCodeIntegrationAsDefault`, …). `hub.code` covers
+every Code Hub endpoint (38); the five cloud-function routes:
+
+| Method | Call |
+|--------|------|
+| `getCodeFunctions(query:)` | `GET /{version}/code/functions` — `integrationId` (required), `prefix`, `tag` (`key` or `key=value`), paging (`pageSize`, `startingAfter`, `endingBefore`); a live listing from the provider |
+| `getCodeFunctionQualifiers(query:)` | `GET /{version}/code/functions/qualifiers` — `integrationId`, `functionId`; the aliases and versions |
+| `invokeCodeFunction(body:)` | `POST /{version}/code/functions/invoke` — `functionRef` `{integrationId, functionId, qualifier?}`, `payload?`, `invocationType` (`Sync` / `Async`), `runAsUserId?`, `config?` |
+| `getCodeFunctionEventSample(query:)` | `GET /{version}/code/functions/event-sample` — `source` (`database` · `membership` · `files` · `payments` · `ai` · `scheduler` · `manual`), `event?`, `schemaId?`; a sample envelope for a local run |
+| `getCodeFunctionRuns(query:)` | `GET /{version}/code/functions/runs` — exactly one of `triggerId` / `taskId`, `limit` (1–50, default 20); the last runs, newest first |
+
+```dart
+final hub = NorbixHub(config: NorbixConfig(baseUrl: 'https://hub.norbix.ai', apiKey: 'k'));
+
+final functions = await hub.code.getCodeFunctions(
+  query: {'integrationId': 'int_1', 'prefix': 'orders-'},
+);
+final result = await hub.code.invokeCodeFunction(body: {
+  'functionRef': {'integrationId': 'int_1', 'functionId': 'orders-on-update', 'qualifier': 'prod'},
+  'payload': {'orderId': '6ac54a59212c29912eaddd81', 'dryRun': true},
+  'invocationType': 'Sync',
+});
+// {statusCode, output, durationMs, requestId?, logs?}
+final runs = await hub.code.getCodeFunctionRuns(query: {'triggerId': 'trg_1', 'limit': 5});
+```
+
+The function receives one JSON envelope (`CodeFunctionEventDto` in
+`references/hub.dtos.dart`): `event`, `source`, `context` (`projectId`,
+`environment`, `hubUrl`, `apiUrl`, `runAs.accessToken` — a 15-minute token
+for the run-as user) and `data` with one slot per source (`database`,
+`user`, `file`, `payment`, `ai`, `task`, `payload`). Every route is asserted
+in `test/hub/code_test.dart`.
+
 ## Repo layout
 
 ```
