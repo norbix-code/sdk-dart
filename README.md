@@ -964,16 +964,16 @@ Norbix does not host code: a trigger's `Code` action, a scheduler
 `CodeFunctionalCall` task or a manual call runs a function in **your** cloud
 (AWS Lambda, Azure Functions, Google Cloud Functions) through a Code
 integration (`hub.code.getCodeIntegrations`, `saveCodeIntegration`,
-`testCodeIntegration`, `setCodeIntegrationAsDefault`, …). `hub.code` covers
-every Code Hub endpoint (38); the five cloud-function routes:
+`testCodeIntegration`, …). `hub.code` covers every Code Hub endpoint (37);
+the five cloud-function routes:
 
 | Method | Call |
 |--------|------|
 | `getCodeFunctions(query:)` | `GET /{version}/code/functions` — `integrationId` (required), `prefix`, `tag` (`key` or `key=value`), paging (`pageSize`, `startingAfter`, `endingBefore`); a live listing from the provider |
 | `getCodeFunctionQualifiers(query:)` | `GET /{version}/code/functions/qualifiers` — `integrationId`, `functionId`; the aliases and versions |
 | `invokeCodeFunction(body:)` | `POST /{version}/code/functions/invoke` — `functionRef` `{integrationId, functionId, qualifier?}`, `payload?`, `invocationType` (`Sync` / `Async`), `runAsUserId?`, `config?` |
-| `getCodeFunctionEventSample(query:)` | `GET /{version}/code/functions/event-sample` — `source` (`database` · `membership` · `files` · `payments` · `ai` · `scheduler` · `manual`), `event?`, `schemaId?`; a sample envelope for a local run |
-| `getCodeFunctionRuns(query:)` | `GET /{version}/code/functions/runs` — exactly one of `triggerId` / `taskId`, `limit` (1–50, default 20); the last runs, newest first |
+| `getCodeFunctionEventSample(query:)` | `GET /{version}/code/functions/event-sample` — `source` (`database` · `membership` · `files` · `payments` · `ai` · `scheduler` · `manual`, any case), `event?`, `schemaId?`; a sample envelope for a local run |
+| `getCodeFunctionRuns(query:)` | `GET /{version}/code/functions/runs` — exactly one of `triggerId` / `taskId`, `limit` (1–50, default 20); the last runs, newest first; each run carries `input` — the scrubbed envelope a Fake-provider run received |
 
 ```dart
 final hub = NorbixHub(config: NorbixConfig(baseUrl: 'https://hub.norbix.ai', apiKey: 'k'));

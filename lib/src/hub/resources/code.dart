@@ -575,22 +575,6 @@ class CodeResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/code/integrations/{Id}/default`
-  Future<Object?> setCodeIntegrationAsDefault(
-      {required Object id,
-      Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/code/integrations/{Id}/default',
-      method: 'PUT',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: <String, Object?>{'Id': id},
-    );
-  }
-
   /// `PUT /{version}/code/marketplace/integrations/{IntegrationViewId}/token-mappings`
   Future<Object?> setMarketplaceIntegrationTokenMappings(
       {required Object integrationViewId,
