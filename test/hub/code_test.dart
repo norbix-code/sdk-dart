@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.code` — every Code Hub endpoint (37: the module switch, the
+/// `hub.code` — every Code Hub endpoint (38: the module switch, the
 /// integrations, the marketplace and the five cloud-function routes of
 /// `Code.Functions.md`), against the fake driver (never a real server): the
 /// verb and the full path with every id substituted; for the five
@@ -159,6 +159,11 @@ final _routes = <_Route>[
       'POST',
       '/v3/code/marketplace/functions/mpf_1/invoke',
       (c) => c.invokeMarketplaceFunction(functionViewId: 'mpf_1')),
+  _Route(
+      'getMarketplaceFunctionRuns',
+      'GET',
+      '/v3/code/marketplace/functions/runs',
+      (c) => c.getMarketplaceFunctionRuns()),
   _Route('getCodeFunctions', 'GET', '/v3/code/functions',
       (c) => c.getCodeFunctions()),
   _Route('getCodeFunctionQualifiers', 'GET', '/v3/code/functions/qualifiers',
@@ -173,9 +178,9 @@ final _routes = <_Route>[
 
 void main() {
   group('hub.code — every route: verb and path', () {
-    test('37 routes, no duplicate names', () {
-      expect(_routes.length, equals(37));
-      expect(_routes.map((r) => r.name).toSet().length, equals(37));
+    test('38 routes, no duplicate names', () {
+      expect(_routes.length, equals(38));
+      expect(_routes.map((r) => r.name).toSet().length, equals(38));
     });
 
     for (final route in _routes) {
@@ -303,6 +308,25 @@ void main() {
       expect(
         req.url.queryParameters,
         equals({'triggerId': 'trg_1', 'limit': '5'}),
+      );
+      expect(req.body, isNull);
+    });
+
+    test(
+        'getMarketplaceFunctionRuns → GET /v3/code/marketplace/functions/runs, '
+        'one of the ids', () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).code.getMarketplaceFunctionRuns(query: {
+        'taskId': 'tsk_9',
+        'limit': 5,
+      });
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('GET'));
+      expect(req.url.path, equals('/v3/code/marketplace/functions/runs'));
+      expect(
+        req.url.queryParameters,
+        equals({'taskId': 'tsk_9', 'limit': '5'}),
       );
       expect(req.body, isNull);
     });
