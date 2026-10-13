@@ -509,6 +509,25 @@ class CodeResource extends Resource {
     );
   }
 
+  /// `GET /{version}/code/marketplace/integrations/{IntegrationViewId}/tools`
+  ///
+  /// The stored MCP tool catalog of a connection (route 24).
+  Future<Object?> getMarketplaceIntegrationTools(
+      {required Object integrationViewId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/code/marketplace/integrations/{IntegrationViewId}/tools',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationViewId': integrationViewId},
+    );
+  }
+
   /// `PUT /{version}/code/marketplace/integrations/{IntegrationViewId}/secrets`
   Future<Object?> replaceMarketplaceIntegrationSecrets(
       {required Object integrationViewId,
