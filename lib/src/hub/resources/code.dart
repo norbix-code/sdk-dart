@@ -588,6 +588,26 @@ class CodeResource extends Resource {
     );
   }
 
+  /// `POST /{version}/code/marketplace/integrations/{IntegrationViewId}/oauth/start`
+  ///
+  /// Start the OAuth sign-in of an MCP connection (route 28). Answers
+  /// `authorizeUrl` (open it in a browser), `redirectUrl` and `expiresAt`.
+  Future<Object?> startMarketplaceIntegrationSignIn(
+      {required Object integrationViewId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/code/marketplace/integrations/{IntegrationViewId}/oauth/start',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationViewId': integrationViewId},
+    );
+  }
+
   /// `PUT /{version}/code/marketplace/integrations/{IntegrationViewId}/secrets`
   Future<Object?> replaceMarketplaceIntegrationSecrets(
       {required Object integrationViewId,
