@@ -330,5 +330,25 @@ void main() {
       );
       expect(req.body, isNull);
     });
+
+    // Exactly one of functionId / triggerId / taskId (gateway item gw-runs).
+    test(
+        'getMarketplaceFunctionRuns → GET /v3/code/marketplace/functions/runs, '
+        'a function\'s own runs by functionId', () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).code.getMarketplaceFunctionRuns(query: {
+        'functionId': 'func_1p4R3gTobGZpD6fXvHT4rd',
+        'limit': 50,
+      });
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('GET'));
+      expect(req.url.path, equals('/v3/code/marketplace/functions/runs'));
+      expect(
+        req.url.queryParameters,
+        equals({'functionId': 'func_1p4R3gTobGZpD6fXvHT4rd', 'limit': '50'}),
+      );
+      expect(req.body, isNull);
+    });
   });
 }
