@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-13 13:23:41
+Date: 2026-10-13 16:21:31
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -15781,12 +15781,13 @@ class ServiceUserApiKeyDto implements IConvertible
     String name = "";
     String? visibleKey;
     List<String> scopes = [];
+    String? environment;
     DateTime? createdDate;
     DateTime? expiryDate;
     DateTime? cancelledDate;
     bool? active;
 
-    ServiceUserApiKeyDto({this.id=0,this.name="",this.visibleKey,this.scopes=const [],this.createdDate,this.expiryDate,this.cancelledDate,this.active});
+    ServiceUserApiKeyDto({this.id=0,this.name="",this.visibleKey,this.scopes=const [],this.environment,this.createdDate,this.expiryDate,this.cancelledDate,this.active});
     ServiceUserApiKeyDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -15794,6 +15795,7 @@ class ServiceUserApiKeyDto implements IConvertible
         name = json['name'] ?? "";
         visibleKey = json['visibleKey'];
         scopes = JsonConverters.fromJson(json['scopes'],'List<String>',context!) ?? [];
+        environment = json['environment'];
         createdDate = JsonConverters.fromJson(json['createdDate'],'DateTime',context!) ?? DateTime(0);
         expiryDate = JsonConverters.fromJson(json['expiryDate'],'DateTime',context!);
         cancelledDate = JsonConverters.fromJson(json['cancelledDate'],'DateTime',context!);
@@ -15806,6 +15808,7 @@ class ServiceUserApiKeyDto implements IConvertible
         'name': name,
         'visibleKey': visibleKey,
         'scopes': JsonConverters.toJson(scopes,'List<String>',context!),
+        'environment': environment,
         'createdDate': JsonConverters.toJson(createdDate,'DateTime',context!),
         'expiryDate': JsonConverters.toJson(expiryDate,'DateTime',context!),
         'cancelledDate': JsonConverters.toJson(cancelledDate,'DateTime',context!),
@@ -19281,7 +19284,10 @@ class MarketplaceAccessRoleDto implements IConvertible
     // @DataMember
     String? defaultNotApplied;
 
-    MarketplaceAccessRoleDto({this.roleId="",this.name="",this.scope="",this.isSystem,this.fixed,this.package,this.isCustom,this.manage,this.custom,this.defaultNotApplied});
+    // @DataMember
+    bool? canChange;
+
+    MarketplaceAccessRoleDto({this.roleId="",this.name="",this.scope="",this.isSystem,this.fixed,this.package,this.isCustom,this.manage,this.custom,this.defaultNotApplied,this.canChange});
     MarketplaceAccessRoleDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19295,6 +19301,7 @@ class MarketplaceAccessRoleDto implements IConvertible
         manage = json['manage'];
         custom = JsonConverters.fromJson(json['custom'],'IReadOnlyList<MarketplaceAccessCustomPolicyDto>',context!);
         defaultNotApplied = json['defaultNotApplied'];
+        canChange = json['canChange'];
         return this;
     }
 
@@ -19308,7 +19315,8 @@ class MarketplaceAccessRoleDto implements IConvertible
         'isCustom': isCustom,
         'manage': manage,
         'custom': JsonConverters.toJson(custom,'IReadOnlyList<MarketplaceAccessCustomPolicyDto>',context!),
-        'defaultNotApplied': defaultNotApplied
+        'defaultNotApplied': defaultNotApplied,
+        'canChange': canChange
     };
 
     getTypeName() => "MarketplaceAccessRoleDto";
@@ -19364,20 +19372,30 @@ class MarketplaceAccessToolDto implements IConvertible
     // @DataMember
     bool? grantable;
 
-    MarketplaceAccessToolDto({this.name="",this.readOnly,this.grantable});
+    // @DataMember
+    bool? curated;
+
+    // @DataMember
+    bool? excludedFromFullAccess;
+
+    MarketplaceAccessToolDto({this.name="",this.readOnly,this.grantable,this.curated,this.excludedFromFullAccess});
     MarketplaceAccessToolDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         name = json['name'] ?? "";
         readOnly = json['readOnly'];
         grantable = json['grantable'];
+        curated = json['curated'];
+        excludedFromFullAccess = json['excludedFromFullAccess'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'name': name,
         'readOnly': readOnly,
-        'grantable': grantable
+        'grantable': grantable,
+        'curated': curated,
+        'excludedFromFullAccess': excludedFromFullAccess
     };
 
     getTypeName() => "MarketplaceAccessToolDto";
@@ -19562,20 +19580,30 @@ class MarketplaceAccessChangesDto implements IConvertible
     // @DataMember
     IReadOnlyList<String>? notGrantable;
 
-    MarketplaceAccessChangesDto({this.readOnlyAdded,this.readOnlyRemoved,this.notGrantable});
+    // @DataMember
+    IReadOnlyList<String>? readOnlyHintOverridden;
+
+    // @DataMember
+    IReadOnlyList<String>? excludedFromFullAccess;
+
+    MarketplaceAccessChangesDto({this.readOnlyAdded,this.readOnlyRemoved,this.notGrantable,this.readOnlyHintOverridden,this.excludedFromFullAccess});
     MarketplaceAccessChangesDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         readOnlyAdded = JsonConverters.fromJson(json['readOnlyAdded'],'IReadOnlyList<String>',context!);
         readOnlyRemoved = JsonConverters.fromJson(json['readOnlyRemoved'],'IReadOnlyList<String>',context!);
         notGrantable = JsonConverters.fromJson(json['notGrantable'],'IReadOnlyList<String>',context!);
+        readOnlyHintOverridden = JsonConverters.fromJson(json['readOnlyHintOverridden'],'IReadOnlyList<String>',context!);
+        excludedFromFullAccess = JsonConverters.fromJson(json['excludedFromFullAccess'],'IReadOnlyList<String>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'readOnlyAdded': JsonConverters.toJson(readOnlyAdded,'IReadOnlyList<String>',context!),
         'readOnlyRemoved': JsonConverters.toJson(readOnlyRemoved,'IReadOnlyList<String>',context!),
-        'notGrantable': JsonConverters.toJson(notGrantable,'IReadOnlyList<String>',context!)
+        'notGrantable': JsonConverters.toJson(notGrantable,'IReadOnlyList<String>',context!),
+        'readOnlyHintOverridden': JsonConverters.toJson(readOnlyHintOverridden,'IReadOnlyList<String>',context!),
+        'excludedFromFullAccess': JsonConverters.toJson(excludedFromFullAccess,'IReadOnlyList<String>',context!)
     };
 
     getTypeName() => "MarketplaceAccessChangesDto";
@@ -19677,7 +19705,13 @@ class MarketplaceFunctionRunDto implements IConvertible
     // @DataMember
     String? input;
 
-    MarketplaceFunctionRunDto({this.firedAt,this.event="",this.source="",this.functionId="",this.runAsUserId,this.succeeded,this.status,this.durationMs,this.error,this.vendorRequestId,this.correlationId,this.hasDetails,this.triggerId,this.taskId,this.input});
+    // @DataMember
+    String? integrationId;
+
+    // @DataMember
+    String? toolName;
+
+    MarketplaceFunctionRunDto({this.firedAt,this.event="",this.source="",this.functionId="",this.runAsUserId,this.succeeded,this.status,this.durationMs,this.error,this.vendorRequestId,this.correlationId,this.hasDetails,this.triggerId,this.taskId,this.input,this.integrationId,this.toolName});
     MarketplaceFunctionRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19696,6 +19730,8 @@ class MarketplaceFunctionRunDto implements IConvertible
         triggerId = json['triggerId'];
         taskId = json['taskId'];
         input = json['input'];
+        integrationId = json['integrationId'];
+        toolName = json['toolName'];
         return this;
     }
 
@@ -19714,7 +19750,9 @@ class MarketplaceFunctionRunDto implements IConvertible
         'hasDetails': hasDetails,
         'triggerId': triggerId,
         'taskId': taskId,
-        'input': input
+        'input': input,
+        'integrationId': integrationId,
+        'toolName': toolName
     };
 
     getTypeName() => "MarketplaceFunctionRunDto";
@@ -20012,7 +20050,25 @@ class PushDeviceListProjection implements IConvertible
     // @DataMember
     int? platformApiLevel;
 
-    PushDeviceListProjection({this.id="",this.userId="",this.deviceOs="",this.token="",this.brand,this.manufacturer,this.modelName,this.deviceName,this.deviceType,this.osName,this.osVersion,this.platformApiLevel});
+    // @DataMember
+    String? platform;
+
+    // @DataMember
+    String? appVersion;
+
+    // @DataMember
+    String? installationId;
+
+    // @DataMember
+    String? locale;
+
+    // @DataMember
+    String? timeZone;
+
+    // @DataMember
+    DateTime? updatedAtUtc;
+
+    PushDeviceListProjection({this.id="",this.userId="",this.deviceOs="",this.token="",this.brand,this.manufacturer,this.modelName,this.deviceName,this.deviceType,this.osName,this.osVersion,this.platformApiLevel,this.platform,this.appVersion,this.installationId,this.locale,this.timeZone,this.updatedAtUtc});
     PushDeviceListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20028,6 +20084,12 @@ class PushDeviceListProjection implements IConvertible
         osName = json['osName'];
         osVersion = json['osVersion'];
         platformApiLevel = json['platformApiLevel'];
+        platform = json['platform'];
+        appVersion = json['appVersion'];
+        installationId = json['installationId'];
+        locale = json['locale'];
+        timeZone = json['timeZone'];
+        updatedAtUtc = JsonConverters.fromJson(json['updatedAtUtc'],'DateTime',context!);
         return this;
     }
 
@@ -20043,7 +20105,13 @@ class PushDeviceListProjection implements IConvertible
         'deviceType': deviceType,
         'osName': osName,
         'osVersion': osVersion,
-        'platformApiLevel': platformApiLevel
+        'platformApiLevel': platformApiLevel,
+        'platform': platform,
+        'appVersion': appVersion,
+        'installationId': installationId,
+        'locale': locale,
+        'timeZone': timeZone,
+        'updatedAtUtc': JsonConverters.toJson(updatedAtUtc,'DateTime',context!)
     };
 
     getTypeName() => "PushDeviceListProjection";
@@ -20218,6 +20286,33 @@ class PushCampaignBatchDto extends CampaignBatchDto implements IConvertible
 }
 
 // @DataContract
+class NotificationReadMarkDto implements IConvertible
+{
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    DateTime? readAtUtc;
+
+    NotificationReadMarkDto({this.userId="",this.readAtUtc});
+    NotificationReadMarkDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'] ?? "";
+        readAtUtc = JsonConverters.fromJson(json['readAtUtc'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'readAtUtc': JsonConverters.toJson(readAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "NotificationReadMarkDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class PushCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
 {
     // @DataMember
@@ -20229,7 +20324,10 @@ class PushCampaignBatchNotificationDto extends CampaignBatchNotificationDto impl
     // @DataMember
     PushMessageContentDto? content;
 
-    PushCampaignBatchNotificationDto({this.subject,this.recipients,this.content});
+    // @DataMember
+    List<NotificationReadMarkDto>? readBy;
+
+    PushCampaignBatchNotificationDto({this.subject,this.recipients,this.content,this.readBy});
     PushCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20237,13 +20335,15 @@ class PushCampaignBatchNotificationDto extends CampaignBatchNotificationDto impl
         subject = json['subject'];
         recipients = JsonConverters.fromJson(json['recipients'],'PushRecipientsDto',context!);
         content = JsonConverters.fromJson(json['content'],'PushMessageContentDto',context!);
+        readBy = JsonConverters.fromJson(json['readBy'],'List<NotificationReadMarkDto>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'subject': subject,
         'recipients': JsonConverters.toJson(recipients,'PushRecipientsDto',context!),
-        'content': JsonConverters.toJson(content,'PushMessageContentDto',context!)
+        'content': JsonConverters.toJson(content,'PushMessageContentDto',context!),
+        'readBy': JsonConverters.toJson(readBy,'List<NotificationReadMarkDto>',context!)
     });
 
     getTypeName() => "PushCampaignBatchNotificationDto";
@@ -24286,21 +24386,27 @@ class IssueServiceUserApiKeyResponse implements IConvertible
     int id = 0;
     String name = "";
     String key = "";
+    String? environment;
+    CodeMashResponseStatus? responseStatus;
 
-    IssueServiceUserApiKeyResponse({this.id=0,this.name="",this.key=""});
+    IssueServiceUserApiKeyResponse({this.id=0,this.name="",this.key="",this.environment,this.responseStatus});
     IssueServiceUserApiKeyResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         id = json['id'] ?? 0;
         name = json['name'] ?? "";
         key = json['key'] ?? "";
+        environment = json['environment'];
+        responseStatus = JsonConverters.fromJson(json['responseStatus'],'CodeMashResponseStatus',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
-        'key': key
+        'key': key,
+        'environment': environment,
+        'responseStatus': JsonConverters.toJson(responseStatus,'CodeMashResponseStatus',context!)
     };
 
     getTypeName() => "IssueServiceUserApiKeyResponse";
@@ -24310,17 +24416,20 @@ class IssueServiceUserApiKeyResponse implements IConvertible
 class ListServiceUserApiKeysResponse implements IConvertible
 {
     List<ServiceUserApiKeyDto> keys = [];
+    CodeMashResponseStatus? responseStatus;
 
-    ListServiceUserApiKeysResponse({this.keys=const []});
+    ListServiceUserApiKeysResponse({this.keys=const [],this.responseStatus});
     ListServiceUserApiKeysResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         keys = JsonConverters.fromJson(json['keys'],'List<ServiceUserApiKeyDto>',context!) ?? [];
+        responseStatus = JsonConverters.fromJson(json['responseStatus'],'CodeMashResponseStatus',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'keys': JsonConverters.toJson(keys,'List<ServiceUserApiKeyDto>',context!)
+        'keys': JsonConverters.toJson(keys,'List<ServiceUserApiKeyDto>',context!),
+        'responseStatus': JsonConverters.toJson(responseStatus,'CodeMashResponseStatus',context!)
     };
 
     getTypeName() => "ListServiceUserApiKeysResponse";
@@ -26530,7 +26639,10 @@ class GetMarketplaceIntegrationAccessResponse extends ResponseBase implements IC
     // @DataMember
     IReadOnlyList<MarketplaceAccessFunctionDto>? functions;
 
-    GetMarketplaceIntegrationAccessResponse({this.roles,this.packages,this.tools,this.functions});
+    // @DataMember
+    bool? canManage;
+
+    GetMarketplaceIntegrationAccessResponse({this.roles,this.packages,this.tools,this.functions,this.canManage});
     GetMarketplaceIntegrationAccessResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -26539,6 +26651,7 @@ class GetMarketplaceIntegrationAccessResponse extends ResponseBase implements IC
         packages = JsonConverters.fromJson(json['packages'],'IReadOnlyList<MarketplaceAccessPackageDto>',context!);
         tools = JsonConverters.fromJson(json['tools'],'IReadOnlyList<MarketplaceAccessToolDto>',context!);
         functions = JsonConverters.fromJson(json['functions'],'IReadOnlyList<MarketplaceAccessFunctionDto>',context!);
+        canManage = json['canManage'];
         return this;
     }
 
@@ -26546,7 +26659,8 @@ class GetMarketplaceIntegrationAccessResponse extends ResponseBase implements IC
         'roles': JsonConverters.toJson(roles,'IReadOnlyList<MarketplaceAccessRoleDto>',context!),
         'packages': JsonConverters.toJson(packages,'IReadOnlyList<MarketplaceAccessPackageDto>',context!),
         'tools': JsonConverters.toJson(tools,'IReadOnlyList<MarketplaceAccessToolDto>',context!),
-        'functions': JsonConverters.toJson(functions,'IReadOnlyList<MarketplaceAccessFunctionDto>',context!)
+        'functions': JsonConverters.toJson(functions,'IReadOnlyList<MarketplaceAccessFunctionDto>',context!),
+        'canManage': canManage
     });
 
     getTypeName() => "GetMarketplaceIntegrationAccessResponse";
@@ -26682,6 +26796,30 @@ class StartMarketplaceIntegrationSignInResponse extends ResponseBase implements 
     });
 
     getTypeName() => "StartMarketplaceIntegrationSignInResponse";
+    TypeContext? context = _ctx;
+}
+
+class SignOutMarketplaceIntegrationResponse extends ResponseBase implements IConvertible
+{
+    bool? wasSignedIn;
+    String? revoke;
+
+    SignOutMarketplaceIntegrationResponse({this.wasSignedIn,this.revoke});
+    SignOutMarketplaceIntegrationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        wasSignedIn = json['wasSignedIn'];
+        revoke = json['revoke'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'wasSignedIn': wasSignedIn,
+        'revoke': revoke
+    });
+
+    getTypeName() => "SignOutMarketplaceIntegrationResponse";
     TypeContext? context = _ctx;
 }
 
@@ -37380,7 +37518,9 @@ class FindRecords extends CodeMashListPaginationRequestBase implements IReturn<F
     // @ApiMember(Description="Set true to get every reference value as { id, display } (display = the target's displayField per the schema; null when the target is gone). Needs read permission on every source the schema links to (users, roles, taxonomy, collection, files) — otherwise the read is refused with CM-ERRORS-DATABASE-056 naming the source. Default false returns the stored ids.")
     bool? expandReferences;
 
-    FindRecords({this.collectionName="",this.databaseIntegrationId,this.filter,this.contactId,this.schemaVersion,this.pagingArgs,this.sortBy,this.sortOrder,this.expandReferences});
+    bool? allLanguages;
+
+    FindRecords({this.collectionName="",this.databaseIntegrationId,this.filter,this.contactId,this.schemaVersion,this.pagingArgs,this.sortBy,this.sortOrder,this.expandReferences,this.allLanguages});
     FindRecords.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -37394,6 +37534,7 @@ class FindRecords extends CodeMashListPaginationRequestBase implements IReturn<F
         sortBy = json['sortBy'];
         sortOrder = json['sortOrder'];
         expandReferences = json['expandReferences'];
+        allLanguages = json['allLanguages'];
         return this;
     }
 
@@ -37406,7 +37547,8 @@ class FindRecords extends CodeMashListPaginationRequestBase implements IReturn<F
         'pagingArgs': JsonConverters.toJson(pagingArgs,'PagingArgs',context!),
         'sortBy': sortBy,
         'sortOrder': sortOrder,
-        'expandReferences': expandReferences
+        'expandReferences': expandReferences,
+        'allLanguages': allLanguages
     });
 
     createResponse() => FindRecordsResponse();
@@ -37441,7 +37583,9 @@ class FindOneRecord extends CodeMashRequestBase implements IReturn<FindOneRecord
     // @ApiMember(Description="Set true to get every reference value as { id, display } (display = the target's displayField per the schema; null when the target is gone). Needs read permission on every source the schema links to (users, roles, taxonomy, collection, files) — otherwise the read is refused with CM-ERRORS-DATABASE-056 naming the source. Default false returns the stored ids.")
     bool? expandReferences;
 
-    FindOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId,this.expandReferences});
+    bool? allLanguages;
+
+    FindOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId,this.expandReferences,this.allLanguages});
     FindOneRecord.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -37450,6 +37594,7 @@ class FindOneRecord extends CodeMashRequestBase implements IReturn<FindOneRecord
         id = json['id'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         expandReferences = json['expandReferences'];
+        allLanguages = json['allLanguages'];
         return this;
     }
 
@@ -37457,7 +37602,8 @@ class FindOneRecord extends CodeMashRequestBase implements IReturn<FindOneRecord
         'collectionName': collectionName,
         'id': id,
         'databaseIntegrationId': databaseIntegrationId,
-        'expandReferences': expandReferences
+        'expandReferences': expandReferences,
+        'allLanguages': allLanguages
     });
 
     createResponse() => FindOneRecordResponse();
@@ -42419,6 +42565,34 @@ class StartMarketplaceIntegrationSignIn extends CodeMashRequestBase implements I
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/oauth/sign-out", "POST")
+class SignOutMarketplaceIntegration extends CodeMashRequestBase implements IReturn<SignOutMarketplaceIntegrationResponse>, IConvertible, IPost
+{
+    /**
+    * Integration view id, from get_marketplace_integrations.
+    */
+    // @ApiMember(Description="Integration view id, from get_marketplace_integrations.", IsRequired=true)
+    String integrationViewId = "";
+
+    SignOutMarketplaceIntegration({this.integrationViewId=""});
+    SignOutMarketplaceIntegration.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationViewId = json['integrationViewId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationViewId': integrationViewId
+    });
+
+    createResponse() => SignOutMarketplaceIntegrationResponse();
+    getResponseTypeName() => "SignOutMarketplaceIntegrationResponse";
+    getTypeName() => "SignOutMarketplaceIntegration";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/secrets", "PUT")
 // @DataContract
 class ReplaceMarketplaceIntegrationSecretsRequest extends CodeMashRequestBase implements IReturn<EmptyMarketplaceSecretsResponse>, IConvertible, IPut
@@ -42569,12 +42743,18 @@ class GetMarketplaceFunctionRuns extends CodeMashRequestBase implements IReturn<
     String? taskId;
 
     /**
+    * The MCP connection whose tool runs to list — the calls an AI chat made to one of its tools without a saved function (int_…). One of functionId / triggerId / taskId / integrationId.
+    */
+    // @ApiMember(Description="The MCP connection whose tool runs to list — the calls an AI chat made to one of its tools without a saved function (int_…). One of functionId / triggerId / taskId / integrationId.")
+    String? integrationId;
+
+    /**
     * How many runs, newest first: 1-50. Default 20.
     */
     // @ApiMember(DataType="integer", Description="How many runs, newest first: 1-50. Default 20.")
     int? limit;
 
-    GetMarketplaceFunctionRuns({this.functionId,this.triggerId,this.taskId,this.limit});
+    GetMarketplaceFunctionRuns({this.functionId,this.triggerId,this.taskId,this.integrationId,this.limit});
     GetMarketplaceFunctionRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -42582,6 +42762,7 @@ class GetMarketplaceFunctionRuns extends CodeMashRequestBase implements IReturn<
         functionId = json['functionId'];
         triggerId = json['triggerId'];
         taskId = json['taskId'];
+        integrationId = json['integrationId'];
         limit = json['limit'];
         return this;
     }
@@ -42590,6 +42771,7 @@ class GetMarketplaceFunctionRuns extends CodeMashRequestBase implements IReturn<
         'functionId': functionId,
         'triggerId': triggerId,
         'taskId': taskId,
+        'integrationId': integrationId,
         'limit': limit
     });
 
@@ -50011,7 +50193,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PushRecipientsDto': TypeInfo(TypeOf.Class, create:() => PushRecipientsDto()),
     'List<PushRecipientDto>': TypeInfo(TypeOf.Class, create:() => <PushRecipientDto>[]),
     'PushCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => PushCampaignBatchDto()),
+    'NotificationReadMarkDto': TypeInfo(TypeOf.Class, create:() => NotificationReadMarkDto()),
     'PushCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => PushCampaignBatchNotificationDto()),
+    'List<NotificationReadMarkDto>': TypeInfo(TypeOf.Class, create:() => <NotificationReadMarkDto>[]),
     'PaymentsWebhookLogEntry': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookLogEntry()),
     'PaymentTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => PaymentTriggerProjectionList()),
     'PaymentsIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationListProjection()),
@@ -50342,6 +50526,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMarketplaceIntegrationToolsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationToolsResponse()),
     'IReadOnlyList<MarketplaceMcpToolDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceMcpToolDto>()),
     'StartMarketplaceIntegrationSignInResponse': TypeInfo(TypeOf.Class, create:() => StartMarketplaceIntegrationSignInResponse()),
+    'SignOutMarketplaceIntegrationResponse': TypeInfo(TypeOf.Class, create:() => SignOutMarketplaceIntegrationResponse()),
     'EmptyMarketplaceSecretsResponse': TypeInfo(TypeOf.Class, create:() => EmptyMarketplaceSecretsResponse()),
     'RevealMarketplaceIntegrationSecretsResponse': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsResponse()),
     'TestMarketplaceIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestMarketplaceIntegrationResponse()),
@@ -50856,6 +51041,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveMarketplaceIntegrationCustomAccess': TypeInfo(TypeOf.Class, create:() => SaveMarketplaceIntegrationCustomAccess()),
     'GetMarketplaceIntegrationTools': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationTools()),
     'StartMarketplaceIntegrationSignIn': TypeInfo(TypeOf.Class, create:() => StartMarketplaceIntegrationSignIn()),
+    'SignOutMarketplaceIntegration': TypeInfo(TypeOf.Class, create:() => SignOutMarketplaceIntegration()),
     'ReplaceMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => ReplaceMarketplaceIntegrationSecretsRequest()),
     'RevealMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsRequest()),
     'SetMarketplaceIntegrationTokenMappingsRequest': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationTokenMappingsRequest()),
