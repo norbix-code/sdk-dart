@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-13 12:57:28
+Date: 2026-10-13 13:23:41
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -8214,7 +8214,19 @@ class MarketplaceIntegrationDto extends IntegrationDto implements IConvertible
     // @DataMember
     List<MarketplaceValidationStepResultDto>? lastValidationSteps;
 
-    MarketplaceIntegrationDto({this.listingViewId="",this.transport,this.vendor="",this.category,this.description,this.config,this.lastValidationSteps});
+    // @DataMember
+    bool? signedIn;
+
+    // @DataMember
+    String? signedInBy;
+
+    // @DataMember
+    DateTime? signedInAt;
+
+    // @DataMember
+    DateTime? tokenExpiresAt;
+
+    MarketplaceIntegrationDto({this.listingViewId="",this.transport,this.vendor="",this.category,this.description,this.config,this.lastValidationSteps,this.signedIn,this.signedInBy,this.signedInAt,this.tokenExpiresAt});
     MarketplaceIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8226,6 +8238,10 @@ class MarketplaceIntegrationDto extends IntegrationDto implements IConvertible
         description = json['description'];
         config = JsonConverters.fromJson(json['config'],'IReadOnlyDictionary<String,String>',context!);
         lastValidationSteps = JsonConverters.fromJson(json['lastValidationSteps'],'List<MarketplaceValidationStepResultDto>',context!);
+        signedIn = json['signedIn'];
+        signedInBy = json['signedInBy'];
+        signedInAt = JsonConverters.fromJson(json['signedInAt'],'DateTime',context!);
+        tokenExpiresAt = JsonConverters.fromJson(json['tokenExpiresAt'],'DateTime',context!);
         return this;
     }
 
@@ -8236,7 +8252,11 @@ class MarketplaceIntegrationDto extends IntegrationDto implements IConvertible
         'category': JsonConverters.toJson(category,'MarketplaceCategory',context!),
         'description': description,
         'config': JsonConverters.toJson(config,'IReadOnlyDictionary<String,String>',context!),
-        'lastValidationSteps': JsonConverters.toJson(lastValidationSteps,'List<MarketplaceValidationStepResultDto>',context!)
+        'lastValidationSteps': JsonConverters.toJson(lastValidationSteps,'List<MarketplaceValidationStepResultDto>',context!),
+        'signedIn': signedIn,
+        'signedInBy': signedInBy,
+        'signedInAt': JsonConverters.toJson(signedInAt,'DateTime',context!),
+        'tokenExpiresAt': JsonConverters.toJson(tokenExpiresAt,'DateTime',context!)
     });
 
     getTypeName() => "MarketplaceIntegrationDto";
@@ -8737,6 +8757,12 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
     MarketplaceAvailability? availability;
 
     // @DataMember
+    IReadOnlyList<String>? connectSteps;
+
+    // @DataMember
+    String? oAuthRedirectUrl;
+
+    // @DataMember
     bool? isOfficial;
 
     // @DataMember
@@ -8760,7 +8786,7 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
     // @DataMember
     IReadOnlyList<MarketplaceFunctionDefinitionDto>? functions;
 
-    MarketplaceListingDto({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.description,this.iconUrl,this.documentationUrl,this.videoUrl,this.availability,this.isOfficial,this.tags,this.specVersion=0,this.configFields,this.secretFields,this.installForm,this.validationSteps,this.functions});
+    MarketplaceListingDto({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.description,this.iconUrl,this.documentationUrl,this.videoUrl,this.availability,this.connectSteps,this.oAuthRedirectUrl,this.isOfficial,this.tags,this.specVersion=0,this.configFields,this.secretFields,this.installForm,this.validationSteps,this.functions});
     MarketplaceListingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8775,6 +8801,8 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
         documentationUrl = json['documentationUrl'];
         videoUrl = json['videoUrl'];
         availability = JsonConverters.fromJson(json['availability'],'MarketplaceAvailability',context!);
+        connectSteps = JsonConverters.fromJson(json['connectSteps'],'IReadOnlyList<String>',context!);
+        oAuthRedirectUrl = json['oAuthRedirectUrl'];
         isOfficial = json['isOfficial'];
         tags = JsonConverters.fromJson(json['tags'],'IReadOnlyList<String>',context!);
         specVersion = json['specVersion'] ?? 0;
@@ -8798,6 +8826,8 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
         'documentationUrl': documentationUrl,
         'videoUrl': videoUrl,
         'availability': JsonConverters.toJson(availability,'MarketplaceAvailability',context!),
+        'connectSteps': JsonConverters.toJson(connectSteps,'IReadOnlyList<String>',context!),
+        'oAuthRedirectUrl': oAuthRedirectUrl,
         'isOfficial': isOfficial,
         'tags': JsonConverters.toJson(tags,'IReadOnlyList<String>',context!),
         'specVersion': specVersion,
@@ -19425,7 +19455,13 @@ class MarketplaceIntegrationListProjection implements IHasViewId, IConvertible
     // @DataMember
     bool? requiresHumanDeliveryConfirmation;
 
-    MarketplaceIntegrationListProjection({this.viewId="",this.integrationName="",this.isEnabled,this.listingViewId="",this.vendor="",this.category,this.transport,this.lastIntegrationTestAtUtc,this.lastIntegrationTestSucceeded,this.lastIntegrationTestErrors,this.humanDeliveryConfirmedAtUtc,this.requiresHumanDeliveryConfirmation});
+    // @DataMember
+    bool? signedIn;
+
+    // @DataMember
+    DateTime? signedInAt;
+
+    MarketplaceIntegrationListProjection({this.viewId="",this.integrationName="",this.isEnabled,this.listingViewId="",this.vendor="",this.category,this.transport,this.lastIntegrationTestAtUtc,this.lastIntegrationTestSucceeded,this.lastIntegrationTestErrors,this.humanDeliveryConfirmedAtUtc,this.requiresHumanDeliveryConfirmation,this.signedIn,this.signedInAt});
     MarketplaceIntegrationListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19441,6 +19477,8 @@ class MarketplaceIntegrationListProjection implements IHasViewId, IConvertible
         lastIntegrationTestErrors = JsonConverters.fromJson(json['lastIntegrationTestErrors'],'IReadOnlyList<String>',context!);
         humanDeliveryConfirmedAtUtc = JsonConverters.fromJson(json['humanDeliveryConfirmedAtUtc'],'DateTime',context!);
         requiresHumanDeliveryConfirmation = json['requiresHumanDeliveryConfirmation'];
+        signedIn = json['signedIn'];
+        signedInAt = JsonConverters.fromJson(json['signedInAt'],'DateTime',context!);
         return this;
     }
 
@@ -19456,7 +19494,9 @@ class MarketplaceIntegrationListProjection implements IHasViewId, IConvertible
         'lastIntegrationTestSucceeded': lastIntegrationTestSucceeded,
         'lastIntegrationTestErrors': JsonConverters.toJson(lastIntegrationTestErrors,'IReadOnlyList<String>',context!),
         'humanDeliveryConfirmedAtUtc': JsonConverters.toJson(humanDeliveryConfirmedAtUtc,'DateTime',context!),
-        'requiresHumanDeliveryConfirmation': requiresHumanDeliveryConfirmation
+        'requiresHumanDeliveryConfirmation': requiresHumanDeliveryConfirmation,
+        'signedIn': signedIn,
+        'signedInAt': JsonConverters.toJson(signedInAt,'DateTime',context!)
     };
 
     getTypeName() => "MarketplaceIntegrationListProjection";
@@ -26615,6 +26655,33 @@ class GetMarketplaceIntegrationToolsResponse extends ResponseBase implements ICo
     });
 
     getTypeName() => "GetMarketplaceIntegrationToolsResponse";
+    TypeContext? context = _ctx;
+}
+
+class StartMarketplaceIntegrationSignInResponse extends ResponseBase implements IConvertible
+{
+    String? authorizeUrl;
+    String? redirectUrl;
+    DateTime? expiresAt;
+
+    StartMarketplaceIntegrationSignInResponse({this.authorizeUrl,this.redirectUrl,this.expiresAt});
+    StartMarketplaceIntegrationSignInResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        authorizeUrl = json['authorizeUrl'];
+        redirectUrl = json['redirectUrl'];
+        expiresAt = JsonConverters.fromJson(json['expiresAt'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'authorizeUrl': authorizeUrl,
+        'redirectUrl': redirectUrl,
+        'expiresAt': JsonConverters.toJson(expiresAt,'DateTime',context!)
+    });
+
+    getTypeName() => "StartMarketplaceIntegrationSignInResponse";
     TypeContext? context = _ctx;
 }
 
@@ -42324,6 +42391,34 @@ class GetMarketplaceIntegrationTools extends CodeMashRequestBase implements IRet
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/oauth/start", "POST")
+class StartMarketplaceIntegrationSignIn extends CodeMashRequestBase implements IReturn<StartMarketplaceIntegrationSignInResponse>, IConvertible, IPost
+{
+    /**
+    * Integration view id, from get_marketplace_integrations.
+    */
+    // @ApiMember(Description="Integration view id, from get_marketplace_integrations.", IsRequired=true)
+    String integrationViewId = "";
+
+    StartMarketplaceIntegrationSignIn({this.integrationViewId=""});
+    StartMarketplaceIntegrationSignIn.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationViewId = json['integrationViewId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationViewId': integrationViewId
+    });
+
+    createResponse() => StartMarketplaceIntegrationSignInResponse();
+    getResponseTypeName() => "StartMarketplaceIntegrationSignInResponse";
+    getTypeName() => "StartMarketplaceIntegrationSignIn";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/secrets", "PUT")
 // @DataContract
 class ReplaceMarketplaceIntegrationSecretsRequest extends CodeMashRequestBase implements IReturn<EmptyMarketplaceSecretsResponse>, IConvertible, IPut
@@ -50246,6 +50341,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PaginatedResponse<MarketplaceIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MarketplaceIntegrationListProjection>()),
     'GetMarketplaceIntegrationToolsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationToolsResponse()),
     'IReadOnlyList<MarketplaceMcpToolDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceMcpToolDto>()),
+    'StartMarketplaceIntegrationSignInResponse': TypeInfo(TypeOf.Class, create:() => StartMarketplaceIntegrationSignInResponse()),
     'EmptyMarketplaceSecretsResponse': TypeInfo(TypeOf.Class, create:() => EmptyMarketplaceSecretsResponse()),
     'RevealMarketplaceIntegrationSecretsResponse': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsResponse()),
     'TestMarketplaceIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestMarketplaceIntegrationResponse()),
@@ -50759,6 +50855,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SetMarketplaceIntegrationRoleAccess': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationRoleAccess()),
     'SaveMarketplaceIntegrationCustomAccess': TypeInfo(TypeOf.Class, create:() => SaveMarketplaceIntegrationCustomAccess()),
     'GetMarketplaceIntegrationTools': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationTools()),
+    'StartMarketplaceIntegrationSignIn': TypeInfo(TypeOf.Class, create:() => StartMarketplaceIntegrationSignIn()),
     'ReplaceMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => ReplaceMarketplaceIntegrationSecretsRequest()),
     'RevealMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsRequest()),
     'SetMarketplaceIntegrationTokenMappingsRequest': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationTokenMappingsRequest()),
