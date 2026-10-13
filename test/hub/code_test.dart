@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.code` — every Code Hub endpoint (38: the module switch, the
+/// `hub.code` — every Code Hub endpoint (39: the module switch, the
 /// integrations, the marketplace and the five cloud-function routes of
 /// `Code.Functions.md`), against the fake driver (never a real server): the
 /// verb and the full path with every id substituted; for the five
@@ -93,6 +93,11 @@ final _routes = <_Route>[
       '/v3/code/marketplace/integrations/mpi_1/test',
       (c) => c.testMarketplaceIntegration(integrationViewId: 'mpi_1')),
   _Route(
+      'getMarketplaceIntegrationTools',
+      'GET',
+      '/v3/code/marketplace/integrations/mpi_1/tools',
+      (c) => c.getMarketplaceIntegrationTools(integrationViewId: 'mpi_1')),
+  _Route(
       'replaceMarketplaceIntegrationSecrets',
       'PUT',
       '/v3/code/marketplace/integrations/mpi_1/secrets',
@@ -178,9 +183,9 @@ final _routes = <_Route>[
 
 void main() {
   group('hub.code — every route: verb and path', () {
-    test('38 routes, no duplicate names', () {
-      expect(_routes.length, equals(38));
-      expect(_routes.map((r) => r.name).toSet().length, equals(38));
+    test('39 routes, no duplicate names', () {
+      expect(_routes.length, equals(39));
+      expect(_routes.map((r) => r.name).toSet().length, equals(39));
     });
 
     for (final route in _routes) {
@@ -348,6 +353,24 @@ void main() {
         req.url.queryParameters,
         equals({'functionId': 'func_1p4R3gTobGZpD6fXvHT4rd', 'limit': '50'}),
       );
+      expect(req.body, isNull);
+    });
+
+    // The stored MCP tool catalog of a connection (gateway item mcp-step1).
+    test(
+        'getMarketplaceIntegrationTools → GET '
+        '/v3/code/marketplace/integrations/{id}/tools, id in the path',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver)
+          .code
+          .getMarketplaceIntegrationTools(integrationViewId: 'int_7Hq2mcpServer');
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('GET'));
+      expect(req.url.path,
+          equals('/v3/code/marketplace/integrations/int_7Hq2mcpServer/tools'));
+      expect(req.url.queryParameters, isEmpty);
       expect(req.body, isNull);
     });
   });
