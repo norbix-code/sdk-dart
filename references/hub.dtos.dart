@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-13 09:01:25
+Date: 2026-10-13 12:57:28
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -8159,7 +8159,10 @@ class MarketplaceValidationStepResultDto implements IConvertible
     // @DataMember
     String? message;
 
-    MarketplaceValidationStepResultDto({this.key="",this.label="",this.requiredForFunctions,this.succeeded,this.skipped,this.message});
+    // @DataMember
+    String? errorCode;
+
+    MarketplaceValidationStepResultDto({this.key="",this.label="",this.requiredForFunctions,this.succeeded,this.skipped,this.message,this.errorCode});
     MarketplaceValidationStepResultDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8169,6 +8172,7 @@ class MarketplaceValidationStepResultDto implements IConvertible
         succeeded = json['succeeded'];
         skipped = json['skipped'];
         message = json['message'];
+        errorCode = json['errorCode'];
         return this;
     }
 
@@ -8178,7 +8182,8 @@ class MarketplaceValidationStepResultDto implements IConvertible
         'requiredForFunctions': requiredForFunctions,
         'succeeded': succeeded,
         'skipped': skipped,
-        'message': message
+        'message': message,
+        'errorCode': errorCode
     };
 
     getTypeName() => "MarketplaceValidationStepResultDto";
@@ -11890,6 +11895,16 @@ abstract class SmsIntegrationRequest
 
     getTypeName() => "SmsIntegrationRequest";
     TypeContext? context = _ctx;
+}
+
+enum MarketplaceAccessLevel
+{
+    None,
+    Viewer,
+    FunctionsOnly,
+    ReadOnly,
+    FullAccess,
+    Manage,
 }
 
 class SavePushTemplate extends CodeMashRequestBase implements IConvertible
@@ -19172,6 +19187,206 @@ class MarketplaceListingProjection implements IHasViewId, IConvertible
 }
 
 // @DataContract
+class MarketplaceAccessCustomPolicyDto implements IConvertible
+{
+    // @DataMember
+    String policyId = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    int usedByRoles = 0;
+
+    MarketplaceAccessCustomPolicyDto({this.policyId="",this.name="",this.usedByRoles=0});
+    MarketplaceAccessCustomPolicyDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        policyId = json['policyId'] ?? "";
+        name = json['name'] ?? "";
+        usedByRoles = json['usedByRoles'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'policyId': policyId,
+        'name': name,
+        'usedByRoles': usedByRoles
+    };
+
+    getTypeName() => "MarketplaceAccessCustomPolicyDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MarketplaceAccessRoleDto implements IConvertible
+{
+    // @DataMember
+    String roleId = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    String scope = "";
+
+    // @DataMember
+    bool? isSystem;
+
+    // @DataMember
+    bool? fixed;
+
+    // @DataMember
+    MarketplaceAccessLevel? package;
+
+    // @DataMember
+    bool? isCustom;
+
+    // @DataMember
+    bool? manage;
+
+    // @DataMember
+    IReadOnlyList<MarketplaceAccessCustomPolicyDto>? custom;
+
+    // @DataMember
+    String? defaultNotApplied;
+
+    MarketplaceAccessRoleDto({this.roleId="",this.name="",this.scope="",this.isSystem,this.fixed,this.package,this.isCustom,this.manage,this.custom,this.defaultNotApplied});
+    MarketplaceAccessRoleDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        roleId = json['roleId'] ?? "";
+        name = json['name'] ?? "";
+        scope = json['scope'] ?? "";
+        isSystem = json['isSystem'];
+        fixed = json['fixed'];
+        package = JsonConverters.fromJson(json['package'],'MarketplaceAccessLevel',context!);
+        isCustom = json['isCustom'];
+        manage = json['manage'];
+        custom = JsonConverters.fromJson(json['custom'],'IReadOnlyList<MarketplaceAccessCustomPolicyDto>',context!);
+        defaultNotApplied = json['defaultNotApplied'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'roleId': roleId,
+        'name': name,
+        'scope': scope,
+        'isSystem': isSystem,
+        'fixed': fixed,
+        'package': JsonConverters.toJson(package,'MarketplaceAccessLevel',context!),
+        'isCustom': isCustom,
+        'manage': manage,
+        'custom': JsonConverters.toJson(custom,'IReadOnlyList<MarketplaceAccessCustomPolicyDto>',context!),
+        'defaultNotApplied': defaultNotApplied
+    };
+
+    getTypeName() => "MarketplaceAccessRoleDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MarketplaceAccessPackageDto implements IConvertible
+{
+    // @DataMember
+    MarketplaceAccessLevel? kind;
+
+    // @DataMember
+    String policyId = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    bool? exists;
+
+    MarketplaceAccessPackageDto({this.kind,this.policyId="",this.name="",this.exists});
+    MarketplaceAccessPackageDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        kind = JsonConverters.fromJson(json['kind'],'MarketplaceAccessLevel',context!);
+        policyId = json['policyId'] ?? "";
+        name = json['name'] ?? "";
+        exists = json['exists'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'kind': JsonConverters.toJson(kind,'MarketplaceAccessLevel',context!),
+        'policyId': policyId,
+        'name': name,
+        'exists': exists
+    };
+
+    getTypeName() => "MarketplaceAccessPackageDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MarketplaceAccessToolDto implements IConvertible
+{
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    bool? readOnly;
+
+    // @DataMember
+    bool? grantable;
+
+    MarketplaceAccessToolDto({this.name="",this.readOnly,this.grantable});
+    MarketplaceAccessToolDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        name = json['name'] ?? "";
+        readOnly = json['readOnly'];
+        grantable = json['grantable'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'name': name,
+        'readOnly': readOnly,
+        'grantable': grantable
+    };
+
+    getTypeName() => "MarketplaceAccessToolDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MarketplaceAccessFunctionDto implements IConvertible
+{
+    // @DataMember
+    String functionId = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    String functionKey = "";
+
+    MarketplaceAccessFunctionDto({this.functionId="",this.name="",this.functionKey=""});
+    MarketplaceAccessFunctionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        functionId = json['functionId'] ?? "";
+        name = json['name'] ?? "";
+        functionKey = json['functionKey'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'functionId': functionId,
+        'name': name,
+        'functionKey': functionKey
+    };
+
+    getTypeName() => "MarketplaceAccessFunctionDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class MarketplaceIntegrationListProjection implements IHasViewId, IConvertible
 {
     // @DataMember
@@ -19292,6 +19507,38 @@ class MarketplaceMcpToolDto implements IConvertible
     };
 
     getTypeName() => "MarketplaceMcpToolDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MarketplaceAccessChangesDto implements IConvertible
+{
+    // @DataMember
+    IReadOnlyList<String>? readOnlyAdded;
+
+    // @DataMember
+    IReadOnlyList<String>? readOnlyRemoved;
+
+    // @DataMember
+    IReadOnlyList<String>? notGrantable;
+
+    MarketplaceAccessChangesDto({this.readOnlyAdded,this.readOnlyRemoved,this.notGrantable});
+    MarketplaceAccessChangesDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        readOnlyAdded = JsonConverters.fromJson(json['readOnlyAdded'],'IReadOnlyList<String>',context!);
+        readOnlyRemoved = JsonConverters.fromJson(json['readOnlyRemoved'],'IReadOnlyList<String>',context!);
+        notGrantable = JsonConverters.fromJson(json['notGrantable'],'IReadOnlyList<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'readOnlyAdded': JsonConverters.toJson(readOnlyAdded,'IReadOnlyList<String>',context!),
+        'readOnlyRemoved': JsonConverters.toJson(readOnlyRemoved,'IReadOnlyList<String>',context!),
+        'notGrantable': JsonConverters.toJson(notGrantable,'IReadOnlyList<String>',context!)
+    };
+
+    getTypeName() => "MarketplaceAccessChangesDto";
     TypeContext? context = _ctx;
 }
 
@@ -26228,6 +26475,77 @@ class GetMarketplaceListingsResponse extends ResponseBase implements IConvertibl
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class GetMarketplaceIntegrationAccessResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    IReadOnlyList<MarketplaceAccessRoleDto>? roles;
+
+    // @DataMember
+    IReadOnlyList<MarketplaceAccessPackageDto>? packages;
+
+    // @DataMember
+    IReadOnlyList<MarketplaceAccessToolDto>? tools;
+
+    // @DataMember
+    IReadOnlyList<MarketplaceAccessFunctionDto>? functions;
+
+    GetMarketplaceIntegrationAccessResponse({this.roles,this.packages,this.tools,this.functions});
+    GetMarketplaceIntegrationAccessResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        roles = JsonConverters.fromJson(json['roles'],'IReadOnlyList<MarketplaceAccessRoleDto>',context!);
+        packages = JsonConverters.fromJson(json['packages'],'IReadOnlyList<MarketplaceAccessPackageDto>',context!);
+        tools = JsonConverters.fromJson(json['tools'],'IReadOnlyList<MarketplaceAccessToolDto>',context!);
+        functions = JsonConverters.fromJson(json['functions'],'IReadOnlyList<MarketplaceAccessFunctionDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'roles': JsonConverters.toJson(roles,'IReadOnlyList<MarketplaceAccessRoleDto>',context!),
+        'packages': JsonConverters.toJson(packages,'IReadOnlyList<MarketplaceAccessPackageDto>',context!),
+        'tools': JsonConverters.toJson(tools,'IReadOnlyList<MarketplaceAccessToolDto>',context!),
+        'functions': JsonConverters.toJson(functions,'IReadOnlyList<MarketplaceAccessFunctionDto>',context!)
+    });
+
+    getTypeName() => "GetMarketplaceIntegrationAccessResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SaveMarketplaceIntegrationCustomAccessResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? policyId;
+
+    // @DataMember
+    bool? created;
+
+    // @DataMember
+    int usedByRoles = 0;
+
+    SaveMarketplaceIntegrationCustomAccessResponse({this.policyId,this.created,this.usedByRoles=0});
+    SaveMarketplaceIntegrationCustomAccessResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        policyId = json['policyId'];
+        created = json['created'];
+        usedByRoles = json['usedByRoles'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'policyId': policyId,
+        'created': created,
+        'usedByRoles': usedByRoles
+    });
+
+    getTypeName() => "SaveMarketplaceIntegrationCustomAccessResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetMarketplaceIntegrationResponse extends ResponseBase implements IConvertible
 {
     MarketplaceIntegrationDto? integration;
@@ -26344,19 +26662,24 @@ class TestMarketplaceIntegrationResponse extends ResponseBase implements IConver
     // @DataMember
     IReadOnlyList<MarketplaceValidationStepResultDto>? steps;
 
-    TestMarketplaceIntegrationResponse({this.items,this.steps});
+    // @DataMember
+    MarketplaceAccessChangesDto? accessChanges;
+
+    TestMarketplaceIntegrationResponse({this.items,this.steps,this.accessChanges});
     TestMarketplaceIntegrationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         items = JsonConverters.fromJson(json['items'],'IReadOnlyList<IntegrationTestResultItemDto>',context!);
         steps = JsonConverters.fromJson(json['steps'],'IReadOnlyList<MarketplaceValidationStepResultDto>',context!);
+        accessChanges = JsonConverters.fromJson(json['accessChanges'],'MarketplaceAccessChangesDto',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'items': JsonConverters.toJson(items,'IReadOnlyList<IntegrationTestResultItemDto>',context!),
-        'steps': JsonConverters.toJson(steps,'IReadOnlyList<MarketplaceValidationStepResultDto>',context!)
+        'steps': JsonConverters.toJson(steps,'IReadOnlyList<MarketplaceValidationStepResultDto>',context!),
+        'accessChanges': JsonConverters.toJson(accessChanges,'MarketplaceAccessChangesDto',context!)
     });
 
     getTypeName() => "TestMarketplaceIntegrationResponse";
@@ -41804,6 +42127,175 @@ class GetSmsCampaignMessagesRequest extends CodeMashListPaginationRequestBase im
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/access", "GET")
+class GetMarketplaceIntegrationAccess extends CodeMashRequestBase implements IReturn<GetMarketplaceIntegrationAccessResponse>, IConvertible, IGet
+{
+    /**
+    * Integration view id, from get_marketplace_integrations.
+    */
+    // @ApiMember(Description="Integration view id, from get_marketplace_integrations.", IsRequired=true)
+    String integrationViewId = "";
+
+    GetMarketplaceIntegrationAccess({this.integrationViewId=""});
+    GetMarketplaceIntegrationAccess.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationViewId = json['integrationViewId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationViewId': integrationViewId
+    });
+
+    createResponse() => GetMarketplaceIntegrationAccessResponse();
+    getResponseTypeName() => "GetMarketplaceIntegrationAccessResponse";
+    getTypeName() => "GetMarketplaceIntegrationAccess";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/access/roles", "PUT")
+// @DataContract
+class SetMarketplaceIntegrationRoleAccess extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPut
+{
+    /**
+    * Integration view id, from get_marketplace_integrations.
+    */
+    // @DataMember
+    // @ApiMember(Description="Integration view id, from get_marketplace_integrations.", IsRequired=true)
+    String integrationViewId = "";
+
+    /**
+    * The role's composite id: acc_…_nr_… (account / team role) or pr_…_nr_… (project role).
+    */
+    // @DataMember
+    // @ApiMember(Description="The role's composite id: acc_…_nr_… (account / team role) or pr_…_nr_… (project role).", IsRequired=true)
+    String roleId = "";
+
+    /**
+    * None, Viewer, FunctionsOnly, ReadOnly or FullAccess.
+    */
+    // @DataMember
+    // @ApiMember(Description="None, Viewer, FunctionsOnly, ReadOnly or FullAccess.")
+    MarketplaceAccessLevel? package;
+
+    /**
+    * True to also give the Manage package (edit the connection, its secrets, validation and functions).
+    */
+    // @DataMember
+    // @ApiMember(Description="True to also give the Manage package (edit the connection, its secrets, validation and functions).")
+    bool? manage;
+
+    SetMarketplaceIntegrationRoleAccess({this.integrationViewId="",this.roleId="",this.package,this.manage});
+    SetMarketplaceIntegrationRoleAccess.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationViewId = json['integrationViewId'] ?? "";
+        roleId = json['roleId'] ?? "";
+        package = JsonConverters.fromJson(json['package'],'MarketplaceAccessLevel',context!);
+        manage = json['manage'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationViewId': integrationViewId,
+        'roleId': roleId,
+        'package': JsonConverters.toJson(package,'MarketplaceAccessLevel',context!),
+        'manage': manage
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "SetMarketplaceIntegrationRoleAccess";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/access/roles/custom", "POST")
+// @DataContract
+class SaveMarketplaceIntegrationCustomAccess extends CodeMashRequestBase implements IReturn<SaveMarketplaceIntegrationCustomAccessResponse>, IConvertible, IPost
+{
+    /**
+    * Integration view id, from get_marketplace_integrations.
+    */
+    // @DataMember
+    // @ApiMember(Description="Integration view id, from get_marketplace_integrations.", IsRequired=true)
+    String integrationViewId = "";
+
+    /**
+    * The role's composite id: acc_…_nr_… or pr_…_nr_….
+    */
+    // @DataMember
+    // @ApiMember(Description="The role's composite id: acc_…_nr_… or pr_…_nr_….", IsRequired=true)
+    String roleId = "";
+
+    /**
+    * The package to start from: None, Viewer, FunctionsOnly, ReadOnly or FullAccess.
+    */
+    // @DataMember
+    // @ApiMember(Description="The package to start from: None, Viewer, FunctionsOnly, ReadOnly or FullAccess.")
+    MarketplaceAccessLevel? basePackage;
+
+    /**
+    * Tool names the role may run (from the connection's tools).
+    */
+    // @DataMember
+    // @ApiMember(Description="Tool names the role may run (from the connection's tools).")
+    List<String> tools = [];
+
+    /**
+    * Function ids (func_…) of this connection the role may run.
+    */
+    // @DataMember
+    // @ApiMember(Description="Function ids (func_…) of this connection the role may run.")
+    List<String> functions = [];
+
+    /**
+    * True to include the Manage rights (edit the connection, its secrets, validation and functions).
+    */
+    // @DataMember
+    // @ApiMember(Description="True to include the Manage rights (edit the connection, its secrets, validation and functions).")
+    bool? manage;
+
+    /**
+    * True to write a new policy for this role only when its current custom policy is shared with other roles.
+    */
+    // @DataMember
+    // @ApiMember(Description="True to write a new policy for this role only when its current custom policy is shared with other roles.")
+    bool? newPolicyForThisRoleOnly;
+
+    SaveMarketplaceIntegrationCustomAccess({this.integrationViewId="",this.roleId="",this.basePackage,this.tools=const [],this.functions=const [],this.manage,this.newPolicyForThisRoleOnly});
+    SaveMarketplaceIntegrationCustomAccess.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationViewId = json['integrationViewId'] ?? "";
+        roleId = json['roleId'] ?? "";
+        basePackage = JsonConverters.fromJson(json['basePackage'],'MarketplaceAccessLevel',context!);
+        tools = JsonConverters.fromJson(json['tools'],'List<String>',context!) ?? [];
+        functions = JsonConverters.fromJson(json['functions'],'List<String>',context!) ?? [];
+        manage = json['manage'];
+        newPolicyForThisRoleOnly = json['newPolicyForThisRoleOnly'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationViewId': integrationViewId,
+        'roleId': roleId,
+        'basePackage': JsonConverters.toJson(basePackage,'MarketplaceAccessLevel',context!),
+        'tools': JsonConverters.toJson(tools,'List<String>',context!),
+        'functions': JsonConverters.toJson(functions,'List<String>',context!),
+        'manage': manage,
+        'newPolicyForThisRoleOnly': newPolicyForThisRoleOnly
+    });
+
+    createResponse() => SaveMarketplaceIntegrationCustomAccessResponse();
+    getResponseTypeName() => "SaveMarketplaceIntegrationCustomAccessResponse";
+    getTypeName() => "SaveMarketplaceIntegrationCustomAccess";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/tools", "GET")
 class GetMarketplaceIntegrationTools extends CodeMashRequestBase implements IReturn<GetMarketplaceIntegrationToolsResponse>, IConvertible, IGet
 {
@@ -49144,6 +49636,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TranslationDto': TypeInfo(TypeOf.Class, create:() => TranslationDto()),
     'SaveSmsTemplate': TypeInfo(TypeOf.Class, create:() => SaveSmsTemplate()),
     'SmsIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
+    'MarketplaceAccessLevel': TypeInfo(TypeOf.Enum, enumValues:MarketplaceAccessLevel.values),
     'SavePushTemplate': TypeInfo(TypeOf.Class, create:() => SavePushTemplate()),
     'DeviceType': TypeInfo(TypeOf.Enum, enumValues:DeviceType.values),
     'PushDeviceDto': TypeInfo(TypeOf.Class, create:() => PushDeviceDto()),
@@ -49397,8 +49890,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SmsCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchDto()),
     'SmsCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchNotificationDto()),
     'MarketplaceListingProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceListingProjection()),
+    'MarketplaceAccessCustomPolicyDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessCustomPolicyDto()),
+    'MarketplaceAccessRoleDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessRoleDto()),
+    'IReadOnlyList<MarketplaceAccessCustomPolicyDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceAccessCustomPolicyDto>()),
+    'MarketplaceAccessPackageDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessPackageDto()),
+    'MarketplaceAccessToolDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessToolDto()),
+    'MarketplaceAccessFunctionDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessFunctionDto()),
     'MarketplaceIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationListProjection()),
     'MarketplaceMcpToolDto': TypeInfo(TypeOf.Class, create:() => MarketplaceMcpToolDto()),
+    'MarketplaceAccessChangesDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessChangesDto()),
     'MarketplaceFunctionProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionProjection()),
     'MarketplaceFunctionRunDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionRunDto()),
     'CodeIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => CodeIntegrationListProjection()),
@@ -49735,6 +50235,12 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMarketplaceTokensResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceTokensResponse()),
     'GetMarketplaceListingsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceListingsResponse()),
     'PaginatedResponse<MarketplaceListingProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MarketplaceListingProjection>()),
+    'GetMarketplaceIntegrationAccessResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationAccessResponse()),
+    'IReadOnlyList<MarketplaceAccessRoleDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceAccessRoleDto>()),
+    'IReadOnlyList<MarketplaceAccessPackageDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceAccessPackageDto>()),
+    'IReadOnlyList<MarketplaceAccessToolDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceAccessToolDto>()),
+    'IReadOnlyList<MarketplaceAccessFunctionDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceAccessFunctionDto>()),
+    'SaveMarketplaceIntegrationCustomAccessResponse': TypeInfo(TypeOf.Class, create:() => SaveMarketplaceIntegrationCustomAccessResponse()),
     'GetMarketplaceIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationResponse()),
     'GetMarketplaceIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationsResponse()),
     'PaginatedResponse<MarketplaceIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MarketplaceIntegrationListProjection>()),
@@ -50249,6 +50755,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PreviewSmsNotification': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotification()),
     'StopSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopSmsCampaignRequest()),
     'GetSmsCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesRequest()),
+    'GetMarketplaceIntegrationAccess': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationAccess()),
+    'SetMarketplaceIntegrationRoleAccess': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationRoleAccess()),
+    'SaveMarketplaceIntegrationCustomAccess': TypeInfo(TypeOf.Class, create:() => SaveMarketplaceIntegrationCustomAccess()),
     'GetMarketplaceIntegrationTools': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationTools()),
     'ReplaceMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => ReplaceMarketplaceIntegrationSecretsRequest()),
     'RevealMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsRequest()),
