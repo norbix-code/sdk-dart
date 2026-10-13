@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-12 21:43:19
+Date: 2026-10-13 06:06:38
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -19317,6 +19317,9 @@ class MarketplaceFunctionRunDto implements IConvertible
     bool? succeeded;
 
     // @DataMember
+    String? status;
+
+    // @DataMember
     int? durationMs;
 
     // @DataMember
@@ -19326,9 +19329,21 @@ class MarketplaceFunctionRunDto implements IConvertible
     String? vendorRequestId;
 
     // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    bool? hasDetails;
+
+    // @DataMember
+    String? triggerId;
+
+    // @DataMember
+    String? taskId;
+
+    // @DataMember
     String? input;
 
-    MarketplaceFunctionRunDto({this.firedAt,this.event="",this.source="",this.functionId="",this.runAsUserId,this.succeeded,this.durationMs,this.error,this.vendorRequestId,this.input});
+    MarketplaceFunctionRunDto({this.firedAt,this.event="",this.source="",this.functionId="",this.runAsUserId,this.succeeded,this.status,this.durationMs,this.error,this.vendorRequestId,this.correlationId,this.hasDetails,this.triggerId,this.taskId,this.input});
     MarketplaceFunctionRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19338,9 +19353,14 @@ class MarketplaceFunctionRunDto implements IConvertible
         functionId = json['functionId'] ?? "";
         runAsUserId = json['runAsUserId'];
         succeeded = json['succeeded'];
+        status = json['status'];
         durationMs = json['durationMs'];
         error = json['error'];
         vendorRequestId = json['vendorRequestId'];
+        correlationId = json['correlationId'];
+        hasDetails = json['hasDetails'];
+        triggerId = json['triggerId'];
+        taskId = json['taskId'];
         input = json['input'];
         return this;
     }
@@ -19352,9 +19372,14 @@ class MarketplaceFunctionRunDto implements IConvertible
         'functionId': functionId,
         'runAsUserId': runAsUserId,
         'succeeded': succeeded,
+        'status': status,
         'durationMs': durationMs,
         'error': error,
         'vendorRequestId': vendorRequestId,
+        'correlationId': correlationId,
+        'hasDetails': hasDetails,
+        'triggerId': triggerId,
+        'taskId': taskId,
         'input': input
     };
 
@@ -41834,15 +41859,21 @@ class GetMarketplaceFunctionCatalog extends CodeMashRequestBase implements IRetu
 class GetMarketplaceFunctionRuns extends CodeMashRequestBase implements IReturn<GetMarketplaceFunctionRunsResponse>, IConvertible, IGet
 {
     /**
-    * The trigger whose marketplace function runs to list (trg_…). One of triggerId / taskId.
+    * The marketplace function whose runs to list, from every source (func_…). One of functionId / triggerId / taskId.
     */
-    // @ApiMember(Description="The trigger whose marketplace function runs to list (trg_…). One of triggerId / taskId.")
+    // @ApiMember(Description="The marketplace function whose runs to list, from every source (func_…). One of functionId / triggerId / taskId.")
+    String? functionId;
+
+    /**
+    * The trigger whose marketplace function runs to list (trg_…). One of functionId / triggerId / taskId.
+    */
+    // @ApiMember(Description="The trigger whose marketplace function runs to list (trg_…). One of functionId / triggerId / taskId.")
     String? triggerId;
 
     /**
-    * The scheduler task whose marketplace function runs to list (tsk_…). One of triggerId / taskId.
+    * The scheduler task whose marketplace function runs to list (tsk_…). One of functionId / triggerId / taskId.
     */
-    // @ApiMember(Description="The scheduler task whose marketplace function runs to list (tsk_…). One of triggerId / taskId.")
+    // @ApiMember(Description="The scheduler task whose marketplace function runs to list (tsk_…). One of functionId / triggerId / taskId.")
     String? taskId;
 
     /**
@@ -41851,11 +41882,12 @@ class GetMarketplaceFunctionRuns extends CodeMashRequestBase implements IReturn<
     // @ApiMember(DataType="integer", Description="How many runs, newest first: 1-50. Default 20.")
     int? limit;
 
-    GetMarketplaceFunctionRuns({this.triggerId,this.taskId,this.limit});
+    GetMarketplaceFunctionRuns({this.functionId,this.triggerId,this.taskId,this.limit});
     GetMarketplaceFunctionRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        functionId = json['functionId'];
         triggerId = json['triggerId'];
         taskId = json['taskId'];
         limit = json['limit'];
@@ -41863,6 +41895,7 @@ class GetMarketplaceFunctionRuns extends CodeMashRequestBase implements IReturn<
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'functionId': functionId,
         'triggerId': triggerId,
         'taskId': taskId,
         'limit': limit
