@@ -997,6 +997,32 @@ for the run-as user) and `data` with one slot per source (`database`,
 `user`, `file`, `payment`, `ai`, `task`, `payload`). Every route is asserted
 in `test/hub/code_test.dart`.
 
+
+### Marketplace function runs
+
+Each call of a marketplace function is one run row: an invoke (user, API key,
+AI), a trigger run or a scheduler fire. `code.getMarketplaceFunctionRuns`
+takes exactly one of `functionId` (every source, newest first, up to 50),
+`triggerId` or `taskId`, plus `limit` (1–50, default 20). A row carries
+`status` (`ok` / `failed` / `skipped`, null on rows written before the field
+existed), `durationMs`, `source`, `event`, `correlationId` and `hasDetails`.
+
+The input, steps and response of a run are written to the project log under
+the row's `correlationId`, only while the environment's Norbix Logging is on —
+then `hasDetails` is true. Read them with the logs route; its query field is
+`targetCorrelationId`:
+
+```dart
+final res = await hub.code.getMarketplaceFunctionRuns(
+    query: {'functionId': 'func_…', 'limit': 10}) as Map<String, Object?>;
+for (final run in (res['runs'] as List? ?? const []).cast<Map<String, Object?>>()) {
+  if (run['hasDetails'] != true) continue; // logs were off for this run
+  final details = await hub.logs.getLogsByCorrelationId(
+      query: {'targetCorrelationId': run['correlationId']});
+  // details['items']: marketplace:run:started → marketplace:run:step … → completed | failed | skipped
+}
+```
+
 ## Repo layout
 
 ```
