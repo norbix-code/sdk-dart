@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.code` — every Code Hub endpoint (42: the module switch, the
+/// `hub.code` — every Code Hub endpoint (43: the module switch, the
 /// integrations, the marketplace and the five cloud-function routes of
 /// `Code.Functions.md`), against the fake driver (never a real server): the
 /// verb and the full path with every id substituted; for the five
@@ -114,6 +114,11 @@ final _routes = <_Route>[
       (c) =>
           c.saveMarketplaceIntegrationCustomAccess(integrationViewId: 'mpi_1')),
   _Route(
+      'startMarketplaceIntegrationSignIn',
+      'POST',
+      '/v3/code/marketplace/integrations/mpi_1/oauth/start',
+      (c) => c.startMarketplaceIntegrationSignIn(integrationViewId: 'mpi_1')),
+  _Route(
       'replaceMarketplaceIntegrationSecrets',
       'PUT',
       '/v3/code/marketplace/integrations/mpi_1/secrets',
@@ -199,9 +204,9 @@ final _routes = <_Route>[
 
 void main() {
   group('hub.code — every route: verb and path', () {
-    test('42 routes, no duplicate names', () {
-      expect(_routes.length, equals(42));
-      expect(_routes.map((r) => r.name).toSet().length, equals(42));
+    test('43 routes, no duplicate names', () {
+      expect(_routes.length, equals(43));
+      expect(_routes.map((r) => r.name).toSet().length, equals(43));
     });
 
     for (final route in _routes) {
@@ -470,6 +475,24 @@ void main() {
             'manage': false,
             'newPolicyForThisRoleOnly': true,
           }));
+    });
+
+    // The OAuth sign-in start of an MCP connection (gateway item oauth, route 28).
+    test(
+        'startMarketplaceIntegrationSignIn → POST '
+        '/v3/code/marketplace/integrations/{id}/oauth/start, id in the path',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver)
+          .code
+          .startMarketplaceIntegrationSignIn(integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('POST'));
+      expect(req.url.path,
+          equals('/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/oauth/start'));
+      expect(req.url.queryParameters, isEmpty);
+      expect(req.body, isNull);
     });
   });
 }
