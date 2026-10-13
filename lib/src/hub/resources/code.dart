@@ -608,6 +608,26 @@ class CodeResource extends Resource {
     );
   }
 
+  /// `POST /{version}/code/marketplace/integrations/{IntegrationViewId}/oauth/sign-out`
+  ///
+  /// Sign an MCP connection out of OAuth (route 30). Answers `wasSignedIn`
+  /// and `revoke` (Revoked, NoRevocationEndpoint, Failed or null).
+  Future<Object?> signOutMarketplaceIntegration(
+      {required Object integrationViewId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/code/marketplace/integrations/{IntegrationViewId}/oauth/sign-out',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationViewId': integrationViewId},
+    );
+  }
+
   /// `PUT /{version}/code/marketplace/integrations/{IntegrationViewId}/secrets`
   Future<Object?> replaceMarketplaceIntegrationSecrets(
       {required Object integrationViewId,
