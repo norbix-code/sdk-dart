@@ -964,7 +964,7 @@ Norbix does not host code: a trigger's `Code` action, a scheduler
 `CodeFunctionalCall` task or a manual call runs a function in **your** cloud
 (AWS Lambda, Azure Functions, Google Cloud Functions) through a Code
 integration (`hub.code.getCodeIntegrations`, `saveCodeIntegration`,
-`testCodeIntegration`, …). `hub.code` covers every Code Hub endpoint (39);
+`testCodeIntegration`, …). `hub.code` covers every Code Hub endpoint (42);
 the five cloud-function routes:
 
 | Method | Call |

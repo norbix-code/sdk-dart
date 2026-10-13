@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.code` — every Code Hub endpoint (39: the module switch, the
+/// `hub.code` — every Code Hub endpoint (42: the module switch, the
 /// integrations, the marketplace and the five cloud-function routes of
 /// `Code.Functions.md`), against the fake driver (never a real server): the
 /// verb and the full path with every id substituted; for the five
@@ -98,6 +98,22 @@ final _routes = <_Route>[
       '/v3/code/marketplace/integrations/mpi_1/tools',
       (c) => c.getMarketplaceIntegrationTools(integrationViewId: 'mpi_1')),
   _Route(
+      'getMarketplaceIntegrationAccess',
+      'GET',
+      '/v3/code/marketplace/integrations/mpi_1/access',
+      (c) => c.getMarketplaceIntegrationAccess(integrationViewId: 'mpi_1')),
+  _Route(
+      'setMarketplaceIntegrationRoleAccess',
+      'PUT',
+      '/v3/code/marketplace/integrations/mpi_1/access/roles',
+      (c) => c.setMarketplaceIntegrationRoleAccess(integrationViewId: 'mpi_1')),
+  _Route(
+      'saveMarketplaceIntegrationCustomAccess',
+      'POST',
+      '/v3/code/marketplace/integrations/mpi_1/access/roles/custom',
+      (c) =>
+          c.saveMarketplaceIntegrationCustomAccess(integrationViewId: 'mpi_1')),
+  _Route(
       'replaceMarketplaceIntegrationSecrets',
       'PUT',
       '/v3/code/marketplace/integrations/mpi_1/secrets',
@@ -183,9 +199,9 @@ final _routes = <_Route>[
 
 void main() {
   group('hub.code — every route: verb and path', () {
-    test('39 routes, no duplicate names', () {
-      expect(_routes.length, equals(39));
-      expect(_routes.map((r) => r.name).toSet().length, equals(39));
+    test('42 routes, no duplicate names', () {
+      expect(_routes.length, equals(42));
+      expect(_routes.map((r) => r.name).toSet().length, equals(42));
     });
 
     for (final route in _routes) {
@@ -372,6 +388,88 @@ void main() {
           equals('/v3/code/marketplace/integrations/int_7Hq2mcpServer/tools'));
       expect(req.url.queryParameters, isEmpty);
       expect(req.body, isNull);
+    });
+
+    // The access matrix of a connection (gateway item access, route 25).
+    test(
+        'getMarketplaceIntegrationAccess → GET '
+        '/v3/code/marketplace/integrations/{id}/access, id in the path',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver)
+          .code
+          .getMarketplaceIntegrationAccess(integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('GET'));
+      expect(req.url.path,
+          equals('/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/access'));
+      expect(req.url.queryParameters, isEmpty);
+      expect(req.body, isNull);
+    });
+
+    // A role package (route 26): role, package and Manage flag in the body.
+    test(
+        'setMarketplaceIntegrationRoleAccess → PUT '
+        '/v3/code/marketplace/integrations/{id}/access/roles, JSON body',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).code.setMarketplaceIntegrationRoleAccess(
+          integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb',
+          body: {
+            'roleId': 'acc_6Qp1dW2kRm8NsT4vYc0Hb_nr_3kLm9QwErTyU',
+            'package': 'ReadOnly',
+            'manage': false,
+          });
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('PUT'));
+      expect(req.url.path,
+          equals('/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/access/roles'));
+      expect(req.url.queryParameters, isEmpty);
+      expect(
+          jsonDecode(req.body!),
+          equals({
+            'roleId': 'acc_6Qp1dW2kRm8NsT4vYc0Hb_nr_3kLm9QwErTyU',
+            'package': 'ReadOnly',
+            'manage': false,
+          }));
+    });
+
+    // A custom access policy (route 27): the ticks in the body.
+    test(
+        'saveMarketplaceIntegrationCustomAccess → POST '
+        '/v3/code/marketplace/integrations/{id}/access/roles/custom, JSON body',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).code.saveMarketplaceIntegrationCustomAccess(
+          integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb',
+          body: {
+            'roleId': 'acc_6Qp1dW2kRm8NsT4vYc0Hb_nr_3kLm9QwErTyU',
+            'basePackage': 'ReadOnly',
+            'tools': ['create_issue'],
+            'functions': ['func_4hT2b9QkLm3XcT1yRfGh7a'],
+            'manage': false,
+            'newPolicyForThisRoleOnly': true,
+          });
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('POST'));
+      expect(
+          req.url.path,
+          equals(
+              '/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/access/roles/custom'));
+      expect(req.url.queryParameters, isEmpty);
+      expect(
+          jsonDecode(req.body!),
+          equals({
+            'roleId': 'acc_6Qp1dW2kRm8NsT4vYc0Hb_nr_3kLm9QwErTyU',
+            'basePackage': 'ReadOnly',
+            'tools': ['create_issue'],
+            'functions': ['func_4hT2b9QkLm3XcT1yRfGh7a'],
+            'manage': false,
+            'newPolicyForThisRoleOnly': true,
+          }));
     });
   });
 }

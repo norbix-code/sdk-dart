@@ -528,6 +528,66 @@ class CodeResource extends Resource {
     );
   }
 
+  /// `GET /{version}/code/marketplace/integrations/{IntegrationViewId}/access`
+  ///
+  /// The access matrix of a connection (route 25): roles, packages, tools and functions.
+  Future<Object?> getMarketplaceIntegrationAccess(
+      {required Object integrationViewId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/code/marketplace/integrations/{IntegrationViewId}/access',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationViewId': integrationViewId},
+    );
+  }
+
+  /// `PUT /{version}/code/marketplace/integrations/{IntegrationViewId}/access/roles`
+  ///
+  /// Give a role one package (None, Viewer, FunctionsOnly, ReadOnly, FullAccess)
+  /// and the Manage flag (route 26). Body: `roleId`, `package`, `manage`.
+  Future<Object?> setMarketplaceIntegrationRoleAccess(
+      {required Object integrationViewId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/code/marketplace/integrations/{IntegrationViewId}/access/roles',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationViewId': integrationViewId},
+    );
+  }
+
+  /// `POST /{version}/code/marketplace/integrations/{IntegrationViewId}/access/roles/custom`
+  ///
+  /// A custom access policy of the connection for one role (route 27). Body:
+  /// `roleId`, `basePackage`, `tools`, `functions`, `manage`,
+  /// `newPolicyForThisRoleOnly`.
+  Future<Object?> saveMarketplaceIntegrationCustomAccess(
+      {required Object integrationViewId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/code/marketplace/integrations/{IntegrationViewId}/access/roles/custom',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationViewId': integrationViewId},
+    );
+  }
+
   /// `PUT /{version}/code/marketplace/integrations/{IntegrationViewId}/secrets`
   Future<Object?> replaceMarketplaceIntegrationSecrets(
       {required Object integrationViewId,
