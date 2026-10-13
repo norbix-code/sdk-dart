@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-13 06:06:38
+Date: 2026-10-13 09:01:25
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -19249,6 +19249,53 @@ class MarketplaceIntegrationListProjection implements IHasViewId, IConvertible
 }
 
 // @DataContract
+class MarketplaceMcpToolDto implements IConvertible
+{
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    String? title;
+
+    // @DataMember
+    String? description;
+
+    // @DataMember
+    String inputSchema = "";
+
+    // @DataMember
+    bool? readOnlyHint;
+
+    // @DataMember
+    bool? destructiveHint;
+
+    MarketplaceMcpToolDto({this.name="",this.title,this.description,this.inputSchema="",this.readOnlyHint,this.destructiveHint});
+    MarketplaceMcpToolDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        name = json['name'] ?? "";
+        title = json['title'];
+        description = json['description'];
+        inputSchema = json['inputSchema'] ?? "";
+        readOnlyHint = json['readOnlyHint'];
+        destructiveHint = json['destructiveHint'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'name': name,
+        'title': title,
+        'description': description,
+        'inputSchema': inputSchema,
+        'readOnlyHint': readOnlyHint,
+        'destructiveHint': destructiveHint
+    };
+
+    getTypeName() => "MarketplaceMcpToolDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class MarketplaceFunctionProjection implements IHasViewId, IConvertible
 {
     // @DataMember
@@ -26220,6 +26267,36 @@ class GetMarketplaceIntegrationsResponse extends ResponseBase implements IConver
     });
 
     getTypeName() => "GetMarketplaceIntegrationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetMarketplaceIntegrationToolsResponse extends ResponseBase implements IConvertible
+{
+    IReadOnlyList<MarketplaceMcpToolDto>? tools;
+    DateTime? listedAt;
+    String? catalogHash;
+    bool? truncated;
+
+    GetMarketplaceIntegrationToolsResponse({this.tools,this.listedAt,this.catalogHash,this.truncated});
+    GetMarketplaceIntegrationToolsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        tools = JsonConverters.fromJson(json['tools'],'IReadOnlyList<MarketplaceMcpToolDto>',context!);
+        listedAt = JsonConverters.fromJson(json['listedAt'],'DateTime',context!);
+        catalogHash = json['catalogHash'];
+        truncated = json['truncated'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'tools': JsonConverters.toJson(tools,'IReadOnlyList<MarketplaceMcpToolDto>',context!),
+        'listedAt': JsonConverters.toJson(listedAt,'DateTime',context!),
+        'catalogHash': catalogHash,
+        'truncated': truncated
+    });
+
+    getTypeName() => "GetMarketplaceIntegrationToolsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -41727,6 +41804,34 @@ class GetSmsCampaignMessagesRequest extends CodeMashListPaginationRequestBase im
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/tools", "GET")
+class GetMarketplaceIntegrationTools extends CodeMashRequestBase implements IReturn<GetMarketplaceIntegrationToolsResponse>, IConvertible, IGet
+{
+    /**
+    * Integration view id, from get_marketplace_integrations.
+    */
+    // @ApiMember(Description="Integration view id, from get_marketplace_integrations.", IsRequired=true)
+    String integrationViewId = "";
+
+    GetMarketplaceIntegrationTools({this.integrationViewId=""});
+    GetMarketplaceIntegrationTools.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationViewId = json['integrationViewId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationViewId': integrationViewId
+    });
+
+    createResponse() => GetMarketplaceIntegrationToolsResponse();
+    getResponseTypeName() => "GetMarketplaceIntegrationToolsResponse";
+    getTypeName() => "GetMarketplaceIntegrationTools";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/secrets", "PUT")
 // @DataContract
 class ReplaceMarketplaceIntegrationSecretsRequest extends CodeMashRequestBase implements IReturn<EmptyMarketplaceSecretsResponse>, IConvertible, IPut
@@ -49293,6 +49398,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SmsCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchNotificationDto()),
     'MarketplaceListingProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceListingProjection()),
     'MarketplaceIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceIntegrationListProjection()),
+    'MarketplaceMcpToolDto': TypeInfo(TypeOf.Class, create:() => MarketplaceMcpToolDto()),
     'MarketplaceFunctionProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionProjection()),
     'MarketplaceFunctionRunDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionRunDto()),
     'CodeIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => CodeIntegrationListProjection()),
@@ -49632,6 +49738,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMarketplaceIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationResponse()),
     'GetMarketplaceIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationsResponse()),
     'PaginatedResponse<MarketplaceIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MarketplaceIntegrationListProjection>()),
+    'GetMarketplaceIntegrationToolsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationToolsResponse()),
+    'IReadOnlyList<MarketplaceMcpToolDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<MarketplaceMcpToolDto>()),
     'EmptyMarketplaceSecretsResponse': TypeInfo(TypeOf.Class, create:() => EmptyMarketplaceSecretsResponse()),
     'RevealMarketplaceIntegrationSecretsResponse': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsResponse()),
     'TestMarketplaceIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestMarketplaceIntegrationResponse()),
@@ -50141,6 +50249,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PreviewSmsNotification': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotification()),
     'StopSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopSmsCampaignRequest()),
     'GetSmsCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesRequest()),
+    'GetMarketplaceIntegrationTools': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationTools()),
     'ReplaceMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => ReplaceMarketplaceIntegrationSecretsRequest()),
     'RevealMarketplaceIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => RevealMarketplaceIntegrationSecretsRequest()),
     'SetMarketplaceIntegrationTokenMappingsRequest': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationTokenMappingsRequest()),
