@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-07 10:34:37
+Date: 2026-10-14 08:01:37
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -18,15 +18,8 @@ import 'package:servicestack/servicestack.dart';
 import 'dart:typed_data';
 
 // @DataContract(Namespace="http://codemash.io/types/")
-class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCorrelationIdRequest, IConvertible
+class RequestBase implements IVersionBasedRequest, IHasCorrelationIdRequest, IConvertible
 {
-    /**
-    * Specify culture code when your response from the API should be localised. E.g.: en
-    */
-    // @DataMember
-    // @ApiMember(DataType="string", Description="Specify culture code when your response from the API should be localised. E.g.: en", Name="CultureCode", ParameterType="header")
-    String? cultureCode;
-
     /**
     * TimeZone
     */
@@ -48,11 +41,10 @@ class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCor
     // @ApiMember(DataType="string", Description="CorrelationId for each request", Name="CorrelationId", ParameterType="header")
     String? correlationId;
 
-    RequestBase({this.cultureCode,this.timeZoneId,this.version="",this.correlationId});
+    RequestBase({this.timeZoneId,this.version="",this.correlationId});
     RequestBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        cultureCode = json['cultureCode'];
         timeZoneId = json['timeZoneId'];
         version = json['version'] ?? "";
         correlationId = json['correlationId'];
@@ -60,7 +52,6 @@ class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCor
     }
 
     Map<String, dynamic> toJson() => {
-        'cultureCode': cultureCode,
         'timeZoneId': timeZoneId,
         'version': version,
         'correlationId': correlationId
@@ -68,11 +59,6 @@ class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCor
 
     getTypeName() => "RequestBase";
     TypeContext? context = _ctx;
-}
-
-abstract class ICultureBasedRequest
-{
-    String? cultureCode;
 }
 
 abstract class IVersionBasedRequest
@@ -443,58 +429,6 @@ enum CodeMashRuntime
     Production,
 }
 
-// @DataContract
-class EchoLicenseDto implements IConvertible
-{
-    // @DataMember(Name="domain")
-    String? domain;
-
-    // @DataMember(Name="accountId")
-    String? accountId;
-
-    // @DataMember(Name="email")
-    String? email;
-
-    // @DataMember(Name="release")
-    String? release;
-
-    // @DataMember(Name="expire")
-    int expire = 0;
-
-    // @DataMember(Name="isTrial")
-    bool? isTrial;
-
-    // @DataMember(Name="cap")
-    int cap = 0;
-
-    EchoLicenseDto({this.domain,this.accountId,this.email,this.release,this.expire=0,this.isTrial,this.cap=0});
-    EchoLicenseDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        domain = json['domain'];
-        accountId = json['accountId'];
-        email = json['email'];
-        release = json['release'];
-        expire = json['expire'] ?? 0;
-        isTrial = json['isTrial'];
-        cap = json['projectsCap'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'domain': domain,
-        'accountId': accountId,
-        'email': email,
-        'release': release,
-        'expire': expire,
-        'isTrial': isTrial,
-        'cap': cap
-    };
-
-    getTypeName() => "EchoLicenseDto";
-    TypeContext? context = _ctx;
-}
-
 class EchoRegionDto implements IConvertible
 {
     String code = "";
@@ -524,6 +458,38 @@ class EchoRegionDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class EchoAgentSnippetDto implements IConvertible
+{
+    String client = "";
+    String kind = "";
+    bool? recommended;
+    String auth = "";
+    String config = "";
+
+    EchoAgentSnippetDto({this.client="",this.kind="",this.recommended,this.auth="",this.config=""});
+    EchoAgentSnippetDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        client = json['client'] ?? "";
+        kind = json['kind'] ?? "";
+        recommended = json['recommended'];
+        auth = json['auth'] ?? "";
+        config = json['config'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'client': client,
+        'kind': kind,
+        'recommended': recommended,
+        'auth': auth,
+        'config': config
+    };
+
+    getTypeName() => "EchoAgentSnippetDto";
+    TypeContext? context = _ctx;
+}
+
 class EchoAgentDto implements IConvertible
 {
     String mcpUrl = "";
@@ -531,8 +497,13 @@ class EchoAgentDto implements IConvertible
     String installationType = "";
     String onboardingDocsUrl = "";
     String toolsUrl = "";
+    String cliPackage = "";
+    String cliInstallCommand = "";
+    String deviceAuthorizationUrl = "";
+    String deviceTokenUrl = "";
+    List<EchoAgentSnippetDto> snippets = [];
 
-    EchoAgentDto({this.mcpUrl="",this.oAuthMetadataUrl,this.installationType="",this.onboardingDocsUrl="",this.toolsUrl=""});
+    EchoAgentDto({this.mcpUrl="",this.oAuthMetadataUrl,this.installationType="",this.onboardingDocsUrl="",this.toolsUrl="",this.cliPackage="",this.cliInstallCommand="",this.deviceAuthorizationUrl="",this.deviceTokenUrl="",this.snippets=const []});
     EchoAgentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -541,6 +512,11 @@ class EchoAgentDto implements IConvertible
         installationType = json['installationType'] ?? "";
         onboardingDocsUrl = json['onboardingDocsUrl'] ?? "";
         toolsUrl = json['toolsUrl'] ?? "";
+        cliPackage = json['cliPackage'] ?? "";
+        cliInstallCommand = json['cliInstallCommand'] ?? "";
+        deviceAuthorizationUrl = json['deviceAuthorizationUrl'] ?? "";
+        deviceTokenUrl = json['deviceTokenUrl'] ?? "";
+        snippets = JsonConverters.fromJson(json['snippets'],'List<EchoAgentSnippetDto>',context!) ?? [];
         return this;
     }
 
@@ -549,10 +525,38 @@ class EchoAgentDto implements IConvertible
         'oAuthMetadataUrl': oAuthMetadataUrl,
         'installationType': installationType,
         'onboardingDocsUrl': onboardingDocsUrl,
-        'toolsUrl': toolsUrl
+        'toolsUrl': toolsUrl,
+        'cliPackage': cliPackage,
+        'cliInstallCommand': cliInstallCommand,
+        'deviceAuthorizationUrl': deviceAuthorizationUrl,
+        'deviceTokenUrl': deviceTokenUrl,
+        'snippets': JsonConverters.toJson(snippets,'List<EchoAgentSnippetDto>',context!)
     };
 
     getTypeName() => "EchoAgentDto";
+    TypeContext? context = _ctx;
+}
+
+class EchoHostingPlatformDto implements IConvertible
+{
+    String provider = "";
+    bool? isAws;
+
+    EchoHostingPlatformDto({this.provider="",this.isAws});
+    EchoHostingPlatformDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        provider = json['provider'] ?? "";
+        isAws = json['isAws'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'provider': provider,
+        'isAws': isAws
+    };
+
+    getTypeName() => "EchoHostingPlatformDto";
     TypeContext? context = _ctx;
 }
 
@@ -1731,7 +1735,7 @@ abstract class TriggerActionDto
 }
 
 // @DataContract
-class TriggerDto implements IHasViewId, IConvertible
+class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
 {
     // @DataMember
     TriggerType? type;
@@ -1755,9 +1759,15 @@ class TriggerDto implements IHasViewId, IConvertible
     String? activationCode;
 
     // @DataMember
+    int? order;
+
+    // @DataMember
+    bool? breakOnError;
+
+    // @DataMember
     String? savedByAuthId;
 
-    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId});
+    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.order,this.breakOnError,this.savedByAuthId});
     TriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1768,6 +1778,8 @@ class TriggerDto implements IHasViewId, IConvertible
         description = json['description'];
         isEnabled = json['isEnabled'];
         activationCode = json['activationCode'];
+        order = json['order'];
+        breakOnError = json['breakOnError'];
         savedByAuthId = json['savedByAuthId'];
         return this;
     }
@@ -1780,6 +1792,8 @@ class TriggerDto implements IHasViewId, IConvertible
         'description': description,
         'isEnabled': isEnabled,
         'activationCode': activationCode,
+        'order': order,
+        'breakOnError': breakOnError,
         'savedByAuthId': savedByAuthId
     };
 
@@ -1945,7 +1959,7 @@ class FileChecksumDto implements IConvertible
 class FileResourceDto implements IConvertible
 {
     // @DataMember(Order=1)
-    String id = "";
+    String? id;
 
     // @DataMember(Order=2)
     String originalFileName = "";
@@ -1962,11 +1976,11 @@ class FileResourceDto implements IConvertible
     // @DataMember(Order=6)
     FileChecksumDto? checksum;
 
-    FileResourceDto({this.id="",this.originalFileName="",this.Extension="",this.storedFileName="",this.sizeBytes,this.checksum});
+    FileResourceDto({this.id,this.originalFileName="",this.Extension="",this.storedFileName="",this.sizeBytes,this.checksum});
     FileResourceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
+        id = json['id'];
         originalFileName = json['originalFileName'] ?? "";
         Extension = json['extension'] ?? "";
         storedFileName = json['storedFileName'] ?? "";
@@ -2116,6 +2130,145 @@ class IntegrationTestResultItemDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class OwnPushDeviceDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String provider = "";
+
+    // @DataMember
+    String token = "";
+
+    // @DataMember
+    String? platform;
+
+    // @DataMember
+    String? osName;
+
+    // @DataMember
+    String? osVersion;
+
+    // @DataMember
+    String? appVersion;
+
+    // @DataMember
+    String? deviceName;
+
+    // @DataMember
+    String? modelName;
+
+    // @DataMember
+    String? brand;
+
+    // @DataMember
+    String? installationId;
+
+    // @DataMember
+    String? locale;
+
+    // @DataMember
+    String? timeZone;
+
+    // @DataMember
+    DateTime? updatedAtUtc;
+
+    OwnPushDeviceDto({this.id="",this.provider="",this.token="",this.platform,this.osName,this.osVersion,this.appVersion,this.deviceName,this.modelName,this.brand,this.installationId,this.locale,this.timeZone,this.updatedAtUtc});
+    OwnPushDeviceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        provider = json['provider'] ?? "";
+        token = json['token'] ?? "";
+        platform = json['platform'];
+        osName = json['osName'];
+        osVersion = json['osVersion'];
+        appVersion = json['appVersion'];
+        deviceName = json['deviceName'];
+        modelName = json['modelName'];
+        brand = json['brand'];
+        installationId = json['installationId'];
+        locale = json['locale'];
+        timeZone = json['timeZone'];
+        updatedAtUtc = JsonConverters.fromJson(json['updatedAtUtc'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'provider': provider,
+        'token': token,
+        'platform': platform,
+        'osName': osName,
+        'osVersion': osVersion,
+        'appVersion': appVersion,
+        'deviceName': deviceName,
+        'modelName': modelName,
+        'brand': brand,
+        'installationId': installationId,
+        'locale': locale,
+        'timeZone': timeZone,
+        'updatedAtUtc': JsonConverters.toJson(updatedAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "OwnPushDeviceDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class OwnPushMessageDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String campaignId = "";
+
+    // @DataMember
+    String? title;
+
+    // @DataMember
+    String? body;
+
+    // @DataMember
+    DateTime? sentAtUtc;
+
+    // @DataMember
+    bool? isRead;
+
+    // @DataMember
+    DateTime? readAtUtc;
+
+    OwnPushMessageDto({this.id="",this.campaignId="",this.title,this.body,this.sentAtUtc,this.isRead,this.readAtUtc});
+    OwnPushMessageDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        campaignId = json['campaignId'] ?? "";
+        title = json['title'];
+        body = json['body'];
+        sentAtUtc = JsonConverters.fromJson(json['sentAtUtc'],'DateTime',context!);
+        isRead = json['isRead'];
+        readAtUtc = JsonConverters.fromJson(json['readAtUtc'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'campaignId': campaignId,
+        'title': title,
+        'body': body,
+        'sentAtUtc': JsonConverters.toJson(sentAtUtc,'DateTime',context!),
+        'isRead': isRead,
+        'readAtUtc': JsonConverters.toJson(readAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "OwnPushMessageDto";
+    TypeContext? context = _ctx;
+}
+
 abstract class IBindableContract
 {
 }
@@ -2131,595 +2284,16 @@ abstract class ICursorArgs
     int order = 0;
 }
 
-class StringFieldDto extends JsonSchemaFieldDto implements IConvertible
+abstract class IQueuedTrigger
 {
-    // @DataMember
-    String? format;
-
-    // @DataMember
-    String? pattern;
-
-    // @DataMember
-    int? minLength;
-
-    // @DataMember
-    int? maxLength;
-
-    // @DataMember
-    IReadOnlyDictionary<String,String>? translateOptions;
-
-    // @DataMember
-    String? Default;
-
-    // @DataMember
-    bool? unique;
-
-    StringFieldDto({this.format,this.pattern,this.minLength,this.maxLength,this.translateOptions,this.Default,this.unique});
-    StringFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        format = json['format'];
-        pattern = json['pattern'];
-        minLength = json['minLength'];
-        maxLength = json['maxLength'];
-        translateOptions = JsonConverters.fromJson(json['translateOptions'],'IReadOnlyDictionary<String,String>',context!);
-        Default = json['default'];
-        unique = json['unique'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'format': format,
-        'pattern': pattern,
-        'minLength': minLength,
-        'maxLength': maxLength,
-        'translateOptions': JsonConverters.toJson(translateOptions,'IReadOnlyDictionary<String,String>',context!),
-        'default': Default,
-        'unique': unique
-    });
-
-    getTypeName() => "StringFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class DecimalFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    double? minimum;
-
-    // @DataMember
-    double? maximum;
-
-    // @DataMember
-    double? multipleOf;
-
-    // @DataMember
-    double? Default;
-
-    // @DataMember
-    bool? unique;
-
-    DecimalFieldDto({this.minimum,this.maximum,this.multipleOf,this.Default,this.unique});
-    DecimalFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        minimum = JsonConverters.toDouble(json['minimum']);
-        maximum = JsonConverters.toDouble(json['maximum']);
-        multipleOf = JsonConverters.toDouble(json['multipleOf']);
-        Default = JsonConverters.toDouble(json['default']);
-        unique = json['unique'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'minimum': minimum,
-        'maximum': maximum,
-        'multipleOf': multipleOf,
-        'default': Default,
-        'unique': unique
-    });
-
-    getTypeName() => "DecimalFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class CurrencyDefaultDto implements IConvertible
-{
-    // @DataMember
-    double value = 0;
-
-    // @DataMember
-    String currency = "";
-
-    CurrencyDefaultDto({this.value=0,this.currency=""});
-    CurrencyDefaultDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        value = JsonConverters.toDouble(json['value']) ?? 0;
-        currency = json['currency'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'value': value,
-        'currency': currency
-    };
-
-    getTypeName() => "CurrencyDefaultDto";
-    TypeContext? context = _ctx;
-}
-
-class CurrencyFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    IReadOnlyList<String>? allowedCurrencies;
-
-    // @DataMember
-    double? multipleOf;
-
-    // @DataMember
-    double? minimum;
-
-    // @DataMember
-    double? maximum;
-
-    // @DataMember
-    CurrencyDefaultDto? Default;
-
-    CurrencyFieldDto({this.allowedCurrencies,this.multipleOf,this.minimum,this.maximum,this.Default});
-    CurrencyFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        allowedCurrencies = JsonConverters.fromJson(json['allowedCurrencies'],'IReadOnlyList<String>',context!);
-        multipleOf = JsonConverters.toDouble(json['multipleOf']);
-        minimum = JsonConverters.toDouble(json['minimum']);
-        maximum = JsonConverters.toDouble(json['maximum']);
-        Default = JsonConverters.fromJson(json['default'],'CurrencyDefaultDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'allowedCurrencies': JsonConverters.toJson(allowedCurrencies,'IReadOnlyList<String>',context!),
-        'multipleOf': multipleOf,
-        'minimum': minimum,
-        'maximum': maximum,
-        'default': JsonConverters.toJson(Default,'CurrencyDefaultDto',context!)
-    });
-
-    getTypeName() => "CurrencyFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class BooleanFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    bool? Default;
-
-    BooleanFieldDto({this.Default});
-    BooleanFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        Default = json['default'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'default': Default
-    });
-
-    getTypeName() => "BooleanFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class DateFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    int? minimum;
-
-    // @DataMember
-    int? maximum;
-
-    // @DataMember
-    int? Default;
-
-    DateFieldDto({this.minimum,this.maximum,this.Default});
-    DateFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        minimum = json['minimum'];
-        maximum = json['maximum'];
-        Default = json['default'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'minimum': minimum,
-        'maximum': maximum,
-        'default': Default
-    });
-
-    getTypeName() => "DateFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class IntegerFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    int? minimum;
-
-    // @DataMember
-    int? maximum;
-
-    // @DataMember
-    int? Default;
-
-    // @DataMember
-    bool? unique;
-
-    IntegerFieldDto({this.minimum,this.maximum,this.Default,this.unique});
-    IntegerFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        minimum = json['minimum'];
-        maximum = json['maximum'];
-        Default = json['default'];
-        unique = json['unique'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'minimum': minimum,
-        'maximum': maximum,
-        'default': Default,
-        'unique': unique
-    });
-
-    getTypeName() => "IntegerFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class GeolocationFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    IReadOnlyList<String>? allowedTypes;
-
-    GeolocationFieldDto({this.allowedTypes});
-    GeolocationFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        allowedTypes = JsonConverters.fromJson(json['allowedTypes'],'IReadOnlyList<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'allowedTypes': JsonConverters.toJson(allowedTypes,'IReadOnlyList<String>',context!)
-    });
-
-    getTypeName() => "GeolocationFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class TagsFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    int? minItems;
-
-    // @DataMember
-    int? maxItems;
-
-    // @DataMember
-    IReadOnlyList<String>? Default;
-
-    TagsFieldDto({this.minItems,this.maxItems,this.Default});
-    TagsFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        minItems = json['minItems'];
-        maxItems = json['maxItems'];
-        Default = JsonConverters.fromJson(json['default'],'IReadOnlyList<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'minItems': minItems,
-        'maxItems': maxItems,
-        'default': JsonConverters.toJson(Default,'IReadOnlyList<String>',context!)
-    });
-
-    getTypeName() => "TagsFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class FileFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    IReadOnlyList<String>? storages;
-
-    // @DataMember
-    int? minItems;
-
-    // @DataMember
-    int? maxItems;
-
-    // @DataMember
-    String? allowedFileType;
-
-    // @DataMember
-    double? maxSizeMb;
-
-    FileFieldDto({this.storages,this.minItems,this.maxItems,this.allowedFileType,this.maxSizeMb});
-    FileFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        storages = JsonConverters.fromJson(json['storages'],'IReadOnlyList<String>',context!);
-        minItems = json['minItems'];
-        maxItems = json['maxItems'];
-        allowedFileType = json['allowedFileType'];
-        maxSizeMb = JsonConverters.toDouble(json['maxSizeMb']);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'storages': JsonConverters.toJson(storages,'IReadOnlyList<String>',context!),
-        'minItems': minItems,
-        'maxItems': maxItems,
-        'allowedFileType': allowedFileType,
-        'maxSizeMb': maxSizeMb
-    });
-
-    getTypeName() => "FileFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class TaxonomySelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    String? taxonomyId;
-
-    // @DataMember
-    bool? multiple;
-
-    // @DataMember
-    String? displayField;
-
-    TaxonomySelectionFieldDto({this.taxonomyId,this.multiple,this.displayField});
-    TaxonomySelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        taxonomyId = json['taxonomyId'];
-        multiple = json['multiple'];
-        displayField = json['displayField'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'taxonomyId': taxonomyId,
-        'multiple': multiple,
-        'displayField': displayField
-    });
-
-    getTypeName() => "TaxonomySelectionFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class CollectionSelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    String? collectionId;
-
-    // @DataMember
-    String? displayField;
-
-    // @DataMember
-    bool? multiple;
-
-    CollectionSelectionFieldDto({this.collectionId,this.displayField,this.multiple});
-    CollectionSelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        collectionId = json['collectionId'];
-        displayField = json['displayField'];
-        multiple = json['multiple'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'collectionId': collectionId,
-        'displayField': displayField,
-        'multiple': multiple
-    });
-
-    getTypeName() => "CollectionSelectionFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class UserSelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    bool? multiple;
-
-    // @DataMember
-    String? displayField;
-
-    UserSelectionFieldDto({this.multiple,this.displayField});
-    UserSelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        multiple = json['multiple'];
-        displayField = json['displayField'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'multiple': multiple,
-        'displayField': displayField
-    });
-
-    getTypeName() => "UserSelectionFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class RoleSelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    bool? multiple;
-
-    // @DataMember
-    String? displayField;
-
-    RoleSelectionFieldDto({this.multiple,this.displayField});
-    RoleSelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        multiple = json['multiple'];
-        displayField = json['displayField'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'multiple': multiple,
-        'displayField': displayField
-    });
-
-    getTypeName() => "RoleSelectionFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class EnumSelectionFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    IReadOnlyList<String>? values;
-
-    // @DataMember
-    bool? multiple;
-
-    // @DataMember
-    IReadOnlyList<String>? Default;
-
-    EnumSelectionFieldDto({this.values,this.multiple,this.Default});
-    EnumSelectionFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        values = JsonConverters.fromJson(json['values'],'IReadOnlyList<String>',context!);
-        multiple = json['multiple'];
-        Default = JsonConverters.fromJson(json['default'],'IReadOnlyList<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'values': JsonConverters.toJson(values,'IReadOnlyList<String>',context!),
-        'multiple': multiple,
-        'default': JsonConverters.toJson(Default,'IReadOnlyList<String>',context!)
-    });
-
-    getTypeName() => "EnumSelectionFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class ObjectFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    IReadOnlyList<JsonSchemaFieldDto>? properties;
-
-    // @DataMember
-    IReadOnlyList<String>? Required;
-
-    ObjectFieldDto({this.properties,this.Required});
-    ObjectFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        properties = JsonConverters.fromJson(json['properties'],'IReadOnlyList<JsonSchemaFieldDto>',context!);
-        Required = JsonConverters.fromJson(json['required'],'IReadOnlyList<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'properties': JsonConverters.toJson(properties,'IReadOnlyList<JsonSchemaFieldDto>',context!),
-        'required': JsonConverters.toJson(Required,'IReadOnlyList<String>',context!)
-    });
-
-    getTypeName() => "ObjectFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class ArrayFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    JsonSchemaFieldDto? items;
-
-    // @DataMember
-    int? minItems;
-
-    // @DataMember
-    int? maxItems;
-
-    // @DataMember
-    bool? uniqueItems;
-
-    ArrayFieldDto({this.items,this.minItems,this.maxItems,this.uniqueItems});
-    ArrayFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        items = JsonConverters.fromJson(json['items'],'JsonSchemaFieldDto',context!);
-        minItems = json['minItems'];
-        maxItems = json['maxItems'];
-        uniqueItems = json['uniqueItems'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'items': JsonConverters.toJson(items,'JsonSchemaFieldDto',context!),
-        'minItems': minItems,
-        'maxItems': maxItems,
-        'uniqueItems': uniqueItems
-    });
-
-    getTypeName() => "ArrayFieldDto";
-    TypeContext? context = _ctx;
-}
-
-class JsonFieldDto extends JsonSchemaFieldDto implements IConvertible
-{
-    // @DataMember
-    int? maxBytes;
-
-    JsonFieldDto({this.maxBytes});
-    JsonFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        maxBytes = json['maxBytes'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'maxBytes': maxBytes
-    });
-
-    getTypeName() => "JsonFieldDto";
-    TypeContext? context = _ctx;
+    String viewId = "";
+    String name = "";
+    int? order;
+    bool? breakOnError;
 }
 
 class EchoResponse implements IConvertible
 {
-    String? containerName;
-    String ip = "";
     CodeMashRelease? release;
     CodeMashRuntime? runtime;
     String managedServiceHubUrl = "";
@@ -2728,26 +2302,17 @@ class EchoResponse implements IConvertible
     String apiUrl = "";
     String apiVersion = "";
     String hubVersion = "";
-    String mjmlUrl = "";
     String? adminUrlTemplate;
-    EchoLicenseDto? license;
-    String? askForEnterpriseLicenseEmail;
     bool? emailServiceConfigured;
     String? rootBootstrapPasswordSource;
     List<EchoRegionDto>? regions;
-    bool? isProductionInstallation;
-    String licensingMode = "";
-    int? graceDaysLeft;
-    String? installationDomain;
-    String? licensingDocsUrl;
     EchoAgentDto? agent;
+    EchoHostingPlatformDto? hostingPlatform;
 
-    EchoResponse({this.containerName,this.ip="",this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.mjmlUrl="",this.adminUrlTemplate,this.license,this.askForEnterpriseLicenseEmail,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.isProductionInstallation,this.licensingMode="",this.graceDaysLeft,this.installationDomain,this.licensingDocsUrl,this.agent});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        containerName = json['containerName'];
-        ip = json['ip'] ?? "";
         release = JsonConverters.fromJson(json['release'],'CodeMashRelease',context!);
         runtime = JsonConverters.fromJson(json['runtime'],'CodeMashRuntime',context!);
         managedServiceHubUrl = json['managedServiceHubUrl'] ?? "";
@@ -2756,25 +2321,16 @@ class EchoResponse implements IConvertible
         apiUrl = json['apiUrl'] ?? "";
         apiVersion = json['apiVersion'] ?? "";
         hubVersion = json['hubVersion'] ?? "";
-        mjmlUrl = json['mjmlUrl'] ?? "";
         adminUrlTemplate = json['adminUrlTemplate'];
-        license = JsonConverters.fromJson(json['license'],'EchoLicenseDto',context!);
-        askForEnterpriseLicenseEmail = json['askForEnterpriseLicenseEmail'];
         emailServiceConfigured = json['emailServiceConfigured'];
         rootBootstrapPasswordSource = json['rootBootstrapPasswordSource'];
         regions = JsonConverters.fromJson(json['regions'],'List<EchoRegionDto>',context!);
-        isProductionInstallation = json['isProductionInstallation'];
-        licensingMode = json['licensingMode'] ?? "";
-        graceDaysLeft = json['graceDaysLeft'];
-        installationDomain = json['installationDomain'];
-        licensingDocsUrl = json['licensingDocsUrl'];
         agent = JsonConverters.fromJson(json['agent'],'EchoAgentDto',context!);
+        hostingPlatform = JsonConverters.fromJson(json['hostingPlatform'],'EchoHostingPlatformDto',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'containerName': containerName,
-        'ip': ip,
         'release': JsonConverters.toJson(release,'CodeMashRelease',context!),
         'runtime': JsonConverters.toJson(runtime,'CodeMashRuntime',context!),
         'managedServiceHubUrl': managedServiceHubUrl,
@@ -2783,19 +2339,12 @@ class EchoResponse implements IConvertible
         'apiUrl': apiUrl,
         'apiVersion': apiVersion,
         'hubVersion': hubVersion,
-        'mjmlUrl': mjmlUrl,
         'adminUrlTemplate': adminUrlTemplate,
-        'license': JsonConverters.toJson(license,'EchoLicenseDto',context!),
-        'askForEnterpriseLicenseEmail': askForEnterpriseLicenseEmail,
         'emailServiceConfigured': emailServiceConfigured,
         'rootBootstrapPasswordSource': rootBootstrapPasswordSource,
         'regions': JsonConverters.toJson(regions,'List<EchoRegionDto>',context!),
-        'isProductionInstallation': isProductionInstallation,
-        'licensingMode': licensingMode,
-        'graceDaysLeft': graceDaysLeft,
-        'installationDomain': installationDomain,
-        'licensingDocsUrl': licensingDocsUrl,
-        'agent': JsonConverters.toJson(agent,'EchoAgentDto',context!)
+        'agent': JsonConverters.toJson(agent,'EchoAgentDto',context!),
+        'hostingPlatform': JsonConverters.toJson(hostingPlatform,'EchoHostingPlatformDto',context!)
     };
 
     getTypeName() => "EchoResponse";
@@ -3701,6 +3250,48 @@ class TestFilesIntegrationResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "TestFilesIntegrationResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetOwnPushDevicesResponse extends ResponseBase implements IConvertible
+{
+    List<OwnPushDeviceDto> items = [];
+
+    GetOwnPushDevicesResponse({this.items=const []});
+    GetOwnPushDevicesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        items = JsonConverters.fromJson(json['items'],'List<OwnPushDeviceDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'items': JsonConverters.toJson(items,'List<OwnPushDeviceDto>',context!)
+    });
+
+    getTypeName() => "GetOwnPushDevicesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetOwnPushMessagesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<OwnPushMessageDto>? list;
+
+    GetOwnPushMessagesResponse({this.list});
+    GetOwnPushMessagesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<OwnPushMessageDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<OwnPushMessageDto>',context!)
+    });
+
+    getTypeName() => "GetOwnPushMessagesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -6013,23 +5604,32 @@ class PasskeyLogoutRequest extends CodeMashRequestBase implements IReturn<Passke
 // @DataContract
 class FindMergedTermTreeRequest extends CodeMashRequestBase implements IReturn<FindMergedTermTreeResponse>, IConvertible, IGet
 {
+    /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
     // @DataMember
     String taxonomyName = "";
 
     // @DataMember
     String? databaseIntegrationId;
 
-    FindMergedTermTreeRequest({this.taxonomyName="",this.databaseIntegrationId});
+    FindMergedTermTreeRequest({this.allLanguages,this.taxonomyName="",this.databaseIntegrationId});
     FindMergedTermTreeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         taxonomyName = json['taxonomyName'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'taxonomyName': taxonomyName,
         'databaseIntegrationId': databaseIntegrationId
     });
@@ -6048,23 +5648,32 @@ class FindMergedTermTreeRequest extends CodeMashRequestBase implements IReturn<F
 // @DataContract
 class FindTaxonomyTreeRequest extends CodeMashRequestBase implements IReturn<FindTaxonomyTreeResponse>, IConvertible, IGet
 {
+    /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
     // @DataMember
     bool? includeTerms;
 
     // @DataMember
     String? databaseIntegrationId;
 
-    FindTaxonomyTreeRequest({this.includeTerms,this.databaseIntegrationId});
+    FindTaxonomyTreeRequest({this.allLanguages,this.includeTerms,this.databaseIntegrationId});
     FindTaxonomyTreeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         includeTerms = json['includeTerms'];
         databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'includeTerms': includeTerms,
         'databaseIntegrationId': databaseIntegrationId
     });
@@ -6083,6 +5692,13 @@ class FindTaxonomyTreeRequest extends CodeMashRequestBase implements IReturn<Fin
 // @DataContract
 class FindTermsRequest extends CodeMashListPaginationRequestBase implements IReturn<FindTermsResponse>, IConvertible, IGet
 {
+    /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
     // @DataMember
     String taxonomyName = "";
 
@@ -6098,11 +5714,12 @@ class FindTermsRequest extends CodeMashListPaginationRequestBase implements IRet
     // @DataMember
     PagingArgs? pagingArgs;
 
-    FindTermsRequest({this.taxonomyName="",this.databaseIntegrationId,this.filter,this.sortDescending,this.pagingArgs});
+    FindTermsRequest({this.allLanguages,this.taxonomyName="",this.databaseIntegrationId,this.filter,this.sortDescending,this.pagingArgs});
     FindTermsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         taxonomyName = json['taxonomyName'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         filter = json['filter'];
@@ -6112,6 +5729,7 @@ class FindTermsRequest extends CodeMashListPaginationRequestBase implements IRet
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'taxonomyName': taxonomyName,
         'databaseIntegrationId': databaseIntegrationId,
         'filter': filter,
@@ -6133,6 +5751,13 @@ class FindTermsRequest extends CodeMashListPaginationRequestBase implements IRet
 // @DataContract
 class FindTermsChildrenRequest extends CodeMashListPaginationRequestBase implements IReturn<FindTermsChildrenResponse>, IConvertible, IGet
 {
+    /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
     // @DataMember
     String taxonomyName = "";
 
@@ -6148,11 +5773,12 @@ class FindTermsChildrenRequest extends CodeMashListPaginationRequestBase impleme
     // @DataMember
     PagingArgs? pagingArgs;
 
-    FindTermsChildrenRequest({this.taxonomyName="",this.parentId="",this.databaseIntegrationId,this.filter,this.pagingArgs});
+    FindTermsChildrenRequest({this.allLanguages,this.taxonomyName="",this.parentId="",this.databaseIntegrationId,this.filter,this.pagingArgs});
     FindTermsChildrenRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         taxonomyName = json['taxonomyName'] ?? "";
         parentId = json['parentId'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
@@ -6162,6 +5788,7 @@ class FindTermsChildrenRequest extends CodeMashListPaginationRequestBase impleme
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'taxonomyName': taxonomyName,
         'parentId': parentId,
         'databaseIntegrationId': databaseIntegrationId,
@@ -6183,6 +5810,13 @@ class FindTermsChildrenRequest extends CodeMashListPaginationRequestBase impleme
 // @DataContract
 class FindTermTreeRequest extends CodeMashRequestBase implements IReturn<FindTermTreeResponse>, IConvertible, IGet
 {
+    /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
     // @DataMember
     String taxonomyName = "";
 
@@ -6195,11 +5829,12 @@ class FindTermTreeRequest extends CodeMashRequestBase implements IReturn<FindTer
     // @DataMember
     String? databaseIntegrationId;
 
-    FindTermTreeRequest({this.taxonomyName="",this.rootTermId,this.depth,this.databaseIntegrationId});
+    FindTermTreeRequest({this.allLanguages,this.taxonomyName="",this.rootTermId,this.depth,this.databaseIntegrationId});
     FindTermTreeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         taxonomyName = json['taxonomyName'] ?? "";
         rootTermId = json['rootTermId'];
         depth = json['depth'];
@@ -6208,6 +5843,7 @@ class FindTermTreeRequest extends CodeMashRequestBase implements IReturn<FindTer
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'taxonomyName': taxonomyName,
         'rootTermId': rootTermId,
         'depth': depth,
@@ -6622,7 +6258,10 @@ class FindRequest extends CodeMashListPaginationRequestBase implements IReturn<F
     // @DataMember
     bool? expandReferences;
 
-    FindRequest({this.collectionName="",this.databaseIntegrationId,this.filter,this.schemaVersion,this.pagingArgs,this.sortBy,this.sortOrder,this.expandReferences});
+    // @DataMember
+    bool? allLanguages;
+
+    FindRequest({this.collectionName="",this.databaseIntegrationId,this.filter,this.schemaVersion,this.pagingArgs,this.sortBy,this.sortOrder,this.expandReferences,this.allLanguages});
     FindRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -6635,6 +6274,7 @@ class FindRequest extends CodeMashListPaginationRequestBase implements IReturn<F
         sortBy = json['sortBy'];
         sortOrder = json['sortOrder'];
         expandReferences = json['expandReferences'];
+        allLanguages = json['allLanguages'];
         return this;
     }
 
@@ -6646,7 +6286,8 @@ class FindRequest extends CodeMashListPaginationRequestBase implements IReturn<F
         'pagingArgs': JsonConverters.toJson(pagingArgs,'PagingArgs',context!),
         'sortBy': sortBy,
         'sortOrder': sortOrder,
-        'expandReferences': expandReferences
+        'expandReferences': expandReferences,
+        'allLanguages': allLanguages
     });
 
     createResponse() => FindResponse();
@@ -6675,7 +6316,10 @@ class FindOneRequest extends CodeMashRequestBase implements IReturn<FindOneRespo
     // @DataMember
     bool? expandReferences;
 
-    FindOneRequest({this.collectionName="",this.id="",this.databaseIntegrationId,this.expandReferences});
+    // @DataMember
+    bool? allLanguages;
+
+    FindOneRequest({this.collectionName="",this.id="",this.databaseIntegrationId,this.expandReferences,this.allLanguages});
     FindOneRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -6684,6 +6328,7 @@ class FindOneRequest extends CodeMashRequestBase implements IReturn<FindOneRespo
         id = json['id'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         expandReferences = json['expandReferences'];
+        allLanguages = json['allLanguages'];
         return this;
     }
 
@@ -6691,7 +6336,8 @@ class FindOneRequest extends CodeMashRequestBase implements IReturn<FindOneRespo
         'collectionName': collectionName,
         'id': id,
         'databaseIntegrationId': databaseIntegrationId,
-        'expandReferences': expandReferences
+        'expandReferences': expandReferences,
+        'allLanguages': allLanguages
     });
 
     createResponse() => FindOneResponse();
@@ -6730,7 +6376,10 @@ class FindOwnRequest extends CodeMashListPaginationRequestBase implements IRetur
     // @ApiMember(Description="Set true to get every reference value as { id, display } (display = the target's displayField per the schema; null when the target is gone). Needs read permission on every source the schema links to (users, roles, taxonomy, collection, files) — otherwise the read is refused with CM-ERRORS-DATABASE-056 naming the source. Default false returns the stored ids.")
     bool? expandReferences;
 
-    FindOwnRequest({this.collectionName="",this.databaseIntegrationId,this.filter,this.schemaVersion,this.pagingArgs,this.expandReferences});
+    // @DataMember
+    bool? allLanguages;
+
+    FindOwnRequest({this.collectionName="",this.databaseIntegrationId,this.filter,this.schemaVersion,this.pagingArgs,this.expandReferences,this.allLanguages});
     FindOwnRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -6741,6 +6390,7 @@ class FindOwnRequest extends CodeMashListPaginationRequestBase implements IRetur
         schemaVersion = json['schemaVersion'];
         pagingArgs = JsonConverters.fromJson(json['pagingArgs'],'PagingArgs',context!);
         expandReferences = json['expandReferences'];
+        allLanguages = json['allLanguages'];
         return this;
     }
 
@@ -6750,7 +6400,8 @@ class FindOwnRequest extends CodeMashListPaginationRequestBase implements IRetur
         'filter': filter,
         'schemaVersion': schemaVersion,
         'pagingArgs': JsonConverters.toJson(pagingArgs,'PagingArgs',context!),
-        'expandReferences': expandReferences
+        'expandReferences': expandReferences,
+        'allLanguages': allLanguages
     });
 
     createResponse() => FindResponse();
@@ -7479,9 +7130,331 @@ class TestFilesIntegrationRequest extends CodeMashRequestBase implements IReturn
     TypeContext? context = _ctx;
 }
 
+/**
+* Files
+*/
+// @Route("/{version}/files/{filesIntegrationId}/use", "POST")
+// @Api(Description="Files")
+// @DataContract
+class UseFileRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String filesIntegrationId = "";
+
+    // @DataMember
+    String path = "";
+
+    UseFileRequest({this.filesIntegrationId="",this.path=""});
+    UseFileRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "UseFileRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Registers or refreshes a push device for the signed-in user.
+*/
+// @Route("/{version}/notifications/push/devices", "POST")
+// @Api(Description="Registers or refreshes a push device for the signed-in user.")
+class RegisterOwnPushDeviceRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * Who issued the token: expo (getExpoPushTokenAsync), fcm (Android / Firebase) or apns (iOS).
+    */
+    // @ApiMember(Description="Who issued the token: expo (getExpoPushTokenAsync), fcm (Android / Firebase) or apns (iOS).", IsRequired=true)
+    String provider = "";
+
+    /**
+    * The push token, exactly as the provider gave it.
+    */
+    // @ApiMember(Description="The push token, exactly as the provider gave it.", IsRequired=true)
+    String token = "";
+
+    /**
+    * The app's platform: ios, android or web.
+    */
+    // @ApiMember(Description="The app's platform: ios, android or web.")
+    String? platform;
+
+    /**
+    * Operating system name, e.g. iOS.
+    */
+    // @ApiMember(Description="Operating system name, e.g. iOS.")
+    String? osName;
+
+    /**
+    * Operating system version, e.g. 18.1.
+    */
+    // @ApiMember(Description="Operating system version, e.g. 18.1.")
+    String? osVersion;
+
+    /**
+    * The app version, e.g. 2.4.1.
+    */
+    // @ApiMember(Description="The app version, e.g. 2.4.1.")
+    String? appVersion;
+
+    /**
+    * The device name the user sees, e.g. Anna's iPhone.
+    */
+    // @ApiMember(Description="The device name the user sees, e.g. Anna's iPhone.")
+    String? deviceName;
+
+    /**
+    * The device model, e.g. iPhone 15.
+    */
+    // @ApiMember(Description="The device model, e.g. iPhone 15.")
+    String? modelName;
+
+    String? brand;
+    String? manufacturer;
+    /**
+    * A stable id the app keeps for this installation (not the token).
+    */
+    // @ApiMember(Description="A stable id the app keeps for this installation (not the token).")
+    String? installationId;
+
+    /**
+    * The device locale, e.g. lt-LT.
+    */
+    // @ApiMember(Description="The device locale, e.g. lt-LT.")
+    String? locale;
+
+    /**
+    * The device time zone (IANA), e.g. Europe/Vilnius.
+    */
+    // @ApiMember(Description="The device time zone (IANA), e.g. Europe/Vilnius.")
+    String? timeZone;
+
+    RegisterOwnPushDeviceRequest({this.provider="",this.token="",this.platform,this.osName,this.osVersion,this.appVersion,this.deviceName,this.modelName,this.brand,this.manufacturer,this.installationId,this.locale,this.timeZone});
+    RegisterOwnPushDeviceRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = json['provider'] ?? "";
+        token = json['token'] ?? "";
+        platform = json['platform'];
+        osName = json['osName'];
+        osVersion = json['osVersion'];
+        appVersion = json['appVersion'];
+        deviceName = json['deviceName'];
+        modelName = json['modelName'];
+        brand = json['brand'];
+        manufacturer = json['manufacturer'];
+        installationId = json['installationId'];
+        locale = json['locale'];
+        timeZone = json['timeZone'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': provider,
+        'token': token,
+        'platform': platform,
+        'osName': osName,
+        'osVersion': osVersion,
+        'appVersion': appVersion,
+        'deviceName': deviceName,
+        'modelName': modelName,
+        'brand': brand,
+        'manufacturer': manufacturer,
+        'installationId': installationId,
+        'locale': locale,
+        'timeZone': timeZone
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "RegisterOwnPushDeviceRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists the signed-in user's own push devices.
+*/
+// @Route("/{version}/notifications/push/devices", "GET")
+// @Api(Description="Lists the signed-in user's own push devices.")
+class GetOwnPushDevicesRequest extends CodeMashRequestBase implements IReturn<GetOwnPushDevicesResponse>, IConvertible, IGet
+{
+    GetOwnPushDevicesRequest();
+    GetOwnPushDevicesRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetOwnPushDevicesResponse();
+    getResponseTypeName() => "GetOwnPushDevicesResponse";
+    getTypeName() => "GetOwnPushDevicesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Removes one of the signed-in user's own push devices by id.
+*/
+// @Route("/{version}/notifications/push/devices/{Id}", "DELETE")
+// @Api(Description="Removes one of the signed-in user's own push devices by id.")
+class DeleteOwnPushDeviceRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * The device id (pnd_…) from the devices list or the register answer.
+    */
+    // @ApiMember(Description="The device id (pnd_…) from the devices list or the register answer.", IsRequired=true)
+    String id = "";
+
+    DeleteOwnPushDeviceRequest({this.id=""});
+    DeleteOwnPushDeviceRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteOwnPushDeviceRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Removes the signed-in user's push device registered with a token (sign-out).
+*/
+// @Route("/{version}/notifications/push/devices", "DELETE")
+// @Api(Description="Removes the signed-in user's push device registered with a token (sign-out).")
+class DeleteOwnPushDeviceByTokenRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * The push token the device was registered with.
+    */
+    // @ApiMember(Description="The push token the device was registered with.", IsRequired=true)
+    String token = "";
+
+    DeleteOwnPushDeviceByTokenRequest({this.token=""});
+    DeleteOwnPushDeviceByTokenRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        token = json['token'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'token': token
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteOwnPushDeviceByTokenRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists the push messages sent to the signed-in user.
+*/
+// @Route("/{version}/notifications/push/messages", "GET")
+// @Api(Description="Lists the push messages sent to the signed-in user.")
+class GetOwnPushMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetOwnPushMessagesResponse>, IConvertible, IGet
+{
+    /**
+    * Only messages the caller has not marked read.
+    */
+    // @ApiMember(Description="Only messages the caller has not marked read.")
+    bool? unreadOnly;
+
+    GetOwnPushMessagesRequest({this.unreadOnly});
+    GetOwnPushMessagesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        unreadOnly = json['unreadOnly'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'unreadOnly': unreadOnly
+    });
+
+    createResponse() => GetOwnPushMessagesResponse();
+    getResponseTypeName() => "GetOwnPushMessagesResponse";
+    getTypeName() => "GetOwnPushMessagesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Marks one push message sent to the signed-in user read.
+*/
+// @Route("/{version}/notifications/push/messages/{Id}/read", "POST")
+// @Api(Description="Marks one push message sent to the signed-in user read.")
+class MarkOwnPushMessageReadRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The message id (ntf_…) from the messages list.
+    */
+    // @ApiMember(Description="The message id (ntf_…) from the messages list.", IsRequired=true)
+    String id = "";
+
+    MarkOwnPushMessageReadRequest({this.id=""});
+    MarkOwnPushMessageReadRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "MarkOwnPushMessageReadRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Marks every push message sent to the signed-in user read.
+*/
+// @Route("/{version}/notifications/push/messages/read", "POST")
+// @Api(Description="Marks every push message sent to the signed-in user read.")
+class MarkAllOwnPushMessagesReadRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    MarkAllOwnPushMessagesReadRequest();
+    MarkAllOwnPushMessagesReadRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "MarkAllOwnPushMessagesReadRequest";
+    TypeContext? context = _ctx;
+}
+
 TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RequestBase': TypeInfo(TypeOf.Class, create:() => RequestBase()),
-    'ICultureBasedRequest': TypeInfo(TypeOf.Interface),
     'IVersionBasedRequest': TypeInfo(TypeOf.Interface),
     'IHasCorrelationIdRequest': TypeInfo(TypeOf.Interface),
     'CodeMashRequestBase': TypeInfo(TypeOf.Class, create:() => CodeMashRequestBase()),
@@ -7501,9 +7474,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PagingArgs': TypeInfo(TypeOf.Class, create:() => PagingArgs()),
     'CodeMashRelease': TypeInfo(TypeOf.Enum, enumValues:CodeMashRelease.values),
     'CodeMashRuntime': TypeInfo(TypeOf.Enum, enumValues:CodeMashRuntime.values),
-    'EchoLicenseDto': TypeInfo(TypeOf.Class, create:() => EchoLicenseDto()),
     'EchoRegionDto': TypeInfo(TypeOf.Class, create:() => EchoRegionDto()),
+    'EchoAgentSnippetDto': TypeInfo(TypeOf.Class, create:() => EchoAgentSnippetDto()),
     'EchoAgentDto': TypeInfo(TypeOf.Class, create:() => EchoAgentDto()),
+    'List<EchoAgentSnippetDto>': TypeInfo(TypeOf.Class, create:() => <EchoAgentSnippetDto>[]),
+    'EchoHostingPlatformDto': TypeInfo(TypeOf.Class, create:() => EchoHostingPlatformDto()),
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
@@ -7559,29 +7534,12 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PublicFolderDto': TypeInfo(TypeOf.Class, create:() => PublicFolderDto()),
     'IntegrationTestResultItemDto': TypeInfo(TypeOf.Class, create:() => IntegrationTestResultItemDto()),
     'IReadOnlyList<String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<String>()),
+    'OwnPushDeviceDto': TypeInfo(TypeOf.Class, create:() => OwnPushDeviceDto()),
+    'OwnPushMessageDto': TypeInfo(TypeOf.Class, create:() => OwnPushMessageDto()),
     'IBindableContract': TypeInfo(TypeOf.Interface),
     'IHasViewId': TypeInfo(TypeOf.Interface),
     'ICursorArgs': TypeInfo(TypeOf.Interface),
-    'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
-    'IReadOnlyDictionary<String,String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyDictionary<String,String>()),
-    'DecimalFieldDto': TypeInfo(TypeOf.Class, create:() => DecimalFieldDto()),
-    'CurrencyDefaultDto': TypeInfo(TypeOf.Class, create:() => CurrencyDefaultDto()),
-    'CurrencyFieldDto': TypeInfo(TypeOf.Class, create:() => CurrencyFieldDto()),
-    'BooleanFieldDto': TypeInfo(TypeOf.Class, create:() => BooleanFieldDto()),
-    'DateFieldDto': TypeInfo(TypeOf.Class, create:() => DateFieldDto()),
-    'IntegerFieldDto': TypeInfo(TypeOf.Class, create:() => IntegerFieldDto()),
-    'GeolocationFieldDto': TypeInfo(TypeOf.Class, create:() => GeolocationFieldDto()),
-    'TagsFieldDto': TypeInfo(TypeOf.Class, create:() => TagsFieldDto()),
-    'FileFieldDto': TypeInfo(TypeOf.Class, create:() => FileFieldDto()),
-    'TaxonomySelectionFieldDto': TypeInfo(TypeOf.Class, create:() => TaxonomySelectionFieldDto()),
-    'CollectionSelectionFieldDto': TypeInfo(TypeOf.Class, create:() => CollectionSelectionFieldDto()),
-    'UserSelectionFieldDto': TypeInfo(TypeOf.Class, create:() => UserSelectionFieldDto()),
-    'RoleSelectionFieldDto': TypeInfo(TypeOf.Class, create:() => RoleSelectionFieldDto()),
-    'EnumSelectionFieldDto': TypeInfo(TypeOf.Class, create:() => EnumSelectionFieldDto()),
-    'ObjectFieldDto': TypeInfo(TypeOf.Class, create:() => ObjectFieldDto()),
-    'IReadOnlyList<JsonSchemaFieldDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<JsonSchemaFieldDto>()),
-    'ArrayFieldDto': TypeInfo(TypeOf.Class, create:() => ArrayFieldDto()),
-    'JsonFieldDto': TypeInfo(TypeOf.Class, create:() => JsonFieldDto()),
+    'IQueuedTrigger': TypeInfo(TypeOf.Interface),
     'EchoResponse': TypeInfo(TypeOf.Class, create:() => EchoResponse()),
     'List<EchoRegionDto>': TypeInfo(TypeOf.Class, create:() => <EchoRegionDto>[]),
     'PublicProjectConfigDto': TypeInfo(TypeOf.Class, create:() => PublicProjectConfigDto()),
@@ -7638,6 +7596,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RequestUploadUrlResponse': TypeInfo(TypeOf.Class, create:() => RequestUploadUrlResponse()),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
     'IReadOnlyList<IntegrationTestResultItemDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<IntegrationTestResultItemDto>()),
+    'GetOwnPushDevicesResponse': TypeInfo(TypeOf.Class, create:() => GetOwnPushDevicesResponse()),
+    'List<OwnPushDeviceDto>': TypeInfo(TypeOf.Class, create:() => <OwnPushDeviceDto>[]),
+    'GetOwnPushMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetOwnPushMessagesResponse()),
+    'PaginatedResponse<OwnPushMessageDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<OwnPushMessageDto>()),
     'Echo': TypeInfo(TypeOf.Class, create:() => Echo()),
     'GetPublicProjectBrandAsset': TypeInfo(TypeOf.Class, create:() => GetPublicProjectBrandAsset()),
     'GetPublicProjectConfig': TypeInfo(TypeOf.Class, create:() => GetPublicProjectConfig()),
@@ -7737,5 +7699,13 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPublicFileRequest': TypeInfo(TypeOf.Class, create:() => GetPublicFileRequest()),
     'RequestUploadUrlRequest': TypeInfo(TypeOf.Class, create:() => RequestUploadUrlRequest()),
     'TestFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationRequest()),
+    'UseFileRequest': TypeInfo(TypeOf.Class, create:() => UseFileRequest()),
+    'RegisterOwnPushDeviceRequest': TypeInfo(TypeOf.Class, create:() => RegisterOwnPushDeviceRequest()),
+    'GetOwnPushDevicesRequest': TypeInfo(TypeOf.Class, create:() => GetOwnPushDevicesRequest()),
+    'DeleteOwnPushDeviceRequest': TypeInfo(TypeOf.Class, create:() => DeleteOwnPushDeviceRequest()),
+    'DeleteOwnPushDeviceByTokenRequest': TypeInfo(TypeOf.Class, create:() => DeleteOwnPushDeviceByTokenRequest()),
+    'GetOwnPushMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetOwnPushMessagesRequest()),
+    'MarkOwnPushMessageReadRequest': TypeInfo(TypeOf.Class, create:() => MarkOwnPushMessageReadRequest()),
+    'MarkAllOwnPushMessagesReadRequest': TypeInfo(TypeOf.Class, create:() => MarkAllOwnPushMessagesReadRequest()),
 });
 
