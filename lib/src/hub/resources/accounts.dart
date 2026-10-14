@@ -89,7 +89,8 @@ class AccountsResource extends Resource {
   Future<Object?> getAccountRegions(
       {Map<String, Object?>? query,
       Map<String, String>? headers,
-      String? region}) {
+      String? region,
+      String? language}) {
     return transport.send(
       route: '/{version}/account/regions',
       method: 'GET',
@@ -97,6 +98,7 @@ class AccountsResource extends Resource {
       headers: headers,
       pathParams: null,
       region: region,
+      language: language,
     );
   }
 

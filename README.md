@@ -133,6 +133,37 @@ override sets the **header only**; the URL is not recomposed:
 await hub.accounts.getAccountRegions(region: 'nb-us-east');
 ```
 
+### Language
+
+Ask for responses in a language. The value is sent verbatim as the
+standard `Accept-Language` header — one tag (`lt`, `lt-LT`) or a
+q-weighted list (`lt-LT, en;q=0.8`). The gateway honours the q-values,
+falls back to the project default language when nothing matches, and
+reports the language it used in the `Content-Language` response header.
+**There is no default language**: when none is set, no header is sent.
+
+```dart
+// 1) At construction
+final hub = NorbixHub(language: 'lt');
+final api = NorbixApi(language: 'lt-LT, en;q=0.8');
+
+// 2) From environment variables
+final hub = NorbixHub.fromEnv();   // reads NORBIX_HUB_LANGUAGE
+final api = NorbixApi.fromEnv();   // reads NORBIX_API_LANGUAGE
+
+// 3) At runtime
+hub.setLanguage('en');             // subsequent requests ask for English
+print(hub.language);               // 'en'
+hub.setLanguage(null);             // clear — no header, project default
+
+// 4) Per call (wherever a per-call `region:` is accepted)
+await hub.accounts.getAccountRegions(language: 'de');
+```
+
+(`NorbixConfig.fromEnv` also takes a `languageVar:` name, default
+`NORBIX_LANGUAGE`.) The old `cultureCode` field and the `CultureCode` /
+`norbix-language` headers are gone from the gateway — use this option.
+
 ### Regions endpoints
 
 Regions live on the existing `accounts` and `projects` resources — there

@@ -60,13 +60,17 @@ class NorbixHub {
     Object? accountId,
     String? env,
     String? region,
+    String? language,
   }) : _transport = Transport(
-          config: _withRegion(
-            _withEnv(
-              config ?? NorbixConfig(baseUrl: kNorbixHubDefaultBaseUrl),
-              env,
+          config: _withLanguage(
+            _withRegion(
+              _withEnv(
+                config ?? NorbixConfig(baseUrl: kNorbixHubDefaultBaseUrl),
+                env,
+              ),
+              region,
             ),
-            region,
+            language,
           ),
           driver: driver,
           defaultPathParams: {'projectId': projectId, 'accountId': accountId},
@@ -84,6 +88,12 @@ class NorbixHub {
   static NorbixConfig _withRegion(NorbixConfig config, String? region) =>
       region == null ? config : config.copyWith(region: region);
 
+  /// Apply an optional `language` override on top of a config without losing
+  /// its other fields. When `language` is null the config's own value
+  /// (default none) is kept.
+  static NorbixConfig _withLanguage(NorbixConfig config, String? language) =>
+      language == null ? config : config.copyWith(language: language);
+
   /// Build a client that reads its base URL and credentials from
   /// environment variables. Falls back to the public host when the
   /// URL var is not set, so callers always get a usable client.
@@ -98,6 +108,7 @@ class NorbixHub {
   ///   NORBIX_HUB_PROJECT_ID
   ///   NORBIX_HUB_ACCOUNT_ID
   ///   NORBIX_HUB_REGION
+  ///   NORBIX_HUB_LANGUAGE        (sent as Accept-Language)
   factory NorbixHub.fromEnv({
     Map<String, String>? overrides,
     HttpDriver? driver,
@@ -118,6 +129,7 @@ class NorbixHub {
       maxRetriesVar: 'NORBIX_HUB_MAX_RETRIES',
       envVar: 'NORBIX_HUB_ENV',
       regionVar: 'NORBIX_HUB_REGION',
+      languageVar: 'NORBIX_HUB_LANGUAGE',
       overrides: overrides,
     );
     return NorbixHub(
@@ -168,6 +180,18 @@ class NorbixHub {
   /// for individual requests (header only).
   void setRegion(String? region) =>
       _transport.config = _transport.config.copyWith(region: region ?? '');
+
+  /// Preferred response language, sent as the `Accept-Language` header (a
+  /// tag like `lt` or a q-weighted list like `lt-LT, en;q=0.8`). Null (the
+  /// default) means no header: the gateway answers in the project default
+  /// language. The answered language comes back in `Content-Language`.
+  String? get language => _transport.config.language;
+
+  /// Switch the preferred language for subsequent requests. Pass `null` to
+  /// clear it (no `Accept-Language` header). Per-call `language` arguments
+  /// still override this for individual requests.
+  void setLanguage(String? language) =>
+      _transport.config = _transport.config.copyWith(language: language ?? '');
 
   /// Project context used for routes that include `{projectId}`.
   /// Per-call parameters still override this default.

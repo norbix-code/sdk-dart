@@ -45,6 +45,7 @@ class Transport {
     Map<String, Object?>? pathParams,
     String? env,
     String? region,
+    String? language,
     bool authenticated = true,
   }) async {
     final response = await _execute(
@@ -56,6 +57,7 @@ class Transport {
       pathParams: pathParams,
       env: env,
       region: region,
+      language: language,
       authenticated: authenticated,
     );
     return _parseResponse(response);
@@ -76,6 +78,7 @@ class Transport {
     Map<String, Object?>? pathParams,
     String? env,
     String? region,
+    String? language,
     bool authenticated = true,
   }) async {
     final response = await _execute(
@@ -87,6 +90,7 @@ class Transport {
       pathParams: pathParams,
       env: env,
       region: region,
+      language: language,
       authenticated: authenticated,
       accept: '*/*',
     );
@@ -113,6 +117,7 @@ class Transport {
     Map<String, Object?>? pathParams,
     String? env,
     String? region,
+    String? language,
     bool authenticated = true,
     String? accept,
   }) async {
@@ -125,6 +130,7 @@ class Transport {
       pathParams: pathParams,
       env: env,
       region: region,
+      language: language,
       authenticated: authenticated,
       accept: accept,
     );
@@ -144,6 +150,7 @@ class Transport {
     Map<String, Object?>? pathParams,
     String? env,
     String? region,
+    String? language,
     bool authenticated = true,
     String? accept,
   }) async {
@@ -152,6 +159,7 @@ class Transport {
       headers,
       env,
       region,
+      language,
       authenticated: authenticated,
       accept: accept,
     );
@@ -288,7 +296,8 @@ class Transport {
   Map<String, String> _buildHeaders(
     Map<String, String>? extra,
     String? env,
-    String? region, {
+    String? region,
+    String? language, {
     bool authenticated = true,
     String? accept,
   }) {
@@ -318,6 +327,13 @@ class Transport {
     final resolvedRegion = region ?? config.region;
     if (resolvedRegion != null && resolvedRegion.isNotEmpty) {
       out['nb-region'] = resolvedRegion;
+    }
+    // Language: per-call override wins over the client default. There is no
+    // default language — `Accept-Language` is sent only when one is resolved
+    // (the gateway then answers in the project default language).
+    final resolvedLanguage = language ?? config.language;
+    if (resolvedLanguage != null && resolvedLanguage.isNotEmpty) {
+      out['accept-language'] = resolvedLanguage;
     }
     if (extra != null) out.addAll(extra);
     return out;
