@@ -71,6 +71,15 @@ class NorbixConfig {
   /// custom [baseUrl] is never rewritten.
   final String? region;
 
+  /// Preferred response language, sent verbatim as the standard
+  /// `Accept-Language` header — a single tag (`lt`, `lt-LT`) or a full
+  /// q-weighted list (`lt-LT, en;q=0.8`). The gateway honours the q-values
+  /// and falls back to the project default language when nothing matches;
+  /// the language it answered in comes back in `Content-Language`. Like
+  /// [region] there is NO default: when null (the default) no header is
+  /// sent.
+  final String? language;
+
   NorbixConfig({
     required String baseUrl,
     this.apiVersion = 'v3',
@@ -81,8 +90,10 @@ class NorbixConfig {
     Map<String, String>? defaultHeaders,
     this.env = 'PROD',
     String? region,
+    String? language,
   })  : baseUrl = _stripTrailingSlash(baseUrl),
-        region = _normalizeRegion(region),
+        region = _blankToNull(region),
+        language = _blankToNull(language),
         defaultHeaders = Map.unmodifiable(defaultHeaders ?? const {});
 
   /// Build a config from environment variables. Falls back to [defaultBaseUrl]
@@ -100,6 +111,7 @@ class NorbixConfig {
     String maxRetriesVar = 'NORBIX_MAX_RETRIES',
     String envVar = 'NORBIX_ENV',
     String regionVar = 'NORBIX_REGION',
+    String languageVar = 'NORBIX_LANGUAGE',
     Map<String, String>? overrides,
   }) {
     final env = <String, String>{
@@ -124,14 +136,15 @@ class NorbixConfig {
       maxRetries: retries ?? 0,
       env: read(envVar) ?? 'PROD',
       region: read(regionVar),
+      language: read(languageVar),
     );
   }
 
   /// Returns a copy with selected fields replaced. Useful for runtime token
   /// rotation without mutating shared state.
   ///
-  /// Pass an empty string for [region] to clear it (null keeps the current
-  /// value, like every other field).
+  /// Pass an empty string for [region] or [language] to clear it (null keeps
+  /// the current value, like every other field).
   NorbixConfig copyWith({
     String? baseUrl,
     String? apiVersion,
@@ -142,6 +155,7 @@ class NorbixConfig {
     Map<String, String>? defaultHeaders,
     String? env,
     String? region,
+    String? language,
   }) {
     return NorbixConfig(
       baseUrl: baseUrl ?? this.baseUrl,
@@ -153,6 +167,7 @@ class NorbixConfig {
       defaultHeaders: defaultHeaders ?? this.defaultHeaders,
       env: env ?? this.env,
       region: region ?? this.region,
+      language: language ?? this.language,
     );
   }
 
@@ -160,8 +175,8 @@ class NorbixConfig {
     return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
   }
 
-  static String? _normalizeRegion(String? region) {
-    return (region == null || region.isEmpty) ? null : region;
+  static String? _blankToNull(String? value) {
+    return (value == null || value.isEmpty) ? null : value;
   }
 }
 

@@ -41,11 +41,13 @@ class NorbixApi {
     HttpDriver? driver,
     String? env,
     String? region,
+    String? language,
   }) : _transport = Transport(
           config: () {
             var cfg = config ?? NorbixConfig(baseUrl: kNorbixApiDefaultBaseUrl);
             if (env != null) cfg = cfg.copyWith(env: env);
             if (region != null) cfg = cfg.copyWith(region: region);
+            if (language != null) cfg = cfg.copyWith(language: language);
             return cfg;
           }(),
           driver: driver,
@@ -63,6 +65,7 @@ class NorbixApi {
   ///   NORBIX_API_TIMEOUT_MS
   ///   NORBIX_API_MAX_RETRIES
   ///   NORBIX_API_REGION
+  ///   NORBIX_API_LANGUAGE        (sent as Accept-Language)
   factory NorbixApi.fromEnv({
     Map<String, String>? overrides,
     HttpDriver? driver,
@@ -77,6 +80,7 @@ class NorbixApi {
       maxRetriesVar: 'NORBIX_API_MAX_RETRIES',
       envVar: 'NORBIX_API_ENV',
       regionVar: 'NORBIX_API_REGION',
+      languageVar: 'NORBIX_API_LANGUAGE',
       overrides: overrides,
     );
     return NorbixApi(config: cfg, driver: driver);
@@ -117,6 +121,18 @@ class NorbixApi {
   /// for individual requests (header only).
   void setRegion(String? region) =>
       _transport.config = _transport.config.copyWith(region: region ?? '');
+
+  /// Preferred response language, sent as the `Accept-Language` header (a
+  /// tag like `lt` or a q-weighted list like `lt-LT, en;q=0.8`). Null (the
+  /// default) means no header: the gateway answers in the project default
+  /// language. The answered language comes back in `Content-Language`.
+  String? get language => _transport.config.language;
+
+  /// Switch the preferred language for subsequent requests. Pass `null` to
+  /// clear it (no `Accept-Language` header). Per-call `language` arguments
+  /// still override this for individual requests.
+  void setLanguage(String? language) =>
+      _transport.config = _transport.config.copyWith(language: language ?? '');
 
   /// Replace the entire configuration. Useful for switching environments
   /// (staging <-> production) at runtime.

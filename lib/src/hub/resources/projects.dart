@@ -354,7 +354,8 @@ class ProjectsResource extends Resource {
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers,
-      String? region}) {
+      String? region,
+      String? language}) {
     return transport.send(
       route: '/{version}/account/projects/{projectId}/settings/regions',
       method: 'PATCH',
@@ -363,6 +364,7 @@ class ProjectsResource extends Resource {
       headers: headers,
       pathParams: <String, Object?>{'projectId': projectId},
       region: region,
+      language: language,
     );
   }
 
