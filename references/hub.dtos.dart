@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-13 16:21:31
+Date: 2026-10-14 08:01:38
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -4463,15 +4463,8 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
 }
 
 // @DataContract(Namespace="http://codemash.io/types/")
-class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCorrelationIdRequest, IConvertible
+class RequestBase implements IVersionBasedRequest, IHasCorrelationIdRequest, IConvertible
 {
-    /**
-    * Specify culture code when your response from the API should be localised. E.g.: en
-    */
-    // @DataMember
-    // @ApiMember(DataType="string", Description="Specify culture code when your response from the API should be localised. E.g.: en", Name="CultureCode", ParameterType="header")
-    String? cultureCode;
-
     /**
     * TimeZone
     */
@@ -4493,11 +4486,10 @@ class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCor
     // @ApiMember(DataType="string", Description="CorrelationId for each request", Name="CorrelationId", ParameterType="header")
     String? correlationId;
 
-    RequestBase({this.cultureCode,this.timeZoneId,this.version="",this.correlationId});
+    RequestBase({this.timeZoneId,this.version="",this.correlationId});
     RequestBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        cultureCode = json['cultureCode'];
         timeZoneId = json['timeZoneId'];
         version = json['version'] ?? "";
         correlationId = json['correlationId'];
@@ -4505,7 +4497,6 @@ class RequestBase implements ICultureBasedRequest, IVersionBasedRequest, IHasCor
     }
 
     Map<String, dynamic> toJson() => {
-        'cultureCode': cultureCode,
         'timeZoneId': timeZoneId,
         'version': version,
         'correlationId': correlationId
@@ -10865,11 +10856,6 @@ class MarketplaceFunctionSchedulerTaskRequest extends SchedulerTaskRequest imple
     TypeContext? context = _ctx;
 }
 
-abstract class ICultureBasedRequest
-{
-    String? cultureCode;
-}
-
 abstract class IVersionBasedRequest
 {
     String version = "";
@@ -12216,58 +12202,6 @@ enum CodeMashRuntime
     CI,
     Staging,
     Production,
-}
-
-// @DataContract
-class EchoLicenseDto implements IConvertible
-{
-    // @DataMember(Name="domain")
-    String? domain;
-
-    // @DataMember(Name="accountId")
-    String? accountId;
-
-    // @DataMember(Name="email")
-    String? email;
-
-    // @DataMember(Name="release")
-    String? release;
-
-    // @DataMember(Name="expire")
-    int expire = 0;
-
-    // @DataMember(Name="isTrial")
-    bool? isTrial;
-
-    // @DataMember(Name="cap")
-    int cap = 0;
-
-    EchoLicenseDto({this.domain,this.accountId,this.email,this.release,this.expire=0,this.isTrial,this.cap=0});
-    EchoLicenseDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        domain = json['domain'];
-        accountId = json['accountId'];
-        email = json['email'];
-        release = json['release'];
-        expire = json['expire'] ?? 0;
-        isTrial = json['isTrial'];
-        cap = json['projectsCap'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'domain': domain,
-        'accountId': accountId,
-        'email': email,
-        'release': release,
-        'expire': expire,
-        'isTrial': isTrial,
-        'cap': cap
-    };
-
-    getTypeName() => "EchoLicenseDto";
-    TypeContext? context = _ctx;
 }
 
 class EchoRegionDto implements IConvertible
@@ -15536,6 +15470,58 @@ class LicenseHeartbeatVerdictDto implements IConvertible
 }
 
 // @DataContract
+class InstallationLicenseDetailsDto implements IConvertible
+{
+    // @DataMember(Name="domain")
+    String? domain;
+
+    // @DataMember(Name="accountId")
+    String? accountId;
+
+    // @DataMember(Name="email")
+    String? email;
+
+    // @DataMember(Name="release")
+    String? release;
+
+    // @DataMember(Name="expire")
+    int expire = 0;
+
+    // @DataMember(Name="isTrial")
+    bool? isTrial;
+
+    // @DataMember(Name="cap")
+    int cap = 0;
+
+    InstallationLicenseDetailsDto({this.domain,this.accountId,this.email,this.release,this.expire=0,this.isTrial,this.cap=0});
+    InstallationLicenseDetailsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        domain = json['domain'];
+        accountId = json['accountId'];
+        email = json['email'];
+        release = json['release'];
+        expire = json['expire'] ?? 0;
+        isTrial = json['isTrial'];
+        cap = json['projectsCap'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'domain': domain,
+        'accountId': accountId,
+        'email': email,
+        'release': release,
+        'expire': expire,
+        'isTrial': isTrial,
+        'cap': cap
+    };
+
+    getTypeName() => "InstallationLicenseDetailsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class InstallationLicenseStatusDto implements IConvertible
 {
     // @DataMember(Name="storedMode")
@@ -15583,7 +15569,16 @@ class InstallationLicenseStatusDto implements IConvertible
     // @DataMember(Name="message")
     String? message;
 
-    InstallationLicenseStatusDto({this.storedMode="",this.effectiveMode="",this.isProduction,this.graceDaysLeft,this.graceUntilUtc,this.lastProvenAtUtc,this.lastHeartbeatAtUtc,this.installationDomain,this.licensedDomain,this.hostKind,this.isTrialLicense,this.licenseExpireUtc,this.lastHeartbeatOutcome,this.lastHeartbeatError,this.message});
+    // @DataMember(Name="license")
+    InstallationLicenseDetailsDto? license;
+
+    // @DataMember(Name="licensingDocsUrl")
+    String? licensingDocsUrl;
+
+    // @DataMember(Name="askForEnterpriseLicenseEmail")
+    String? askForEnterpriseLicenseEmail;
+
+    InstallationLicenseStatusDto({this.storedMode="",this.effectiveMode="",this.isProduction,this.graceDaysLeft,this.graceUntilUtc,this.lastProvenAtUtc,this.lastHeartbeatAtUtc,this.installationDomain,this.licensedDomain,this.hostKind,this.isTrialLicense,this.licenseExpireUtc,this.lastHeartbeatOutcome,this.lastHeartbeatError,this.message,this.license,this.licensingDocsUrl,this.askForEnterpriseLicenseEmail});
     InstallationLicenseStatusDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -15602,6 +15597,9 @@ class InstallationLicenseStatusDto implements IConvertible
         lastHeartbeatOutcome = json['lastHeartbeatOutcome'];
         lastHeartbeatError = json['lastHeartbeatError'];
         message = json['message'];
+        license = JsonConverters.fromJson(json['license'],'InstallationLicenseDetailsDto',context!);
+        licensingDocsUrl = json['licensingDocsUrl'];
+        askForEnterpriseLicenseEmail = json['askForEnterpriseLicenseEmail'];
         return this;
     }
 
@@ -15620,7 +15618,10 @@ class InstallationLicenseStatusDto implements IConvertible
         'licenseExpireUtc': JsonConverters.toJson(licenseExpireUtc,'DateTime',context!),
         'lastHeartbeatOutcome': lastHeartbeatOutcome,
         'lastHeartbeatError': lastHeartbeatError,
-        'message': message
+        'message': message,
+        'license': JsonConverters.toJson(license,'InstallationLicenseDetailsDto',context!),
+        'licensingDocsUrl': licensingDocsUrl,
+        'askForEnterpriseLicenseEmail': askForEnterpriseLicenseEmail
     };
 
     getTypeName() => "InstallationLicenseStatusDto";
@@ -22193,6 +22194,53 @@ class UserDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class ContactRolesRepairDto implements IConvertible
+{
+    // @DataMember(Name="dryRun")
+    bool? dryRun;
+
+    // @DataMember(Name="contactsWithoutRoles")
+    int contactsWithoutRoles = 0;
+
+    // @DataMember(Name="contactsToRepair")
+    int contactsToRepair = 0;
+
+    // @DataMember(Name="contactsRepaired")
+    int contactsRepaired = 0;
+
+    // @DataMember(Name="contactsWithoutLoginRoleIds")
+    int contactsWithoutLoginRoleIds = 0;
+
+    // @DataMember(Name="legacyRoleNamesIgnored")
+    int legacyRoleNamesIgnored = 0;
+
+    ContactRolesRepairDto({this.dryRun,this.contactsWithoutRoles=0,this.contactsToRepair=0,this.contactsRepaired=0,this.contactsWithoutLoginRoleIds=0,this.legacyRoleNamesIgnored=0});
+    ContactRolesRepairDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        dryRun = json['dryRun'];
+        contactsWithoutRoles = json['contactsWithoutRoles'] ?? 0;
+        contactsToRepair = json['contactsToRepair'] ?? 0;
+        contactsRepaired = json['contactsRepaired'] ?? 0;
+        contactsWithoutLoginRoleIds = json['contactsWithoutLoginRoleIds'] ?? 0;
+        legacyRoleNamesIgnored = json['legacyRoleNamesIgnored'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'dryRun': dryRun,
+        'contactsWithoutRoles': contactsWithoutRoles,
+        'contactsToRepair': contactsToRepair,
+        'contactsRepaired': contactsRepaired,
+        'contactsWithoutLoginRoleIds': contactsWithoutLoginRoleIds,
+        'legacyRoleNamesIgnored': legacyRoleNamesIgnored
+    };
+
+    getTypeName() => "ContactRolesRepairDto";
+    TypeContext? context = _ctx;
+}
+
 class ConsentPurposeDto implements IConvertible
 {
     String key = "";
@@ -23257,8 +23305,6 @@ abstract class ICursorArgs
 
 class EchoResponse implements IConvertible
 {
-    String? containerName;
-    String ip = "";
     CodeMashRelease? release;
     CodeMashRuntime? runtime;
     String managedServiceHubUrl = "";
@@ -23267,27 +23313,17 @@ class EchoResponse implements IConvertible
     String apiUrl = "";
     String apiVersion = "";
     String hubVersion = "";
-    String mjmlUrl = "";
     String? adminUrlTemplate;
-    EchoLicenseDto? license;
-    String? askForEnterpriseLicenseEmail;
     bool? emailServiceConfigured;
     String? rootBootstrapPasswordSource;
     List<EchoRegionDto>? regions;
-    bool? isProductionInstallation;
-    String licensingMode = "";
-    int? graceDaysLeft;
-    String? installationDomain;
-    String? licensingDocsUrl;
     EchoAgentDto? agent;
     EchoHostingPlatformDto? hostingPlatform;
 
-    EchoResponse({this.containerName,this.ip="",this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.mjmlUrl="",this.adminUrlTemplate,this.license,this.askForEnterpriseLicenseEmail,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.isProductionInstallation,this.licensingMode="",this.graceDaysLeft,this.installationDomain,this.licensingDocsUrl,this.agent,this.hostingPlatform});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        containerName = json['containerName'];
-        ip = json['ip'] ?? "";
         release = JsonConverters.fromJson(json['release'],'CodeMashRelease',context!);
         runtime = JsonConverters.fromJson(json['runtime'],'CodeMashRuntime',context!);
         managedServiceHubUrl = json['managedServiceHubUrl'] ?? "";
@@ -23296,26 +23332,16 @@ class EchoResponse implements IConvertible
         apiUrl = json['apiUrl'] ?? "";
         apiVersion = json['apiVersion'] ?? "";
         hubVersion = json['hubVersion'] ?? "";
-        mjmlUrl = json['mjmlUrl'] ?? "";
         adminUrlTemplate = json['adminUrlTemplate'];
-        license = JsonConverters.fromJson(json['license'],'EchoLicenseDto',context!);
-        askForEnterpriseLicenseEmail = json['askForEnterpriseLicenseEmail'];
         emailServiceConfigured = json['emailServiceConfigured'];
         rootBootstrapPasswordSource = json['rootBootstrapPasswordSource'];
         regions = JsonConverters.fromJson(json['regions'],'List<EchoRegionDto>',context!);
-        isProductionInstallation = json['isProductionInstallation'];
-        licensingMode = json['licensingMode'] ?? "";
-        graceDaysLeft = json['graceDaysLeft'];
-        installationDomain = json['installationDomain'];
-        licensingDocsUrl = json['licensingDocsUrl'];
         agent = JsonConverters.fromJson(json['agent'],'EchoAgentDto',context!);
         hostingPlatform = JsonConverters.fromJson(json['hostingPlatform'],'EchoHostingPlatformDto',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'containerName': containerName,
-        'ip': ip,
         'release': JsonConverters.toJson(release,'CodeMashRelease',context!),
         'runtime': JsonConverters.toJson(runtime,'CodeMashRuntime',context!),
         'managedServiceHubUrl': managedServiceHubUrl,
@@ -23324,18 +23350,10 @@ class EchoResponse implements IConvertible
         'apiUrl': apiUrl,
         'apiVersion': apiVersion,
         'hubVersion': hubVersion,
-        'mjmlUrl': mjmlUrl,
         'adminUrlTemplate': adminUrlTemplate,
-        'license': JsonConverters.toJson(license,'EchoLicenseDto',context!),
-        'askForEnterpriseLicenseEmail': askForEnterpriseLicenseEmail,
         'emailServiceConfigured': emailServiceConfigured,
         'rootBootstrapPasswordSource': rootBootstrapPasswordSource,
         'regions': JsonConverters.toJson(regions,'List<EchoRegionDto>',context!),
-        'isProductionInstallation': isProductionInstallation,
-        'licensingMode': licensingMode,
-        'graceDaysLeft': graceDaysLeft,
-        'installationDomain': installationDomain,
-        'licensingDocsUrl': licensingDocsUrl,
         'agent': JsonConverters.toJson(agent,'EchoAgentDto',context!),
         'hostingPlatform': JsonConverters.toJson(hostingPlatform,'EchoHostingPlatformDto',context!)
     };
@@ -29072,6 +29090,27 @@ class GetAllContactsResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetAllContactsResponse";
+    TypeContext? context = _ctx;
+}
+
+class RepairContactRolesResponse extends ResponseBase implements IConvertible
+{
+    ContactRolesRepairDto? result;
+
+    RepairContactRolesResponse({this.result});
+    RepairContactRolesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'ContactRolesRepairDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'ContactRolesRepairDto',context!)
+    });
+
+    getTypeName() => "RepairContactRolesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -35929,6 +35968,13 @@ class GetDatabaseTaxonomies extends CodeMashListPaginationRequestBase implements
 class GetDatabaseTaxonomyTreeRequest extends CodeMashRequestBase implements IReturn<GetDatabaseTaxonomyTreeResponse>, IConvertible, IGet
 {
     /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
+    /**
     * When true, each taxonomy node also carries its own term tree (heavier response).
     */
     // @DataMember
@@ -35942,17 +35988,19 @@ class GetDatabaseTaxonomyTreeRequest extends CodeMashRequestBase implements IRet
     // @ApiMember(Description="Optional database integration id. When omitted, the project's default database integration is used.")
     String? databaseIntegrationId;
 
-    GetDatabaseTaxonomyTreeRequest({this.includeTerms,this.databaseIntegrationId});
+    GetDatabaseTaxonomyTreeRequest({this.allLanguages,this.includeTerms,this.databaseIntegrationId});
     GetDatabaseTaxonomyTreeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         includeTerms = json['includeTerms'];
         databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'includeTerms': includeTerms,
         'databaseIntegrationId': databaseIntegrationId
     });
@@ -36164,6 +36212,13 @@ class DeleteManyDatabaseTaxonomyTermsRequest extends CodeMashRequestBase impleme
 class GetDatabaseTaxonomyTermRequest extends CodeMashRequestBase implements IReturn<GetDatabaseTaxonomyTermResponse>, IConvertible, IGet
 {
     /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
+    /**
     * Taxonomy id from get_database_taxonomies.
     */
     // @DataMember
@@ -36184,11 +36239,12 @@ class GetDatabaseTaxonomyTermRequest extends CodeMashRequestBase implements IRet
     // @ApiMember(Description="Optional database integration id. When omitted, the project's default database integration is used.")
     String? databaseIntegrationId;
 
-    GetDatabaseTaxonomyTermRequest({this.taxonomyId="",this.id="",this.databaseIntegrationId});
+    GetDatabaseTaxonomyTermRequest({this.allLanguages,this.taxonomyId="",this.id="",this.databaseIntegrationId});
     GetDatabaseTaxonomyTermRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         taxonomyId = json['taxonomyId'] ?? "";
         id = json['id'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
@@ -36196,6 +36252,7 @@ class GetDatabaseTaxonomyTermRequest extends CodeMashRequestBase implements IRet
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'taxonomyId': taxonomyId,
         'id': id,
         'databaseIntegrationId': databaseIntegrationId
@@ -36216,6 +36273,13 @@ class GetDatabaseTaxonomyTermRequest extends CodeMashRequestBase implements IRet
 class GetDatabaseMergedTermTreeRequest extends CodeMashRequestBase implements IReturn<GetDatabaseMergedTermTreeResponse>, IConvertible, IGet
 {
     /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
+    /**
     * Root taxonomy slug/name (from get_database_taxonomies). Its terms are the roots; child-taxonomy terms nest under them.
     */
     // @DataMember
@@ -36229,17 +36293,19 @@ class GetDatabaseMergedTermTreeRequest extends CodeMashRequestBase implements IR
     // @ApiMember(Description="Optional database integration id. When omitted, the project's default database integration is used.")
     String? databaseIntegrationId;
 
-    GetDatabaseMergedTermTreeRequest({this.taxonomyName="",this.databaseIntegrationId});
+    GetDatabaseMergedTermTreeRequest({this.allLanguages,this.taxonomyName="",this.databaseIntegrationId});
     GetDatabaseMergedTermTreeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         taxonomyName = json['taxonomyName'] ?? "";
         databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'taxonomyName': taxonomyName,
         'databaseIntegrationId': databaseIntegrationId
     });
@@ -36258,6 +36324,13 @@ class GetDatabaseMergedTermTreeRequest extends CodeMashRequestBase implements IR
 // @DataContract
 class GetDatabaseTaxonomyTermTreeRequest extends CodeMashRequestBase implements IReturn<GetDatabaseTaxonomyTermTreeResponse>, IConvertible, IGet
 {
+    /**
+    * Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set true to keep name / description as stored even when Accept-Language is sent (editors). The full translations are always in names / descriptions.")
+    bool? allLanguages;
+
     /**
     * Taxonomy slug/name to fetch the term tree for, from get_database_taxonomies.
     */
@@ -36286,11 +36359,12 @@ class GetDatabaseTaxonomyTermTreeRequest extends CodeMashRequestBase implements 
     // @ApiMember(Description="Optional database integration id. When omitted, the project's default database integration is used.")
     String? databaseIntegrationId;
 
-    GetDatabaseTaxonomyTermTreeRequest({this.taxonomyName="",this.rootTermId,this.depth,this.databaseIntegrationId});
+    GetDatabaseTaxonomyTermTreeRequest({this.allLanguages,this.taxonomyName="",this.rootTermId,this.depth,this.databaseIntegrationId});
     GetDatabaseTaxonomyTermTreeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        allLanguages = json['allLanguages'];
         taxonomyName = json['taxonomyName'] ?? "";
         rootTermId = json['rootTermId'];
         depth = json['depth'];
@@ -36299,6 +36373,7 @@ class GetDatabaseTaxonomyTermTreeRequest extends CodeMashRequestBase implements 
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'allLanguages': allLanguages,
         'taxonomyName': taxonomyName,
         'rootTermId': rootTermId,
         'depth': depth,
@@ -48335,6 +48410,38 @@ class MergeContactsRequest extends CodeMashRequestBase implements IReturn<EmptyR
 }
 
 /**
+* Repair contact roles from their logins
+*/
+// @Route("/{version}/membership/users/repair-roles", "POST")
+// @Api(Description="Repair contact roles from their logins")
+class RepairContactRolesRequest extends CodeMashRequestBase implements IReturn<RepairContactRolesResponse>, IConvertible, IPost
+{
+    /**
+    * True (default) = only count what would change. False = write.
+    */
+    // @ApiMember(Description="True (default) = only count what would change. False = write.")
+    bool? dryRun;
+
+    RepairContactRolesRequest({this.dryRun});
+    RepairContactRolesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        dryRun = json['dryRun'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'dryRun': dryRun
+    });
+
+    createResponse() => RepairContactRolesResponse();
+    getResponseTypeName() => "RepairContactRolesResponse";
+    getTypeName() => "RepairContactRolesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Update a contact
 */
 // @Route("/{version}/membership/users/{contactId}", "PATCH")
@@ -49869,7 +49976,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'FakeCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FakeCodeIntegrationRequest()),
     'CodeFunctionSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => CodeFunctionSchedulerTaskRequest()),
     'MarketplaceFunctionSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionSchedulerTaskRequest()),
-    'ICultureBasedRequest': TypeInfo(TypeOf.Interface),
     'IVersionBasedRequest': TypeInfo(TypeOf.Interface),
     'IHasCorrelationIdRequest': TypeInfo(TypeOf.Interface),
     'IHasProjectId': TypeInfo(TypeOf.Interface),
@@ -49924,7 +50030,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'CaseResolutionDto': TypeInfo(TypeOf.Class, create:() => CaseResolutionDto()),
     'CodeMashRelease': TypeInfo(TypeOf.Enum, enumValues:CodeMashRelease.values),
     'CodeMashRuntime': TypeInfo(TypeOf.Enum, enumValues:CodeMashRuntime.values),
-    'EchoLicenseDto': TypeInfo(TypeOf.Class, create:() => EchoLicenseDto()),
     'EchoRegionDto': TypeInfo(TypeOf.Class, create:() => EchoRegionDto()),
     'EchoAgentSnippetDto': TypeInfo(TypeOf.Class, create:() => EchoAgentSnippetDto()),
     'EchoAgentDto': TypeInfo(TypeOf.Class, create:() => EchoAgentDto()),
@@ -50043,6 +50148,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'CodeMashSubscriptionDto': TypeInfo(TypeOf.Class, create:() => CodeMashSubscriptionDto()),
     'LicenseDto': TypeInfo(TypeOf.Class, create:() => LicenseDto()),
     'LicenseHeartbeatVerdictDto': TypeInfo(TypeOf.Class, create:() => LicenseHeartbeatVerdictDto()),
+    'InstallationLicenseDetailsDto': TypeInfo(TypeOf.Class, create:() => InstallationLicenseDetailsDto()),
     'InstallationLicenseStatusDto': TypeInfo(TypeOf.Class, create:() => InstallationLicenseStatusDto()),
     'AiRoleDto': TypeInfo(TypeOf.Class, create:() => AiRoleDto()),
     'AiProjectRolesDto': TypeInfo(TypeOf.Class, create:() => AiProjectRolesDto()),
@@ -50271,6 +50377,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UserDto': TypeInfo(TypeOf.Class, create:() => UserDto()),
     'List<AuthDto>': TypeInfo(TypeOf.Class, create:() => <AuthDto>[]),
     'Map<String,ChannelSubscriptionStateDto?>': TypeInfo(TypeOf.Class, create:() => Map<String,ChannelSubscriptionStateDto?>()),
+    'ContactRolesRepairDto': TypeInfo(TypeOf.Class, create:() => ContactRolesRepairDto()),
     'ConsentPurposeDto': TypeInfo(TypeOf.Class, create:() => ConsentPurposeDto()),
     'RetentionWindowDto': TypeInfo(TypeOf.Class, create:() => RetentionWindowDto()),
     'ProjectComplianceDto': TypeInfo(TypeOf.Class, create:() => ProjectComplianceDto()),
@@ -50663,6 +50770,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetContactResponse': TypeInfo(TypeOf.Class, create:() => GetContactResponse()),
     'GetAllContactsResponse': TypeInfo(TypeOf.Class, create:() => GetAllContactsResponse()),
     'IReadOnlyList<UserDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<UserDto>()),
+    'RepairContactRolesResponse': TypeInfo(TypeOf.Class, create:() => RepairContactRolesResponse()),
     'GetComplianceSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetComplianceSettingsResponse()),
     'GetLegalHoldsResponse': TypeInfo(TypeOf.Class, create:() => GetLegalHoldsResponse()),
     'List<LegalHoldDto>': TypeInfo(TypeOf.Class, create:() => <LegalHoldDto>[]),
@@ -51212,6 +51320,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetContact': TypeInfo(TypeOf.Class, create:() => GetContact()),
     'GetAllContacts': TypeInfo(TypeOf.Class, create:() => GetAllContacts()),
     'MergeContactsRequest': TypeInfo(TypeOf.Class, create:() => MergeContactsRequest()),
+    'RepairContactRolesRequest': TypeInfo(TypeOf.Class, create:() => RepairContactRolesRequest()),
     'UpdateContactRequest': TypeInfo(TypeOf.Class, create:() => UpdateContactRequest()),
     'AddContactIdentityRequest': TypeInfo(TypeOf.Class, create:() => AddContactIdentityRequest()),
     'PromoteContactIdentityRequest': TypeInfo(TypeOf.Class, create:() => PromoteContactIdentityRequest()),
