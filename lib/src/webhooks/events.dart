@@ -19,6 +19,7 @@ const List<String> kNorbixWebhookEventNames = [
   'membership.user.reactivated',
   'files.file.uploaded',
   'files.file.deleted',
+  'payments.webhook.received',
 ];
 
 /// Named event constants — use these instead of raw strings.
@@ -50,4 +51,11 @@ abstract final class NorbixWebhookEvents {
   // files
   static const filesFileUploaded = 'files.file.uploaded';
   static const filesFileDeleted = 'files.file.deleted';
+
+  // payments
+  /// A payment provider (Stripe, Apple In-App, Google In-App, …) called the
+  /// project's payments webhook. The payload is the normalized payment fact
+  /// (a JSON map: `provider`, `eventName`, `status`, `amountMinor`, …); the
+  /// provider's own event name is `eventName`.
+  static const paymentsWebhookReceived = 'payments.webhook.received';
 }
