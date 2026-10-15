@@ -124,13 +124,26 @@ class WebhookEventMetadata {
   final WebhookRecordIds? records;
   final String? integrationId;
 
+  /// `payments.*` events: the provider and its own event id / name.
+  final WebhookPaymentRef? payment;
+
   const WebhookEventMetadata({
     this.user,
     this.schema,
     this.record,
     this.records,
     this.integrationId,
+    this.payment,
   });
+}
+
+/// The provider ids of a `payments.*` delivery (e.g. `Stripe`, `evt_…`,
+/// `payment_intent.succeeded`).
+class WebhookPaymentRef {
+  final String provider;
+  final String providerEventId;
+  final String eventName;
+  const WebhookPaymentRef(this.provider, this.providerEventId, this.eventName);
 }
 
 /// The raw JSON envelope POSTed to a destination.

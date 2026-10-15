@@ -37,7 +37,8 @@ Normalized normalizeWebhook(WebhookEnvelope envelope) {
       integrationId: data['integrationId'] is String
           ? data['integrationId'] as String
           : null,
-      record: data['id'] is String ? WebhookEntityRef(data['id'] as String) : null,
+      record:
+          data['id'] is String ? WebhookEntityRef(data['id'] as String) : null,
       records: data['ids'] is List
           ? WebhookRecordIds((data['ids'] as List).whereType<String>().toList())
           : null,
@@ -62,7 +63,8 @@ Normalized normalizeWebhook(WebhookEnvelope envelope) {
 
   if (event.startsWith('membership.')) {
     final metadata = WebhookEventMetadata(
-      user: data['id'] is String ? WebhookEntityRef(data['id'] as String) : null,
+      user:
+          data['id'] is String ? WebhookEntityRef(data['id'] as String) : null,
     );
 
     switch (event) {
@@ -82,7 +84,8 @@ Normalized normalizeWebhook(WebhookEnvelope envelope) {
           metadata,
         );
       case 'membership.user.invited':
-        return Normalized(UserInvited(email: data['email'] as String?), metadata);
+        return Normalized(
+            UserInvited(email: data['email'] as String?), metadata);
       default:
         return Normalized(envelope.data, metadata);
     }
@@ -96,12 +99,31 @@ Normalized normalizeWebhook(WebhookEnvelope envelope) {
     );
     switch (event) {
       case 'files.file.uploaded':
-        return Normalized(FileResourceRef.fromJson(_asMap(data['file'])), metadata);
+        return Normalized(
+            FileResourceRef.fromJson(_asMap(data['file'])), metadata);
       case 'files.file.deleted':
         return Normalized(FileDeleted(path: data['path'] as String?), metadata);
       default:
         return Normalized(envelope.data, metadata);
     }
+  }
+
+  if (event.startsWith('payments.')) {
+    // The whole data object IS the normalized payment fact; the provider ids
+    // are lifted onto metadata so a handler can de-duplicate on them.
+    final provider = data['provider'];
+    final providerEventId = data['providerEventId'];
+    final eventName = data['eventName'];
+    final metadata = WebhookEventMetadata(
+      integrationId: data['integrationId'] is String
+          ? data['integrationId'] as String
+          : null,
+      payment:
+          provider is String && providerEventId is String && eventName is String
+              ? WebhookPaymentRef(provider, providerEventId, eventName)
+              : null,
+    );
+    return Normalized(data, metadata);
   }
 
   return Normalized(envelope.data, const WebhookEventMetadata());

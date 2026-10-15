@@ -115,6 +115,42 @@ void main() {
       expect(capturedEvent!.metadata.record!.id, equals('rec_1'));
     });
 
+    test(
+        'payments.webhook.received payload is the fact, provider ids on metadata',
+        () async {
+      // gateway campaign audit/payments: one Norbix event for every payment
+      // provider callback; data is the normalized fact, never the raw payload.
+      final receiver = NorbixWebhookReceiver();
+      Map<String, dynamic>? captured;
+      WebhookEvent? capturedEvent;
+      receiver.on<Map<String, dynamic>>(
+          NorbixWebhookEvents.paymentsWebhookReceived, (fact, event) {
+        captured = fact;
+        capturedEvent = event;
+      });
+
+      final result = await receiver.handle(
+        rawBody: body('payments.webhook.received', {
+          'integrationId': 'int_stripe',
+          'provider': 'Stripe',
+          'providerEventId': 'evt_1',
+          'eventName': 'payment_intent.succeeded',
+          'status': 'Succeeded',
+          'amountMinor': 1099,
+          'currency': 'USD',
+        }),
+        headers: const {},
+      );
+
+      expect(result.handled, isTrue);
+      expect(captured!['eventName'], equals('payment_intent.succeeded'));
+      expect(captured!['amountMinor'], equals(1099));
+      expect(capturedEvent!.metadata.integrationId, equals('int_stripe'));
+      expect(capturedEvent!.metadata.payment!.provider, equals('Stripe'));
+      expect(capturedEvent!.metadata.payment!.providerEventId, equals('evt_1'));
+      expect(kNorbixWebhookEventNames, contains('payments.webhook.received'));
+    });
+
     test('records.inserted payload is the list, ids on metadata', () async {
       final receiver = NorbixWebhookReceiver();
       List<dynamic>? captured;
