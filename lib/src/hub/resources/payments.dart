@@ -174,6 +174,19 @@ class PaymentsResource extends Resource {
     );
   }
 
+  /// `GET /{version}/payments/webhooks/log` — the received payment webhooks of
+  /// the project, newest first (query: `integrationId`, `limit`).
+  Future<Object?> getPaymentsWebhookLog(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/payments/webhooks/log',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/payments/triggers/{id}`
   Future<Object?> getPaymentsTrigger(
       {required Object id,
