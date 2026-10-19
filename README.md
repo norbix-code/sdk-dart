@@ -56,7 +56,7 @@ There is no `client.api.xxx` or `client.hub.xxx` middle layer.
 
 | Client | Resources |
 |--------|-----------|
-| `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `database`, `files`, `publicProjects`, `userAuth`, `users` |
+| `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `database`, `files`, `payments`, `publicProjects`, `userAuth`, `users` |
 | `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `internals`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
 
 ## Configuration
@@ -821,6 +821,42 @@ for (final step in res['items'] as List) {
   print('${step['operation']}: ${step['result']}'); // UploadFile: OK, GetFile: OK, ...
 }
 ```
+
+## Payments
+
+### Orders and checkout
+
+`api.payments` creates a payment order for a buyer, reads it back and starts a
+provider checkout (e.g. Montonio) for it. Amounts are minor units (cents).
+
+| Method | Route | Answers |
+| --- | --- | --- |
+| `createPaymentOrder(body:)` | `POST /{version}/payments/orders` — `buyerUserId`, `merchantReference`, `idempotencyKey?`, `currency`, `priceVersion`, `lines` (`sku?`, `title?`, `quantity`, `unitAmountMinor`), `metadata?` | `{ id }` (`ord_…`) |
+| `getPaymentOrder(id:)` | `GET /{version}/payments/orders/{id}` | `{ item: PaymentOrderDto }` |
+| `getPaymentOrders(query:)` | `GET /{version}/payments/orders` — `buyerUserId?`, `merchantReference?`, `status?` | `{ list: Paginated<PaymentOrderDto> }` |
+| `startPaymentCheckout(id:, body:)` | `POST /{version}/payments/orders/{id}/checkout` — `integrationId`, `method?`, `returnUrl`, `preferredCountry?`, `preferredProvider?` | `{ checkout, reused, order }` |
+
+```dart
+final created = await api.payments.createPaymentOrder(body: {
+  'buyerUserId': userId,
+  'merchantReference': 'ad-1042-promo-1',
+  'idempotencyKey': 'ad-1042-promo-1', // same body + same key -> same id
+  'currency': 'EUR',
+  'priceVersion': 'v1',
+  'lines': [
+    {'sku': 'star-day', 'title': 'Star × day', 'quantity': 21, 'unitAmountMinor': 30},
+  ],
+}) as Map<String, dynamic>;
+
+final started = await api.payments.startPaymentCheckout(
+  id: created['id'] as Object,
+  body: {'integrationId': 'int_montonio', 'returnUrl': 'https://shop.example/return'},
+) as Map<String, dynamic>;
+print(started['checkout']['paymentUrl']); // send the buyer here
+```
+
+When the provider confirms the payment, the project's webhook destinations get
+`payments.order.paid` (see `doc/webhooks_receiver.md`).
 
 ## Notifications
 

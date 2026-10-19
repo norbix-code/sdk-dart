@@ -23,6 +23,7 @@ export 'src/api/resources/api_keys.dart';
 export 'src/api/resources/auth.dart';
 export 'src/api/resources/database.dart';
 export 'src/api/resources/files.dart';
+export 'src/api/resources/payments.dart';
 export 'src/api/resources/public_projects.dart';
 export 'src/api/resources/user_auth.dart';
 export 'src/api/resources/users.dart';
