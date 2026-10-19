@@ -127,6 +127,10 @@ class WebhookEventMetadata {
   /// `payments.*` events: the provider and its own event id / name.
   final WebhookPaymentRef? payment;
 
+  /// `payments.order.*` events: the stored order, its status after the
+  /// change and the de-duplication key (`orderEventId`).
+  final WebhookOrderRef? order;
+
   const WebhookEventMetadata({
     this.user,
     this.schema,
@@ -134,6 +138,7 @@ class WebhookEventMetadata {
     this.records,
     this.integrationId,
     this.payment,
+    this.order,
   });
 }
 
@@ -144,6 +149,18 @@ class WebhookPaymentRef {
   final String providerEventId;
   final String eventName;
   const WebhookPaymentRef(this.provider, this.providerEventId, this.eventName);
+}
+
+/// The order ids of a `payments.order.*` delivery (e.g. `ord_…`,
+/// `ord_…:2`, `Paid`).
+///
+/// [orderEventId] is the de-duplication key: one per order change, the same
+/// on every retry of it.
+class WebhookOrderRef {
+  final String id;
+  final String orderEventId;
+  final String status;
+  const WebhookOrderRef(this.id, this.orderEventId, this.status);
 }
 
 /// The raw JSON envelope POSTed to a destination.

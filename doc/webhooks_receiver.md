@@ -62,9 +62,16 @@ flips give the **entity directly**; only an arbitrary mutation gives a
 | `database.record.updated` / `replaced` | mutation | `Mutation<Map<String, dynamic>>` |
 | `database.records.inserted` | batch | `List` of documents |
 | `files.file.uploaded` | entity | `FileResourceRef` |
+| `payments.webhook.received` | entity | `Map<String, dynamic>` (the normalized payment fact) |
+| `payments.order.paid` / `partially_refunded` / `refunded` / `reversed` / `expired` | entity | `Map<String, dynamic>` (`PaymentOrderEventDto`: `orderEventId`, `event`, `from`, `to`, `reason`, `order`, `payment`) |
 
 Wrapper identifiers (entity id, schema, record ids) are lifted onto
 `event.metadata` (`event.metadata.user`, `.schema`, `.record`, `.records`).
+Payments events lift `event.metadata.integrationId` and `.payment`
+(`provider`, `providerEventId`, `eventName`); `payments.order.*` events take
+them from `data.payment` and also lift `.order` (`id`, `orderEventId`,
+`status`). **De-duplicate an order event on `orderEventId`** — it is one per
+order change and the same on every retry.
 
 ```dart
 receiver.on<Mutation<UserDto>>(NorbixWebhookEvents.membershipUserUpdated, (m, event) {

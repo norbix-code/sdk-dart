@@ -151,6 +151,149 @@ void main() {
       expect(kNorbixWebhookEventNames, contains('payments.webhook.received'));
     });
 
+    test(
+        'payments.order.paid hands over the stored order and lifts its ids onto metadata',
+        () async {
+      // gateway campaign audit/payments-checkout: a stored order changed; the
+      // payload is the order event, its `payment` the callback that changed it.
+      final receiver = NorbixWebhookReceiver();
+      Map<String, dynamic>? captured;
+      WebhookEvent? capturedEvent;
+      receiver.on<Map<String, dynamic>>(NorbixWebhookEvents.paymentsOrderPaid,
+          (orderEvent, event) {
+        captured = orderEvent;
+        capturedEvent = event;
+      });
+
+      final result = await receiver.handle(
+        rawBody: body(
+            'payments.order.paid',
+            {
+              'orderEventId': 'ord_2ToIiRM03X63TZaJ2dJdv2:2',
+              'event': 'payments.order.paid',
+              'from': 'CheckoutStarted',
+              'to': 'Paid',
+              'reason': 'paid in attempt 1',
+              'order': {
+                'id': 'ord_2ToIiRM03X63TZaJ2dJdv2',
+                'env': 'PROD',
+                'buyerUserId': 'usr_1szWVIyZFBV8HfvC4SfVw',
+                'merchantReference': 'ad-1042-promo-1',
+                'currency': 'EUR',
+                'priceVersion': '2026-10-01',
+                'lines': [
+                  {
+                    'sku': 'star-day',
+                    'title': 'Star × day',
+                    'quantity': 21,
+                    'unitAmountMinor': 30,
+                    'amountMinor': 630
+                  }
+                ],
+                'totalMinor': 630,
+                'metadata': {'adId': 'ad_1042'},
+                'status': 'Paid',
+                'checkouts': [],
+                'settledMinor': 630,
+                'refundedMinor': 0,
+                'providerPaymentId': 'mnt-1',
+                'mismatches': []
+              },
+              'payment': {
+                'integrationId': 'int_montonio',
+                'provider': 'Montonio',
+                'providerEventId': 'order:mnt-1:PAID',
+                'orderId': 'ord_2ToIiRM03X63TZaJ2dJdv2',
+                'eventName': 'order.paid',
+                'status': 'Succeeded',
+                'amountMinor': 630,
+                'currency': 'EUR'
+              }
+            },
+            triggerId: null),
+        headers: const {},
+      );
+
+      expect(result.handled, isTrue);
+      expect(captured!['orderEventId'], equals('ord_2ToIiRM03X63TZaJ2dJdv2:2'));
+      expect(captured!['order']['totalMinor'], equals(630));
+      expect(captured!['payment']['provider'], equals('Montonio'));
+      final metadata = capturedEvent!.metadata;
+      expect(metadata.integrationId, equals('int_montonio'));
+      expect(metadata.payment!.provider, equals('Montonio'));
+      expect(metadata.payment!.providerEventId, equals('order:mnt-1:PAID'));
+      expect(metadata.payment!.eventName, equals('order.paid'));
+      expect(metadata.order!.id, equals('ord_2ToIiRM03X63TZaJ2dJdv2'));
+      expect(
+          metadata.order!.orderEventId, equals('ord_2ToIiRM03X63TZaJ2dJdv2:2'));
+      expect(metadata.order!.status, equals('Paid'));
+    });
+
+    test('payments.order.expired without a payment still lifts the order',
+        () async {
+      final receiver = NorbixWebhookReceiver();
+      WebhookEvent? capturedEvent;
+      receiver.on<Map<String, dynamic>>(
+          NorbixWebhookEvents.paymentsOrderExpired, (_, event) {
+        capturedEvent = event;
+      });
+
+      await receiver.handle(
+        rawBody: body('payments.order.expired', {
+          'orderEventId': 'ord_1:3',
+          'event': 'payments.order.expired',
+          'from': 'CheckoutStarted',
+          'to': 'Expired',
+          'reason': 'checkout expired',
+          'order': {'id': 'ord_1', 'status': 'Expired'}
+        }),
+        headers: const {},
+      );
+
+      final metadata = capturedEvent!.metadata;
+      expect(metadata.payment, isNull);
+      expect(metadata.integrationId, isNull);
+      expect(metadata.order!.id, equals('ord_1'));
+      expect(metadata.order!.orderEventId, equals('ord_1:3'));
+      expect(metadata.order!.status, equals('Expired'));
+    });
+
+    test('the catalog lists the five payments.order.* events', () {
+      expect(
+          kNorbixWebhookEventNames,
+          containsAll([
+            NorbixWebhookEvents.paymentsOrderPaid,
+            NorbixWebhookEvents.paymentsOrderPartiallyRefunded,
+            NorbixWebhookEvents.paymentsOrderRefunded,
+            NorbixWebhookEvents.paymentsOrderReversed,
+            NorbixWebhookEvents.paymentsOrderExpired
+          ]));
+      expect(NorbixWebhookEvents.paymentsOrderPartiallyRefunded,
+          equals('payments.order.partially_refunded'));
+    });
+
+    test('payments.webhook.received carries no order metadata', () async {
+      final receiver = NorbixWebhookReceiver();
+      WebhookEvent? capturedEvent;
+      receiver.on<Map<String, dynamic>>(
+          NorbixWebhookEvents.paymentsWebhookReceived, (_, event) {
+        capturedEvent = event;
+      });
+      await receiver.handle(
+        rawBody: body('payments.webhook.received', {
+          'integrationId': 'int_stripe',
+          'provider': 'Stripe',
+          'providerEventId': 'evt_1',
+          'eventName': 'payment_intent.succeeded',
+          'order': {'id': 'ord_1', 'status': 'Paid'},
+          'orderEventId': 'ord_1:1'
+        }),
+        headers: const {},
+      );
+      expect(capturedEvent!.metadata.order, isNull);
+      expect(capturedEvent!.metadata.payment!.provider, equals('Stripe'));
+    });
+
     test('records.inserted payload is the list, ids on metadata', () async {
       final receiver = NorbixWebhookReceiver();
       List<dynamic>? captured;

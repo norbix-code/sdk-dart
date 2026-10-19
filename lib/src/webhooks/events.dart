@@ -20,6 +20,11 @@ const List<String> kNorbixWebhookEventNames = [
   'files.file.uploaded',
   'files.file.deleted',
   'payments.webhook.received',
+  'payments.order.paid',
+  'payments.order.partially_refunded',
+  'payments.order.refunded',
+  'payments.order.reversed',
+  'payments.order.expired',
 ];
 
 /// Named event constants — use these instead of raw strings.
@@ -58,4 +63,29 @@ abstract final class NorbixWebhookEvents {
   /// (a JSON map: `provider`, `eventName`, `status`, `amountMinor`, …); the
   /// provider's own event name is `eventName`.
   static const paymentsWebhookReceived = 'payments.webhook.received';
+
+  /// A verified provider callback made a stored payment order Paid. The
+  /// payload is the order event (a JSON map, `PaymentOrderEventDto`:
+  /// `orderEventId`, `event`, `from`, `to`, `reason`, `order` — the order as
+  /// stored after the change — and `payment`, the payment fact). De-duplicate
+  /// on `orderEventId` (also on `event.metadata.order.orderEventId`): it is
+  /// the same on every retry.
+  static const paymentsOrderPaid = 'payments.order.paid';
+
+  /// Part of a paid order was refunded (`payload['order']['refundedMinor']`).
+  /// Same payload as [paymentsOrderPaid]; de-duplicate on `orderEventId`.
+  static const paymentsOrderPartiallyRefunded =
+      'payments.order.partially_refunded';
+
+  /// The whole order was refunded. Same payload as [paymentsOrderPaid];
+  /// de-duplicate on `orderEventId`.
+  static const paymentsOrderRefunded = 'payments.order.refunded';
+
+  /// The provider reversed (voided) the payment. Same payload as
+  /// [paymentsOrderPaid]; de-duplicate on `orderEventId`.
+  static const paymentsOrderReversed = 'payments.order.reversed';
+
+  /// The checkout ran out without a payment. Same payload as
+  /// [paymentsOrderPaid]; de-duplicate on `orderEventId`.
+  static const paymentsOrderExpired = 'payments.order.expired';
 }

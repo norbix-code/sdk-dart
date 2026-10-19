@@ -111,17 +111,30 @@ Normalized normalizeWebhook(WebhookEnvelope envelope) {
   if (event.startsWith('payments.')) {
     // The whole data object IS the normalized payment fact; the provider ids
     // are lifted onto metadata so a handler can de-duplicate on them.
-    final provider = data['provider'];
-    final providerEventId = data['providerEventId'];
-    final eventName = data['eventName'];
+    // payments.order.*: the data is the order event; its `payment` is the fact.
+    final isOrderEvent = event.startsWith('payments.order.');
+    final fact = isOrderEvent ? _asMap(data['payment']) : data;
+    final provider = fact['provider'];
+    final providerEventId = fact['providerEventId'];
+    final eventName = fact['eventName'];
+    final order = _asMap(data['order']);
+    final orderId = order['id'];
+    final orderStatus = order['status'];
+    final orderEventId = data['orderEventId'];
     final metadata = WebhookEventMetadata(
-      integrationId: data['integrationId'] is String
-          ? data['integrationId'] as String
+      integrationId: fact['integrationId'] is String
+          ? fact['integrationId'] as String
           : null,
       payment:
           provider is String && providerEventId is String && eventName is String
               ? WebhookPaymentRef(provider, providerEventId, eventName)
               : null,
+      order: isOrderEvent &&
+              orderId is String &&
+              orderEventId is String &&
+              orderStatus is String
+          ? WebhookOrderRef(orderId, orderEventId, orderStatus)
+          : null,
     );
     return Normalized(data, metadata);
   }
