@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-19 11:27:38
+Date: 2026-10-21 18:13:09
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -1020,6 +1020,120 @@ class PagingArgs implements IConvertible
     };
 
     getTypeName() => "PagingArgs";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RegisterFileItem implements IConvertible
+{
+    // @DataMember
+    String? path;
+
+    // @DataMember
+    String? ownerUserId;
+
+    // @DataMember
+    String? contentType;
+
+    // @DataMember
+    int? sizeBytes;
+
+    // @DataMember
+    String? fileName;
+
+    RegisterFileItem({this.path,this.ownerUserId,this.contentType,this.sizeBytes,this.fileName});
+    RegisterFileItem.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        path = json['path'];
+        ownerUserId = json['ownerUserId'];
+        contentType = json['contentType'];
+        sizeBytes = json['sizeBytes'];
+        fileName = json['fileName'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'path': path,
+        'ownerUserId': ownerUserId,
+        'contentType': contentType,
+        'sizeBytes': sizeBytes,
+        'fileName': fileName
+    };
+
+    getTypeName() => "RegisterFileItem";
+    TypeContext? context = _ctx;
+}
+
+class WriteLogEntry implements IConvertible
+{
+    /**
+    * information (default), warning or error.
+    */
+    // @ApiMember(Description="information (default), warning or error.")
+    String? level;
+
+    /**
+    * A short line, 1–200 characters — what the Logs list shows.
+    */
+    // @ApiMember(Description="A short line, 1–200 characters — what the Logs list shows.", IsRequired=true)
+    String title = "";
+
+    /**
+    * Details, at most 8 000 characters.
+    */
+    // @ApiMember(Description="Details, at most 8 000 characters.")
+    String? message;
+
+    /**
+    * Your own code for this kind of line, e.g. order:paid — lower case letters, digits and _ . : -, at most 64. Stored as app:<code>; app:log when empty.
+    */
+    // @ApiMember(Description="Your own code for this kind of line, e.g. order:paid — lower case letters, digits and _ . : -, at most 64. Stored as app:<code>; app:log when empty.")
+    String? eventCode;
+
+    /**
+    * Groups your lines into one flow in the Logs details view: at most 64 letters, digits, _ or -. Empty = the id of this request.
+    */
+    // @ApiMember(Description="Groups your lines into one flow in the Logs details view: at most 64 letters, digits, _ or -. Empty = the id of this request.")
+    String? correlationId;
+
+    /**
+    * When it happened (UTC). Empty = when Norbix received it. At most 7 days old and at most 5 minutes ahead.
+    */
+    // @ApiMember(Description="When it happened (UTC). Empty = when Norbix received it. At most 7 days old and at most 5 minutes ahead.")
+    DateTime? timestamp;
+
+    /**
+    * Extra fields, at most 20; key at most 64, value at most 2 000 characters. Values under secret-looking keys (password, token, apiKey …) are masked.
+    */
+    // @ApiMember(Description="Extra fields, at most 20; key at most 64, value at most 2 000 characters. Values under secret-looking keys (password, token, apiKey …) are masked.")
+    Map<String,String?>? meta;
+
+    WriteLogEntry({this.level,this.title="",this.message,this.eventCode,this.correlationId,this.timestamp,this.meta});
+    WriteLogEntry.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        level = json['level'];
+        title = json['title'] ?? "";
+        message = json['message'];
+        eventCode = json['eventCode'];
+        correlationId = json['correlationId'];
+        timestamp = JsonConverters.fromJson(json['timestamp'],'DateTime',context!);
+        meta = JsonConverters.toStringMap(json['meta']);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'level': level,
+        'title': title,
+        'message': message,
+        'eventCode': eventCode,
+        'correlationId': correlationId,
+        'timestamp': JsonConverters.toJson(timestamp,'DateTime',context!),
+        'meta': meta
+    };
+
+    getTypeName() => "WriteLogEntry";
     TypeContext? context = _ctx;
 }
 
@@ -2288,7 +2402,10 @@ class SchemaSettingsDto implements IConvertible
     // @DataMember
     List<SchemaUniqueIndexDto>? uniqueIndexes;
 
-    SchemaSettingsDto({this.softDelete,this.hasRecordOwner,this.description,this.uniqueIndexes});
+    // @DataMember
+    bool? endUserOwnRecords;
+
+    SchemaSettingsDto({this.softDelete,this.hasRecordOwner,this.description,this.uniqueIndexes,this.endUserOwnRecords});
     SchemaSettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -2296,6 +2413,7 @@ class SchemaSettingsDto implements IConvertible
         hasRecordOwner = json['hasRecordOwner'];
         description = json['description'];
         uniqueIndexes = JsonConverters.fromJson(json['uniqueIndexes'],'List<SchemaUniqueIndexDto>',context!);
+        endUserOwnRecords = json['endUserOwnRecords'];
         return this;
     }
 
@@ -2303,7 +2421,8 @@ class SchemaSettingsDto implements IConvertible
         'softDelete': softDelete,
         'hasRecordOwner': hasRecordOwner,
         'description': description,
-        'uniqueIndexes': JsonConverters.toJson(uniqueIndexes,'List<SchemaUniqueIndexDto>',context!)
+        'uniqueIndexes': JsonConverters.toJson(uniqueIndexes,'List<SchemaUniqueIndexDto>',context!),
+        'endUserOwnRecords': endUserOwnRecords
     };
 
     getTypeName() => "SchemaSettingsDto";
@@ -2754,6 +2873,53 @@ class PublicFolderDto implements IConvertible
     };
 
     getTypeName() => "PublicFolderDto";
+    TypeContext? context = _ctx;
+}
+
+class RegisterFileResult implements IConvertible
+{
+    int index = 0;
+    String? path;
+    String? ownerUserId;
+    String? status;
+    String? fileId;
+    bool? verified;
+    String? warning;
+    String? errorCode;
+    int? errorStatus;
+    String? error;
+
+    RegisterFileResult({this.index=0,this.path,this.ownerUserId,this.status,this.fileId,this.verified,this.warning,this.errorCode,this.errorStatus,this.error});
+    RegisterFileResult.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        index = json['index'] ?? 0;
+        path = json['path'];
+        ownerUserId = json['ownerUserId'];
+        status = json['status'];
+        fileId = json['fileId'];
+        verified = json['verified'];
+        warning = json['warning'];
+        errorCode = json['errorCode'];
+        errorStatus = json['errorStatus'];
+        error = json['error'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'index': index,
+        'path': path,
+        'ownerUserId': ownerUserId,
+        'status': status,
+        'fileId': fileId,
+        'verified': verified,
+        'warning': warning,
+        'errorCode': errorCode,
+        'errorStatus': errorStatus,
+        'error': error
+    };
+
+    getTypeName() => "RegisterFileResult";
     TypeContext? context = _ctx;
 }
 
@@ -4126,6 +4292,39 @@ class ListFilesResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class RegisterFilesResponse extends ResponseBase implements IConvertible
+{
+    bool? dryRun;
+    int registered = 0;
+    int unchanged = 0;
+    int failed = 0;
+    List<RegisterFileResult>? items;
+
+    RegisterFilesResponse({this.dryRun,this.registered=0,this.unchanged=0,this.failed=0,this.items});
+    RegisterFilesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        dryRun = json['dryRun'];
+        registered = json['registered'] ?? 0;
+        unchanged = json['unchanged'] ?? 0;
+        failed = json['failed'] ?? 0;
+        items = JsonConverters.fromJson(json['items'],'List<RegisterFileResult>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'dryRun': dryRun,
+        'registered': registered,
+        'unchanged': unchanged,
+        'failed': failed,
+        'items': JsonConverters.toJson(items,'List<RegisterFileResult>',context!)
+    });
+
+    getTypeName() => "RegisterFilesResponse";
+    TypeContext? context = _ctx;
+}
+
 class RequestUploadUrlResponse extends ResponseBase implements IConvertible
 {
     String? url;
@@ -4209,6 +4408,27 @@ class GetOwnPushMessagesResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetOwnPushMessagesResponse";
+    TypeContext? context = _ctx;
+}
+
+class WriteLogsResponse extends ResponseBase implements IConvertible
+{
+    int accepted = 0;
+
+    WriteLogsResponse({this.accepted=0});
+    WriteLogsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        accepted = json['accepted'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'accepted': accepted
+    });
+
+    getTypeName() => "WriteLogsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -7972,7 +8192,13 @@ class CommitUploadRequest extends CodeMashRequestBase implements IReturn<EmptyRe
     // @DataMember
     String? fileName;
 
-    CommitUploadRequest({this.filesIntegrationId="",this.path="",this.contentType,this.sizeBytes,this.fileName});
+    // @DataMember
+    String? ownerUserId;
+
+    // @DataMember
+    bool? reassignOwner;
+
+    CommitUploadRequest({this.filesIntegrationId="",this.path="",this.contentType,this.sizeBytes,this.fileName,this.ownerUserId,this.reassignOwner});
     CommitUploadRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -7982,6 +8208,8 @@ class CommitUploadRequest extends CodeMashRequestBase implements IReturn<EmptyRe
         contentType = json['contentType'];
         sizeBytes = json['sizeBytes'];
         fileName = json['fileName'];
+        ownerUserId = json['ownerUserId'];
+        reassignOwner = json['reassignOwner'];
         return this;
     }
 
@@ -7990,7 +8218,9 @@ class CommitUploadRequest extends CodeMashRequestBase implements IReturn<EmptyRe
         'path': path,
         'contentType': contentType,
         'sizeBytes': sizeBytes,
-        'fileName': fileName
+        'fileName': fileName,
+        'ownerUserId': ownerUserId,
+        'reassignOwner': reassignOwner
     });
 
     createResponse() => EmptyResponse();
@@ -8367,6 +8597,51 @@ class GetPublicFileRequest extends RequestBase implements IReturn<Uint8List>, IC
 /**
 * Files
 */
+// @Route("/{version}/files/{filesIntegrationId}/register", "POST")
+// @Api(Description="Files")
+// @DataContract
+class RegisterFilesRequest extends CodeMashRequestBase implements IReturn<RegisterFilesResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String filesIntegrationId = "";
+
+    // @DataMember
+    List<RegisterFileItem>? items;
+
+    // @DataMember
+    bool? reassignOwner;
+
+    // @DataMember
+    bool? dryRun;
+
+    RegisterFilesRequest({this.filesIntegrationId="",this.items,this.reassignOwner,this.dryRun});
+    RegisterFilesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        items = JsonConverters.fromJson(json['items'],'List<RegisterFileItem>',context!);
+        reassignOwner = json['reassignOwner'];
+        dryRun = json['dryRun'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'items': JsonConverters.toJson(items,'List<RegisterFileItem>',context!),
+        'reassignOwner': reassignOwner,
+        'dryRun': dryRun
+    });
+
+    createResponse() => RegisterFilesResponse();
+    getResponseTypeName() => "RegisterFilesResponse";
+    getTypeName() => "RegisterFilesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Files
+*/
 // @Route("/{version}/files/{filesIntegrationId}/upload-url", "POST")
 // @Api(Description="Files")
 // @DataContract
@@ -8384,7 +8659,13 @@ class RequestUploadUrlRequest extends CodeMashRequestBase implements IReturn<Req
     // @DataMember
     int? expirationSeconds;
 
-    RequestUploadUrlRequest({this.filesIntegrationId="",this.path="",this.contentType="",this.expirationSeconds});
+    // @DataMember
+    String? ownerUserId;
+
+    // @DataMember
+    bool? reassignOwner;
+
+    RequestUploadUrlRequest({this.filesIntegrationId="",this.path="",this.contentType="",this.expirationSeconds,this.ownerUserId,this.reassignOwner});
     RequestUploadUrlRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8393,6 +8674,8 @@ class RequestUploadUrlRequest extends CodeMashRequestBase implements IReturn<Req
         path = json['path'] ?? "";
         contentType = json['contentType'] ?? "";
         expirationSeconds = json['expirationSeconds'];
+        ownerUserId = json['ownerUserId'];
+        reassignOwner = json['reassignOwner'];
         return this;
     }
 
@@ -8400,7 +8683,9 @@ class RequestUploadUrlRequest extends CodeMashRequestBase implements IReturn<Req
         'filesIntegrationId': filesIntegrationId,
         'path': path,
         'contentType': contentType,
-        'expirationSeconds': expirationSeconds
+        'expirationSeconds': expirationSeconds,
+        'ownerUserId': ownerUserId,
+        'reassignOwner': reassignOwner
     });
 
     createResponse() => RequestUploadUrlResponse();
@@ -8453,19 +8738,29 @@ class UseFileRequest extends CodeMashRequestBase implements IReturn<IdResponse>,
     // @DataMember
     String path = "";
 
-    UseFileRequest({this.filesIntegrationId="",this.path=""});
+    // @DataMember
+    String? ownerUserId;
+
+    // @DataMember
+    bool? reassignOwner;
+
+    UseFileRequest({this.filesIntegrationId="",this.path="",this.ownerUserId,this.reassignOwner});
     UseFileRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         filesIntegrationId = json['filesIntegrationId'] ?? "";
         path = json['path'] ?? "";
+        ownerUserId = json['ownerUserId'];
+        reassignOwner = json['reassignOwner'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'filesIntegrationId': filesIntegrationId,
-        'path': path
+        'path': path,
+        'ownerUserId': ownerUserId,
+        'reassignOwner': reassignOwner
     });
 
     createResponse() => IdResponse();
@@ -8759,6 +9054,38 @@ class MarkAllOwnPushMessagesReadRequest extends CodeMashRequestBase implements I
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "MarkAllOwnPushMessagesReadRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Send your app's own log entries to the project's logs.
+*/
+// @Route("/{version}/logs", "POST")
+// @Api(Description="Send your app's own log entries to the project's logs.")
+class WriteLogs extends CodeMashRequestBase implements IReturn<WriteLogsResponse>, IConvertible, IPost
+{
+    /**
+    * 1–100 entries.
+    */
+    // @ApiMember(Description="1–100 entries.", IsRequired=true)
+    List<WriteLogEntry> entries = [];
+
+    WriteLogs({this.entries=const []});
+    WriteLogs.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        entries = JsonConverters.fromJson(json['entries'],'List<WriteLogEntry>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'entries': JsonConverters.toJson(entries,'List<WriteLogEntry>',context!)
+    });
+
+    createResponse() => WriteLogsResponse();
+    getResponseTypeName() => "WriteLogsResponse";
+    getTypeName() => "WriteLogs";
     TypeContext? context = _ctx;
 }
 
@@ -9079,7 +9406,7 @@ class MarkAllNotificationsReadRequest extends CodeMashRequestBase implements IRe
     TypeContext? context = _ctx;
 }
 
-TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
+TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'JsonSchemaFieldDto': TypeInfo(TypeOf.AbstractClass),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
     'IReadOnlyDictionary<String,String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyDictionary<String,String>()),
@@ -9121,6 +9448,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'IPasskeyCeremonyRequest': TypeInfo(TypeOf.Interface),
     'CursorArgs': TypeInfo(TypeOf.Class, create:() => CursorArgs()),
     'PagingArgs': TypeInfo(TypeOf.Class, create:() => PagingArgs()),
+    'RegisterFileItem': TypeInfo(TypeOf.Class, create:() => RegisterFileItem()),
+    'WriteLogEntry': TypeInfo(TypeOf.Class, create:() => WriteLogEntry()),
     'PaymentOrderLineInput': TypeInfo(TypeOf.Class, create:() => PaymentOrderLineInput()),
     'CodeMashRelease': TypeInfo(TypeOf.Enum, enumValues:CodeMashRelease.values),
     'CodeMashRuntime': TypeInfo(TypeOf.Enum, enumValues:CodeMashRuntime.values),
@@ -9183,6 +9512,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'FileProvider': TypeInfo(TypeOf.Enum, enumValues:FileProvider.values),
     'FileResourceRefDto': TypeInfo(TypeOf.Class, create:() => FileResourceRefDto()),
     'PublicFolderDto': TypeInfo(TypeOf.Class, create:() => PublicFolderDto()),
+    'RegisterFileResult': TypeInfo(TypeOf.Class, create:() => RegisterFileResult()),
     'IntegrationTestResultItemDto': TypeInfo(TypeOf.Class, create:() => IntegrationTestResultItemDto()),
     'OwnPushDeviceDto': TypeInfo(TypeOf.Class, create:() => OwnPushDeviceDto()),
     'OwnPushMessageDto': TypeInfo(TypeOf.Class, create:() => OwnPushMessageDto()),
@@ -9249,6 +9579,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ListFilesResponse': TypeInfo(TypeOf.Class, create:() => ListFilesResponse()),
     'PaginatedResponse<FileResourceRefDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FileResourceRefDto>()),
     'List<PublicFolderDto>': TypeInfo(TypeOf.Class, create:() => <PublicFolderDto>[]),
+    'RegisterFilesResponse': TypeInfo(TypeOf.Class, create:() => RegisterFilesResponse()),
+    'List<RegisterFileResult>': TypeInfo(TypeOf.Class, create:() => <RegisterFileResult>[]),
     'RequestUploadUrlResponse': TypeInfo(TypeOf.Class, create:() => RequestUploadUrlResponse()),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
     'IReadOnlyList<IntegrationTestResultItemDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<IntegrationTestResultItemDto>()),
@@ -9256,6 +9588,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<OwnPushDeviceDto>': TypeInfo(TypeOf.Class, create:() => <OwnPushDeviceDto>[]),
     'GetOwnPushMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetOwnPushMessagesResponse()),
     'PaginatedResponse<OwnPushMessageDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<OwnPushMessageDto>()),
+    'WriteLogsResponse': TypeInfo(TypeOf.Class, create:() => WriteLogsResponse()),
     'GetPaymentOrderResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentOrderResponse()),
     'GetPaymentOrdersResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentOrdersResponse()),
     'PaginatedResponse<PaymentOrderDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PaymentOrderDto>()),
@@ -9364,6 +9697,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetSignedUrlRequest': TypeInfo(TypeOf.Class, create:() => GetSignedUrlRequest()),
     'ListFilesRequest': TypeInfo(TypeOf.Class, create:() => ListFilesRequest()),
     'GetPublicFileRequest': TypeInfo(TypeOf.Class, create:() => GetPublicFileRequest()),
+    'RegisterFilesRequest': TypeInfo(TypeOf.Class, create:() => RegisterFilesRequest()),
+    'List<RegisterFileItem>': TypeInfo(TypeOf.Class, create:() => <RegisterFileItem>[]),
     'RequestUploadUrlRequest': TypeInfo(TypeOf.Class, create:() => RequestUploadUrlRequest()),
     'TestFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationRequest()),
     'UseFileRequest': TypeInfo(TypeOf.Class, create:() => UseFileRequest()),
@@ -9374,6 +9709,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetOwnPushMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetOwnPushMessagesRequest()),
     'MarkOwnPushMessageReadRequest': TypeInfo(TypeOf.Class, create:() => MarkOwnPushMessageReadRequest()),
     'MarkAllOwnPushMessagesReadRequest': TypeInfo(TypeOf.Class, create:() => MarkAllOwnPushMessagesReadRequest()),
+    'WriteLogs': TypeInfo(TypeOf.Class, create:() => WriteLogs()),
+    'List<WriteLogEntry>': TypeInfo(TypeOf.Class, create:() => <WriteLogEntry>[]),
     'CreatePaymentOrderRequest': TypeInfo(TypeOf.Class, create:() => CreatePaymentOrderRequest()),
     'List<PaymentOrderLineInput>': TypeInfo(TypeOf.Class, create:() => <PaymentOrderLineInput>[]),
     'GetPaymentOrderRequest': TypeInfo(TypeOf.Class, create:() => GetPaymentOrderRequest()),
