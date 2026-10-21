@@ -56,7 +56,7 @@ There is no `client.api.xxx` or `client.hub.xxx` middle layer.
 
 | Client | Resources |
 |--------|-----------|
-| `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `database`, `files`, `payments`, `publicProjects`, `userAuth`, `users` |
+| `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `database`, `files`, `logs`, `payments`, `publicProjects`, `userAuth`, `users` |
 | `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `internals`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
 
 ## Configuration
@@ -857,6 +857,76 @@ print(started['checkout']['paymentUrl']); // send the buyer here
 
 When the provider confirms the payment, the project's webhook destinations get
 `payments.order.paid` (see `doc/webhooks_receiver.md`).
+
+## Logs
+
+### Write your app's own log lines
+
+`api.logs.writeLogs` sends 1–100 entries to the project's Logs. The call
+returns at once — the entries are queued — and answers `{ accepted }`.
+
+```dart
+await api.logs.writeLogs(body: {
+  'entries': [
+    {
+      'level': 'error', // information (default) | warning | error
+      'title': 'Payment failed', // 1–200 characters
+      'message': 'card declined', // at most 8 000
+      'eventCode': 'order:payment_failed', // stored as app:order:payment_failed
+      'correlationId': 'checkout-42', // groups lines into one flow
+      'meta': {'orderId': 'ord_1'}, // at most 20 keys
+    },
+  ],
+});
+```
+
+Refusals: 400 for a broken entry, 400 `CM-ERRORS-LOGGING-002` when the Logs
+module is off, and 429 `CM-ERRORS-LOGGING-003` when the project's per-minute
+quota is used up. The 429 is a `NorbixRateLimitError`; its
+`retryAfterSeconds` (the `Retry-After` header) says when to send again. The SDK
+never resends a POST on its own.
+
+```dart
+try {
+  await api.logs.writeLogs(body: {'entries': entries});
+} on NorbixRateLimitError catch (e) {
+  await Future<void>.delayed(Duration(seconds: e.retryAfterSeconds ?? 60));
+}
+```
+
+### Read, clean and configure (Hub)
+
+| Method | Route |
+| --- | --- |
+| `getLogs(query:)` | `GET /{version}/logs` — `level?`, `module?`, `logCorrelationId?`, `eventCode?`, `search?`, `metaKey?` + `metaValue?`, `fromUtc?`, `toUtc?`, `pageSize?`, `startingAfter?`, `endingBefore?` |
+| `getLog(id:)` | `GET /{version}/logs/{id}` — one entry by id |
+| `getLogsByCorrelationId(query:)` | `GET /{version}/logs/audit` — `targetCorrelationId` |
+| `cleanLogs()` | `POST /{version}/logs/clean` — deletes every stored entry |
+| `getLogSettings()` / `saveLogSettings(body:)` | `GET` / `POST /{version}/logs/settings` — `skipCloudDashboardLogs`, `skipHttpBodyMeta`, `aiChatLoggingEnabled` |
+| `getLoggingIntegrations`, `getLoggingIntegration`, `saveLoggingIntegration`, `testLoggingIntegration`, `enableLoggingIntegration`, `disableLoggingIntegration`, `deleteLoggingIntegration` | `/{version}/logs/integrations…` |
+
+### Logging integrations — test after saving
+
+Nothing is delivered to a logging integration (Datadog, AWS CloudWatch,
+MongoDB, …) until its last test passed. After saving or changing one, call
+`testLoggingIntegration`:
+
+```dart
+final saved = await hub.logs.saveLoggingIntegration(body: {
+  'integration': {
+    'provider': 'MongoDB',
+    'integrationName': 'Audit copy',
+    'isEnabled': true,
+    'connectionString': 'mongodb+srv://…',
+    'databaseName': 'logs', // optional
+  },
+}) as Map<String, dynamic>;
+await hub.logs.testLoggingIntegration(body: {'integrationId': saved['id']});
+```
+
+Request types (`MongoDbLoggingIntegrationRequest`,
+`DataDogLoggingIntegrationRequest` with its `site`,
+`AwsCloudWatchLoggingIntegrationRequest`, …) are in `references/hub.dtos.dart`.
 
 ## Notifications
 
