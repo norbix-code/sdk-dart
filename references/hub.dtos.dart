@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-21 18:13:09
+Date: 2026-10-22 07:38:15
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -1442,7 +1442,12 @@ class PrometheusLoggingIntegrationRequest extends LoggingIntegrationRequest impl
 class DataDogLoggingIntegrationRequest extends LoggingIntegrationRequest implements IConvertible
 {
     LoggingProvider? provider;
+    /**
+    * The Datadog site of your account, one of: datadoghq.com, us3.datadoghq.com, us5.datadoghq.com, datadoghq.eu, ap1.datadoghq.com, ap2.datadoghq.com, ddog-gov.com (DataDogSites.All).
+    */
+    // @ApiMember(Description="The Datadog site of your account, one of: datadoghq.com, us3.datadoghq.com, us5.datadoghq.com, datadoghq.eu, ap1.datadoghq.com, ap2.datadoghq.com, ddog-gov.com (DataDogSites.All).", IsRequired=true)
     String site = "";
+
     String serviceName = "";
     String environment = "";
     String apiKey = "";
@@ -37271,9 +37276,9 @@ class EnableMembership extends CodeMashRequestBase implements IReturn<EmptyRespo
 class ImportUsersRequest extends CodeMashRequestBase implements IReturn<ImportUsersResponse>, IConvertible, IPost
 {
     /**
-    * True (default) = check every row and write nothing. False = write.
+    * True = check every row and write nothing. False = write. Empty = true (check only, write nothing).
     */
-    // @ApiMember(Description="True (default) = check every row and write nothing. False = write.")
+    // @ApiMember(Description="True = check every row and write nothing. False = write. Empty = true (check only, write nothing).")
     bool? dryRun;
 
     /**
@@ -37319,9 +37324,9 @@ class ImportUsersRequest extends CodeMashRequestBase implements IReturn<ImportUs
 class RepairLoginProjectIdsRequest extends CodeMashRequestBase implements IReturn<RepairLoginProjectIdsResponse>, IConvertible, IPost
 {
     /**
-    * True (default) = only count what would change. False = write.
+    * True = only count what would change. False = write. Empty = true (only count).
     */
-    // @ApiMember(Description="True (default) = only count what would change. False = write.")
+    // @ApiMember(Description="True = only count what would change. False = write. Empty = true (only count).")
     bool? dryRun;
 
     RepairLoginProjectIdsRequest({this.dryRun});
@@ -38010,9 +38015,9 @@ class SavePasskeySettings extends CodeMashRequestBase implements IReturn<EmptyRe
     int recoveryCodeCount = 0;
 
     /**
-    * Whether recovery codes are generated automatically at signup.
+    * Whether recovery codes are generated automatically at signup. Empty = true (generated).
     */
-    // @ApiMember(Description="Whether recovery codes are generated automatically at signup.")
+    // @ApiMember(Description="Whether recovery codes are generated automatically at signup. Empty = true (generated).")
     bool? generateRecoveryCodesAtSignup;
 
     /**
@@ -39453,10 +39458,10 @@ class ApplyDatabaseSchemaBundleRequest extends CodeMashRequestBase implements IR
     bool? translatable;
 
     /**
-    * false = leave every collection as a draft instead of publishing v1. Default true.
+    * false = leave every collection as a draft instead of publishing v1. Empty = true (publish v1).
     */
     // @DataMember
-    // @ApiMember(Description="false = leave every collection as a draft instead of publishing v1. Default true.")
+    // @ApiMember(Description="false = leave every collection as a draft instead of publishing v1. Empty = true (publish v1).")
     bool? publish;
 
     ApplyDatabaseSchemaBundleRequest({this.entities,this.bundleJson,this.tier,this.translatable,this.publish});
@@ -39560,9 +39565,9 @@ class DiscardDatabaseSchemaDraftRequest extends CodeMashRequestBase implements I
 class EndUserOwnRecordsReportRequest extends CodeMashRequestBase implements IReturn<EndUserOwnRecordsReportResponse>, IConvertible, IPost
 {
     /**
-    * True (default) = only list. False = turn the switch on for the schemas in 'enable'.
+    * True = only list. False = turn the switch on for the schemas in 'enable'. Empty = true (only list).
     */
-    // @ApiMember(Description="True (default) = only list. False = turn the switch on for the schemas in 'enable'.")
+    // @ApiMember(Description="True = only list. False = turn the switch on for the schemas in 'enable'. Empty = true (only list).")
     bool? dryRun;
 
     /**
@@ -50929,9 +50934,9 @@ class SaveWebhookDestinationRequest extends CodeMashRequestBase implements IRetu
     Map<String,String?>? extraHeaders;
 
     /**
-    * Whether this destination is enabled for delivery. Defaults to true.
+    * Whether this destination is enabled for delivery. Empty = true (enabled).
     */
-    // @ApiMember(Description="Whether this destination is enabled for delivery. Defaults to true.")
+    // @ApiMember(Description="Whether this destination is enabled for delivery. Empty = true (enabled).")
     bool? isEnabled;
 
     SaveWebhookDestinationRequest({this.destinationId,this.destinationName="",this.endpointUrl="",this.selectedEvents=const [],this.extraHeaders,this.isEnabled});
@@ -51578,9 +51583,9 @@ class MergeContactsRequest extends CodeMashRequestBase implements IReturn<EmptyR
 class RepairContactRolesRequest extends CodeMashRequestBase implements IReturn<RepairContactRolesResponse>, IConvertible, IPost
 {
     /**
-    * True (default) = only count what would change. False = write.
+    * True = only count what would change. False = write. Empty = true (only count).
     */
-    // @ApiMember(Description="True (default) = only count what would change. False = write.")
+    // @ApiMember(Description="True = only count what would change. False = write. Empty = true (only count).")
     bool? dryRun;
 
     RepairContactRolesRequest({this.dryRun});
