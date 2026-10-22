@@ -31,7 +31,6 @@ export 'src/hub/resources/email_notifications.dart';
 export 'src/hub/resources/email_unsubscribe.dart';
 export 'src/hub/resources/environments.dart';
 export 'src/hub/resources/files.dart';
-export 'src/hub/resources/internals.dart';
 export 'src/hub/resources/logs.dart';
 export 'src/hub/resources/membership.dart';
 export 'src/hub/resources/payments.dart';
