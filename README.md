@@ -57,7 +57,7 @@ There is no `client.api.xxx` or `client.hub.xxx` middle layer.
 | Client | Resources |
 |--------|-----------|
 | `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `database`, `files`, `logs`, `payments`, `publicProjects`, `userAuth`, `users` |
-| `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `internals`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
+| `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
 
 ## Configuration
 
