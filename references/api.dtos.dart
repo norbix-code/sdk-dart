@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-22 07:38:15
+Date: 2026-10-23 15:27:03
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -883,17 +883,26 @@ abstract class SaveUserWithRolesBase extends SaveUser
     // @DataMember
     List<String> roles = [];
 
-    SaveUserWithRolesBase({this.roles=const []});
+    /**
+    * Tags to put on the new user's contact (free labels campaigns and segments select by, normalised like any tag). Only here, on the routes that need membership:create — a public self sign-up cannot tag itself. Ignored for a service user (no contact).
+    */
+    // @DataMember
+    // @ApiMember(Description="Tags to put on the new user's contact (free labels campaigns and segments select by, normalised like any tag). Only here, on the routes that need membership:create — a public self sign-up cannot tag itself. Ignored for a service user (no contact).")
+    List<String>? tags;
+
+    SaveUserWithRolesBase({this.roles=const [],this.tags});
     SaveUserWithRolesBase.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         roles = JsonConverters.fromJson(json['roles'],'List<String>',context!) ?? [];
+        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'roles': JsonConverters.toJson(roles,'List<String>',context!)
+        'roles': JsonConverters.toJson(roles,'List<String>',context!),
+        'tags': JsonConverters.toJson(tags,'List<String>',context!)
     });
 
     getTypeName() => "SaveUserWithRolesBase";
@@ -3714,6 +3723,34 @@ class InvokeEndUserAiToolResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class SaveGuestUserResponse extends IdResponse implements IConvertible
+{
+    // @DataMember
+    String? userName;
+
+    // @DataMember
+    String? password;
+
+    SaveGuestUserResponse({this.userName,this.password});
+    SaveGuestUserResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        userName = json['userName'];
+        password = json['password'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'userName': userName,
+        'password': password
+    });
+
+    getTypeName() => "SaveGuestUserResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetUserResponse extends ResponseBase implements IConvertible
 {
     AuthDto? user;
@@ -3788,6 +3825,109 @@ class PasskeyOkResponse extends ResponseBase implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson();
     getTypeName() => "PasskeyOkResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SendTestPasswordResetResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    bool? queued;
+
+    // @DataMember
+    String? reason;
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    DateTime? expiresAtUtc;
+
+    // @DataMember
+    String? integrationId;
+
+    // @DataMember
+    String? integrationName;
+
+    // @DataMember
+    String? provider;
+
+    // @DataMember
+    String? integrationProblem;
+
+    // @DataMember
+    String? templateId;
+
+    // @DataMember
+    String? templateName;
+
+    // @DataMember
+    String? templateSource;
+
+    // @DataMember
+    String? language;
+
+    // @DataMember
+    String? languageRule;
+
+    // @DataMember
+    List<String>? templateLanguages;
+
+    // @DataMember
+    String? fallback;
+
+    // @DataMember
+    String? mjmlRenderer;
+
+    SendTestPasswordResetResponse({this.queued,this.reason,this.env="",this.correlationId,this.expiresAtUtc,this.integrationId,this.integrationName,this.provider,this.integrationProblem,this.templateId,this.templateName,this.templateSource,this.language,this.languageRule,this.templateLanguages,this.fallback,this.mjmlRenderer});
+    SendTestPasswordResetResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        queued = json['queued'];
+        reason = json['reason'];
+        env = json['env'] ?? "";
+        correlationId = json['correlationId'];
+        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!);
+        integrationId = json['integrationId'];
+        integrationName = json['integrationName'];
+        provider = json['provider'];
+        integrationProblem = json['integrationProblem'];
+        templateId = json['templateId'];
+        templateName = json['templateName'];
+        templateSource = json['templateSource'];
+        language = json['language'];
+        languageRule = json['languageRule'];
+        templateLanguages = JsonConverters.fromJson(json['templateLanguages'],'List<String>',context!);
+        fallback = json['fallback'];
+        mjmlRenderer = json['mjmlRenderer'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'queued': queued,
+        'reason': reason,
+        'env': env,
+        'correlationId': correlationId,
+        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!),
+        'integrationId': integrationId,
+        'integrationName': integrationName,
+        'provider': provider,
+        'integrationProblem': integrationProblem,
+        'templateId': templateId,
+        'templateName': templateName,
+        'templateSource': templateSource,
+        'language': language,
+        'languageRule': languageRule,
+        'templateLanguages': JsonConverters.toJson(templateLanguages,'List<String>',context!),
+        'fallback': fallback,
+        'mjmlRenderer': mjmlRenderer
+    });
+
+    getTypeName() => "SendTestPasswordResetResponse";
     TypeContext? context = _ctx;
 }
 
@@ -5343,7 +5483,7 @@ class SaveSystemUserWithPermissions extends SaveUserWithRolesBase implements IRe
 // @Route("/{version}/membership/auth/register/guest", "POST")
 // @Api(Description="Membership")
 // @DataContract
-class SaveGuestUser extends SaveUser implements IReturn<IdResponse>, IConvertible, IPost
+class SaveGuestUser extends SaveUser implements IReturn<SaveGuestUserResponse>, IConvertible, IPost
 {
     SaveGuestUser();
     SaveGuestUser.fromJson(Map<String, dynamic> json) : super.fromJson(json);
@@ -5353,8 +5493,8 @@ class SaveGuestUser extends SaveUser implements IReturn<IdResponse>, IConvertibl
     }
 
     Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
+    createResponse() => SaveGuestUserResponse();
+    getResponseTypeName() => "SaveGuestUserResponse";
     getTypeName() => "SaveGuestUser";
     TypeContext? context = _ctx;
 }
@@ -6617,6 +6757,40 @@ class ConfirmPasswordResetRequest extends CodeMashRequestBase implements IReturn
     createResponse() => PasskeyOkResponse();
     getResponseTypeName() => "PasskeyOkResponse";
     getTypeName() => "ConfirmPasswordResetRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Membership · Password
+*/
+// @Route("/{version}/membership/userauth/password/reset/test", "POST")
+// @Api(Description="Membership · Password")
+// @DataContract
+class SendTestPasswordResetRequest extends CodeMashRequestBase implements IReturn<SendTestPasswordResetResponse>, IConvertible, IPost
+{
+    /**
+    * Email address of the project user (a login in the request environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Email address of the project user (a login in the request environment).", IsRequired=true)
+    String email = "";
+
+    SendTestPasswordResetRequest({this.email=""});
+    SendTestPasswordResetRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        email = json['email'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'email': email
+    });
+
+    createResponse() => SendTestPasswordResetResponse();
+    getResponseTypeName() => "SendTestPasswordResetResponse";
+    getTypeName() => "SendTestPasswordResetRequest";
     TypeContext? context = _ctx;
 }
 
@@ -9250,10 +9424,10 @@ class GetPaymentOrdersRequest extends CodeMashListPaginationRequestBase implemen
 }
 
 /**
-* Opens a Montonio checkout for a stored order and answers where the buyer pays. The buyer (own order) or the server.
+* Opens a provider checkout (Montonio or Neopay) for a stored order and answers where the buyer pays. The buyer (own order) or the server.
 */
 // @Route("/{version}/payments/orders/{Id}/checkout", "POST")
-// @Api(Description="Opens a Montonio checkout for a stored order and answers where the buyer pays. The buyer (own order) or the server.")
+// @Api(Description="Opens a provider checkout (Montonio or Neopay) for a stored order and answers where the buyer pays. The buyer (own order) or the server.")
 class StartPaymentCheckoutRequest extends CodeMashRequestBase implements IReturn<StartPaymentCheckoutResponse>, IConvertible, IPost
 {
     /**
@@ -9263,15 +9437,15 @@ class StartPaymentCheckoutRequest extends CodeMashRequestBase implements IReturn
     String id = "";
 
     /**
-    * The Montonio integration (int_…) of the project in the request's environment.
+    * The checkout integration (int_…, Montonio or Neopay) of the project in the request's environment.
     */
-    // @ApiMember(Description="The Montonio integration (int_…) of the project in the request's environment.", IsRequired=true)
+    // @ApiMember(Description="The checkout integration (int_…, Montonio or Neopay) of the project in the request's environment.", IsRequired=true)
     String integrationId = "";
 
     /**
-    * bankLink (default), card, applePay or googlePay.
+    * bankLink (default), card, applePay or googlePay (the wallets: Montonio only).
     */
-    // @ApiMember(Description="bankLink (default), card, applePay or googlePay.")
+    // @ApiMember(Description="bankLink (default), card, applePay or googlePay (the wallets: Montonio only).")
     String? method;
 
     /**
@@ -9545,11 +9719,13 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetEndUserAiToolsResponse': TypeInfo(TypeOf.Class, create:() => GetEndUserAiToolsResponse()),
     'List<EndUserAiTool>': TypeInfo(TypeOf.Class, create:() => <EndUserAiTool>[]),
     'InvokeEndUserAiToolResponse': TypeInfo(TypeOf.Class, create:() => InvokeEndUserAiToolResponse()),
+    'SaveGuestUserResponse': TypeInfo(TypeOf.Class, create:() => SaveGuestUserResponse()),
     'GetUserResponse': TypeInfo(TypeOf.Class, create:() => GetUserResponse()),
     'GetUsersResponse': TypeInfo(TypeOf.Class, create:() => GetUsersResponse()),
     'PaginatedResponse<AuthDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AuthDto>()),
     'GetUserPreferencesResponse': TypeInfo(TypeOf.Class, create:() => GetUserPreferencesResponse()),
     'PasskeyOkResponse': TypeInfo(TypeOf.Class, create:() => PasskeyOkResponse()),
+    'SendTestPasswordResetResponse': TypeInfo(TypeOf.Class, create:() => SendTestPasswordResetResponse()),
     'PasskeyCeremonyOptionsResponse': TypeInfo(TypeOf.Class, create:() => PasskeyCeremonyOptionsResponse()),
     'PasskeyAuthTokensResponse': TypeInfo(TypeOf.Class, create:() => PasskeyAuthTokensResponse()),
     'PasskeyListResponse': TypeInfo(TypeOf.Class, create:() => PasskeyListResponse()),
@@ -9649,6 +9825,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'ChangePasswordRequest': TypeInfo(TypeOf.Class, create:() => ChangePasswordRequest()),
     'RequestPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => RequestPasswordResetRequest()),
     'ConfirmPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => ConfirmPasswordResetRequest()),
+    'SendTestPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => SendTestPasswordResetRequest()),
     'PasskeyAuthenticationOptionsRequest': TypeInfo(TypeOf.Class, create:() => PasskeyAuthenticationOptionsRequest()),
     'VerifyPasskeyAuthenticationRequest': TypeInfo(TypeOf.Class, create:() => VerifyPasskeyAuthenticationRequest()),
     'ListPasskeysRequest': TypeInfo(TypeOf.Class, create:() => ListPasskeysRequest()),
