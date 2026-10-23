@@ -1020,6 +1020,20 @@ calls `getSmsCampaignMessage`, `getEmailCampaignMessage` and
 read the campaign's messages with `get*CampaignMessages(campaignId:)`, or one
 message of a batch with `get*CampaignBatchNotification`.
 
+### Cloning a template
+
+`emailNotifications.cloneEmailTemplate`, `smsNotifications.cloneSmsTemplate`
+and `pushNotifications.clonePushTemplate` copy a template and answer the new
+copy's id (`{'id': '…'}`), so you can open or edit the copy without listing
+the templates again:
+
+```dart
+final copy = await hub.emailNotifications.cloneEmailTemplate(id: 'tpl_welcome')
+    as Map<String, dynamic>;
+final template =
+    await hub.emailNotifications.getEmailTemplate(id: copy['id'] as String);
+```
+
 ### Your own team-member record and phone
 
 Two calls on `hub.accounts` work on the signed-in person only — never on
