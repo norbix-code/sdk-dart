@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-26 10:25:57
+Date: 2026-10-26 11:03:33
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -260,6 +260,27 @@ class AzureCommunicationEmailIntegrationRequest extends EmailIntegrationRequest 
     });
 
     getTypeName() => "AzureCommunicationEmailIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class FakeEmailIntegrationRequest extends EmailIntegrationRequest implements IConvertible
+{
+    EmailProvider? provider;
+
+    FakeEmailIntegrationRequest({this.provider});
+    FakeEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'EmailProvider',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'EmailProvider',context!)
+    });
+
+    getTypeName() => "FakeEmailIntegrationRequest";
     TypeContext? context = _ctx;
 }
 
@@ -3040,6 +3061,308 @@ class AppleApnsPushIntegrationRequest extends PushIntegrationRequest implements 
     });
 
     getTypeName() => "AppleApnsPushIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class FakePushIntegrationRequest extends PushIntegrationRequest implements IConvertible
+{
+    PushProvider? provider;
+
+    FakePushIntegrationRequest({this.provider});
+    FakePushIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'PushProvider',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'PushProvider',context!)
+    });
+
+    getTypeName() => "FakePushIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+enum SmsProvider
+{
+    Twilio,
+    Vonage,
+    Plivo,
+    Telnyx,
+    Bird,
+    Telesign,
+    Sinch,
+    Fake,
+}
+
+abstract class SmsIntegrationRequest
+{
+    String? integrationId;
+    SmsProvider? provider;
+    String integrationName = "";
+    bool? isEnabled;
+
+    SmsIntegrationRequest({this.integrationId,this.provider,this.integrationName="",this.isEnabled});
+    SmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        integrationId = json['integrationId'];
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        integrationName = json['integrationName'] ?? "";
+        isEnabled = json['isEnabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'integrationId': integrationId,
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'integrationName': integrationName,
+        'isEnabled': isEnabled
+    };
+
+    getTypeName() => "SmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class BirdSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+    String originator = "";
+    String region = "";
+    String apiKey = "";
+
+    BirdSmsIntegrationRequest({this.provider,this.originator="",this.region="",this.apiKey=""});
+    BirdSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        originator = json['originator'] ?? "";
+        region = json['region'] ?? "";
+        apiKey = json['apiKey'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'originator': originator,
+        'region': region,
+        'apiKey': apiKey
+    });
+
+    getTypeName() => "BirdSmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class PlivoSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+    String authId = "";
+    String fromPhoneNumber = "";
+    String authToken = "";
+
+    PlivoSmsIntegrationRequest({this.provider,this.authId="",this.fromPhoneNumber="",this.authToken=""});
+    PlivoSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        authId = json['authId'] ?? "";
+        fromPhoneNumber = json['fromPhoneNumber'] ?? "";
+        authToken = json['authToken'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'authId': authId,
+        'fromPhoneNumber': fromPhoneNumber,
+        'authToken': authToken
+    });
+
+    getTypeName() => "PlivoSmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class SinchSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+    String servicePlanId = "";
+    String fromPhoneNumber = "";
+    String apiKey = "";
+    String apiSecret = "";
+
+    SinchSmsIntegrationRequest({this.provider,this.servicePlanId="",this.fromPhoneNumber="",this.apiKey="",this.apiSecret=""});
+    SinchSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        servicePlanId = json['servicePlanId'] ?? "";
+        fromPhoneNumber = json['fromPhoneNumber'] ?? "";
+        apiKey = json['apiKey'] ?? "";
+        apiSecret = json['apiSecret'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'servicePlanId': servicePlanId,
+        'fromPhoneNumber': fromPhoneNumber,
+        'apiKey': apiKey,
+        'apiSecret': apiSecret
+    });
+
+    getTypeName() => "SinchSmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class TelesignSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+    String customerId = "";
+    String fromSender = "";
+    String apiKey = "";
+
+    TelesignSmsIntegrationRequest({this.provider,this.customerId="",this.fromSender="",this.apiKey=""});
+    TelesignSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        customerId = json['customerId'] ?? "";
+        fromSender = json['fromSender'] ?? "";
+        apiKey = json['apiKey'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'customerId': customerId,
+        'fromSender': fromSender,
+        'apiKey': apiKey
+    });
+
+    getTypeName() => "TelesignSmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class TelnyxSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+    String messagingProfileId = "";
+    String fromPhoneNumber = "";
+    String apiKey = "";
+
+    TelnyxSmsIntegrationRequest({this.provider,this.messagingProfileId="",this.fromPhoneNumber="",this.apiKey=""});
+    TelnyxSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        messagingProfileId = json['messagingProfileId'] ?? "";
+        fromPhoneNumber = json['fromPhoneNumber'] ?? "";
+        apiKey = json['apiKey'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'messagingProfileId': messagingProfileId,
+        'fromPhoneNumber': fromPhoneNumber,
+        'apiKey': apiKey
+    });
+
+    getTypeName() => "TelnyxSmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class TwilioSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+    String accountSid = "";
+    String fromPhoneNumber = "";
+    String authToken = "";
+    bool? deliveryEventsEnabled;
+    String? statusCallbackUrl;
+
+    TwilioSmsIntegrationRequest({this.provider,this.accountSid="",this.fromPhoneNumber="",this.authToken="",this.deliveryEventsEnabled,this.statusCallbackUrl});
+    TwilioSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        accountSid = json['accountSid'] ?? "";
+        fromPhoneNumber = json['fromPhoneNumber'] ?? "";
+        authToken = json['authToken'] ?? "";
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        statusCallbackUrl = json['statusCallbackUrl'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'accountSid': accountSid,
+        'fromPhoneNumber': fromPhoneNumber,
+        'authToken': authToken,
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'statusCallbackUrl': statusCallbackUrl
+    });
+
+    getTypeName() => "TwilioSmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class VonageSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+    String apiKey = "";
+    String fromSender = "";
+    String apiSecret = "";
+
+    VonageSmsIntegrationRequest({this.provider,this.apiKey="",this.fromSender="",this.apiSecret=""});
+    VonageSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        apiKey = json['apiKey'] ?? "";
+        fromSender = json['fromSender'] ?? "";
+        apiSecret = json['apiSecret'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
+        'apiKey': apiKey,
+        'fromSender': fromSender,
+        'apiSecret': apiSecret
+    });
+
+    getTypeName() => "VonageSmsIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class FakeSmsIntegrationRequest extends SmsIntegrationRequest implements IConvertible
+{
+    SmsProvider? provider;
+
+    FakeSmsIntegrationRequest({this.provider});
+    FakeSmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'SmsProvider',context!)
+    });
+
+    getTypeName() => "FakeSmsIntegrationRequest";
     TypeContext? context = _ctx;
 }
 
@@ -7688,18 +8011,6 @@ class MongoDbAtlasFlexManagedIntegrationDto extends DatabaseIntegrationDto imple
     TypeContext? context = _ctx;
 }
 
-enum SmsProvider
-{
-    Twilio,
-    Vonage,
-    Plivo,
-    Telnyx,
-    Bird,
-    Telesign,
-    Sinch,
-    Fake,
-}
-
 class SmsIntegrationDto extends IntegrationDto implements IConvertible
 {
     SmsProvider? provider;
@@ -8288,6 +8599,34 @@ class SmtpEmailIntegrationDto extends EmailIntegrationDto implements IConvertibl
     });
 
     getTypeName() => "SmtpEmailIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class AzureCommunicationEmailIntegrationDto extends EmailIntegrationDto implements IConvertible
+{
+    // @DataMember
+    String endpoint = "";
+
+    // @DataMember
+    bool? deliveryEventsEnabled;
+
+    AzureCommunicationEmailIntegrationDto({this.endpoint="",this.deliveryEventsEnabled});
+    AzureCommunicationEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        endpoint = json['endpoint'] ?? "";
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'endpoint': endpoint,
+        'deliveryEventsEnabled': deliveryEventsEnabled
+    });
+
+    getTypeName() => "AzureCommunicationEmailIntegrationDto";
     TypeContext? context = _ctx;
 }
 
@@ -13050,35 +13389,6 @@ class SaveSmsTemplate extends CodeMashRequestBase implements IConvertible
     });
 
     getTypeName() => "SaveSmsTemplate";
-    TypeContext? context = _ctx;
-}
-
-abstract class SmsIntegrationRequest
-{
-    String? integrationId;
-    SmsProvider? provider;
-    String integrationName = "";
-    bool? isEnabled;
-
-    SmsIntegrationRequest({this.integrationId,this.provider,this.integrationName="",this.isEnabled});
-    SmsIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        integrationId = json['integrationId'];
-        provider = JsonConverters.fromJson(json['provider'],'SmsProvider',context!);
-        integrationName = json['integrationName'] ?? "";
-        isEnabled = json['isEnabled'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'integrationId': integrationId,
-        'provider': JsonConverters.toJson(provider,'SmsProvider',context!),
-        'integrationName': integrationName,
-        'isEnabled': isEnabled
-    };
-
-    getTypeName() => "SmsIntegrationRequest";
     TypeContext? context = _ctx;
 }
 
@@ -33173,6 +33483,7 @@ class InternalsTypeGen implements IConvertible, IGet
     SendGridEmailIntegrationRequest? typegen_2_SendGridEmailIntegrationRequest;
     MailGunEmailIntegrationRequest? typegen_3_MailGunEmailIntegrationRequest;
     AzureCommunicationEmailIntegrationRequest? typegen_3a_AzureCommunicationEmailIntegrationRequest;
+    FakeEmailIntegrationRequest? typegen_297_FakeEmailIntegrationRequest;
     EmailToAllUsersDeliverySettingsRequest? typegen_4_EmailToAllUsersDeliverySettingsRequest;
     EmailToAccountUsersDeliverySettingsRequest? typegen_5_EmailToAccountUsersDeliverySettingsRequest;
     EmailToCollectionRecordsDeliverySettingsRequest? typegen_6_EmailToCollectionRecordsDeliverySettingsRequest;
@@ -33237,6 +33548,15 @@ class InternalsTypeGen implements IConvertible, IGet
     FirefoxWebPushIntegrationRequest? typegen_60_FirefoxWebPushIntegrationRequest;
     AndroidFirebasePushIntegrationRequest? typegen_61_AndroidFirebasePushIntegrationRequest;
     AppleApnsPushIntegrationRequest? typegen_62_AppleApnsPushIntegrationRequest;
+    FakePushIntegrationRequest? typegen_298_FakePushIntegrationRequest;
+    BirdSmsIntegrationRequest? typegen_299_BirdSmsIntegrationRequest;
+    PlivoSmsIntegrationRequest? typegen_300_PlivoSmsIntegrationRequest;
+    SinchSmsIntegrationRequest? typegen_301_SinchSmsIntegrationRequest;
+    TelesignSmsIntegrationRequest? typegen_302_TelesignSmsIntegrationRequest;
+    TelnyxSmsIntegrationRequest? typegen_303_TelnyxSmsIntegrationRequest;
+    TwilioSmsIntegrationRequest? typegen_304_TwilioSmsIntegrationRequest;
+    VonageSmsIntegrationRequest? typegen_305_VonageSmsIntegrationRequest;
+    FakeSmsIntegrationRequest? typegen_306_FakeSmsIntegrationRequest;
     AwsLambdaCodeIntegrationRequest? typegen_65_AwsLambdaCodeIntegrationRequest;
     AzureFunctionsCodeIntegrationRequest? typegen_66_AzureFunctionsCodeIntegrationRequest;
     GoogleCloudFunctionsCodeIntegrationRequest? typegen_67_GoogleCloudFunctionsCodeIntegrationRequest;
@@ -33370,6 +33690,7 @@ class InternalsTypeGen implements IConvertible, IGet
     MailGunEmailIntegrationDto? typegen_181_MailGunEmailIntegrationDto;
     SendGridEmailIntegrationDto? typegen_182_SendGridEmailIntegrationDto;
     SmtpEmailIntegrationDto? typegen_183_SmtpEmailIntegrationDto;
+    AzureCommunicationEmailIntegrationDto? typegen_307_AzureCommunicationEmailIntegrationDto;
     FakeEmailIntegrationDto? typegen_248_FakeEmailIntegrationDto;
     WebhookIntegrationDto? typegen_192_WebhookIntegrationDto;
     WebhookDestinationDto? typegen_193_WebhookDestinationDto;
@@ -33444,7 +33765,7 @@ class InternalsTypeGen implements IConvertible, IGet
     AwsCloudWatchLoggingIntegrationRequest? typegen_285_AwsCloudWatchLoggingIntegrationRequest;
     AwsCloudWatchLoggingIntegrationDto? typegen_286_AwsCloudWatchLoggingIntegrationDto;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_297_FakeEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_298_FakePushIntegrationRequest,this.typegen_299_BirdSmsIntegrationRequest,this.typegen_300_PlivoSmsIntegrationRequest,this.typegen_301_SinchSmsIntegrationRequest,this.typegen_302_TelesignSmsIntegrationRequest,this.typegen_303_TelnyxSmsIntegrationRequest,this.typegen_304_TwilioSmsIntegrationRequest,this.typegen_305_VonageSmsIntegrationRequest,this.typegen_306_FakeSmsIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_307_AzureCommunicationEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -33453,6 +33774,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_2_SendGridEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_2_SendGridEmailIntegrationRequest'],'SendGridEmailIntegrationRequest',context!);
         typegen_3_MailGunEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_3_MailGunEmailIntegrationRequest'],'MailGunEmailIntegrationRequest',context!);
         typegen_3a_AzureCommunicationEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_3a_AzureCommunicationEmailIntegrationRequest'],'AzureCommunicationEmailIntegrationRequest',context!);
+        typegen_297_FakeEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_297_FakeEmailIntegrationRequest'],'FakeEmailIntegrationRequest',context!);
         typegen_4_EmailToAllUsersDeliverySettingsRequest = JsonConverters.fromJson(json['typegen_4_EmailToAllUsersDeliverySettingsRequest'],'EmailToAllUsersDeliverySettingsRequest',context!);
         typegen_5_EmailToAccountUsersDeliverySettingsRequest = JsonConverters.fromJson(json['typegen_5_EmailToAccountUsersDeliverySettingsRequest'],'EmailToAccountUsersDeliverySettingsRequest',context!);
         typegen_6_EmailToCollectionRecordsDeliverySettingsRequest = JsonConverters.fromJson(json['typegen_6_EmailToCollectionRecordsDeliverySettingsRequest'],'EmailToCollectionRecordsDeliverySettingsRequest',context!);
@@ -33517,6 +33839,15 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_60_FirefoxWebPushIntegrationRequest = JsonConverters.fromJson(json['typegen_60_FirefoxWebPushIntegrationRequest'],'FirefoxWebPushIntegrationRequest',context!);
         typegen_61_AndroidFirebasePushIntegrationRequest = JsonConverters.fromJson(json['typegen_61_AndroidFirebasePushIntegrationRequest'],'AndroidFirebasePushIntegrationRequest',context!);
         typegen_62_AppleApnsPushIntegrationRequest = JsonConverters.fromJson(json['typegen_62_AppleApnsPushIntegrationRequest'],'AppleApnsPushIntegrationRequest',context!);
+        typegen_298_FakePushIntegrationRequest = JsonConverters.fromJson(json['typegen_298_FakePushIntegrationRequest'],'FakePushIntegrationRequest',context!);
+        typegen_299_BirdSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_299_BirdSmsIntegrationRequest'],'BirdSmsIntegrationRequest',context!);
+        typegen_300_PlivoSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_300_PlivoSmsIntegrationRequest'],'PlivoSmsIntegrationRequest',context!);
+        typegen_301_SinchSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_301_SinchSmsIntegrationRequest'],'SinchSmsIntegrationRequest',context!);
+        typegen_302_TelesignSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_302_TelesignSmsIntegrationRequest'],'TelesignSmsIntegrationRequest',context!);
+        typegen_303_TelnyxSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_303_TelnyxSmsIntegrationRequest'],'TelnyxSmsIntegrationRequest',context!);
+        typegen_304_TwilioSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_304_TwilioSmsIntegrationRequest'],'TwilioSmsIntegrationRequest',context!);
+        typegen_305_VonageSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_305_VonageSmsIntegrationRequest'],'VonageSmsIntegrationRequest',context!);
+        typegen_306_FakeSmsIntegrationRequest = JsonConverters.fromJson(json['typegen_306_FakeSmsIntegrationRequest'],'FakeSmsIntegrationRequest',context!);
         typegen_65_AwsLambdaCodeIntegrationRequest = JsonConverters.fromJson(json['typegen_65_AwsLambdaCodeIntegrationRequest'],'AwsLambdaCodeIntegrationRequest',context!);
         typegen_66_AzureFunctionsCodeIntegrationRequest = JsonConverters.fromJson(json['typegen_66_AzureFunctionsCodeIntegrationRequest'],'AzureFunctionsCodeIntegrationRequest',context!);
         typegen_67_GoogleCloudFunctionsCodeIntegrationRequest = JsonConverters.fromJson(json['typegen_67_GoogleCloudFunctionsCodeIntegrationRequest'],'GoogleCloudFunctionsCodeIntegrationRequest',context!);
@@ -33650,6 +33981,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_181_MailGunEmailIntegrationDto = JsonConverters.fromJson(json['typegen_181_MailGunEmailIntegrationDto'],'MailGunEmailIntegrationDto',context!);
         typegen_182_SendGridEmailIntegrationDto = JsonConverters.fromJson(json['typegen_182_SendGridEmailIntegrationDto'],'SendGridEmailIntegrationDto',context!);
         typegen_183_SmtpEmailIntegrationDto = JsonConverters.fromJson(json['typegen_183_SmtpEmailIntegrationDto'],'SmtpEmailIntegrationDto',context!);
+        typegen_307_AzureCommunicationEmailIntegrationDto = JsonConverters.fromJson(json['typegen_307_AzureCommunicationEmailIntegrationDto'],'AzureCommunicationEmailIntegrationDto',context!);
         typegen_248_FakeEmailIntegrationDto = JsonConverters.fromJson(json['typegen_248_FakeEmailIntegrationDto'],'FakeEmailIntegrationDto',context!);
         typegen_192_WebhookIntegrationDto = JsonConverters.fromJson(json['typegen_192_WebhookIntegrationDto'],'WebhookIntegrationDto',context!);
         typegen_193_WebhookDestinationDto = JsonConverters.fromJson(json['typegen_193_WebhookDestinationDto'],'WebhookDestinationDto',context!);
@@ -33732,6 +34064,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_2_SendGridEmailIntegrationRequest': JsonConverters.toJson(typegen_2_SendGridEmailIntegrationRequest,'SendGridEmailIntegrationRequest',context!),
         'typegen_3_MailGunEmailIntegrationRequest': JsonConverters.toJson(typegen_3_MailGunEmailIntegrationRequest,'MailGunEmailIntegrationRequest',context!),
         'typegen_3a_AzureCommunicationEmailIntegrationRequest': JsonConverters.toJson(typegen_3a_AzureCommunicationEmailIntegrationRequest,'AzureCommunicationEmailIntegrationRequest',context!),
+        'typegen_297_FakeEmailIntegrationRequest': JsonConverters.toJson(typegen_297_FakeEmailIntegrationRequest,'FakeEmailIntegrationRequest',context!),
         'typegen_4_EmailToAllUsersDeliverySettingsRequest': JsonConverters.toJson(typegen_4_EmailToAllUsersDeliverySettingsRequest,'EmailToAllUsersDeliverySettingsRequest',context!),
         'typegen_5_EmailToAccountUsersDeliverySettingsRequest': JsonConverters.toJson(typegen_5_EmailToAccountUsersDeliverySettingsRequest,'EmailToAccountUsersDeliverySettingsRequest',context!),
         'typegen_6_EmailToCollectionRecordsDeliverySettingsRequest': JsonConverters.toJson(typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,'EmailToCollectionRecordsDeliverySettingsRequest',context!),
@@ -33796,6 +34129,15 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_60_FirefoxWebPushIntegrationRequest': JsonConverters.toJson(typegen_60_FirefoxWebPushIntegrationRequest,'FirefoxWebPushIntegrationRequest',context!),
         'typegen_61_AndroidFirebasePushIntegrationRequest': JsonConverters.toJson(typegen_61_AndroidFirebasePushIntegrationRequest,'AndroidFirebasePushIntegrationRequest',context!),
         'typegen_62_AppleApnsPushIntegrationRequest': JsonConverters.toJson(typegen_62_AppleApnsPushIntegrationRequest,'AppleApnsPushIntegrationRequest',context!),
+        'typegen_298_FakePushIntegrationRequest': JsonConverters.toJson(typegen_298_FakePushIntegrationRequest,'FakePushIntegrationRequest',context!),
+        'typegen_299_BirdSmsIntegrationRequest': JsonConverters.toJson(typegen_299_BirdSmsIntegrationRequest,'BirdSmsIntegrationRequest',context!),
+        'typegen_300_PlivoSmsIntegrationRequest': JsonConverters.toJson(typegen_300_PlivoSmsIntegrationRequest,'PlivoSmsIntegrationRequest',context!),
+        'typegen_301_SinchSmsIntegrationRequest': JsonConverters.toJson(typegen_301_SinchSmsIntegrationRequest,'SinchSmsIntegrationRequest',context!),
+        'typegen_302_TelesignSmsIntegrationRequest': JsonConverters.toJson(typegen_302_TelesignSmsIntegrationRequest,'TelesignSmsIntegrationRequest',context!),
+        'typegen_303_TelnyxSmsIntegrationRequest': JsonConverters.toJson(typegen_303_TelnyxSmsIntegrationRequest,'TelnyxSmsIntegrationRequest',context!),
+        'typegen_304_TwilioSmsIntegrationRequest': JsonConverters.toJson(typegen_304_TwilioSmsIntegrationRequest,'TwilioSmsIntegrationRequest',context!),
+        'typegen_305_VonageSmsIntegrationRequest': JsonConverters.toJson(typegen_305_VonageSmsIntegrationRequest,'VonageSmsIntegrationRequest',context!),
+        'typegen_306_FakeSmsIntegrationRequest': JsonConverters.toJson(typegen_306_FakeSmsIntegrationRequest,'FakeSmsIntegrationRequest',context!),
         'typegen_65_AwsLambdaCodeIntegrationRequest': JsonConverters.toJson(typegen_65_AwsLambdaCodeIntegrationRequest,'AwsLambdaCodeIntegrationRequest',context!),
         'typegen_66_AzureFunctionsCodeIntegrationRequest': JsonConverters.toJson(typegen_66_AzureFunctionsCodeIntegrationRequest,'AzureFunctionsCodeIntegrationRequest',context!),
         'typegen_67_GoogleCloudFunctionsCodeIntegrationRequest': JsonConverters.toJson(typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,'GoogleCloudFunctionsCodeIntegrationRequest',context!),
@@ -33929,6 +34271,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_181_MailGunEmailIntegrationDto': JsonConverters.toJson(typegen_181_MailGunEmailIntegrationDto,'MailGunEmailIntegrationDto',context!),
         'typegen_182_SendGridEmailIntegrationDto': JsonConverters.toJson(typegen_182_SendGridEmailIntegrationDto,'SendGridEmailIntegrationDto',context!),
         'typegen_183_SmtpEmailIntegrationDto': JsonConverters.toJson(typegen_183_SmtpEmailIntegrationDto,'SmtpEmailIntegrationDto',context!),
+        'typegen_307_AzureCommunicationEmailIntegrationDto': JsonConverters.toJson(typegen_307_AzureCommunicationEmailIntegrationDto,'AzureCommunicationEmailIntegrationDto',context!),
         'typegen_248_FakeEmailIntegrationDto': JsonConverters.toJson(typegen_248_FakeEmailIntegrationDto,'FakeEmailIntegrationDto',context!),
         'typegen_192_WebhookIntegrationDto': JsonConverters.toJson(typegen_192_WebhookIntegrationDto,'WebhookIntegrationDto',context!),
         'typegen_193_WebhookDestinationDto': JsonConverters.toJson(typegen_193_WebhookDestinationDto,'WebhookDestinationDto',context!),
@@ -53719,6 +54062,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MailGunRegion': TypeInfo(TypeOf.Enum, enumValues:MailGunRegion.values),
     'MailGunEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => MailGunEmailIntegrationRequest()),
     'AzureCommunicationEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AzureCommunicationEmailIntegrationRequest()),
+    'FakeEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FakeEmailIntegrationRequest()),
     'EmailCampaignRecipientsSourceTypes': TypeInfo(TypeOf.Enum, enumValues:EmailCampaignRecipientsSourceTypes.values),
     'TokenMappingResolverType': TypeInfo(TypeOf.Enum, enumValues:TokenMappingResolverType.values),
     'SecretValueFormat': TypeInfo(TypeOf.Enum, enumValues:SecretValueFormat.values),
@@ -53817,6 +54161,17 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'FirefoxWebPushIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FirefoxWebPushIntegrationRequest()),
     'AndroidFirebasePushIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AndroidFirebasePushIntegrationRequest()),
     'AppleApnsPushIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AppleApnsPushIntegrationRequest()),
+    'FakePushIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FakePushIntegrationRequest()),
+    'SmsProvider': TypeInfo(TypeOf.Enum, enumValues:SmsProvider.values),
+    'SmsIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
+    'BirdSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => BirdSmsIntegrationRequest()),
+    'PlivoSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => PlivoSmsIntegrationRequest()),
+    'SinchSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => SinchSmsIntegrationRequest()),
+    'TelesignSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => TelesignSmsIntegrationRequest()),
+    'TelnyxSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => TelnyxSmsIntegrationRequest()),
+    'TwilioSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => TwilioSmsIntegrationRequest()),
+    'VonageSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => VonageSmsIntegrationRequest()),
+    'FakeSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FakeSmsIntegrationRequest()),
     'CodeProvider': TypeInfo(TypeOf.Enum, enumValues:CodeProvider.values),
     'CodeIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'AwsLambdaIntegrationType': TypeInfo(TypeOf.Enum, enumValues:AwsLambdaIntegrationType.values),
@@ -53999,7 +54354,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MongoDbConnectionStringIntegrationDto': TypeInfo(TypeOf.Class, create:() => MongoDbConnectionStringIntegrationDto()),
     'IntegrationStatus': TypeInfo(TypeOf.Enum, enumValues:IntegrationStatus.values),
     'MongoDbAtlasFlexManagedIntegrationDto': TypeInfo(TypeOf.Class, create:() => MongoDbAtlasFlexManagedIntegrationDto()),
-    'SmsProvider': TypeInfo(TypeOf.Enum, enumValues:SmsProvider.values),
     'SmsIntegrationDto': TypeInfo(TypeOf.Class, create:() => SmsIntegrationDto()),
     'BirdSmsIntegrationDto': TypeInfo(TypeOf.Class, create:() => BirdSmsIntegrationDto()),
     'PlivoSmsIntegrationDto': TypeInfo(TypeOf.Class, create:() => PlivoSmsIntegrationDto()),
@@ -54025,6 +54379,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MailGunEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => MailGunEmailIntegrationDto()),
     'SendGridEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => SendGridEmailIntegrationDto()),
     'SmtpEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => SmtpEmailIntegrationDto()),
+    'AzureCommunicationEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AzureCommunicationEmailIntegrationDto()),
     'FakeEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => FakeEmailIntegrationDto()),
     'WebhookDestinationDto': TypeInfo(TypeOf.Class, create:() => WebhookDestinationDto()),
     'IReadOnlyDictionary<String,String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyDictionary<String,String>()),
@@ -54194,7 +54549,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveEmailTemplate': TypeInfo(TypeOf.Class, create:() => SaveEmailTemplate()),
     'TranslationDto': TypeInfo(TypeOf.Class, create:() => TranslationDto()),
     'SaveSmsTemplate': TypeInfo(TypeOf.Class, create:() => SaveSmsTemplate()),
-    'SmsIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'MarketplaceAccessLevel': TypeInfo(TypeOf.Enum, enumValues:MarketplaceAccessLevel.values),
     'SavePushTemplate': TypeInfo(TypeOf.Class, create:() => SavePushTemplate()),
     'DeviceType': TypeInfo(TypeOf.Enum, enumValues:DeviceType.values),
