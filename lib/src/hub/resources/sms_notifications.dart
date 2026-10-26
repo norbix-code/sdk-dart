@@ -428,6 +428,32 @@ class SmsNotificationsResource extends Resource {
     );
   }
 
+  /// `POST /{version}/notifications/sms/campaigns/{Id}/retry-failed`
+  ///
+  /// Sends the failed recipients of an SMS campaign again — only the rows
+  /// whose send failed, never one the provider accepted — each as a new
+  /// attempt with the same notification id. Body: `idempotencyKey`
+  /// (required, at most 64 characters; the same key again sends nothing and
+  /// returns the first answer with `replayed: true`), and optionally
+  /// `databaseIntegrationId`, `notificationIds`, `includeAmbiguous` (also
+  /// retry rows whose failure is Ambiguous — may send a duplicate) and
+  /// `categories` (`Transient`, `Permanent`, `Unknown`). Answers
+  /// `{retryRequestId, selected, skipped, replayed, warning?}`.
+  Future<Object?> retryFailedSmsNotifications(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/sms/campaigns/{Id}/retry-failed',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
   /// `POST /{version}/notifications/sms/integrations`
   Future<Object?> saveSmsIntegration(
       {Map<String, Object?>? query,

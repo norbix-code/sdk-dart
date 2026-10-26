@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.smsNotifications` — all 34 SMS Hub endpoints, one test per method,
+/// `hub.smsNotifications` — all 35 SMS Hub endpoints, one test per method,
 /// against the fake driver (never a real server, never a real provider):
 /// verb, full path with the ids substituted in the gateway's own spelling,
 /// and the body for the writes that carry one.
@@ -404,6 +404,22 @@ void main() {
       expect(
         driver.lastRequest!.url.toString(),
         endsWith('/v3/notifications/sms/campaigns/cmp_1/stop'),
+      );
+    });
+
+    test(
+        'retryFailedSmsNotifications → POST /v3/notifications/sms/campaigns/cmp_1/retry-failed',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).smsNotifications.retryFailedSmsNotifications(
+        id: 'cmp_1',
+        body: {'idempotencyKey': 'retry-1'},
+      );
+
+      expect(driver.lastRequest!.method, equals('POST'));
+      expect(
+        driver.lastRequest!.url.toString(),
+        endsWith('/v3/notifications/sms/campaigns/cmp_1/retry-failed'),
       );
     });
 
