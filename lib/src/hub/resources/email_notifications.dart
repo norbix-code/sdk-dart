@@ -569,6 +569,32 @@ class EmailNotificationsResource extends Resource {
     );
   }
 
+  /// `POST /{version}/notifications/email/campaigns/{Id}/retry-failed`
+  ///
+  /// Sends the failed recipients of an email campaign again — only the rows
+  /// whose send failed, never one the provider accepted — each as a new
+  /// attempt with the same notification id. Body: `idempotencyKey`
+  /// (required, at most 64 characters; the same key again sends nothing and
+  /// returns the first answer with `replayed: true`), and optionally
+  /// `databaseIntegrationId`, `notificationIds`, `includeAmbiguous` (also
+  /// retry rows whose failure is Ambiguous — may send a duplicate) and
+  /// `categories` (`Transient`, `Permanent`, `Unknown`). Answers
+  /// `{retryRequestId, selected, skipped, replayed, warning?}`.
+  Future<Object?> retryFailedEmailNotifications(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/email/campaigns/{Id}/retry-failed',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
   /// `POST /{version}/notifications/email/footers`
   Future<Object?> saveEmailFooter(
       {Map<String, Object?>? query,

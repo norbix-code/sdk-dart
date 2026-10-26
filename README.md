@@ -951,7 +951,7 @@ instead of `hash`. A bad or expired link throws `NorbixAuthError` (401).
 
 ### SMS
 
-`hub.smsNotifications` covers every SMS Hub endpoint (34): the module
+`hub.smsNotifications` covers every SMS Hub endpoint (35): the module
 switch (`enableSms`, `disableSms`, `getSmsDisableDependencies`,
 `getSmsSettings`), integrations (`getSmsIntegrations`, `getSmsIntegration`,
 `saveSmsIntegration`, `testSmsIntegration`,
@@ -962,7 +962,8 @@ switch (`enableSms`, `disableSms`, `getSmsDisableDependencies`,
 `archiveSmsTemplate`, `unArchiveSmsTemplate`, `cloneSmsTemplate`,
 `getSmsMessageContentTokens`, `renderSms`) and campaigns
 (`getSmsCampaigns`, `createSmsCampaign`, `getSmsCampaign`,
-`deleteSmsCampaign`, `stopSmsCampaign`, `getSmsCampaignStatistics`,
+`deleteSmsCampaign`, `stopSmsCampaign`, `retryFailedSmsNotifications`,
+`getSmsCampaignStatistics`,
 `getSmsCampaignBatches`, `getSmsCampaignBatchNotifications`,
 `getSmsCampaignBatchNotification`, `getSmsCampaignMessages`), plus
 `previewSmsNotification` above.
@@ -1019,6 +1020,47 @@ calls `getSmsCampaignMessage`, `getEmailCampaignMessage` and
 `getPushCampaignMessage` (`GET …/campaigns/{campaignId}/messages/{id}`) —
 read the campaign's messages with `get*CampaignMessages(campaignId:)`, or one
 message of a batch with `get*CampaignBatchNotification`.
+
+### Retrying failed recipients
+
+`emailNotifications.retryFailedEmailNotifications`,
+`smsNotifications.retryFailedSmsNotifications` and
+`pushNotifications.retryFailedPushNotifications` send the failed recipients
+of a campaign again (`POST /{version}/notifications/{email|sms|push}/campaigns/{Id}/retry-failed`,
+gateway 2.3.9). Only rows whose send failed are selected — never one the
+provider accepted — each as a new attempt with the same notification id.
+
+The body is a map:
+
+| Field | Meaning |
+|-------|---------|
+| `idempotencyKey` | Required, at most 64 characters. The same key again sends nothing and returns the first answer (`replayed: true`); the same key with another body is refused (409). |
+| `databaseIntegrationId` | Optional. Default: the project's default database integration. |
+| `notificationIds` | Optional. Only these notification ids. Default: every failed recipient of the campaign. |
+| `includeAmbiguous` | Optional, default `false`. Also retry rows whose failure is `Ambiguous` (a timeout after the request was sent) — this **may send a duplicate**; the answer then carries a `warning`. |
+| `categories` | Optional. Only these failure classes: `Transient`, `Permanent`, `Unknown`. Default: all three. |
+
+The SDK sends the map as it is — nothing is filled in for you, so an unset
+optional is simply not sent. The answer is
+`{retryRequestId, selected, skipped, replayed, warning?}`: `skipped` counts
+the rows left out per reason (`AlreadyAccepted`, `InFlight`, `Ambiguous`,
+`NotFound`, `Blocked`, `Category`).
+
+```dart
+final answer = await hub.emailNotifications.retryFailedEmailNotifications(
+  id: 'cmp_1',
+  body: {
+    'idempotencyKey': 'retry-cmp_1-2026-10-26',
+    'categories': ['Transient'],
+  },
+) as Map<String, dynamic>;
+print('${answer['selected']} sent again, skipped: ${answer['skipped']}');
+```
+
+A campaign's messages now carry the delivery state too
+(`get*CampaignBatchNotification`: `state`, `stateChangedAt`, `attempts`,
+`deliveryEvents`, `deliveryOutcome`), and `get*CampaignStatistics` adds
+`failedRetryable` and `cancelled`.
 
 ### Cloning a template
 
