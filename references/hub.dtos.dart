@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-23 15:27:01
+Date: 2026-10-26 10:25:57
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -25,6 +25,7 @@ enum EmailProvider
     MailGun,
     AwsSes,
     Fake,
+    AzureCommunication,
 }
 
 abstract class EmailIntegrationRequest
@@ -120,8 +121,10 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
     String? externalId;
     String? accessKey;
     String? secretKey;
+    bool? deliveryEventsEnabled;
+    String? snsTopicArn;
 
-    AwsSesEmailIntegrationRequest({this.provider,this.integrationType,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.externalId,this.accessKey,this.secretKey});
+    AwsSesEmailIntegrationRequest({this.provider,this.integrationType,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.externalId,this.accessKey,this.secretKey,this.deliveryEventsEnabled,this.snsTopicArn});
     AwsSesEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -135,6 +138,8 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
         externalId = json['externalId'];
         accessKey = json['accessKey'];
         secretKey = json['secretKey'];
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        snsTopicArn = json['snsTopicArn'];
         return this;
     }
 
@@ -147,7 +152,9 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
         'roleArn': roleArn,
         'externalId': externalId,
         'accessKey': accessKey,
-        'secretKey': secretKey
+        'secretKey': secretKey,
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'snsTopicArn': snsTopicArn
     });
 
     getTypeName() => "AwsSesEmailIntegrationRequest";
@@ -158,20 +165,26 @@ class SendGridEmailIntegrationRequest extends EmailIntegrationRequest implements
 {
     EmailProvider? provider;
     String apiKey = "";
+    bool? deliveryEventsEnabled;
+    String? eventWebhookPublicKey;
 
-    SendGridEmailIntegrationRequest({this.provider,this.apiKey=""});
+    SendGridEmailIntegrationRequest({this.provider,this.apiKey="",this.deliveryEventsEnabled,this.eventWebhookPublicKey});
     SendGridEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'EmailProvider',context!);
         apiKey = json['apiKey'] ?? "";
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        eventWebhookPublicKey = json['eventWebhookPublicKey'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'EmailProvider',context!),
-        'apiKey': apiKey
+        'apiKey': apiKey,
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'eventWebhookPublicKey': eventWebhookPublicKey
     });
 
     getTypeName() => "SendGridEmailIntegrationRequest";
@@ -214,6 +227,39 @@ class MailGunEmailIntegrationRequest extends EmailIntegrationRequest implements 
     });
 
     getTypeName() => "MailGunEmailIntegrationRequest";
+    TypeContext? context = _ctx;
+}
+
+class AzureCommunicationEmailIntegrationRequest extends EmailIntegrationRequest implements IConvertible
+{
+    EmailProvider? provider;
+    String endpoint = "";
+    String accessKey = "";
+    bool? deliveryEventsEnabled;
+    String? eventGridKey;
+
+    AzureCommunicationEmailIntegrationRequest({this.provider,this.endpoint="",this.accessKey="",this.deliveryEventsEnabled,this.eventGridKey});
+    AzureCommunicationEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = JsonConverters.fromJson(json['provider'],'EmailProvider',context!);
+        endpoint = json['endpoint'] ?? "";
+        accessKey = json['accessKey'] ?? "";
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        eventGridKey = json['eventGridKey'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': JsonConverters.toJson(provider,'EmailProvider',context!),
+        'endpoint': endpoint,
+        'accessKey': accessKey,
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'eventGridKey': eventGridKey
+    });
+
+    getTypeName() => "AzureCommunicationEmailIntegrationRequest";
     TypeContext? context = _ctx;
 }
 
@@ -7799,20 +7845,29 @@ class TwilioSmsIntegrationDto extends SmsIntegrationDto implements IConvertible
 {
     String accountSid = "";
     String fromPhoneNumber = "";
+    // @DataMember
+    bool? deliveryEventsEnabled;
 
-    TwilioSmsIntegrationDto({this.accountSid="",this.fromPhoneNumber=""});
+    // @DataMember
+    String? statusCallbackUrl;
+
+    TwilioSmsIntegrationDto({this.accountSid="",this.fromPhoneNumber="",this.deliveryEventsEnabled,this.statusCallbackUrl});
     TwilioSmsIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         accountSid = json['accountSid'] ?? "";
         fromPhoneNumber = json['fromPhoneNumber'] ?? "";
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        statusCallbackUrl = json['statusCallbackUrl'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'accountSid': accountSid,
-        'fromPhoneNumber': fromPhoneNumber
+        'fromPhoneNumber': fromPhoneNumber,
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'statusCallbackUrl': statusCallbackUrl
     });
 
     getTypeName() => "TwilioSmsIntegrationDto";
@@ -8098,8 +8153,10 @@ abstract class AwsSesEmailIntegrationDto extends EmailIntegrationDto
     String region = "";
     String identityArn = "";
     String? configurationSetName;
+    bool? deliveryEventsEnabled;
+    String? snsTopicArn;
 
-    AwsSesEmailIntegrationDto({this.region="",this.identityArn="",this.configurationSetName});
+    AwsSesEmailIntegrationDto({this.region="",this.identityArn="",this.configurationSetName,this.deliveryEventsEnabled,this.snsTopicArn});
     AwsSesEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8107,13 +8164,17 @@ abstract class AwsSesEmailIntegrationDto extends EmailIntegrationDto
         region = json['region'] ?? "";
         identityArn = json['identityArn'] ?? "";
         configurationSetName = json['configurationSetName'];
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        snsTopicArn = json['snsTopicArn'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'region': region,
         'identityArn': identityArn,
-        'configurationSetName': configurationSetName
+        'configurationSetName': configurationSetName,
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'snsTopicArn': snsTopicArn
     });
 
     getTypeName() => "AwsSesEmailIntegrationDto";
@@ -8184,14 +8245,24 @@ class MailGunEmailIntegrationDto extends EmailIntegrationDto implements IConvert
 
 class SendGridEmailIntegrationDto extends EmailIntegrationDto implements IConvertible
 {
-    SendGridEmailIntegrationDto();
-    SendGridEmailIntegrationDto.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    bool? deliveryEventsEnabled;
+    String? eventWebhookPublicKey;
+
+    SendGridEmailIntegrationDto({this.deliveryEventsEnabled,this.eventWebhookPublicKey});
+    SendGridEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        eventWebhookPublicKey = json['eventWebhookPublicKey'];
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'eventWebhookPublicKey': eventWebhookPublicKey
+    });
+
     getTypeName() => "SendGridEmailIntegrationDto";
     TypeContext? context = _ctx;
 }
@@ -16560,8 +16631,9 @@ class AuthDto implements IBindableContract, IConvertible
     AuthStatus? status;
     DateTime? createdOn;
     DateTime? modifiedOn;
+    String? credentialVersion;
 
-    AuthDto({this.id="",this.type,this.email,this.userName,this.registration,this.login,this.generalInfo,this.roles,this.pushDevices,this.tags,this.status,this.createdOn,this.modifiedOn});
+    AuthDto({this.id="",this.type,this.email,this.userName,this.registration,this.login,this.generalInfo,this.roles,this.pushDevices,this.tags,this.status,this.createdOn,this.modifiedOn,this.credentialVersion});
     AuthDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16578,6 +16650,7 @@ class AuthDto implements IBindableContract, IConvertible
         status = JsonConverters.fromJson(json['status'],'AuthStatus',context!);
         createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
         modifiedOn = JsonConverters.fromJson(json['modifiedOn'],'DateTime',context!) ?? DateTime(0);
+        credentialVersion = json['credentialVersion'];
         return this;
     }
 
@@ -16594,7 +16667,8 @@ class AuthDto implements IBindableContract, IConvertible
         'tags': JsonConverters.toJson(tags,'List<String>',context!),
         'status': JsonConverters.toJson(status,'AuthStatus',context!),
         'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!),
-        'modifiedOn': JsonConverters.toJson(modifiedOn,'DateTime',context!)
+        'modifiedOn': JsonConverters.toJson(modifiedOn,'DateTime',context!),
+        'credentialVersion': credentialVersion
     };
 
     getTypeName() => "AuthDto";
@@ -20694,6 +20768,191 @@ class NotificationStatusChangeEntryDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+enum NotificationDeliveryState
+{
+    Pending,
+    Sending,
+    Retrying,
+    Accepted,
+    Failed,
+    Blocked,
+    Cancelled,
+}
+
+enum NotificationAttemptOutcome
+{
+    Accepted,
+    Failed,
+}
+
+enum SendErrorCategory
+{
+    Unknown,
+    Transient,
+    Permanent,
+    Ambiguous,
+}
+
+enum NotificationAttemptTrigger
+{
+    Initial,
+    AutoRetry,
+    ManualRetry,
+}
+
+// @DataContract
+class NotificationAttemptDto implements IConvertible
+{
+    // @DataMember
+    String attemptId = "";
+
+    // @DataMember
+    int number = 0;
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    NotificationAttemptOutcome? outcome;
+
+    // @DataMember
+    SendErrorCategory? category;
+
+    // @DataMember
+    int? statusCode;
+
+    // @DataMember
+    String? errorCode;
+
+    // @DataMember
+    String? message;
+
+    // @DataMember
+    String? providerRef;
+
+    // @DataMember
+    int? retryAfterSeconds;
+
+    // @DataMember
+    bool? exhausted;
+
+    // @DataMember
+    DateTime? nextRetryAt;
+
+    // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    NotificationAttemptTrigger? trigger;
+
+    // @DataMember
+    String? retryRequestId;
+
+    NotificationAttemptDto({this.attemptId="",this.number=0,this.startedAt,this.finishedAt,this.outcome,this.category,this.statusCode,this.errorCode,this.message,this.providerRef,this.retryAfterSeconds,this.exhausted,this.nextRetryAt,this.correlationId,this.trigger,this.retryRequestId});
+    NotificationAttemptDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        attemptId = json['attemptId'] ?? "";
+        number = json['number'] ?? 0;
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        outcome = JsonConverters.fromJson(json['outcome'],'NotificationAttemptOutcome',context!);
+        category = JsonConverters.fromJson(json['category'],'SendErrorCategory',context!);
+        statusCode = json['statusCode'];
+        errorCode = json['errorCode'];
+        message = json['message'];
+        providerRef = json['providerRef'];
+        retryAfterSeconds = json['retryAfterSeconds'];
+        exhausted = json['exhausted'];
+        nextRetryAt = JsonConverters.fromJson(json['nextRetryAt'],'DateTime',context!);
+        correlationId = json['correlationId'];
+        trigger = JsonConverters.fromJson(json['trigger'],'NotificationAttemptTrigger',context!);
+        retryRequestId = json['retryRequestId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'attemptId': attemptId,
+        'number': number,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'outcome': JsonConverters.toJson(outcome,'NotificationAttemptOutcome',context!),
+        'category': JsonConverters.toJson(category,'SendErrorCategory',context!),
+        'statusCode': statusCode,
+        'errorCode': errorCode,
+        'message': message,
+        'providerRef': providerRef,
+        'retryAfterSeconds': retryAfterSeconds,
+        'exhausted': exhausted,
+        'nextRetryAt': JsonConverters.toJson(nextRetryAt,'DateTime',context!),
+        'correlationId': correlationId,
+        'trigger': JsonConverters.toJson(trigger,'NotificationAttemptTrigger',context!),
+        'retryRequestId': retryRequestId
+    };
+
+    getTypeName() => "NotificationAttemptDto";
+    TypeContext? context = _ctx;
+}
+
+enum DeliveryEventOutcome
+{
+    Delivered,
+    Bounced,
+    Complained,
+    Rejected,
+    Deferred,
+}
+
+// @DataContract
+class NotificationDeliveryEventDto implements IConvertible
+{
+    // @DataMember
+    String? eventId;
+
+    // @DataMember
+    DeliveryEventOutcome? outcome;
+
+    // @DataMember
+    DateTime? at;
+
+    // @DataMember
+    String provider = "";
+
+    // @DataMember
+    String? providerRef;
+
+    // @DataMember
+    String? reason;
+
+    NotificationDeliveryEventDto({this.eventId,this.outcome,this.at,this.provider="",this.providerRef,this.reason});
+    NotificationDeliveryEventDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        eventId = json['eventId'];
+        outcome = JsonConverters.fromJson(json['outcome'],'DeliveryEventOutcome',context!);
+        at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
+        provider = json['provider'] ?? "";
+        providerRef = json['providerRef'];
+        reason = json['reason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'eventId': eventId,
+        'outcome': JsonConverters.toJson(outcome,'DeliveryEventOutcome',context!),
+        'at': JsonConverters.toJson(at,'DateTime',context!),
+        'provider': provider,
+        'providerRef': providerRef,
+        'reason': reason
+    };
+
+    getTypeName() => "NotificationDeliveryEventDto";
+    TypeContext? context = _ctx;
+}
+
 // @DataContract
 class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
 {
@@ -20719,9 +20978,27 @@ class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
     List<NotificationStatusChangeEntryDto> statusHistory = [];
 
     // @DataMember
+    NotificationDeliveryState? state;
+
+    // @DataMember
+    DateTime? stateChangedAt;
+
+    // @DataMember
+    List<NotificationAttemptDto>? attempts;
+
+    // @DataMember
+    List<NotificationDeliveryEventDto>? deliveryEvents;
+
+    // @DataMember
+    DeliveryEventOutcome? deliveryOutcome;
+
+    // @DataMember
+    int? deliveryOutcomeRank;
+
+    // @DataMember
     String id = "";
 
-    CampaignBatchNotificationDto({this.campaignId="",this.batchId="",this.notificationId="",this.refNotificationId,this.body,this.model,this.statusHistory=const [],this.id=""});
+    CampaignBatchNotificationDto({this.campaignId="",this.batchId="",this.notificationId="",this.refNotificationId,this.body,this.model,this.statusHistory=const [],this.state,this.stateChangedAt,this.attempts,this.deliveryEvents,this.deliveryOutcome,this.deliveryOutcomeRank,this.id=""});
     CampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20732,6 +21009,12 @@ class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
         body = json['body'];
         model = JsonConverters.toStringMap(json['model']);
         statusHistory = JsonConverters.fromJson(json['statusHistory'],'List<NotificationStatusChangeEntryDto>',context!) ?? [];
+        state = JsonConverters.fromJson(json['state'],'NotificationDeliveryState',context!);
+        stateChangedAt = JsonConverters.fromJson(json['stateChangedAt'],'DateTime',context!);
+        attempts = JsonConverters.fromJson(json['attempts'],'List<NotificationAttemptDto>',context!);
+        deliveryEvents = JsonConverters.fromJson(json['deliveryEvents'],'List<NotificationDeliveryEventDto>',context!);
+        deliveryOutcome = JsonConverters.fromJson(json['deliveryOutcome'],'DeliveryEventOutcome',context!);
+        deliveryOutcomeRank = json['deliveryOutcomeRank'];
         id = json['id'] ?? "";
         return this;
     }
@@ -20744,6 +21027,12 @@ class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
         'body': body,
         'model': model,
         'statusHistory': JsonConverters.toJson(statusHistory,'List<NotificationStatusChangeEntryDto>',context!),
+        'state': JsonConverters.toJson(state,'NotificationDeliveryState',context!),
+        'stateChangedAt': JsonConverters.toJson(stateChangedAt,'DateTime',context!),
+        'attempts': JsonConverters.toJson(attempts,'List<NotificationAttemptDto>',context!),
+        'deliveryEvents': JsonConverters.toJson(deliveryEvents,'List<NotificationDeliveryEventDto>',context!),
+        'deliveryOutcome': JsonConverters.toJson(deliveryOutcome,'DeliveryEventOutcome',context!),
+        'deliveryOutcomeRank': deliveryOutcomeRank,
         'id': id
     };
 
@@ -20802,15 +21091,23 @@ class CampaignStatsDto implements IConvertible
     int failed = 0;
 
     // @DataMember
+    int failedRetryable = 0;
+
+    // @DataMember
+    int cancelled = 0;
+
+    // @DataMember
     double successRate = 0;
 
-    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.successRate=0});
+    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.failedRetryable=0,this.cancelled=0,this.successRate=0});
     CampaignStatsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         batches = json['batches'] ?? 0;
         sent = json['sent'] ?? 0;
         failed = json['failed'] ?? 0;
+        failedRetryable = json['failedRetryable'] ?? 0;
+        cancelled = json['cancelled'] ?? 0;
         successRate = JsonConverters.toDouble(json['successRate']) ?? 0;
         return this;
     }
@@ -20819,6 +21116,8 @@ class CampaignStatsDto implements IConvertible
         'batches': batches,
         'sent': sent,
         'failed': failed,
+        'failedRetryable': failedRetryable,
+        'cancelled': cancelled,
         'successRate': successRate
     };
 
@@ -28568,6 +28867,49 @@ class PreviewEmailNotificationResponse extends ResponseBase implements IConverti
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class RetryFailedEmailNotificationsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? retryRequestId;
+
+    // @DataMember
+    int selected = 0;
+
+    // @DataMember
+    Map<String,int?>? skipped;
+
+    // @DataMember
+    bool? replayed;
+
+    // @DataMember
+    String? warning;
+
+    RetryFailedEmailNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
+    RetryFailedEmailNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        retryRequestId = json['retryRequestId'];
+        selected = json['selected'] ?? 0;
+        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
+        replayed = json['replayed'];
+        warning = json['warning'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'retryRequestId': retryRequestId,
+        'selected': selected,
+        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
+        'replayed': replayed,
+        'warning': warning
+    });
+
+    getTypeName() => "RetryFailedEmailNotificationsResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetEmailCampaignMessagesResponse extends ResponseBase implements IConvertible
 {
     PaginatedResponse<EmailCampaignBatchNotificationDto>? list;
@@ -28912,6 +29254,49 @@ class PreviewSmsNotificationResponse extends ResponseBase implements IConvertibl
     });
 
     getTypeName() => "PreviewSmsNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RetryFailedSmsNotificationsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? retryRequestId;
+
+    // @DataMember
+    int selected = 0;
+
+    // @DataMember
+    Map<String,int?>? skipped;
+
+    // @DataMember
+    bool? replayed;
+
+    // @DataMember
+    String? warning;
+
+    RetryFailedSmsNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
+    RetryFailedSmsNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        retryRequestId = json['retryRequestId'];
+        selected = json['selected'] ?? 0;
+        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
+        replayed = json['replayed'];
+        warning = json['warning'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'retryRequestId': retryRequestId,
+        'selected': selected,
+        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
+        'replayed': replayed,
+        'warning': warning
+    });
+
+    getTypeName() => "RetryFailedSmsNotificationsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -29954,6 +30339,49 @@ class PreviewPushNotificationResponse extends ResponseBase implements IConvertib
     });
 
     getTypeName() => "PreviewPushNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RetryFailedPushNotificationsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? retryRequestId;
+
+    // @DataMember
+    int selected = 0;
+
+    // @DataMember
+    Map<String,int?>? skipped;
+
+    // @DataMember
+    bool? replayed;
+
+    // @DataMember
+    String? warning;
+
+    RetryFailedPushNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
+    RetryFailedPushNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        retryRequestId = json['retryRequestId'];
+        selected = json['selected'] ?? 0;
+        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
+        replayed = json['replayed'];
+        warning = json['warning'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'retryRequestId': retryRequestId,
+        'selected': selected,
+        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
+        'replayed': replayed,
+        'warning': warning
+    });
+
+    getTypeName() => "RetryFailedPushNotificationsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -32744,6 +33172,7 @@ class InternalsTypeGen implements IConvertible, IGet
     AwsSesEmailIntegrationRequest? typegen_1_AwsSesEmailIntegrationRequest;
     SendGridEmailIntegrationRequest? typegen_2_SendGridEmailIntegrationRequest;
     MailGunEmailIntegrationRequest? typegen_3_MailGunEmailIntegrationRequest;
+    AzureCommunicationEmailIntegrationRequest? typegen_3a_AzureCommunicationEmailIntegrationRequest;
     EmailToAllUsersDeliverySettingsRequest? typegen_4_EmailToAllUsersDeliverySettingsRequest;
     EmailToAccountUsersDeliverySettingsRequest? typegen_5_EmailToAccountUsersDeliverySettingsRequest;
     EmailToCollectionRecordsDeliverySettingsRequest? typegen_6_EmailToCollectionRecordsDeliverySettingsRequest;
@@ -33015,7 +33444,7 @@ class InternalsTypeGen implements IConvertible, IGet
     AwsCloudWatchLoggingIntegrationRequest? typegen_285_AwsCloudWatchLoggingIntegrationRequest;
     AwsCloudWatchLoggingIntegrationDto? typegen_286_AwsCloudWatchLoggingIntegrationDto;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -33023,6 +33452,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_1_AwsSesEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_1_AwsSesEmailIntegrationRequest'],'AwsSesEmailIntegrationRequest',context!);
         typegen_2_SendGridEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_2_SendGridEmailIntegrationRequest'],'SendGridEmailIntegrationRequest',context!);
         typegen_3_MailGunEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_3_MailGunEmailIntegrationRequest'],'MailGunEmailIntegrationRequest',context!);
+        typegen_3a_AzureCommunicationEmailIntegrationRequest = JsonConverters.fromJson(json['typegen_3a_AzureCommunicationEmailIntegrationRequest'],'AzureCommunicationEmailIntegrationRequest',context!);
         typegen_4_EmailToAllUsersDeliverySettingsRequest = JsonConverters.fromJson(json['typegen_4_EmailToAllUsersDeliverySettingsRequest'],'EmailToAllUsersDeliverySettingsRequest',context!);
         typegen_5_EmailToAccountUsersDeliverySettingsRequest = JsonConverters.fromJson(json['typegen_5_EmailToAccountUsersDeliverySettingsRequest'],'EmailToAccountUsersDeliverySettingsRequest',context!);
         typegen_6_EmailToCollectionRecordsDeliverySettingsRequest = JsonConverters.fromJson(json['typegen_6_EmailToCollectionRecordsDeliverySettingsRequest'],'EmailToCollectionRecordsDeliverySettingsRequest',context!);
@@ -33301,6 +33731,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_1_AwsSesEmailIntegrationRequest': JsonConverters.toJson(typegen_1_AwsSesEmailIntegrationRequest,'AwsSesEmailIntegrationRequest',context!),
         'typegen_2_SendGridEmailIntegrationRequest': JsonConverters.toJson(typegen_2_SendGridEmailIntegrationRequest,'SendGridEmailIntegrationRequest',context!),
         'typegen_3_MailGunEmailIntegrationRequest': JsonConverters.toJson(typegen_3_MailGunEmailIntegrationRequest,'MailGunEmailIntegrationRequest',context!),
+        'typegen_3a_AzureCommunicationEmailIntegrationRequest': JsonConverters.toJson(typegen_3a_AzureCommunicationEmailIntegrationRequest,'AzureCommunicationEmailIntegrationRequest',context!),
         'typegen_4_EmailToAllUsersDeliverySettingsRequest': JsonConverters.toJson(typegen_4_EmailToAllUsersDeliverySettingsRequest,'EmailToAllUsersDeliverySettingsRequest',context!),
         'typegen_5_EmailToAccountUsersDeliverySettingsRequest': JsonConverters.toJson(typegen_5_EmailToAccountUsersDeliverySettingsRequest,'EmailToAccountUsersDeliverySettingsRequest',context!),
         'typegen_6_EmailToCollectionRecordsDeliverySettingsRequest': JsonConverters.toJson(typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,'EmailToCollectionRecordsDeliverySettingsRequest',context!),
@@ -44372,6 +44803,85 @@ class PreviewEmailNotification extends RequestBase implements IReturn<PreviewEma
 }
 
 /**
+* Retries the failed recipients of an email campaign
+*/
+// @Route("/{version}/notifications/email/campaigns/{Id}/retry-failed", "POST")
+// @Api(Description="Retries the failed recipients of an email campaign")
+// @DataContract
+class RetryFailedEmailNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedEmailNotificationsResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id. Get it from get_email_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id. Get it from get_email_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
+    */
+    // @DataMember
+    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
+    String idempotencyKey = "";
+
+    /**
+    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
+    List<String>? notificationIds;
+
+    /**
+    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
+    bool? includeAmbiguous;
+
+    /**
+    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
+    List<String>? categories;
+
+    RetryFailedEmailNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
+    RetryFailedEmailNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        idempotencyKey = json['idempotencyKey'] ?? "";
+        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
+        includeAmbiguous = json['includeAmbiguous'];
+        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'idempotencyKey': idempotencyKey,
+        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
+        'includeAmbiguous': includeAmbiguous,
+        'categories': JsonConverters.toJson(categories,'List<String>',context!)
+    });
+
+    createResponse() => RetryFailedEmailNotificationsResponse();
+    getResponseTypeName() => "RetryFailedEmailNotificationsResponse";
+    getTypeName() => "RetryFailedEmailNotificationsRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Stops a running email campaign
 */
 // @Route("/{version}/notifications/email/campaigns/{Id}/stop", "POST")
@@ -45544,6 +46054,85 @@ class PreviewSmsNotification extends RequestBase implements IReturn<PreviewSmsNo
     createResponse() => PreviewSmsNotificationResponse();
     getResponseTypeName() => "PreviewSmsNotificationResponse";
     getTypeName() => "PreviewSmsNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Retries the failed recipients of an SMS campaign
+*/
+// @Route("/{version}/notifications/sms/campaigns/{Id}/retry-failed", "POST")
+// @Api(Description="Retries the failed recipients of an SMS campaign")
+// @DataContract
+class RetryFailedSmsNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedSmsNotificationsResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id. Get it from get_sms_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
+    */
+    // @DataMember
+    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
+    String idempotencyKey = "";
+
+    /**
+    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
+    List<String>? notificationIds;
+
+    /**
+    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
+    bool? includeAmbiguous;
+
+    /**
+    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
+    List<String>? categories;
+
+    RetryFailedSmsNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
+    RetryFailedSmsNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        idempotencyKey = json['idempotencyKey'] ?? "";
+        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
+        includeAmbiguous = json['includeAmbiguous'];
+        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'idempotencyKey': idempotencyKey,
+        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
+        'includeAmbiguous': includeAmbiguous,
+        'categories': JsonConverters.toJson(categories,'List<String>',context!)
+    });
+
+    createResponse() => RetryFailedSmsNotificationsResponse();
+    getResponseTypeName() => "RetryFailedSmsNotificationsResponse";
+    getTypeName() => "RetryFailedSmsNotificationsRequest";
     TypeContext? context = _ctx;
 }
 
@@ -47691,6 +48280,85 @@ class PreviewPushNotification extends RequestBase implements IReturn<PreviewPush
     createResponse() => PreviewPushNotificationResponse();
     getResponseTypeName() => "PreviewPushNotificationResponse";
     getTypeName() => "PreviewPushNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Retries the failed recipients of a push campaign
+*/
+// @Route("/{version}/notifications/push/campaigns/{Id}/retry-failed", "POST")
+// @Api(Description="Retries the failed recipients of a push campaign")
+// @DataContract
+class RetryFailedPushNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedPushNotificationsResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id. Get it from get_push_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id. Get it from get_push_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
+    */
+    // @DataMember
+    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
+    String idempotencyKey = "";
+
+    /**
+    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
+    List<String>? notificationIds;
+
+    /**
+    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
+    bool? includeAmbiguous;
+
+    /**
+    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
+    List<String>? categories;
+
+    RetryFailedPushNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
+    RetryFailedPushNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        idempotencyKey = json['idempotencyKey'] ?? "";
+        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
+        includeAmbiguous = json['includeAmbiguous'];
+        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'idempotencyKey': idempotencyKey,
+        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
+        'includeAmbiguous': includeAmbiguous,
+        'categories': JsonConverters.toJson(categories,'List<String>',context!)
+    });
+
+    createResponse() => RetryFailedPushNotificationsResponse();
+    getResponseTypeName() => "RetryFailedPushNotificationsResponse";
+    getTypeName() => "RetryFailedPushNotificationsRequest";
     TypeContext? context = _ctx;
 }
 
@@ -53040,7 +53708,7 @@ class RunDiagnosticHealthCheckRequest extends CodeMashRequestBase implements IRe
     TypeContext? context = _ctx;
 }
 
-TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
+TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmailProvider': TypeInfo(TypeOf.Enum, enumValues:EmailProvider.values),
     'EmailIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SmtpPorts': TypeInfo(TypeOf.Enum, enumValues:SmtpPorts.values),
@@ -53050,6 +53718,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'SendGridEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => SendGridEmailIntegrationRequest()),
     'MailGunRegion': TypeInfo(TypeOf.Enum, enumValues:MailGunRegion.values),
     'MailGunEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => MailGunEmailIntegrationRequest()),
+    'AzureCommunicationEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AzureCommunicationEmailIntegrationRequest()),
     'EmailCampaignRecipientsSourceTypes': TypeInfo(TypeOf.Enum, enumValues:EmailCampaignRecipientsSourceTypes.values),
     'TokenMappingResolverType': TypeInfo(TypeOf.Enum, enumValues:TokenMappingResolverType.values),
     'SecretValueFormat': TypeInfo(TypeOf.Enum, enumValues:SecretValueFormat.values),
@@ -53788,8 +54457,17 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'EmailCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchDto()),
     'CampaignNotificationStatus': TypeInfo(TypeOf.Enum, enumValues:CampaignNotificationStatus.values),
     'NotificationStatusChangeEntryDto': TypeInfo(TypeOf.Class, create:() => NotificationStatusChangeEntryDto()),
+    'NotificationDeliveryState': TypeInfo(TypeOf.Enum, enumValues:NotificationDeliveryState.values),
+    'NotificationAttemptOutcome': TypeInfo(TypeOf.Enum, enumValues:NotificationAttemptOutcome.values),
+    'SendErrorCategory': TypeInfo(TypeOf.Enum, enumValues:SendErrorCategory.values),
+    'NotificationAttemptTrigger': TypeInfo(TypeOf.Enum, enumValues:NotificationAttemptTrigger.values),
+    'NotificationAttemptDto': TypeInfo(TypeOf.Class, create:() => NotificationAttemptDto()),
+    'DeliveryEventOutcome': TypeInfo(TypeOf.Enum, enumValues:DeliveryEventOutcome.values),
+    'NotificationDeliveryEventDto': TypeInfo(TypeOf.Class, create:() => NotificationDeliveryEventDto()),
     'CampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => CampaignBatchNotificationDto()),
     'List<NotificationStatusChangeEntryDto>': TypeInfo(TypeOf.Class, create:() => <NotificationStatusChangeEntryDto>[]),
+    'List<NotificationAttemptDto>': TypeInfo(TypeOf.Class, create:() => <NotificationAttemptDto>[]),
+    'List<NotificationDeliveryEventDto>': TypeInfo(TypeOf.Class, create:() => <NotificationDeliveryEventDto>[]),
     'EmailCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchNotificationDto()),
     'CampaignStatsDto': TypeInfo(TypeOf.Class, create:() => CampaignStatsDto()),
     'SmsTemplateListProjection': TypeInfo(TypeOf.Class, create:() => SmsTemplateListProjection()),
@@ -54145,6 +54823,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'PaginatedResponse<EmailCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmailCampaignBatchNotificationDto>()),
     'GetEmailCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignStatisticsResponse()),
     'PreviewEmailNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewEmailNotificationResponse()),
+    'RetryFailedEmailNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedEmailNotificationsResponse()),
     'GetEmailCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessagesResponse()),
     'GetSmsTemplateResponse': TypeInfo(TypeOf.Class, create:() => GetSmsTemplateResponse()),
     'GetSmsTemplatesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsTemplatesResponse()),
@@ -54166,6 +54845,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'PaginatedResponse<SmsCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsCampaignBatchNotificationDto>()),
     'GetSmsCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignStatisticsResponse()),
     'PreviewSmsNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotificationResponse()),
+    'RetryFailedSmsNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsResponse()),
     'GetSmsCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesResponse()),
     'GetMarketplaceListingResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceListingResponse()),
     'GetMarketplaceTokensResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceTokensResponse()),
@@ -54232,6 +54912,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'PaginatedResponse<PushCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignBatchNotificationDto>()),
     'GetPushCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignStatisticsResponse()),
     'PreviewPushNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewPushNotificationResponse()),
+    'RetryFailedPushNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedPushNotificationsResponse()),
     'GetPushCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessagesResponse()),
     'GetNotificationInboxResponse': TypeInfo(TypeOf.Class, create:() => GetNotificationInboxResponse()),
     'PaginatedResponse<InAppNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<InAppNotificationDto>()),
@@ -54686,6 +55367,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetEmailCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotifications()),
     'GetEmailCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignStatistics()),
     'PreviewEmailNotification': TypeInfo(TypeOf.Class, create:() => PreviewEmailNotification()),
+    'RetryFailedEmailNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedEmailNotificationsRequest()),
     'StopEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopEmailCampaignRequest()),
     'GetEmailCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessagesRequest()),
     'DisableSms': TypeInfo(TypeOf.Class, create:() => DisableSms()),
@@ -54719,6 +55401,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetSmsCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotifications()),
     'GetSmsCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignStatistics()),
     'PreviewSmsNotification': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotification()),
+    'RetryFailedSmsNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsRequest()),
     'StopSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopSmsCampaignRequest()),
     'GetSmsCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesRequest()),
     'GetMarketplaceIntegrationAccess': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationAccess()),
@@ -54774,6 +55457,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetPushCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotifications()),
     'GetPushCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetPushCampaignStatistics()),
     'PreviewPushNotification': TypeInfo(TypeOf.Class, create:() => PreviewPushNotification()),
+    'RetryFailedPushNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedPushNotificationsRequest()),
     'StopPushCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopPushCampaignRequest()),
     'GetPushCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessagesRequest()),
     'GetNotificationInboxRequest': TypeInfo(TypeOf.Class, create:() => GetNotificationInboxRequest()),

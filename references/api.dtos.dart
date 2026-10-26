@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-23 15:27:03
+Date: 2026-10-26 10:25:57
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -1954,8 +1954,9 @@ class AuthDto implements IBindableContract, IConvertible
     AuthStatus? status;
     DateTime? createdOn;
     DateTime? modifiedOn;
+    String? credentialVersion;
 
-    AuthDto({this.id="",this.type,this.email,this.userName,this.registration,this.login,this.generalInfo,this.roles,this.pushDevices,this.tags,this.status,this.createdOn,this.modifiedOn});
+    AuthDto({this.id="",this.type,this.email,this.userName,this.registration,this.login,this.generalInfo,this.roles,this.pushDevices,this.tags,this.status,this.createdOn,this.modifiedOn,this.credentialVersion});
     AuthDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1972,6 +1973,7 @@ class AuthDto implements IBindableContract, IConvertible
         status = JsonConverters.fromJson(json['status'],'AuthStatus',context!);
         createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
         modifiedOn = JsonConverters.fromJson(json['modifiedOn'],'DateTime',context!) ?? DateTime(0);
+        credentialVersion = json['credentialVersion'];
         return this;
     }
 
@@ -1988,7 +1990,8 @@ class AuthDto implements IBindableContract, IConvertible
         'tags': JsonConverters.toJson(tags,'List<String>',context!),
         'status': JsonConverters.toJson(status,'AuthStatus',context!),
         'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!),
-        'modifiedOn': JsonConverters.toJson(modifiedOn,'DateTime',context!)
+        'modifiedOn': JsonConverters.toJson(modifiedOn,'DateTime',context!),
+        'credentialVersion': credentialVersion
     };
 
     getTypeName() => "AuthDto";
@@ -3811,6 +3814,34 @@ class GetUserPreferencesResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetUserPreferencesResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CredentialChangedResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? authId;
+
+    // @DataMember
+    String? credentialVersion;
+
+    CredentialChangedResponse({this.authId,this.credentialVersion});
+    CredentialChangedResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        authId = json['authId'];
+        credentialVersion = json['credentialVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'authId': authId,
+        'credentialVersion': credentialVersion
+    });
+
+    getTypeName() => "CredentialChangedResponse";
     TypeContext? context = _ctx;
 }
 
@@ -6628,7 +6659,7 @@ class UpdateUserPreferencesRequest extends CodeMashRequestBase implements IRetur
 // @Route("/{version}/membership/userauth/password/change", "POST")
 // @Api(Description="Membership · Password")
 // @DataContract
-class ChangePasswordRequest extends CodeMashRequestBase implements IReturn<PasskeyOkResponse>, IConvertible, IPost
+class ChangePasswordRequest extends CodeMashRequestBase implements IReturn<CredentialChangedResponse>, IConvertible, IPost
 {
     /**
     * The member's current password.
@@ -6668,8 +6699,8 @@ class ChangePasswordRequest extends CodeMashRequestBase implements IReturn<Passk
         'databaseIntegrationId': databaseIntegrationId
     });
 
-    createResponse() => PasskeyOkResponse();
-    getResponseTypeName() => "PasskeyOkResponse";
+    createResponse() => CredentialChangedResponse();
+    getResponseTypeName() => "CredentialChangedResponse";
     getTypeName() => "ChangePasswordRequest";
     TypeContext? context = _ctx;
 }
@@ -6714,7 +6745,7 @@ class RequestPasswordResetRequest extends CodeMashRequestBase implements IReturn
 // @Route("/{version}/membership/userauth/password/reset/confirm", "POST")
 // @Api(Description="Membership · Password")
 // @DataContract
-class ConfirmPasswordResetRequest extends CodeMashRequestBase implements IReturn<PasskeyOkResponse>, IConvertible, IPost
+class ConfirmPasswordResetRequest extends CodeMashRequestBase implements IReturn<CredentialChangedResponse>, IConvertible, IPost
 {
     /**
     * One-time reset token from the email link.
@@ -6754,8 +6785,8 @@ class ConfirmPasswordResetRequest extends CodeMashRequestBase implements IReturn
         'databaseIntegrationId': databaseIntegrationId
     });
 
-    createResponse() => PasskeyOkResponse();
-    getResponseTypeName() => "PasskeyOkResponse";
+    createResponse() => CredentialChangedResponse();
+    getResponseTypeName() => "CredentialChangedResponse";
     getTypeName() => "ConfirmPasswordResetRequest";
     TypeContext? context = _ctx;
 }
@@ -9580,7 +9611,7 @@ class MarkAllNotificationsReadRequest extends CodeMashRequestBase implements IRe
     TypeContext? context = _ctx;
 }
 
-TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
+TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'JsonSchemaFieldDto': TypeInfo(TypeOf.AbstractClass),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
     'IReadOnlyDictionary<String,String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyDictionary<String,String>()),
@@ -9724,6 +9755,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetUsersResponse': TypeInfo(TypeOf.Class, create:() => GetUsersResponse()),
     'PaginatedResponse<AuthDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AuthDto>()),
     'GetUserPreferencesResponse': TypeInfo(TypeOf.Class, create:() => GetUserPreferencesResponse()),
+    'CredentialChangedResponse': TypeInfo(TypeOf.Class, create:() => CredentialChangedResponse()),
     'PasskeyOkResponse': TypeInfo(TypeOf.Class, create:() => PasskeyOkResponse()),
     'SendTestPasswordResetResponse': TypeInfo(TypeOf.Class, create:() => SendTestPasswordResetResponse()),
     'PasskeyCeremonyOptionsResponse': TypeInfo(TypeOf.Class, create:() => PasskeyCeremonyOptionsResponse()),
