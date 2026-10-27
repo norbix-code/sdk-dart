@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-26 11:03:33
+Date: 2026-10-27 15:24:45
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -313,6 +313,7 @@ enum TokenMappingResolverType
     RequestInput,
     IntegrationConfig,
     IntegrationSecret,
+    StepOutput,
 }
 
 enum SecretValueFormat
@@ -598,6 +599,7 @@ enum TriggerActionType
     WebhookCall,
     SseCall,
     Marketplace,
+    Workflow,
 }
 
 // @DataContract
@@ -2553,8 +2555,10 @@ class WooCommercePaymentIntegrationRequest extends PaymentIntegrationRequest imp
     PaymentGatewayPlatform? provider;
     String storeUrl = "";
     String webhookSecret = "";
+    String? consumerKey;
+    String? consumerSecret;
 
-    WooCommercePaymentIntegrationRequest({this.provider,this.storeUrl="",this.webhookSecret=""});
+    WooCommercePaymentIntegrationRequest({this.provider,this.storeUrl="",this.webhookSecret="",this.consumerKey,this.consumerSecret});
     WooCommercePaymentIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -2562,13 +2566,17 @@ class WooCommercePaymentIntegrationRequest extends PaymentIntegrationRequest imp
         provider = JsonConverters.fromJson(json['provider'],'PaymentGatewayPlatform',context!);
         storeUrl = json['storeUrl'] ?? "";
         webhookSecret = json['webhookSecret'] ?? "";
+        consumerKey = json['consumerKey'];
+        consumerSecret = json['consumerSecret'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'PaymentGatewayPlatform',context!),
         'storeUrl': storeUrl,
-        'webhookSecret': webhookSecret
+        'webhookSecret': webhookSecret,
+        'consumerKey': consumerKey,
+        'consumerSecret': consumerSecret
     });
 
     getTypeName() => "WooCommercePaymentIntegrationRequest";
@@ -5124,6 +5132,34 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class TriggerActionWorkflowDto extends TriggerActionDto implements IConvertible
+{
+    // @DataMember
+    String? workflowRef;
+
+    // @DataMember
+    Map<String,String?>? payload;
+
+    TriggerActionWorkflowDto({this.workflowRef,this.payload});
+    TriggerActionWorkflowDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        workflowRef = json['workflowRef'];
+        payload = JsonConverters.toStringMap(json['payload']);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'workflowRef': workflowRef,
+        'payload': payload
+    });
+
+    getTypeName() => "TriggerActionWorkflowDto";
+    TypeContext? context = _ctx;
+}
+
 // @DataContract(Namespace="http://codemash.io/types/")
 class RequestBase implements IVersionBasedRequest, IHasCorrelationIdRequest, IConvertible
 {
@@ -6332,21 +6368,65 @@ class GoogleCloudFunctionsCodeIntegrationDto extends CodeIntegrationDto implemen
     TypeContext? context = _ctx;
 }
 
+class PaymentsIntegrationConnectionDto implements IConvertible
+{
+    String provider = "";
+    String? accountId;
+    String? accountName;
+    String connectedBy = "";
+    DateTime? connectedAtUtc;
+    bool? isConnected;
+    DateTime? disconnectedAtUtc;
+    String? disconnectReason;
+
+    PaymentsIntegrationConnectionDto({this.provider="",this.accountId,this.accountName,this.connectedBy="",this.connectedAtUtc,this.isConnected,this.disconnectedAtUtc,this.disconnectReason});
+    PaymentsIntegrationConnectionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        provider = json['provider'] ?? "";
+        accountId = json['accountId'];
+        accountName = json['accountName'];
+        connectedBy = json['connectedBy'] ?? "";
+        connectedAtUtc = JsonConverters.fromJson(json['connectedAtUtc'],'DateTime',context!) ?? DateTime(0);
+        isConnected = json['isConnected'];
+        disconnectedAtUtc = JsonConverters.fromJson(json['disconnectedAtUtc'],'DateTime',context!);
+        disconnectReason = json['disconnectReason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'provider': provider,
+        'accountId': accountId,
+        'accountName': accountName,
+        'connectedBy': connectedBy,
+        'connectedAtUtc': JsonConverters.toJson(connectedAtUtc,'DateTime',context!),
+        'isConnected': isConnected,
+        'disconnectedAtUtc': JsonConverters.toJson(disconnectedAtUtc,'DateTime',context!),
+        'disconnectReason': disconnectReason
+    };
+
+    getTypeName() => "PaymentsIntegrationConnectionDto";
+    TypeContext? context = _ctx;
+}
+
 class PaymentsIntegrationDto extends IntegrationDto implements IConvertible
 {
     PaymentGatewayPlatform? gatewayPlatform;
+    PaymentsIntegrationConnectionDto? connection;
 
-    PaymentsIntegrationDto({this.gatewayPlatform});
+    PaymentsIntegrationDto({this.gatewayPlatform,this.connection});
     PaymentsIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         gatewayPlatform = JsonConverters.fromJson(json['gatewayPlatform'],'PaymentGatewayPlatform',context!);
+        connection = JsonConverters.fromJson(json['connection'],'PaymentsIntegrationConnectionDto',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'gatewayPlatform': JsonConverters.toJson(gatewayPlatform,'PaymentGatewayPlatform',context!)
+        'gatewayPlatform': JsonConverters.toJson(gatewayPlatform,'PaymentGatewayPlatform',context!),
+        'connection': JsonConverters.toJson(connection,'PaymentsIntegrationConnectionDto',context!)
     });
 
     getTypeName() => "PaymentsIntegrationDto";
@@ -8726,6 +8806,7 @@ enum SchedulerTaskType
     CodeFunctionalCall,
     WebhookCall,
     MarketplaceFunctionCall,
+    WorkflowCall,
 }
 
 // @DataContract
@@ -10616,6 +10697,7 @@ enum CodeFunctionSource
     Ai,
     Scheduler,
     Manual,
+    Workflow,
 }
 
 enum CodeFunctionCallerKind
@@ -10728,7 +10810,16 @@ class CodeFunctionContextDto implements IConvertible
     // @DataMember
     CodeFunctionRunAsDto? runAs;
 
-    CodeFunctionContextDto({this.accountId="",this.projectId="",this.environment="",this.region,this.hubUrl="",this.apiUrl="",this.echoUrl="",this.triggerId,this.taskId,this.correlationId,this.caller,this.runAs});
+    // @DataMember
+    String? workflowId;
+
+    // @DataMember
+    String? runId;
+
+    // @DataMember
+    String? stepId;
+
+    CodeFunctionContextDto({this.accountId="",this.projectId="",this.environment="",this.region,this.hubUrl="",this.apiUrl="",this.echoUrl="",this.triggerId,this.taskId,this.correlationId,this.caller,this.runAs,this.workflowId,this.runId,this.stepId});
     CodeFunctionContextDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -10744,6 +10835,9 @@ class CodeFunctionContextDto implements IConvertible
         correlationId = json['correlationId'];
         caller = JsonConverters.fromJson(json['caller'],'CodeFunctionCallerDto',context!);
         runAs = JsonConverters.fromJson(json['runAs'],'CodeFunctionRunAsDto',context!);
+        workflowId = json['workflowId'];
+        runId = json['runId'];
+        stepId = json['stepId'];
         return this;
     }
 
@@ -10759,7 +10853,10 @@ class CodeFunctionContextDto implements IConvertible
         'taskId': taskId,
         'correlationId': correlationId,
         'caller': JsonConverters.toJson(caller,'CodeFunctionCallerDto',context!),
-        'runAs': JsonConverters.toJson(runAs,'CodeFunctionRunAsDto',context!)
+        'runAs': JsonConverters.toJson(runAs,'CodeFunctionRunAsDto',context!),
+        'workflowId': workflowId,
+        'runId': runId,
+        'stepId': stepId
     };
 
     getTypeName() => "CodeFunctionContextDto";
@@ -11171,6 +11268,48 @@ class MarketplaceFunctionCallDto implements IConvertible
 }
 
 // @DataContract
+class WorkflowStepInfoDto implements IConvertible
+{
+    // @DataMember
+    String workflowId = "";
+
+    // @DataMember
+    String runId = "";
+
+    // @DataMember
+    String stepId = "";
+
+    // @DataMember
+    int? version;
+
+    // @DataMember
+    Map<String,dynamic?>? request;
+
+    WorkflowStepInfoDto({this.workflowId="",this.runId="",this.stepId="",this.version,this.request});
+    WorkflowStepInfoDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        workflowId = json['workflowId'] ?? "";
+        runId = json['runId'] ?? "";
+        stepId = json['stepId'] ?? "";
+        version = json['version'];
+        request = JsonConverters.fromJson(json['request'],'Map<String,dynamic?>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'workflowId': workflowId,
+        'runId': runId,
+        'stepId': stepId,
+        'version': version,
+        'request': JsonConverters.toJson(request,'Map<String,dynamic?>',context!)
+    };
+
+    getTypeName() => "WorkflowStepInfoDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class CodeFunctionDataDto implements IConvertible
 {
     // @DataMember
@@ -11200,7 +11339,10 @@ class CodeFunctionDataDto implements IConvertible
     // @DataMember
     MarketplaceFunctionCallDto? marketplace;
 
-    CodeFunctionDataDto({this.database,this.user,this.file,this.payment,this.order,this.ai,this.task,this.payload,this.marketplace});
+    // @DataMember
+    WorkflowStepInfoDto? workflow;
+
+    CodeFunctionDataDto({this.database,this.user,this.file,this.payment,this.order,this.ai,this.task,this.payload,this.marketplace,this.workflow});
     CodeFunctionDataDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -11213,6 +11355,7 @@ class CodeFunctionDataDto implements IConvertible
         task = JsonConverters.fromJson(json['task'],'ScheduledTaskInfoDto',context!);
         payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
         marketplace = JsonConverters.fromJson(json['marketplace'],'MarketplaceFunctionCallDto',context!);
+        workflow = JsonConverters.fromJson(json['workflow'],'WorkflowStepInfoDto',context!);
         return this;
     }
 
@@ -11225,7 +11368,8 @@ class CodeFunctionDataDto implements IConvertible
         'ai': JsonConverters.toJson(ai,'AiUsageEventDto',context!),
         'task': JsonConverters.toJson(task,'ScheduledTaskInfoDto',context!),
         'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
-        'marketplace': JsonConverters.toJson(marketplace,'MarketplaceFunctionCallDto',context!)
+        'marketplace': JsonConverters.toJson(marketplace,'MarketplaceFunctionCallDto',context!),
+        'workflow': JsonConverters.toJson(workflow,'WorkflowStepInfoDto',context!)
     };
 
     getTypeName() => "CodeFunctionDataDto";
@@ -11389,6 +11533,33 @@ class MarketplaceFunctionSchedulerTaskRequest extends SchedulerTaskRequest imple
     TypeContext? context = _ctx;
 }
 
+class WorkflowSchedulerTaskRequest extends SchedulerTaskRequest implements IConvertible
+{
+    SchedulerTaskType? type;
+    String? workflowRef;
+    Map<String,String?>? payload;
+
+    WorkflowSchedulerTaskRequest({this.type,this.workflowRef,this.payload});
+    WorkflowSchedulerTaskRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        type = JsonConverters.fromJson(json['type'],'SchedulerTaskType',context!);
+        workflowRef = json['workflowRef'];
+        payload = JsonConverters.toStringMap(json['payload']);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'type': JsonConverters.toJson(type,'SchedulerTaskType',context!),
+        'workflowRef': workflowRef,
+        'payload': payload
+    });
+
+    getTypeName() => "WorkflowSchedulerTaskRequest";
+    TypeContext? context = _ctx;
+}
+
 class AwsCloudWatchLoggingIntegrationRequest extends LoggingIntegrationRequest implements IConvertible
 {
     LoggingProvider? provider;
@@ -11449,6 +11620,95 @@ class AwsCloudWatchLoggingIntegrationDto extends LoggingIntegrationDto implement
     });
 
     getTypeName() => "AwsCloudWatchLoggingIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class QuickConnectProviderDto implements IConvertible
+{
+    // @DataMember
+    String module = "";
+
+    // @DataMember
+    String provider = "";
+
+    // @DataMember
+    bool? available;
+
+    // @DataMember
+    String callbackKind = "";
+
+    // @DataMember
+    List<String> requiredInputs = [];
+
+    // @DataMember
+    List<String> modes = [];
+
+    // @DataMember
+    String redirectUrl = "";
+
+    // @DataMember
+    List<String> platformWebhookUrls = [];
+
+    QuickConnectProviderDto({this.module="",this.provider="",this.available,this.callbackKind="",this.requiredInputs=const [],this.modes=const [],this.redirectUrl="",this.platformWebhookUrls=const []});
+    QuickConnectProviderDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        module = json['module'] ?? "";
+        provider = json['provider'] ?? "";
+        available = json['available'];
+        callbackKind = json['callbackKind'] ?? "";
+        requiredInputs = JsonConverters.fromJson(json['requiredInputs'],'List<String>',context!) ?? [];
+        modes = JsonConverters.fromJson(json['modes'],'List<String>',context!) ?? [];
+        redirectUrl = json['redirectUrl'] ?? "";
+        platformWebhookUrls = JsonConverters.fromJson(json['platformWebhookUrls'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'module': module,
+        'provider': provider,
+        'available': available,
+        'callbackKind': callbackKind,
+        'requiredInputs': JsonConverters.toJson(requiredInputs,'List<String>',context!),
+        'modes': JsonConverters.toJson(modes,'List<String>',context!),
+        'redirectUrl': redirectUrl,
+        'platformWebhookUrls': JsonConverters.toJson(platformWebhookUrls,'List<String>',context!)
+    };
+
+    getTypeName() => "QuickConnectProviderDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class QuickConnectTargetDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    String? detail;
+
+    QuickConnectTargetDto({this.id="",this.name="",this.detail});
+    QuickConnectTargetDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        detail = json['detail'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'detail': detail
+    };
+
+    getTypeName() => "QuickConnectTargetDto";
     TypeContext? context = _ctx;
 }
 
@@ -13392,6 +13652,373 @@ class SaveSmsTemplate extends CodeMashRequestBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class WorkflowStepRetryDto implements IConvertible
+{
+    /**
+    * 0–10 automatic retries.
+    */
+    // @DataMember
+    // @ApiMember(Description="0–10 automatic retries.")
+    int count = 0;
+
+    /**
+    * 1–3600 seconds before the first retry, doubled per attempt.
+    */
+    // @DataMember
+    // @ApiMember(Description="1–3600 seconds before the first retry, doubled per attempt.")
+    int backoffSeconds = 0;
+
+    WorkflowStepRetryDto({this.count=0,this.backoffSeconds=0});
+    WorkflowStepRetryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        count = json['count'] ?? 0;
+        backoffSeconds = json['backoffSeconds'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'count': count,
+        'backoffSeconds': backoffSeconds
+    };
+
+    getTypeName() => "WorkflowStepRetryDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowOnErrorDto implements IConvertible
+{
+    /**
+    * fail | continue | goto
+    */
+    // @DataMember
+    // @ApiMember(Description="fail | continue | goto", IsRequired=true)
+    String action = "";
+
+    /**
+    * goto: the step to jump to.
+    */
+    // @DataMember
+    // @ApiMember(Description="goto: the step to jump to.")
+    String? goto;
+
+    WorkflowOnErrorDto({this.action="",this.goto});
+    WorkflowOnErrorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        action = json['action'] ?? "";
+        goto = json['goto'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'action': action,
+        'goto': goto
+    };
+
+    getTypeName() => "WorkflowOnErrorDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowStepDto implements IConvertible
+{
+    /**
+    * ^[A-Za-z_][A-Za-z0-9_]{0,63}$, unique in the definition.
+    */
+    // @DataMember
+    // @ApiMember(Description="^[A-Za-z_][A-Za-z0-9_]{0,63}$, unique in the definition.", IsRequired=true)
+    String id = "";
+
+    /**
+    * email.send | sms.send | push.send | code.invoke | webhook.call | sse.publish | marketplace.invoke | condition | transform | log | delay | wait | parallel | join | workflow.start
+    */
+    // @DataMember
+    // @ApiMember(Description="email.send | sms.send | push.send | code.invoke | webhook.call | sse.publish | marketplace.invoke | condition | transform | log | delay | wait | parallel | join | workflow.start", IsRequired=true)
+    String kind = "";
+
+    // @DataMember
+    String? name;
+
+    /**
+    * The step after this one; absent = the branch ends.
+    */
+    // @DataMember
+    // @ApiMember(Description="The step after this one; absent = the branch ends.")
+    String? next;
+
+    /**
+    * condition: the step when the expression is true.
+    */
+    // @DataMember
+    // @ApiMember(Description="condition: the step when the expression is true.")
+    String? then;
+
+    /**
+    * condition: the step when the expression is false.
+    */
+    // @DataMember
+    // @ApiMember(Description="condition: the step when the expression is false.")
+    String? Else;
+
+    /**
+    * wait (approval): the step when rejected; absent = the branch ends.
+    */
+    // @DataMember
+    // @ApiMember(Description="wait (approval): the step when rejected; absent = the branch ends.")
+    String? rejected;
+
+    /**
+    * wait: the step when the wait times out; absent = the run fails (-022).
+    */
+    // @DataMember
+    // @ApiMember(Description="wait: the step when the wait times out; absent = the run fails (-022).")
+    String? onTimeout;
+
+    // @DataMember
+    WorkflowStepRetryDto? retry;
+
+    /**
+    * A step still running after it is failed with reason=timeout (default 300, cap 3600).
+    */
+    // @DataMember
+    // @ApiMember(Description="A step still running after it is failed with reason=timeout (default 300, cap 3600).")
+    int? timeoutSeconds;
+
+    // @DataMember
+    WorkflowOnErrorDto? onError;
+
+    /**
+    * Action kinds: the trigger action body (type may be left out — the kind implies it).
+    */
+    // @DataMember
+    // @ApiMember(Description="Action kinds: the trigger action body (type may be left out — the kind implies it).")
+    Map<String,dynamic?>? action;
+
+    /**
+    * Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload.
+    */
+    // @DataMember
+    // @ApiMember(Description="Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload.")
+    Map<String,dynamic?>? config;
+
+    WorkflowStepDto({this.id="",this.kind="",this.name,this.next,this.then,this.Else,this.rejected,this.onTimeout,this.retry,this.timeoutSeconds,this.onError,this.action,this.config});
+    WorkflowStepDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        kind = json['kind'] ?? "";
+        name = json['name'];
+        next = json['next'];
+        then = json['then'];
+        Else = json['else'];
+        rejected = json['rejected'];
+        onTimeout = json['onTimeout'];
+        retry = JsonConverters.fromJson(json['retry'],'WorkflowStepRetryDto',context!);
+        timeoutSeconds = json['timeoutSeconds'];
+        onError = JsonConverters.fromJson(json['onError'],'WorkflowOnErrorDto',context!);
+        action = JsonConverters.fromJson(json['action'],'Map<String,dynamic?>',context!);
+        config = JsonConverters.fromJson(json['config'],'Map<String,dynamic?>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'kind': kind,
+        'name': name,
+        'next': next,
+        'then': then,
+        'else': Else,
+        'rejected': rejected,
+        'onTimeout': onTimeout,
+        'retry': JsonConverters.toJson(retry,'WorkflowStepRetryDto',context!),
+        'timeoutSeconds': timeoutSeconds,
+        'onError': JsonConverters.toJson(onError,'WorkflowOnErrorDto',context!),
+        'action': JsonConverters.toJson(action,'Map<String,dynamic?>',context!),
+        'config': JsonConverters.toJson(config,'Map<String,dynamic?>',context!)
+    };
+
+    getTypeName() => "WorkflowStepDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowLimitsDto implements IConvertible
+{
+    /**
+    * Step executions per run; default 200, cap 5000.
+    */
+    // @DataMember
+    // @ApiMember(Description="Step executions per run; default 200, cap 5000.")
+    int? maxStepRuns;
+
+    /**
+    * Wall-clock from start, including parked time; default 604800 (7 days), cap 2592000.
+    */
+    // @DataMember
+    // @ApiMember(Description="Wall-clock from start, including parked time; default 604800 (7 days), cap 2592000.")
+    int? maxDurationSeconds;
+
+    /**
+    * The longest one delay / wait may park; default 604800, cap 2592000.
+    */
+    // @DataMember
+    // @ApiMember(Description="The longest one delay / wait may park; default 604800, cap 2592000.")
+    int? maxWaitSeconds;
+
+    /**
+    * Branch heads per parallel; default 10, cap 20.
+    */
+    // @DataMember
+    // @ApiMember(Description="Branch heads per parallel; default 10, cap 20.")
+    int? maxParallelBranches;
+
+    /**
+    * Nesting of workflow.start and trigger-started descendants; default 3, cap 5.
+    */
+    // @DataMember
+    // @ApiMember(Description="Nesting of workflow.start and trigger-started descendants; default 3, cap 5.")
+    int? maxDepth;
+
+    WorkflowLimitsDto({this.maxStepRuns,this.maxDurationSeconds,this.maxWaitSeconds,this.maxParallelBranches,this.maxDepth});
+    WorkflowLimitsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        maxStepRuns = json['maxStepRuns'];
+        maxDurationSeconds = json['maxDurationSeconds'];
+        maxWaitSeconds = json['maxWaitSeconds'];
+        maxParallelBranches = json['maxParallelBranches'];
+        maxDepth = json['maxDepth'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'maxStepRuns': maxStepRuns,
+        'maxDurationSeconds': maxDurationSeconds,
+        'maxWaitSeconds': maxWaitSeconds,
+        'maxParallelBranches': maxParallelBranches,
+        'maxDepth': maxDepth
+    };
+
+    getTypeName() => "WorkflowLimitsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowDefinitionDto implements IConvertible
+{
+    /**
+    * The version of this shape: "1".
+    */
+    // @DataMember
+    // @ApiMember(Description="The version of this shape: \"1\".")
+    String schemaVersion = "";
+
+    /**
+    * wf_… — absent on the first save, required on an update.
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_… — absent on the first save, required on an update.")
+    String? workflowId;
+
+    /**
+    * 1–120 characters.
+    */
+    // @DataMember
+    // @ApiMember(Description="1–120 characters.", IsRequired=true)
+    String name = "";
+
+    /**
+    * Up to 2 000 characters.
+    */
+    // @DataMember
+    // @ApiMember(Description="Up to 2 000 characters.")
+    String? description;
+
+    /**
+    * Read-only: the published version number (null on a draft). Ignored on save.
+    */
+    // @DataMember
+    // @ApiMember(Description="Read-only: the published version number (null on a draft). Ignored on save.")
+    int? version;
+
+    /**
+    * Read-only on save (use the enable / disable routes).
+    */
+    // @DataMember
+    // @ApiMember(Description="Read-only on save (use the enable / disable routes).")
+    bool? isEnabled;
+
+    /**
+    * usr_… — the service user every step runs as.
+    */
+    // @DataMember
+    // @ApiMember(Description="usr_… — the service user every step runs as.", IsRequired=true)
+    String executionIdentityId = "";
+
+    /**
+    * Optional JSON Schema (draft 2020-12, type object) of the manual-invoke payload.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional JSON Schema (draft 2020-12, type object) of the manual-invoke payload.")
+    Map<String,dynamic?>? inputs;
+
+    // @DataMember
+    String? start;
+
+    /**
+    * 1–200 steps.
+    */
+    // @DataMember
+    // @ApiMember(Description="1–200 steps.", IsRequired=true)
+    List<WorkflowStepDto> steps = [];
+
+    // @DataMember
+    WorkflowOnErrorDto? onError;
+
+    // @DataMember
+    WorkflowLimitsDto? limits;
+
+    WorkflowDefinitionDto({this.schemaVersion="",this.workflowId,this.name="",this.description,this.version,this.isEnabled,this.executionIdentityId="",this.inputs,this.start,this.steps=const [],this.onError,this.limits});
+    WorkflowDefinitionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        schemaVersion = json['schemaVersion'] ?? "";
+        workflowId = json['workflowId'];
+        name = json['name'] ?? "";
+        description = json['description'];
+        version = json['version'];
+        isEnabled = json['isEnabled'];
+        executionIdentityId = json['executionIdentityId'] ?? "";
+        inputs = JsonConverters.fromJson(json['inputs'],'Map<String,dynamic?>',context!);
+        start = json['start'];
+        steps = JsonConverters.fromJson(json['steps'],'List<WorkflowStepDto>',context!) ?? [];
+        onError = JsonConverters.fromJson(json['onError'],'WorkflowOnErrorDto',context!);
+        limits = JsonConverters.fromJson(json['limits'],'WorkflowLimitsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'schemaVersion': schemaVersion,
+        'workflowId': workflowId,
+        'name': name,
+        'description': description,
+        'version': version,
+        'isEnabled': isEnabled,
+        'executionIdentityId': executionIdentityId,
+        'inputs': JsonConverters.toJson(inputs,'Map<String,dynamic?>',context!),
+        'start': start,
+        'steps': JsonConverters.toJson(steps,'List<WorkflowStepDto>',context!),
+        'onError': JsonConverters.toJson(onError,'WorkflowOnErrorDto',context!),
+        'limits': JsonConverters.toJson(limits,'WorkflowLimitsDto',context!)
+    };
+
+    getTypeName() => "WorkflowDefinitionDto";
+    TypeContext? context = _ctx;
+}
+
 enum MarketplaceAccessLevel
 {
     None,
@@ -13815,6 +14442,26 @@ class EchoHostingPlatformDto implements IConvertible
     };
 
     getTypeName() => "EchoHostingPlatformDto";
+    TypeContext? context = _ctx;
+}
+
+class EchoConnectDto implements IConvertible
+{
+    List<QuickConnectProviderDto> providers = [];
+
+    EchoConnectDto({this.providers=const []});
+    EchoConnectDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        providers = JsonConverters.fromJson(json['providers'],'List<QuickConnectProviderDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'providers': JsonConverters.toJson(providers,'List<QuickConnectProviderDto>',context!)
+    };
+
+    getTypeName() => "EchoConnectDto";
     TypeContext? context = _ctx;
 }
 
@@ -15853,16 +16500,21 @@ class CodeDto implements IConvertible
     // @DataMember
     bool? isEnabled;
 
-    CodeDto({this.isEnabled});
+    // @DataMember
+    bool? workflowsEnabled;
+
+    CodeDto({this.isEnabled,this.workflowsEnabled});
     CodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         isEnabled = json['isEnabled'];
+        workflowsEnabled = json['workflowsEnabled'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'isEnabled': isEnabled
+        'isEnabled': isEnabled,
+        'workflowsEnabled': workflowsEnabled
     };
 
     getTypeName() => "CodeDto";
@@ -21652,6 +22304,980 @@ class SmsCampaignBatchNotificationDto extends CampaignBatchNotificationDto imple
 }
 
 // @DataContract
+class WorkflowVersionSummaryDto implements IConvertible
+{
+    // @DataMember
+    int version = 0;
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    int stepCount = 0;
+
+    // @DataMember
+    DateTime? publishedAt;
+
+    // @DataMember
+    String? publishedByAuthId;
+
+    WorkflowVersionSummaryDto({this.version=0,this.name="",this.stepCount=0,this.publishedAt,this.publishedByAuthId});
+    WorkflowVersionSummaryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        version = json['version'] ?? 0;
+        name = json['name'] ?? "";
+        stepCount = json['stepCount'] ?? 0;
+        publishedAt = JsonConverters.fromJson(json['publishedAt'],'DateTime',context!) ?? DateTime(0);
+        publishedByAuthId = json['publishedByAuthId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'version': version,
+        'name': name,
+        'stepCount': stepCount,
+        'publishedAt': JsonConverters.toJson(publishedAt,'DateTime',context!),
+        'publishedByAuthId': publishedByAuthId
+    };
+
+    getTypeName() => "WorkflowVersionSummaryDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowValidationIssueDto implements IConvertible
+{
+    // @DataMember
+    String code = "";
+
+    // @DataMember
+    String message = "";
+
+    // @DataMember
+    String? path;
+
+    // @DataMember
+    String? stepId;
+
+    // @DataMember
+    int? line;
+
+    // @DataMember
+    int? column;
+
+    WorkflowValidationIssueDto({this.code="",this.message="",this.path,this.stepId,this.line,this.column});
+    WorkflowValidationIssueDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        code = json['code'] ?? "";
+        message = json['message'] ?? "";
+        path = json['path'];
+        stepId = json['stepId'];
+        line = json['line'];
+        column = json['column'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'code': code,
+        'message': message,
+        'path': path,
+        'stepId': stepId,
+        'line': line,
+        'column': column
+    };
+
+    getTypeName() => "WorkflowValidationIssueDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowDto implements IConvertible
+{
+    // @DataMember
+    String workflowId = "";
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    WorkflowDefinitionDto? definition;
+
+    // @DataMember
+    int version = 0;
+
+    // @DataMember
+    bool? isPublished;
+
+    // @DataMember
+    bool? hasDraft;
+
+    // @DataMember
+    bool? isEnabled;
+
+    // @DataMember
+    String? disabledReason;
+
+    // @DataMember
+    DateTime? draftUpdatedAt;
+
+    // @DataMember
+    DateTime? publishedAt;
+
+    // @DataMember
+    DateTime? createdAt;
+
+    // @DataMember
+    DateTime? updatedAt;
+
+    // @DataMember
+    String? savedByAuthId;
+
+    // @DataMember
+    List<WorkflowVersionSummaryDto> versions = [];
+
+    // @DataMember
+    List<WorkflowValidationIssueDto> warnings = [];
+
+    WorkflowDto({this.workflowId="",this.env="",this.definition,this.version=0,this.isPublished,this.hasDraft,this.isEnabled,this.disabledReason,this.draftUpdatedAt,this.publishedAt,this.createdAt,this.updatedAt,this.savedByAuthId,this.versions=const [],this.warnings=const []});
+    WorkflowDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        workflowId = json['workflowId'] ?? "";
+        env = json['env'] ?? "";
+        definition = JsonConverters.fromJson(json['definition'],'WorkflowDefinitionDto',context!);
+        version = json['version'] ?? 0;
+        isPublished = json['isPublished'];
+        hasDraft = json['hasDraft'];
+        isEnabled = json['isEnabled'];
+        disabledReason = json['disabledReason'];
+        draftUpdatedAt = JsonConverters.fromJson(json['draftUpdatedAt'],'DateTime',context!);
+        publishedAt = JsonConverters.fromJson(json['publishedAt'],'DateTime',context!);
+        createdAt = JsonConverters.fromJson(json['createdAt'],'DateTime',context!) ?? DateTime(0);
+        updatedAt = JsonConverters.fromJson(json['updatedAt'],'DateTime',context!) ?? DateTime(0);
+        savedByAuthId = json['savedByAuthId'];
+        versions = JsonConverters.fromJson(json['versions'],'List<WorkflowVersionSummaryDto>',context!) ?? [];
+        warnings = JsonConverters.fromJson(json['warnings'],'List<WorkflowValidationIssueDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'workflowId': workflowId,
+        'env': env,
+        'definition': JsonConverters.toJson(definition,'WorkflowDefinitionDto',context!),
+        'version': version,
+        'isPublished': isPublished,
+        'hasDraft': hasDraft,
+        'isEnabled': isEnabled,
+        'disabledReason': disabledReason,
+        'draftUpdatedAt': JsonConverters.toJson(draftUpdatedAt,'DateTime',context!),
+        'publishedAt': JsonConverters.toJson(publishedAt,'DateTime',context!),
+        'createdAt': JsonConverters.toJson(createdAt,'DateTime',context!),
+        'updatedAt': JsonConverters.toJson(updatedAt,'DateTime',context!),
+        'savedByAuthId': savedByAuthId,
+        'versions': JsonConverters.toJson(versions,'List<WorkflowVersionSummaryDto>',context!),
+        'warnings': JsonConverters.toJson(warnings,'List<WorkflowValidationIssueDto>',context!)
+    };
+
+    getTypeName() => "WorkflowDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowStepDiffDto implements IConvertible
+{
+    // @DataMember
+    String stepId = "";
+
+    // @DataMember
+    List<String> paths = [];
+
+    WorkflowStepDiffDto({this.stepId="",this.paths=const []});
+    WorkflowStepDiffDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        stepId = json['stepId'] ?? "";
+        paths = JsonConverters.fromJson(json['paths'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'stepId': stepId,
+        'paths': JsonConverters.toJson(paths,'List<String>',context!)
+    };
+
+    getTypeName() => "WorkflowStepDiffDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowVersionDiffDto implements IConvertible
+{
+    // @DataMember
+    int fromVersion = 0;
+
+    // @DataMember
+    int toVersion = 0;
+
+    // @DataMember
+    List<String> addedSteps = [];
+
+    // @DataMember
+    List<String> removedSteps = [];
+
+    // @DataMember
+    List<WorkflowStepDiffDto> changedSteps = [];
+
+    // @DataMember
+    List<String> changedFields = [];
+
+    WorkflowVersionDiffDto({this.fromVersion=0,this.toVersion=0,this.addedSteps=const [],this.removedSteps=const [],this.changedSteps=const [],this.changedFields=const []});
+    WorkflowVersionDiffDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        fromVersion = json['fromVersion'] ?? 0;
+        toVersion = json['toVersion'] ?? 0;
+        addedSteps = JsonConverters.fromJson(json['addedSteps'],'List<String>',context!) ?? [];
+        removedSteps = JsonConverters.fromJson(json['removedSteps'],'List<String>',context!) ?? [];
+        changedSteps = JsonConverters.fromJson(json['changedSteps'],'List<WorkflowStepDiffDto>',context!) ?? [];
+        changedFields = JsonConverters.fromJson(json['changedFields'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'fromVersion': fromVersion,
+        'toVersion': toVersion,
+        'addedSteps': JsonConverters.toJson(addedSteps,'List<String>',context!),
+        'removedSteps': JsonConverters.toJson(removedSteps,'List<String>',context!),
+        'changedSteps': JsonConverters.toJson(changedSteps,'List<WorkflowStepDiffDto>',context!),
+        'changedFields': JsonConverters.toJson(changedFields,'List<String>',context!)
+    };
+
+    getTypeName() => "WorkflowVersionDiffDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowLastRunDto implements IConvertible
+{
+    // @DataMember
+    String runId = "";
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    WorkflowLastRunDto({this.runId="",this.status="",this.finishedAt});
+    WorkflowLastRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        runId = json['runId'] ?? "";
+        status = json['status'] ?? "";
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'runId': runId,
+        'status': status,
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!)
+    };
+
+    getTypeName() => "WorkflowLastRunDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowListProjection implements IHasViewId, IConvertible
+{
+    // @DataMember
+    String viewId = "";
+
+    // @DataMember
+    String workflowId = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    int version = 0;
+
+    // @DataMember
+    bool? isPublished;
+
+    // @DataMember
+    bool? hasDraft;
+
+    // @DataMember
+    bool? isEnabled;
+
+    // @DataMember
+    String? disabledReason;
+
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    DateTime? updatedAt;
+
+    // @DataMember
+    WorkflowLastRunDto? lastRun;
+
+    // @DataMember
+    int waitingRuns = 0;
+
+    WorkflowListProjection({this.viewId="",this.workflowId="",this.name="",this.env="",this.version=0,this.isPublished,this.hasDraft,this.isEnabled,this.disabledReason,this.executionIdentityId,this.updatedAt,this.lastRun,this.waitingRuns=0});
+    WorkflowListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        viewId = json['viewId'] ?? "";
+        workflowId = json['workflowId'] ?? "";
+        name = json['name'] ?? "";
+        env = json['env'] ?? "";
+        version = json['version'] ?? 0;
+        isPublished = json['isPublished'];
+        hasDraft = json['hasDraft'];
+        isEnabled = json['isEnabled'];
+        disabledReason = json['disabledReason'];
+        executionIdentityId = json['executionIdentityId'];
+        updatedAt = JsonConverters.fromJson(json['updatedAt'],'DateTime',context!) ?? DateTime(0);
+        lastRun = JsonConverters.fromJson(json['lastRun'],'WorkflowLastRunDto',context!);
+        waitingRuns = json['waitingRuns'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'viewId': viewId,
+        'workflowId': workflowId,
+        'name': name,
+        'env': env,
+        'version': version,
+        'isPublished': isPublished,
+        'hasDraft': hasDraft,
+        'isEnabled': isEnabled,
+        'disabledReason': disabledReason,
+        'executionIdentityId': executionIdentityId,
+        'updatedAt': JsonConverters.toJson(updatedAt,'DateTime',context!),
+        'lastRun': JsonConverters.toJson(lastRun,'WorkflowLastRunDto',context!),
+        'waitingRuns': waitingRuns
+    };
+
+    getTypeName() => "WorkflowListProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowStepKindSchemaDto implements IConvertible
+{
+    // @DataMember
+    String kind = "";
+
+    // @DataMember
+    String description = "";
+
+    // @DataMember
+    Map<String,dynamic?>? configSchema;
+
+    // @DataMember
+    Map<String,dynamic?>? outputSchema;
+
+    // @DataMember
+    List<String> requires = [];
+
+    WorkflowStepKindSchemaDto({this.kind="",this.description="",this.configSchema,this.outputSchema,this.requires=const []});
+    WorkflowStepKindSchemaDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        kind = json['kind'] ?? "";
+        description = json['description'] ?? "";
+        configSchema = JsonConverters.fromJson(json['configSchema'],'Map<String,dynamic?>',context!);
+        outputSchema = JsonConverters.fromJson(json['outputSchema'],'Map<String,dynamic?>',context!);
+        requires = JsonConverters.fromJson(json['requires'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'kind': kind,
+        'description': description,
+        'configSchema': JsonConverters.toJson(configSchema,'Map<String,dynamic?>',context!),
+        'outputSchema': JsonConverters.toJson(outputSchema,'Map<String,dynamic?>',context!),
+        'requires': JsonConverters.toJson(requires,'List<String>',context!)
+    };
+
+    getTypeName() => "WorkflowStepKindSchemaDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowBindingFamilyDto implements IConvertible
+{
+    // @DataMember
+    String family = "";
+
+    // @DataMember
+    String description = "";
+
+    WorkflowBindingFamilyDto({this.family="",this.description=""});
+    WorkflowBindingFamilyDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        family = json['family'] ?? "";
+        description = json['description'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'family': family,
+        'description': description
+    };
+
+    getTypeName() => "WorkflowBindingFamilyDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowSchemaDto implements IConvertible
+{
+    // @DataMember
+    String schemaVersion = "";
+
+    // @DataMember
+    Map<String,dynamic?> definition = {};
+
+    // @DataMember
+    List<WorkflowStepKindSchemaDto> stepKinds = [];
+
+    // @DataMember
+    List<WorkflowBindingFamilyDto> bindings = [];
+
+    WorkflowSchemaDto({this.schemaVersion="",this.definition=const {},this.stepKinds=const [],this.bindings=const []});
+    WorkflowSchemaDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        schemaVersion = json['schemaVersion'] ?? "";
+        definition = JsonConverters.fromJson(json['definition'],'Map<String,dynamic?>',context!) ?? {};
+        stepKinds = JsonConverters.fromJson(json['stepKinds'],'List<WorkflowStepKindSchemaDto>',context!) ?? [];
+        bindings = JsonConverters.fromJson(json['bindings'],'List<WorkflowBindingFamilyDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'schemaVersion': schemaVersion,
+        'definition': JsonConverters.toJson(definition,'Map<String,dynamic?>',context!),
+        'stepKinds': JsonConverters.toJson(stepKinds,'List<WorkflowStepKindSchemaDto>',context!),
+        'bindings': JsonConverters.toJson(bindings,'List<WorkflowBindingFamilyDto>',context!)
+    };
+
+    getTypeName() => "WorkflowSchemaDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunErrorDto implements IConvertible
+{
+    // @DataMember
+    String? code;
+
+    // @DataMember
+    String? stepId;
+
+    // @DataMember
+    String? reason;
+
+    // @DataMember
+    String? message;
+
+    WorkflowRunErrorDto({this.code,this.stepId,this.reason,this.message});
+    WorkflowRunErrorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        code = json['code'];
+        stepId = json['stepId'];
+        reason = json['reason'];
+        message = json['message'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'code': code,
+        'stepId': stepId,
+        'reason': reason,
+        'message': message
+    };
+
+    getTypeName() => "WorkflowRunErrorDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunActorDto implements IConvertible
+{
+    // @DataMember
+    String? userId;
+
+    // @DataMember
+    String kind = "";
+
+    WorkflowRunActorDto({this.userId,this.kind=""});
+    WorkflowRunActorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'];
+        kind = json['kind'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'kind': kind
+    };
+
+    getTypeName() => "WorkflowRunActorDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowWaitingOnDto implements IConvertible
+{
+    // @DataMember
+    String stepId = "";
+
+    // @DataMember
+    String kind = "";
+
+    // @DataMember
+    DateTime? until;
+
+    // @DataMember
+    String? key;
+
+    // @DataMember
+    List<String>? assignees;
+
+    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees});
+    WorkflowWaitingOnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        stepId = json['stepId'] ?? "";
+        kind = json['kind'] ?? "";
+        until = JsonConverters.fromJson(json['until'],'DateTime',context!);
+        key = json['key'];
+        assignees = JsonConverters.fromJson(json['assignees'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'stepId': stepId,
+        'kind': kind,
+        'until': JsonConverters.toJson(until,'DateTime',context!),
+        'key': key,
+        'assignees': JsonConverters.toJson(assignees,'List<String>',context!)
+    };
+
+    getTypeName() => "WorkflowWaitingOnDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunStepDto implements IConvertible
+{
+    // @DataMember
+    String stepId = "";
+
+    // @DataMember
+    String kind = "";
+
+    // @DataMember
+    String? name;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    int attempt = 0;
+
+    // @DataMember
+    int pass = 0;
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    dynamic? input;
+
+    // @DataMember
+    bool? inputTruncated;
+
+    // @DataMember
+    dynamic? output;
+
+    // @DataMember
+    bool? outputTruncated;
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    // @DataMember
+    WorkflowRunActorDto? resumedBy;
+
+    // @DataMember
+    String? decision;
+
+    WorkflowRunStepDto({this.stepId="",this.kind="",this.name,this.status="",this.attempt=0,this.pass=0,this.startedAt,this.finishedAt,this.durationMs,this.input,this.inputTruncated,this.output,this.outputTruncated,this.error,this.resumedBy,this.decision});
+    WorkflowRunStepDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        stepId = json['stepId'] ?? "";
+        kind = json['kind'] ?? "";
+        name = json['name'];
+        status = json['status'] ?? "";
+        attempt = json['attempt'] ?? 0;
+        pass = json['pass'] ?? 0;
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        durationMs = json['durationMs'];
+        input = JsonConverters.fromJson(json['input'],'dynamic',context!);
+        inputTruncated = json['inputTruncated'];
+        output = JsonConverters.fromJson(json['output'],'dynamic',context!);
+        outputTruncated = json['outputTruncated'];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        resumedBy = JsonConverters.fromJson(json['resumedBy'],'WorkflowRunActorDto',context!);
+        decision = json['decision'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'stepId': stepId,
+        'kind': kind,
+        'name': name,
+        'status': status,
+        'attempt': attempt,
+        'pass': pass,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'durationMs': durationMs,
+        'input': JsonConverters.toJson(input,'dynamic',context!),
+        'inputTruncated': inputTruncated,
+        'output': JsonConverters.toJson(output,'dynamic',context!),
+        'outputTruncated': outputTruncated,
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!),
+        'resumedBy': JsonConverters.toJson(resumedBy,'WorkflowRunActorDto',context!),
+        'decision': decision
+    };
+
+    getTypeName() => "WorkflowRunStepDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunDto implements IConvertible
+{
+    // @DataMember
+    String runId = "";
+
+    // @DataMember
+    String workflowId = "";
+
+    // @DataMember
+    int? version;
+
+    // @DataMember
+    bool? isDraft;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    String source = "";
+
+    // @DataMember
+    WorkflowRunActorDto? startedBy;
+
+    // @DataMember
+    String? triggerId;
+
+    // @DataMember
+    String? taskId;
+
+    // @DataMember
+    String? parentRunId;
+
+    // @DataMember
+    int depth = 0;
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    List<WorkflowWaitingOnDto> waitingOn = [];
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    // @DataMember
+    dynamic? output;
+
+    // @DataMember
+    int stepRuns = 0;
+
+    // @DataMember
+    List<WorkflowRunStepDto> steps = [];
+
+    // @DataMember
+    Map<String,dynamic?>? request;
+
+    // @DataMember
+    Map<String,dynamic?>? trigger;
+
+    WorkflowRunDto({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedBy,this.triggerId,this.taskId,this.parentRunId,this.depth=0,this.env="",this.correlationId,this.executionIdentityId,this.startedAt,this.finishedAt,this.durationMs,this.waitingOn=const [],this.error,this.output,this.stepRuns=0,this.steps=const [],this.request,this.trigger});
+    WorkflowRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        runId = json['runId'] ?? "";
+        workflowId = json['workflowId'] ?? "";
+        version = json['version'];
+        isDraft = json['isDraft'];
+        status = json['status'] ?? "";
+        source = json['source'] ?? "";
+        startedBy = JsonConverters.fromJson(json['startedBy'],'WorkflowRunActorDto',context!);
+        triggerId = json['triggerId'];
+        taskId = json['taskId'];
+        parentRunId = json['parentRunId'];
+        depth = json['depth'] ?? 0;
+        env = json['env'] ?? "";
+        correlationId = json['correlationId'];
+        executionIdentityId = json['executionIdentityId'];
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        durationMs = json['durationMs'];
+        waitingOn = JsonConverters.fromJson(json['waitingOn'],'List<WorkflowWaitingOnDto>',context!) ?? [];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        output = JsonConverters.fromJson(json['output'],'dynamic',context!);
+        stepRuns = json['stepRuns'] ?? 0;
+        steps = JsonConverters.fromJson(json['steps'],'List<WorkflowRunStepDto>',context!) ?? [];
+        request = JsonConverters.fromJson(json['request'],'Map<String,dynamic?>',context!);
+        trigger = JsonConverters.fromJson(json['trigger'],'Map<String,dynamic?>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'runId': runId,
+        'workflowId': workflowId,
+        'version': version,
+        'isDraft': isDraft,
+        'status': status,
+        'source': source,
+        'startedBy': JsonConverters.toJson(startedBy,'WorkflowRunActorDto',context!),
+        'triggerId': triggerId,
+        'taskId': taskId,
+        'parentRunId': parentRunId,
+        'depth': depth,
+        'env': env,
+        'correlationId': correlationId,
+        'executionIdentityId': executionIdentityId,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'durationMs': durationMs,
+        'waitingOn': JsonConverters.toJson(waitingOn,'List<WorkflowWaitingOnDto>',context!),
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!),
+        'output': JsonConverters.toJson(output,'dynamic',context!),
+        'stepRuns': stepRuns,
+        'steps': JsonConverters.toJson(steps,'List<WorkflowRunStepDto>',context!),
+        'request': JsonConverters.toJson(request,'Map<String,dynamic?>',context!),
+        'trigger': JsonConverters.toJson(trigger,'Map<String,dynamic?>',context!)
+    };
+
+    getTypeName() => "WorkflowRunDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunListProjection implements IConvertible
+{
+    // @DataMember
+    String runId = "";
+
+    // @DataMember
+    String workflowId = "";
+
+    // @DataMember
+    int? version;
+
+    // @DataMember
+    bool? isDraft;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    String source = "";
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    List<String> currentStepIds = [];
+
+    // @DataMember
+    List<WorkflowWaitingOnDto> waitingOn = [];
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    WorkflowRunListProjection({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedAt,this.finishedAt,this.durationMs,this.currentStepIds=const [],this.waitingOn=const [],this.error});
+    WorkflowRunListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        runId = json['runId'] ?? "";
+        workflowId = json['workflowId'] ?? "";
+        version = json['version'];
+        isDraft = json['isDraft'];
+        status = json['status'] ?? "";
+        source = json['source'] ?? "";
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        durationMs = json['durationMs'];
+        currentStepIds = JsonConverters.fromJson(json['currentStepIds'],'List<String>',context!) ?? [];
+        waitingOn = JsonConverters.fromJson(json['waitingOn'],'List<WorkflowWaitingOnDto>',context!) ?? [];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'runId': runId,
+        'workflowId': workflowId,
+        'version': version,
+        'isDraft': isDraft,
+        'status': status,
+        'source': source,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'durationMs': durationMs,
+        'currentStepIds': JsonConverters.toJson(currentStepIds,'List<String>',context!),
+        'waitingOn': JsonConverters.toJson(waitingOn,'List<WorkflowWaitingOnDto>',context!),
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!)
+    };
+
+    getTypeName() => "WorkflowRunListProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TenantLogEntryDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    DateTime? timestamp;
+
+    // @DataMember
+    String module = "";
+
+    // @DataMember
+    String level = "";
+
+    // @DataMember
+    String eventCode = "";
+
+    // @DataMember
+    String title = "";
+
+    // @DataMember
+    String message = "";
+
+    // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    String? traceId;
+
+    // @DataMember
+    String? spanId;
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String origin = "";
+
+    // @DataMember
+    IReadOnlyDictionary<String,String>? meta;
+
+    TenantLogEntryDto({this.id="",this.timestamp,this.module="",this.level="",this.eventCode="",this.title="",this.message="",this.correlationId,this.traceId,this.spanId,this.env="",this.origin="",this.meta});
+    TenantLogEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        timestamp = JsonConverters.fromJson(json['timestamp'],'DateTime',context!) ?? DateTime(0);
+        module = json['module'] ?? "";
+        level = json['level'] ?? "";
+        eventCode = json['eventCode'] ?? "";
+        title = json['title'] ?? "";
+        message = json['message'] ?? "";
+        correlationId = json['correlationId'];
+        traceId = json['traceId'];
+        spanId = json['spanId'];
+        env = json['env'] ?? "";
+        origin = json['origin'] ?? "";
+        meta = JsonConverters.fromJson(json['meta'],'IReadOnlyDictionary<String,String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'timestamp': JsonConverters.toJson(timestamp,'DateTime',context!),
+        'module': module,
+        'level': level,
+        'eventCode': eventCode,
+        'title': title,
+        'message': message,
+        'correlationId': correlationId,
+        'traceId': traceId,
+        'spanId': spanId,
+        'env': env,
+        'origin': origin,
+        'meta': JsonConverters.toJson(meta,'IReadOnlyDictionary<String,String>',context!)
+    };
+
+    getTypeName() => "TenantLogEntryDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class MarketplaceListingProjection implements IHasViewId, IConvertible
 {
     // @DataMember
@@ -22941,6 +24567,7 @@ class InAppNotificationDto implements IConvertible
 
 class PaymentsWebhookLogEntry implements IConvertible
 {
+    String? runId;
     String integrationId = "";
     String source = "";
     String? env;
@@ -22950,10 +24577,11 @@ class PaymentsWebhookLogEntry implements IConvertible
     String description = "";
     DateTime? receivedOn;
 
-    PaymentsWebhookLogEntry({this.integrationId="",this.source="",this.env,this.eventName,this.providerEventId,this.statusCode=0,this.description="",this.receivedOn});
+    PaymentsWebhookLogEntry({this.runId,this.integrationId="",this.source="",this.env,this.eventName,this.providerEventId,this.statusCode=0,this.description="",this.receivedOn});
     PaymentsWebhookLogEntry.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
+        runId = json['runId'];
         integrationId = json['integrationId'] ?? "";
         source = json['source'] ?? "";
         env = json['env'];
@@ -22966,6 +24594,7 @@ class PaymentsWebhookLogEntry implements IConvertible
     }
 
     Map<String, dynamic> toJson() => {
+        'runId': runId,
         'integrationId': integrationId,
         'source': source,
         'env': env,
@@ -22977,6 +24606,226 @@ class PaymentsWebhookLogEntry implements IConvertible
     };
 
     getTypeName() => "PaymentsWebhookLogEntry";
+    TypeContext? context = _ctx;
+}
+
+class PaymentsWebhookRunOrderDto implements IConvertible
+{
+    String? orderId;
+    String kind = "";
+    String? from;
+    String? to;
+    String reason = "";
+
+    PaymentsWebhookRunOrderDto({this.orderId,this.kind="",this.from,this.to,this.reason=""});
+    PaymentsWebhookRunOrderDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        orderId = json['orderId'];
+        kind = json['kind'] ?? "";
+        from = json['from'];
+        to = json['to'];
+        reason = json['reason'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'orderId': orderId,
+        'kind': kind,
+        'from': from,
+        'to': to,
+        'reason': reason
+    };
+
+    getTypeName() => "PaymentsWebhookRunOrderDto";
+    TypeContext? context = _ctx;
+}
+
+class PaymentsWebhookRunActionDto implements IConvertible
+{
+    String triggerId = "";
+    String? triggerName;
+    String? action;
+    String status = "";
+    String? reason;
+    String? queue;
+    String? messageId;
+    int? deliveries;
+    String norbixEvent = "";
+    DateTime? at;
+
+    PaymentsWebhookRunActionDto({this.triggerId="",this.triggerName,this.action,this.status="",this.reason,this.queue,this.messageId,this.deliveries,this.norbixEvent="",this.at});
+    PaymentsWebhookRunActionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        triggerId = json['triggerId'] ?? "";
+        triggerName = json['triggerName'];
+        action = json['action'];
+        status = json['status'] ?? "";
+        reason = json['reason'];
+        queue = json['queue'];
+        messageId = json['messageId'];
+        deliveries = json['deliveries'];
+        norbixEvent = json['norbixEvent'] ?? "";
+        at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'triggerId': triggerId,
+        'triggerName': triggerName,
+        'action': action,
+        'status': status,
+        'reason': reason,
+        'queue': queue,
+        'messageId': messageId,
+        'deliveries': deliveries,
+        'norbixEvent': norbixEvent,
+        'at': JsonConverters.toJson(at,'DateTime',context!)
+    };
+
+    getTypeName() => "PaymentsWebhookRunActionDto";
+    TypeContext? context = _ctx;
+}
+
+class PaymentsWebhookRunDto implements IConvertible
+{
+    String id = "";
+    String callId = "";
+    String env = "";
+    String integrationId = "";
+    String source = "";
+    DateTime? receivedOn;
+    int statusCode = 0;
+    String outcome = "";
+    String reason = "";
+    String description = "";
+    String? eventName;
+    String? providerEventId;
+    String? correlationId;
+    PaymentEventDto? fact;
+    PaymentsWebhookRunOrderDto? order;
+    List<PaymentsWebhookRunActionDto> actions = [];
+    int Part = 0;
+    int parts = 0;
+
+    PaymentsWebhookRunDto({this.id="",this.callId="",this.env="",this.integrationId="",this.source="",this.receivedOn,this.statusCode=0,this.outcome="",this.reason="",this.description="",this.eventName,this.providerEventId,this.correlationId,this.fact,this.order,this.actions=const [],this.Part=0,this.parts=0});
+    PaymentsWebhookRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        callId = json['callId'] ?? "";
+        env = json['env'] ?? "";
+        integrationId = json['integrationId'] ?? "";
+        source = json['source'] ?? "";
+        receivedOn = JsonConverters.fromJson(json['receivedOn'],'DateTime',context!) ?? DateTime(0);
+        statusCode = json['statusCode'] ?? 0;
+        outcome = json['outcome'] ?? "";
+        reason = json['reason'] ?? "";
+        description = json['description'] ?? "";
+        eventName = json['eventName'];
+        providerEventId = json['providerEventId'];
+        correlationId = json['correlationId'];
+        fact = JsonConverters.fromJson(json['fact'],'PaymentEventDto',context!);
+        order = JsonConverters.fromJson(json['order'],'PaymentsWebhookRunOrderDto',context!);
+        actions = JsonConverters.fromJson(json['actions'],'List<PaymentsWebhookRunActionDto>',context!) ?? [];
+        Part = json['part'] ?? 0;
+        parts = json['parts'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'callId': callId,
+        'env': env,
+        'integrationId': integrationId,
+        'source': source,
+        'receivedOn': JsonConverters.toJson(receivedOn,'DateTime',context!),
+        'statusCode': statusCode,
+        'outcome': outcome,
+        'reason': reason,
+        'description': description,
+        'eventName': eventName,
+        'providerEventId': providerEventId,
+        'correlationId': correlationId,
+        'fact': JsonConverters.toJson(fact,'PaymentEventDto',context!),
+        'order': JsonConverters.toJson(order,'PaymentsWebhookRunOrderDto',context!),
+        'actions': JsonConverters.toJson(actions,'List<PaymentsWebhookRunActionDto>',context!),
+        'part': Part,
+        'parts': parts
+    };
+
+    getTypeName() => "PaymentsWebhookRunDto";
+    TypeContext? context = _ctx;
+}
+
+class PaymentsWebhookRawCallDto implements IConvertible
+{
+    String callId = "";
+    DateTime? receivedOn;
+    String? contentType;
+    String body = "";
+    bool? truncated;
+    int maskedFields = 0;
+    Map<String,String?> headers = {};
+    int answerStatus = 0;
+    String? answerBody;
+    int parts = 0;
+
+    PaymentsWebhookRawCallDto({this.callId="",this.receivedOn,this.contentType,this.body="",this.truncated,this.maskedFields=0,this.headers=const {},this.answerStatus=0,this.answerBody,this.parts=0});
+    PaymentsWebhookRawCallDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        callId = json['callId'] ?? "";
+        receivedOn = JsonConverters.fromJson(json['receivedOn'],'DateTime',context!) ?? DateTime(0);
+        contentType = json['contentType'];
+        body = json['body'] ?? "";
+        truncated = json['truncated'];
+        maskedFields = json['maskedFields'] ?? 0;
+        headers = JsonConverters.toStringMap(json['headers']) ?? {};
+        answerStatus = json['answerStatus'] ?? 0;
+        answerBody = json['answerBody'];
+        parts = json['parts'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'callId': callId,
+        'receivedOn': JsonConverters.toJson(receivedOn,'DateTime',context!),
+        'contentType': contentType,
+        'body': body,
+        'truncated': truncated,
+        'maskedFields': maskedFields,
+        'headers': headers,
+        'answerStatus': answerStatus,
+        'answerBody': answerBody,
+        'parts': parts
+    };
+
+    getTypeName() => "PaymentsWebhookRawCallDto";
+    TypeContext? context = _ctx;
+}
+
+class PaymentsWebhookRunDetailsDto implements IConvertible
+{
+    PaymentsWebhookRunDto? run;
+    PaymentsWebhookRawCallDto? raw;
+
+    PaymentsWebhookRunDetailsDto({this.run,this.raw});
+    PaymentsWebhookRunDetailsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        run = JsonConverters.fromJson(json['run'],'PaymentsWebhookRunDto',context!);
+        raw = JsonConverters.fromJson(json['raw'],'PaymentsWebhookRawCallDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'run': JsonConverters.toJson(run,'PaymentsWebhookRunDto',context!),
+        'raw': JsonConverters.toJson(raw,'PaymentsWebhookRawCallDto',context!)
+    };
+
+    getTypeName() => "PaymentsWebhookRunDetailsDto";
     TypeContext? context = _ctx;
 }
 
@@ -23054,88 +24903,6 @@ class LoggingIntegrationListProjection extends IntegrationListProjection impleme
     });
 
     getTypeName() => "LoggingIntegrationListProjection";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class TenantLogEntryDto implements IConvertible
-{
-    // @DataMember
-    String id = "";
-
-    // @DataMember
-    DateTime? timestamp;
-
-    // @DataMember
-    String module = "";
-
-    // @DataMember
-    String level = "";
-
-    // @DataMember
-    String eventCode = "";
-
-    // @DataMember
-    String title = "";
-
-    // @DataMember
-    String message = "";
-
-    // @DataMember
-    String? correlationId;
-
-    // @DataMember
-    String? traceId;
-
-    // @DataMember
-    String? spanId;
-
-    // @DataMember
-    String env = "";
-
-    // @DataMember
-    String origin = "";
-
-    // @DataMember
-    IReadOnlyDictionary<String,String>? meta;
-
-    TenantLogEntryDto({this.id="",this.timestamp,this.module="",this.level="",this.eventCode="",this.title="",this.message="",this.correlationId,this.traceId,this.spanId,this.env="",this.origin="",this.meta});
-    TenantLogEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        timestamp = JsonConverters.fromJson(json['timestamp'],'DateTime',context!) ?? DateTime(0);
-        module = json['module'] ?? "";
-        level = json['level'] ?? "";
-        eventCode = json['eventCode'] ?? "";
-        title = json['title'] ?? "";
-        message = json['message'] ?? "";
-        correlationId = json['correlationId'];
-        traceId = json['traceId'];
-        spanId = json['spanId'];
-        env = json['env'] ?? "";
-        origin = json['origin'] ?? "";
-        meta = JsonConverters.fromJson(json['meta'],'IReadOnlyDictionary<String,String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'timestamp': JsonConverters.toJson(timestamp,'DateTime',context!),
-        'module': module,
-        'level': level,
-        'eventCode': eventCode,
-        'title': title,
-        'message': message,
-        'correlationId': correlationId,
-        'traceId': traceId,
-        'spanId': spanId,
-        'env': env,
-        'origin': origin,
-        'meta': JsonConverters.toJson(meta,'IReadOnlyDictionary<String,String>',context!)
-    };
-
-    getTypeName() => "TenantLogEntryDto";
     TypeContext? context = _ctx;
 }
 
@@ -26103,8 +27870,9 @@ class EchoResponse implements IConvertible
     List<EchoRegionDto>? regions;
     EchoAgentDto? agent;
     EchoHostingPlatformDto? hostingPlatform;
+    EchoConnectDto? connect;
 
-    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -26122,6 +27890,7 @@ class EchoResponse implements IConvertible
         regions = JsonConverters.fromJson(json['regions'],'List<EchoRegionDto>',context!);
         agent = JsonConverters.fromJson(json['agent'],'EchoAgentDto',context!);
         hostingPlatform = JsonConverters.fromJson(json['hostingPlatform'],'EchoHostingPlatformDto',context!);
+        connect = JsonConverters.fromJson(json['connect'],'EchoConnectDto',context!);
         return this;
     }
 
@@ -26139,7 +27908,8 @@ class EchoResponse implements IConvertible
         'rootBootstrapPasswordSource': rootBootstrapPasswordSource,
         'regions': JsonConverters.toJson(regions,'List<EchoRegionDto>',context!),
         'agent': JsonConverters.toJson(agent,'EchoAgentDto',context!),
-        'hostingPlatform': JsonConverters.toJson(hostingPlatform,'EchoHostingPlatformDto',context!)
+        'hostingPlatform': JsonConverters.toJson(hostingPlatform,'EchoHostingPlatformDto',context!),
+        'connect': JsonConverters.toJson(connect,'EchoConnectDto',context!)
     };
 
     getTypeName() => "EchoResponse";
@@ -29631,6 +31401,271 @@ class GetSmsCampaignMessagesResponse extends ResponseBase implements IConvertibl
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class WorkflowResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    WorkflowDto? workflow;
+
+    WorkflowResponse({this.workflow});
+    WorkflowResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        workflow = JsonConverters.fromJson(json['workflow'],'WorkflowDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'workflow': JsonConverters.toJson(workflow,'WorkflowDto',context!)
+    });
+
+    getTypeName() => "WorkflowResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowVersionsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    List<WorkflowVersionSummaryDto>? items;
+
+    WorkflowVersionsResponse({this.items});
+    WorkflowVersionsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        items = JsonConverters.fromJson(json['items'],'List<WorkflowVersionSummaryDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'items': JsonConverters.toJson(items,'List<WorkflowVersionSummaryDto>',context!)
+    });
+
+    getTypeName() => "WorkflowVersionsResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowVersionDiffResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    WorkflowVersionDiffDto? diff;
+
+    WorkflowVersionDiffResponse({this.diff});
+    WorkflowVersionDiffResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        diff = JsonConverters.fromJson(json['diff'],'WorkflowVersionDiffDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'diff': JsonConverters.toJson(diff,'WorkflowVersionDiffDto',context!)
+    });
+
+    getTypeName() => "WorkflowVersionDiffResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ValidateCodeWorkflowResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    bool? isValid;
+
+    // @DataMember
+    List<WorkflowValidationIssueDto> errors = [];
+
+    // @DataMember
+    List<WorkflowValidationIssueDto> warnings = [];
+
+    ValidateCodeWorkflowResponse({this.isValid,this.errors=const [],this.warnings=const []});
+    ValidateCodeWorkflowResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        isValid = json['isValid'];
+        errors = JsonConverters.fromJson(json['errors'],'List<WorkflowValidationIssueDto>',context!) ?? [];
+        warnings = JsonConverters.fromJson(json['warnings'],'List<WorkflowValidationIssueDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'isValid': isValid,
+        'errors': JsonConverters.toJson(errors,'List<WorkflowValidationIssueDto>',context!),
+        'warnings': JsonConverters.toJson(warnings,'List<WorkflowValidationIssueDto>',context!)
+    });
+
+    getTypeName() => "ValidateCodeWorkflowResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    PaginatedResponse<WorkflowListProjection>? list;
+
+    WorkflowsResponse({this.list});
+    WorkflowsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<WorkflowListProjection>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<WorkflowListProjection>',context!)
+    });
+
+    getTypeName() => "WorkflowsResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowSchemaResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    WorkflowSchemaDto? schema;
+
+    WorkflowSchemaResponse({this.schema});
+    WorkflowSchemaResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        schema = JsonConverters.fromJson(json['schema'],'WorkflowSchemaDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'schema': JsonConverters.toJson(schema,'WorkflowSchemaDto',context!)
+    });
+
+    getTypeName() => "WorkflowSchemaResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class InvokeCodeWorkflowResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? runId;
+
+    // @DataMember
+    String? status;
+
+    // @DataMember
+    dynamic? output;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    // @DataMember
+    WorkflowRunDto? run;
+
+    InvokeCodeWorkflowResponse({this.runId,this.status,this.output,this.durationMs,this.error,this.run});
+    InvokeCodeWorkflowResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'];
+        status = json['status'];
+        output = JsonConverters.fromJson(json['output'],'dynamic',context!);
+        durationMs = json['durationMs'];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        run = JsonConverters.fromJson(json['run'],'WorkflowRunDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'status': status,
+        'output': JsonConverters.toJson(output,'dynamic',context!),
+        'durationMs': durationMs,
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!),
+        'run': JsonConverters.toJson(run,'WorkflowRunDto',context!)
+    });
+
+    getTypeName() => "InvokeCodeWorkflowResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    PaginatedResponse<WorkflowRunListProjection>? list;
+
+    WorkflowRunsResponse({this.list});
+    WorkflowRunsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<WorkflowRunListProjection>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<WorkflowRunListProjection>',context!)
+    });
+
+    getTypeName() => "WorkflowRunsResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    WorkflowRunDto? run;
+
+    WorkflowRunResponse({this.run});
+    WorkflowRunResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        run = JsonConverters.fromJson(json['run'],'WorkflowRunDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'run': JsonConverters.toJson(run,'WorkflowRunDto',context!)
+    });
+
+    getTypeName() => "WorkflowRunResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunLogsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    PaginatedResponse<TenantLogEntryDto>? list;
+
+    WorkflowRunLogsResponse({this.list});
+    WorkflowRunLogsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<TenantLogEntryDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<TenantLogEntryDto>',context!)
+    });
+
+    getTypeName() => "WorkflowRunLogsResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetMarketplaceListingResponse extends ResponseBase implements IConvertible
 {
     MarketplaceListingDto? listing;
@@ -30268,6 +32303,74 @@ class InvokeCodeFunctionResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class CodeWorkflowResumeLinkResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? runId;
+
+    // @DataMember
+    String? workflowId;
+
+    // @DataMember
+    String? workflowName;
+
+    // @DataMember
+    String? stepId;
+
+    // @DataMember
+    String? stepName;
+
+    // @DataMember
+    String? mode;
+
+    // @DataMember
+    String? decision;
+
+    // @DataMember
+    String? key;
+
+    // @DataMember
+    String? assigneeUserId;
+
+    // @DataMember
+    DateTime? expiresAt;
+
+    CodeWorkflowResumeLinkResponse({this.runId,this.workflowId,this.workflowName,this.stepId,this.stepName,this.mode,this.decision,this.key,this.assigneeUserId,this.expiresAt});
+    CodeWorkflowResumeLinkResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'];
+        workflowId = json['workflowId'];
+        workflowName = json['workflowName'];
+        stepId = json['stepId'];
+        stepName = json['stepName'];
+        mode = json['mode'];
+        decision = json['decision'];
+        key = json['key'];
+        assigneeUserId = json['assigneeUserId'];
+        expiresAt = JsonConverters.fromJson(json['expiresAt'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'workflowId': workflowId,
+        'workflowName': workflowName,
+        'stepId': stepId,
+        'stepName': stepName,
+        'mode': mode,
+        'decision': decision,
+        'key': key,
+        'assigneeUserId': assigneeUserId,
+        'expiresAt': JsonConverters.toJson(expiresAt,'DateTime',context!)
+    });
+
+    getTypeName() => "CodeWorkflowResumeLinkResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetPushTemplateResponse extends ResponseBase implements IConvertible
 {
     PushTemplateDto? item;
@@ -30807,6 +32910,48 @@ class GetPaymentsWebhookLogResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class GetPaymentsWebhookRunsResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<PaymentsWebhookRunDto>? list;
+
+    GetPaymentsWebhookRunsResponse({this.list});
+    GetPaymentsWebhookRunsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PaymentsWebhookRunDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<PaymentsWebhookRunDto>',context!)
+    });
+
+    getTypeName() => "GetPaymentsWebhookRunsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPaymentsWebhookRunResponse extends ResponseBase implements IConvertible
+{
+    PaymentsWebhookRunDetailsDto? item;
+
+    GetPaymentsWebhookRunResponse({this.item});
+    GetPaymentsWebhookRunResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'PaymentsWebhookRunDetailsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'PaymentsWebhookRunDetailsDto',context!)
+    });
+
+    getTypeName() => "GetPaymentsWebhookRunResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetPaymentsTriggerResponse extends GetTriggerResponse implements IConvertible
 {
     PaymentTriggerDto? trigger;
@@ -30911,6 +33056,117 @@ class TestPaymentsIntegrationResponse extends ResponseBase implements IConvertib
     });
 
     getTypeName() => "TestPaymentsIntegrationResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetQuickConnectProvidersResponse extends ResponseBase implements IConvertible
+{
+    List<QuickConnectProviderDto> providers = [];
+
+    GetQuickConnectProvidersResponse({this.providers=const []});
+    GetQuickConnectProvidersResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        providers = JsonConverters.fromJson(json['providers'],'List<QuickConnectProviderDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'providers': JsonConverters.toJson(providers,'List<QuickConnectProviderDto>',context!)
+    });
+
+    getTypeName() => "GetQuickConnectProvidersResponse";
+    TypeContext? context = _ctx;
+}
+
+class StartIntegrationConnectResponse extends ResponseBase implements IConvertible
+{
+    String? authorizeUrl;
+    String? connectId;
+    String? redirectUrl;
+    DateTime? expiresAt;
+
+    StartIntegrationConnectResponse({this.authorizeUrl,this.connectId,this.redirectUrl,this.expiresAt});
+    StartIntegrationConnectResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        authorizeUrl = json['authorizeUrl'];
+        connectId = json['connectId'];
+        redirectUrl = json['redirectUrl'];
+        expiresAt = JsonConverters.fromJson(json['expiresAt'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'authorizeUrl': authorizeUrl,
+        'connectId': connectId,
+        'redirectUrl': redirectUrl,
+        'expiresAt': JsonConverters.toJson(expiresAt,'DateTime',context!)
+    });
+
+    getTypeName() => "StartIntegrationConnectResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetIntegrationConnectTargetsResponse extends ResponseBase implements IConvertible
+{
+    String? connectId;
+    String? module;
+    String? provider;
+    String? integrationName;
+    String? accountName;
+    List<QuickConnectTargetDto> targets = [];
+
+    GetIntegrationConnectTargetsResponse({this.connectId,this.module,this.provider,this.integrationName,this.accountName,this.targets=const []});
+    GetIntegrationConnectTargetsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        connectId = json['connectId'];
+        module = json['module'];
+        provider = json['provider'];
+        integrationName = json['integrationName'];
+        accountName = json['accountName'];
+        targets = JsonConverters.fromJson(json['targets'],'List<QuickConnectTargetDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'connectId': connectId,
+        'module': module,
+        'provider': provider,
+        'integrationName': integrationName,
+        'accountName': accountName,
+        'targets': JsonConverters.toJson(targets,'List<QuickConnectTargetDto>',context!)
+    });
+
+    getTypeName() => "GetIntegrationConnectTargetsResponse";
+    TypeContext? context = _ctx;
+}
+
+class DisconnectPaymentsIntegrationConnectResponse extends ResponseBase implements IConvertible
+{
+    bool? wasConnected;
+    bool? providerAnswered;
+
+    DisconnectPaymentsIntegrationConnectResponse({this.wasConnected,this.providerAnswered});
+    DisconnectPaymentsIntegrationConnectResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        wasConnected = json['wasConnected'];
+        providerAnswered = json['providerAnswered'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'wasConnected': wasConnected,
+        'providerAnswered': providerAnswered
+    });
+
+    getTypeName() => "DisconnectPaymentsIntegrationConnectResponse";
     TypeContext? context = _ctx;
 }
 
@@ -33475,6 +35731,181 @@ class TestMarketplaceIntegration extends CodeMashRequestBase implements IReturn<
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/integrations/connect/providers", "GET")
+class GetQuickConnectProviders extends RequestBase implements IReturn<GetQuickConnectProvidersResponse>, IConvertible, IGet
+{
+    String? module;
+
+    GetQuickConnectProviders({this.module});
+    GetQuickConnectProviders.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        module = json['module'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'module': module
+    });
+
+    createResponse() => GetQuickConnectProvidersResponse();
+    getResponseTypeName() => "GetQuickConnectProvidersResponse";
+    getTypeName() => "GetQuickConnectProviders";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/payments/integrations/connect/start", "POST")
+class StartPaymentsIntegrationConnect extends CodeMashRequestBase implements IReturn<StartIntegrationConnectResponse>, IConvertible, IPost
+{
+    /**
+    * Provider key from get_quick_connect_providers, e.g. woocommerce.
+    */
+    // @ApiMember(Description="Provider key from get_quick_connect_providers, e.g. woocommerce.", IsRequired=true)
+    String provider = "";
+
+    /**
+    * The name the new integration gets.
+    */
+    // @ApiMember(Description="The name the new integration gets.", IsRequired=true)
+    String integrationName = "";
+
+    /**
+    * The provider's mode (test or live) when the provider has modes.
+    */
+    // @ApiMember(Description="The provider's mode (test or live) when the provider has modes.")
+    String? mode;
+
+    /**
+    * The inputs the provider needs before its page opens, e.g. { "storeUrl": "https://shop.example.com" }.
+    */
+    // @ApiMember(Description="The inputs the provider needs before its page opens, e.g. { \"storeUrl\": \"https://shop.example.com\" }.")
+    Map<String,String?>? input;
+
+    /**
+    * Reconnect: the integration view id the new connection replaces.
+    */
+    // @ApiMember(Description="Reconnect: the integration view id the new connection replaces.")
+    String? integrationId;
+
+    StartPaymentsIntegrationConnect({this.provider="",this.integrationName="",this.mode,this.input,this.integrationId});
+    StartPaymentsIntegrationConnect.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = json['provider'] ?? "";
+        integrationName = json['integrationName'] ?? "";
+        mode = json['mode'];
+        input = JsonConverters.toStringMap(json['input']);
+        integrationId = json['integrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': provider,
+        'integrationName': integrationName,
+        'mode': mode,
+        'input': input,
+        'integrationId': integrationId
+    });
+
+    createResponse() => StartIntegrationConnectResponse();
+    getResponseTypeName() => "StartIntegrationConnectResponse";
+    getTypeName() => "StartPaymentsIntegrationConnect";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/integrations/connect/{ConnectId}/targets", "GET")
+class GetIntegrationConnectTargets extends CodeMashRequestBase implements IReturn<GetIntegrationConnectTargetsResponse>, IConvertible, IGet
+{
+    String connectId = "";
+
+    GetIntegrationConnectTargets({this.connectId=""});
+    GetIntegrationConnectTargets.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        connectId = json['connectId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'connectId': connectId
+    });
+
+    createResponse() => GetIntegrationConnectTargetsResponse();
+    getResponseTypeName() => "GetIntegrationConnectTargetsResponse";
+    getTypeName() => "GetIntegrationConnectTargets";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/payments/integrations/connect/{ConnectId}/complete", "POST")
+class CompletePaymentsIntegrationConnect extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    String connectId = "";
+    /**
+    * The id of the account (profile, shop) from the targets list.
+    */
+    // @ApiMember(Description="The id of the account (profile, shop) from the targets list.", IsRequired=true)
+    String targetId = "";
+
+    /**
+    * Enable the integration right away.
+    */
+    // @ApiMember(Description="Enable the integration right away.")
+    bool? isEnabled;
+
+    CompletePaymentsIntegrationConnect({this.connectId="",this.targetId="",this.isEnabled});
+    CompletePaymentsIntegrationConnect.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        connectId = json['connectId'] ?? "";
+        targetId = json['targetId'] ?? "";
+        isEnabled = json['isEnabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'connectId': connectId,
+        'targetId': targetId,
+        'isEnabled': isEnabled
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CompletePaymentsIntegrationConnect";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/payments/integrations/{Id}/connect/disconnect", "POST")
+class DisconnectPaymentsIntegrationConnect extends CodeMashRequestBase implements IReturn<DisconnectPaymentsIntegrationConnectResponse>, IConvertible, IPost
+{
+    /**
+    * Integration view id.
+    */
+    // @ApiMember(Description="Integration view id.", IsRequired=true)
+    String id = "";
+
+    DisconnectPaymentsIntegrationConnect({this.id=""});
+    DisconnectPaymentsIntegrationConnect.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => DisconnectPaymentsIntegrationConnectResponse();
+    getResponseTypeName() => "DisconnectPaymentsIntegrationConnectResponse";
+    getTypeName() => "DisconnectPaymentsIntegrationConnect";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/internal/_typegen", "GET")
 class InternalsTypeGen implements IConvertible, IGet
 {
@@ -33585,6 +36016,7 @@ class InternalsTypeGen implements IConvertible, IGet
     TriggerActionSmsDto? typegen_236_TriggerActionSmsDto;
     TriggerActionSseDto? typegen_237_TriggerActionSseDto;
     TriggerActionMarketplaceDto? typegen_238_TriggerActionMarketplaceDto;
+    TriggerActionWorkflowDto? typegen_308_TriggerActionWorkflowDto;
     SseDeliverySettingsDto? typegen_239_SseDeliverySettingsDto;
     GetTriggers? typegen_240_GetTriggers;
     GetTriggersResponse? typegen_241_GetTriggersResponse;
@@ -33762,10 +36194,19 @@ class InternalsTypeGen implements IConvertible, IGet
     FakeCodeIntegrationRequest? typegen_282_FakeCodeIntegrationRequest;
     CodeFunctionSchedulerTaskRequest? typegen_283_CodeFunctionSchedulerTaskRequest;
     MarketplaceFunctionSchedulerTaskRequest? typegen_284_MarketplaceFunctionSchedulerTaskRequest;
+    WorkflowSchedulerTaskRequest? typegen_309_WorkflowSchedulerTaskRequest;
     AwsCloudWatchLoggingIntegrationRequest? typegen_285_AwsCloudWatchLoggingIntegrationRequest;
     AwsCloudWatchLoggingIntegrationDto? typegen_286_AwsCloudWatchLoggingIntegrationDto;
+    GetQuickConnectProviders? typegen_310_GetQuickConnectProviders;
+    StartPaymentsIntegrationConnect? typegen_311_StartPaymentsIntegrationConnect;
+    GetIntegrationConnectTargets? typegen_312_GetIntegrationConnectTargets;
+    CompletePaymentsIntegrationConnect? typegen_313_CompletePaymentsIntegrationConnect;
+    QuickConnectProviderDto? typegen_314_QuickConnectProviderDto;
+    QuickConnectTargetDto? typegen_315_QuickConnectTargetDto;
+    DisconnectPaymentsIntegrationConnect? typegen_316_DisconnectPaymentsIntegrationConnect;
+    PaymentsIntegrationConnectionDto? typegen_317_PaymentsIntegrationConnectionDto;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_297_FakeEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_298_FakePushIntegrationRequest,this.typegen_299_BirdSmsIntegrationRequest,this.typegen_300_PlivoSmsIntegrationRequest,this.typegen_301_SinchSmsIntegrationRequest,this.typegen_302_TelesignSmsIntegrationRequest,this.typegen_303_TelnyxSmsIntegrationRequest,this.typegen_304_TwilioSmsIntegrationRequest,this.typegen_305_VonageSmsIntegrationRequest,this.typegen_306_FakeSmsIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_307_AzureCommunicationEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_297_FakeEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_298_FakePushIntegrationRequest,this.typegen_299_BirdSmsIntegrationRequest,this.typegen_300_PlivoSmsIntegrationRequest,this.typegen_301_SinchSmsIntegrationRequest,this.typegen_302_TelesignSmsIntegrationRequest,this.typegen_303_TelnyxSmsIntegrationRequest,this.typegen_304_TwilioSmsIntegrationRequest,this.typegen_305_VonageSmsIntegrationRequest,this.typegen_306_FakeSmsIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_308_TriggerActionWorkflowDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_307_AzureCommunicationEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_309_WorkflowSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto,this.typegen_310_GetQuickConnectProviders,this.typegen_311_StartPaymentsIntegrationConnect,this.typegen_312_GetIntegrationConnectTargets,this.typegen_313_CompletePaymentsIntegrationConnect,this.typegen_314_QuickConnectProviderDto,this.typegen_315_QuickConnectTargetDto,this.typegen_316_DisconnectPaymentsIntegrationConnect,this.typegen_317_PaymentsIntegrationConnectionDto});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -33876,6 +36317,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_236_TriggerActionSmsDto = JsonConverters.fromJson(json['typegen_236_TriggerActionSmsDto'],'TriggerActionSmsDto',context!);
         typegen_237_TriggerActionSseDto = JsonConverters.fromJson(json['typegen_237_TriggerActionSseDto'],'TriggerActionSseDto',context!);
         typegen_238_TriggerActionMarketplaceDto = JsonConverters.fromJson(json['typegen_238_TriggerActionMarketplaceDto'],'TriggerActionMarketplaceDto',context!);
+        typegen_308_TriggerActionWorkflowDto = JsonConverters.fromJson(json['typegen_308_TriggerActionWorkflowDto'],'TriggerActionWorkflowDto',context!);
         typegen_239_SseDeliverySettingsDto = JsonConverters.fromJson(json['typegen_239_SseDeliverySettingsDto'],'SseDeliverySettingsDto',context!);
         typegen_240_GetTriggers = JsonConverters.fromJson(json['typegen_240_GetTriggers'],'GetTriggers',context!);
         typegen_241_GetTriggersResponse = JsonConverters.fromJson(json['typegen_241_GetTriggersResponse'],'GetTriggersResponse',context!);
@@ -34053,8 +36495,17 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_282_FakeCodeIntegrationRequest = JsonConverters.fromJson(json['typegen_282_FakeCodeIntegrationRequest'],'FakeCodeIntegrationRequest',context!);
         typegen_283_CodeFunctionSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_283_CodeFunctionSchedulerTaskRequest'],'CodeFunctionSchedulerTaskRequest',context!);
         typegen_284_MarketplaceFunctionSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_284_MarketplaceFunctionSchedulerTaskRequest'],'MarketplaceFunctionSchedulerTaskRequest',context!);
+        typegen_309_WorkflowSchedulerTaskRequest = JsonConverters.fromJson(json['typegen_309_WorkflowSchedulerTaskRequest'],'WorkflowSchedulerTaskRequest',context!);
         typegen_285_AwsCloudWatchLoggingIntegrationRequest = JsonConverters.fromJson(json['typegen_285_AwsCloudWatchLoggingIntegrationRequest'],'AwsCloudWatchLoggingIntegrationRequest',context!);
         typegen_286_AwsCloudWatchLoggingIntegrationDto = JsonConverters.fromJson(json['typegen_286_AwsCloudWatchLoggingIntegrationDto'],'AwsCloudWatchLoggingIntegrationDto',context!);
+        typegen_310_GetQuickConnectProviders = JsonConverters.fromJson(json['typegen_310_GetQuickConnectProviders'],'GetQuickConnectProviders',context!);
+        typegen_311_StartPaymentsIntegrationConnect = JsonConverters.fromJson(json['typegen_311_StartPaymentsIntegrationConnect'],'StartPaymentsIntegrationConnect',context!);
+        typegen_312_GetIntegrationConnectTargets = JsonConverters.fromJson(json['typegen_312_GetIntegrationConnectTargets'],'GetIntegrationConnectTargets',context!);
+        typegen_313_CompletePaymentsIntegrationConnect = JsonConverters.fromJson(json['typegen_313_CompletePaymentsIntegrationConnect'],'CompletePaymentsIntegrationConnect',context!);
+        typegen_314_QuickConnectProviderDto = JsonConverters.fromJson(json['typegen_314_QuickConnectProviderDto'],'QuickConnectProviderDto',context!);
+        typegen_315_QuickConnectTargetDto = JsonConverters.fromJson(json['typegen_315_QuickConnectTargetDto'],'QuickConnectTargetDto',context!);
+        typegen_316_DisconnectPaymentsIntegrationConnect = JsonConverters.fromJson(json['typegen_316_DisconnectPaymentsIntegrationConnect'],'DisconnectPaymentsIntegrationConnect',context!);
+        typegen_317_PaymentsIntegrationConnectionDto = JsonConverters.fromJson(json['typegen_317_PaymentsIntegrationConnectionDto'],'PaymentsIntegrationConnectionDto',context!);
         return this;
     }
 
@@ -34166,6 +36617,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_236_TriggerActionSmsDto': JsonConverters.toJson(typegen_236_TriggerActionSmsDto,'TriggerActionSmsDto',context!),
         'typegen_237_TriggerActionSseDto': JsonConverters.toJson(typegen_237_TriggerActionSseDto,'TriggerActionSseDto',context!),
         'typegen_238_TriggerActionMarketplaceDto': JsonConverters.toJson(typegen_238_TriggerActionMarketplaceDto,'TriggerActionMarketplaceDto',context!),
+        'typegen_308_TriggerActionWorkflowDto': JsonConverters.toJson(typegen_308_TriggerActionWorkflowDto,'TriggerActionWorkflowDto',context!),
         'typegen_239_SseDeliverySettingsDto': JsonConverters.toJson(typegen_239_SseDeliverySettingsDto,'SseDeliverySettingsDto',context!),
         'typegen_240_GetTriggers': JsonConverters.toJson(typegen_240_GetTriggers,'GetTriggers',context!),
         'typegen_241_GetTriggersResponse': JsonConverters.toJson(typegen_241_GetTriggersResponse,'GetTriggersResponse',context!),
@@ -34343,8 +36795,17 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_282_FakeCodeIntegrationRequest': JsonConverters.toJson(typegen_282_FakeCodeIntegrationRequest,'FakeCodeIntegrationRequest',context!),
         'typegen_283_CodeFunctionSchedulerTaskRequest': JsonConverters.toJson(typegen_283_CodeFunctionSchedulerTaskRequest,'CodeFunctionSchedulerTaskRequest',context!),
         'typegen_284_MarketplaceFunctionSchedulerTaskRequest': JsonConverters.toJson(typegen_284_MarketplaceFunctionSchedulerTaskRequest,'MarketplaceFunctionSchedulerTaskRequest',context!),
+        'typegen_309_WorkflowSchedulerTaskRequest': JsonConverters.toJson(typegen_309_WorkflowSchedulerTaskRequest,'WorkflowSchedulerTaskRequest',context!),
         'typegen_285_AwsCloudWatchLoggingIntegrationRequest': JsonConverters.toJson(typegen_285_AwsCloudWatchLoggingIntegrationRequest,'AwsCloudWatchLoggingIntegrationRequest',context!),
-        'typegen_286_AwsCloudWatchLoggingIntegrationDto': JsonConverters.toJson(typegen_286_AwsCloudWatchLoggingIntegrationDto,'AwsCloudWatchLoggingIntegrationDto',context!)
+        'typegen_286_AwsCloudWatchLoggingIntegrationDto': JsonConverters.toJson(typegen_286_AwsCloudWatchLoggingIntegrationDto,'AwsCloudWatchLoggingIntegrationDto',context!),
+        'typegen_310_GetQuickConnectProviders': JsonConverters.toJson(typegen_310_GetQuickConnectProviders,'GetQuickConnectProviders',context!),
+        'typegen_311_StartPaymentsIntegrationConnect': JsonConverters.toJson(typegen_311_StartPaymentsIntegrationConnect,'StartPaymentsIntegrationConnect',context!),
+        'typegen_312_GetIntegrationConnectTargets': JsonConverters.toJson(typegen_312_GetIntegrationConnectTargets,'GetIntegrationConnectTargets',context!),
+        'typegen_313_CompletePaymentsIntegrationConnect': JsonConverters.toJson(typegen_313_CompletePaymentsIntegrationConnect,'CompletePaymentsIntegrationConnect',context!),
+        'typegen_314_QuickConnectProviderDto': JsonConverters.toJson(typegen_314_QuickConnectProviderDto,'QuickConnectProviderDto',context!),
+        'typegen_315_QuickConnectTargetDto': JsonConverters.toJson(typegen_315_QuickConnectTargetDto,'QuickConnectTargetDto',context!),
+        'typegen_316_DisconnectPaymentsIntegrationConnect': JsonConverters.toJson(typegen_316_DisconnectPaymentsIntegrationConnect,'DisconnectPaymentsIntegrationConnect',context!),
+        'typegen_317_PaymentsIntegrationConnectionDto': JsonConverters.toJson(typegen_317_PaymentsIntegrationConnectionDto,'PaymentsIntegrationConnectionDto',context!)
     };
 
     getTypeName() => "InternalsTypeGen";
@@ -46567,6 +49028,760 @@ class GetSmsCampaignMessagesRequest extends CodeMashListPaginationRequestBase im
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/workflows", "PUT")
+// @DataContract
+class SaveCodeWorkflow extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IPut
+{
+    /**
+    * The definition (JSON Schema v1 from GET /code/workflows/schema).
+    */
+    // @DataMember
+    // @ApiMember(Description="The definition (JSON Schema v1 from GET /code/workflows/schema).", IsRequired=true)
+    WorkflowDefinitionDto? definition;
+
+    SaveCodeWorkflow({this.definition});
+    SaveCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        definition = JsonConverters.fromJson(json['definition'],'WorkflowDefinitionDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'definition': JsonConverters.toJson(definition,'WorkflowDefinitionDto',context!)
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "SaveCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/publish", "POST")
+// @DataContract
+class PublishCodeWorkflow extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IPost
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    PublishCodeWorkflow({this.id=""});
+    PublishCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "PublishCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/draft", "GET")
+// @DataContract
+class GetCodeWorkflowDraft extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IGet
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    GetCodeWorkflowDraft({this.id=""});
+    GetCodeWorkflowDraft.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "GetCodeWorkflowDraft";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/draft", "DELETE")
+// @DataContract
+class DiscardCodeWorkflowDraft extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    DiscardCodeWorkflowDraft({this.id=""});
+    DiscardCodeWorkflowDraft.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DiscardCodeWorkflowDraft";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/versions", "GET")
+// @DataContract
+class GetCodeWorkflowVersions extends CodeMashRequestBase implements IReturn<WorkflowVersionsResponse>, IConvertible, IGet
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    GetCodeWorkflowVersions({this.id=""});
+    GetCodeWorkflowVersions.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => WorkflowVersionsResponse();
+    getResponseTypeName() => "WorkflowVersionsResponse";
+    getTypeName() => "GetCodeWorkflowVersions";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/versions/diff", "GET")
+// @DataContract
+class GetCodeWorkflowVersionDiff extends CodeMashRequestBase implements IReturn<WorkflowVersionDiffResponse>, IConvertible, IGet
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * The earlier version.
+    */
+    // @DataMember
+    // @ApiMember(DataType="integer", Description="The earlier version.", IsRequired=true)
+    int fromVersion = 0;
+
+    /**
+    * The later version.
+    */
+    // @DataMember
+    // @ApiMember(DataType="integer", Description="The later version.", IsRequired=true)
+    int toVersion = 0;
+
+    GetCodeWorkflowVersionDiff({this.id="",this.fromVersion=0,this.toVersion=0});
+    GetCodeWorkflowVersionDiff.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        fromVersion = json['fromVersion'] ?? 0;
+        toVersion = json['toVersion'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'fromVersion': fromVersion,
+        'toVersion': toVersion
+    });
+
+    createResponse() => WorkflowVersionDiffResponse();
+    getResponseTypeName() => "WorkflowVersionDiffResponse";
+    getTypeName() => "GetCodeWorkflowVersionDiff";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/validate", "POST")
+// @DataContract
+class ValidateCodeWorkflow extends CodeMashRequestBase implements IReturn<ValidateCodeWorkflowResponse>, IConvertible, IPost
+{
+    // @DataMember
+    // @ApiMember(IsRequired=true)
+    WorkflowDefinitionDto? definition;
+
+    ValidateCodeWorkflow({this.definition});
+    ValidateCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        definition = JsonConverters.fromJson(json['definition'],'WorkflowDefinitionDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'definition': JsonConverters.toJson(definition,'WorkflowDefinitionDto',context!)
+    });
+
+    createResponse() => ValidateCodeWorkflowResponse();
+    getResponseTypeName() => "ValidateCodeWorkflowResponse";
+    getTypeName() => "ValidateCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows", "GET")
+// @DataContract
+class GetCodeWorkflows extends CodeMashListPaginationRequestBase implements IReturn<WorkflowsResponse>, IConvertible, IGet
+{
+    /**
+    * Only enabled (true) or only disabled (false) workflows.
+    */
+    // @DataMember
+    // @ApiMember(Description="Only enabled (true) or only disabled (false) workflows.")
+    bool? isEnabled;
+
+    GetCodeWorkflows({this.isEnabled});
+    GetCodeWorkflows.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        isEnabled = json['isEnabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'isEnabled': isEnabled
+    });
+
+    createResponse() => WorkflowsResponse();
+    getResponseTypeName() => "WorkflowsResponse";
+    getTypeName() => "GetCodeWorkflows";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}", "GET")
+// @DataContract
+class GetCodeWorkflow extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IGet
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * A pinned published version; absent = the latest.
+    */
+    // @DataMember
+    // @ApiMember(DataType="integer", Description="A pinned published version; absent = the latest.")
+    int? pinnedVersion;
+
+    GetCodeWorkflow({this.id="",this.pinnedVersion});
+    GetCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        pinnedVersion = json['pinnedVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'pinnedVersion': pinnedVersion
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "GetCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}", "DELETE")
+// @DataContract
+class DeleteCodeWorkflow extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    DeleteCodeWorkflow({this.id=""});
+    DeleteCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/enable", "PUT")
+// @DataContract
+class EnableCodeWorkflow extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IPut
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    EnableCodeWorkflow({this.id=""});
+    EnableCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "EnableCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/disable", "PUT")
+// @DataContract
+class DisableCodeWorkflow extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IPut
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    DisableCodeWorkflow({this.id=""});
+    DisableCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "DisableCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/schema", "GET")
+// @DataContract
+class GetCodeWorkflowSchema extends CodeMashRequestBase implements IReturn<WorkflowSchemaResponse>, IConvertible, IGet
+{
+    GetCodeWorkflowSchema();
+    GetCodeWorkflowSchema.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => WorkflowSchemaResponse();
+    getResponseTypeName() => "WorkflowSchemaResponse";
+    getTypeName() => "GetCodeWorkflowSchema";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/enable", "PUT")
+// @DataContract
+class EnableCodeWorkflows extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    EnableCodeWorkflows();
+    EnableCodeWorkflows.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "EnableCodeWorkflows";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/disable", "PUT")
+// @DataContract
+class DisableCodeWorkflows extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+{
+    DisableCodeWorkflows();
+    DisableCodeWorkflows.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DisableCodeWorkflows";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/invoke", "POST")
+// @DataContract
+class InvokeCodeWorkflow extends CodeMashRequestBase implements IReturn<InvokeCodeWorkflowResponse>, IConvertible, IPost
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * The @Model.Request object; checked against the definition's inputs when it has one.
+    */
+    // @DataMember
+    // @ApiMember(Description="The @Model.Request object; checked against the definition's inputs when it has one.")
+    Map<String,dynamic?>? payload;
+
+    /**
+    * 0–30 seconds to wait for the run; default 10; 0 answers 202 at once.
+    */
+    // @DataMember
+    // @ApiMember(DataType="integer", Description="0–30 seconds to wait for the run; default 10; 0 answers 202 at once.")
+    int? waitSeconds;
+
+    /**
+    * "draft" to test the draft, a version number to pin one; absent = the latest published.
+    */
+    // @DataMember
+    // @ApiMember(Description="\"draft\" to test the draft, a version number to pin one; absent = the latest published.")
+    String? runVersion;
+
+    InvokeCodeWorkflow({this.id="",this.payload,this.waitSeconds,this.runVersion});
+    InvokeCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        waitSeconds = json['waitSeconds'];
+        runVersion = json['runVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'waitSeconds': waitSeconds,
+        'runVersion': runVersion
+    });
+
+    createResponse() => InvokeCodeWorkflowResponse();
+    getResponseTypeName() => "InvokeCodeWorkflowResponse";
+    getTypeName() => "InvokeCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/runs", "GET")
+// @DataContract
+class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunsResponse>, IConvertible, IGet
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * running | waiting | succeeded | failed | cancelled
+    */
+    // @DataMember
+    // @ApiMember(Description="running | waiting | succeeded | failed | cancelled")
+    String? status;
+
+    // @DataMember
+    DateTime? from;
+
+    // @DataMember
+    DateTime? to;
+
+    GetCodeWorkflowRuns({this.id="",this.status,this.from,this.to});
+    GetCodeWorkflowRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        status = json['status'];
+        from = JsonConverters.fromJson(json['from'],'DateTime',context!);
+        to = JsonConverters.fromJson(json['to'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'status': status,
+        'from': JsonConverters.toJson(from,'DateTime',context!),
+        'to': JsonConverters.toJson(to,'DateTime',context!)
+    });
+
+    createResponse() => WorkflowRunsResponse();
+    getResponseTypeName() => "WorkflowRunsResponse";
+    getTypeName() => "GetCodeWorkflowRuns";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}", "GET")
+// @DataContract
+class GetCodeWorkflowRun extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IGet
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    GetCodeWorkflowRun({this.runId=""});
+    GetCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "GetCodeWorkflowRun";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}/logs", "GET")
+// @DataContract
+class GetCodeWorkflowRunLogs extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunLogsResponse>, IConvertible, IGet
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    /**
+    * Only this step's lines.
+    */
+    // @DataMember
+    // @ApiMember(Description="Only this step's lines.")
+    String? stepId;
+
+    /**
+    * Information | Warning | Error
+    */
+    // @DataMember
+    // @ApiMember(Description="Information | Warning | Error")
+    String? level;
+
+    GetCodeWorkflowRunLogs({this.runId="",this.stepId,this.level});
+    GetCodeWorkflowRunLogs.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        stepId = json['stepId'];
+        level = json['level'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'stepId': stepId,
+        'level': level
+    });
+
+    createResponse() => WorkflowRunLogsResponse();
+    getResponseTypeName() => "WorkflowRunLogsResponse";
+    getTypeName() => "GetCodeWorkflowRunLogs";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/resume", "POST")
+// @DataContract
+class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * The wait's rendered key.
+    */
+    // @DataMember
+    // @ApiMember(Description="The wait's rendered key.", IsRequired=true)
+    String key = "";
+
+    // @DataMember
+    String? stepId;
+
+    /**
+    * approved | rejected — required for an approval wait.
+    */
+    // @DataMember
+    // @ApiMember(Description="approved | rejected — required for an approval wait.")
+    String? decision;
+
+    // @DataMember
+    Map<String,dynamic?>? payload;
+
+    ResumeCodeWorkflowRunByKey({this.id="",this.key="",this.stepId,this.decision,this.payload});
+    ResumeCodeWorkflowRunByKey.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        key = json['key'] ?? "";
+        stepId = json['stepId'];
+        decision = json['decision'];
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'key': key,
+        'stepId': stepId,
+        'decision': decision,
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "ResumeCodeWorkflowRunByKey";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}/retry", "POST")
+// @DataContract
+class RetryCodeWorkflowRunStep extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    /**
+    * The failed step; default = the step named in the run's error.
+    */
+    // @DataMember
+    // @ApiMember(Description="The failed step; default = the step named in the run's error.")
+    String? stepId;
+
+    RetryCodeWorkflowRunStep({this.runId="",this.stepId});
+    RetryCodeWorkflowRunStep.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        stepId = json['stepId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'stepId': stepId
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "RetryCodeWorkflowRunStep";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}/cancel", "POST")
+// @DataContract
+class CancelCodeWorkflowRun extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    // @DataMember
+    String? reason;
+
+    CancelCodeWorkflowRun({this.runId="",this.reason});
+    CancelCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        reason = json['reason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'reason': reason
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "CancelCodeWorkflowRun";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/marketplace/integrations/{IntegrationViewId}/access", "GET")
 class GetMarketplaceIntegrationAccess extends CodeMashRequestBase implements IReturn<GetMarketplaceIntegrationAccessResponse>, IConvertible, IGet
 {
@@ -47235,6 +50450,193 @@ class InvokeCodeFunction extends CodeMashRequestBase implements IReturn<InvokeCo
     createResponse() => InvokeCodeFunctionResponse();
     getResponseTypeName() => "InvokeCodeFunctionResponse";
     getTypeName() => "InvokeCodeFunction";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs", "GET")
+// @DataContract
+class GetCodeWorkflowWaitingRuns extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunsResponse>, IConvertible, IGet
+{
+    /**
+    * running | waiting (default) | succeeded | failed | cancelled
+    */
+    // @DataMember
+    // @ApiMember(Description="running | waiting (default) | succeeded | failed | cancelled")
+    String? status;
+
+    /**
+    * approval | event | delay
+    */
+    // @DataMember
+    // @ApiMember(Description="approval | event | delay")
+    String? waitingKind;
+
+    /**
+    * "me" or a usr_… id: only approvals assigned to that user. Without code:read only "me" (the default then).
+    */
+    // @DataMember
+    // @ApiMember(Description="\"me\" or a usr_… id: only approvals assigned to that user. Without code:read only \"me\" (the default then).")
+    String? assignee;
+
+    /**
+    * Only runs of this workflow (wf_…).
+    */
+    // @DataMember
+    // @ApiMember(Description="Only runs of this workflow (wf_…).")
+    String? workflowId;
+
+    /**
+    * The wait's rendered key, exact match.
+    */
+    // @DataMember
+    // @ApiMember(Description="The wait's rendered key, exact match.")
+    String? key;
+
+    GetCodeWorkflowWaitingRuns({this.status,this.waitingKind,this.assignee,this.workflowId,this.key});
+    GetCodeWorkflowWaitingRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        status = json['status'];
+        waitingKind = json['waitingKind'];
+        assignee = json['assignee'];
+        workflowId = json['workflowId'];
+        key = json['key'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'status': status,
+        'waitingKind': waitingKind,
+        'assignee': assignee,
+        'workflowId': workflowId,
+        'key': key
+    });
+
+    createResponse() => WorkflowRunsResponse();
+    getResponseTypeName() => "WorkflowRunsResponse";
+    getTypeName() => "GetCodeWorkflowWaitingRuns";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}/resume", "POST")
+// @DataContract
+class ResumeCodeWorkflowRun extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    /**
+    * Required when several steps wait.
+    */
+    // @DataMember
+    // @ApiMember(Description="Required when several steps wait.")
+    String? stepId;
+
+    /**
+    * approved | rejected — required for an approval wait.
+    */
+    // @DataMember
+    // @ApiMember(Description="approved | rejected — required for an approval wait.")
+    String? decision;
+
+    // @DataMember
+    Map<String,dynamic?>? payload;
+
+    ResumeCodeWorkflowRun({this.runId="",this.stepId,this.decision,this.payload});
+    ResumeCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        stepId = json['stepId'];
+        decision = json['decision'];
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'stepId': stepId,
+        'decision': decision,
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "ResumeCodeWorkflowRun";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Beta: what a workflow's one-click link will do — no sign-in, nothing changes. POST the same URL to answer.
+*/
+// @Route("/{version}/code/workflows/resume/{Token}", "GET")
+// @Api(Description="Beta: what a workflow's one-click link will do — no sign-in, nothing changes. POST the same URL to answer.")
+// @DataContract
+class OpenCodeWorkflowResumeLink extends RequestBase implements IReturn<CodeWorkflowResumeLinkResponse>, IConvertible, IGet
+{
+    /**
+    * The signed link token from the wait's notification (@Model.Wait.ApproveUrl / RejectUrl / ResumeUrl).
+    */
+    // @DataMember
+    // @ApiMember(Description="The signed link token from the wait's notification (@Model.Wait.ApproveUrl / RejectUrl / ResumeUrl).", IsRequired=true)
+    String token = "";
+
+    OpenCodeWorkflowResumeLink({this.token=""});
+    OpenCodeWorkflowResumeLink.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        token = json['token'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'token': token
+    });
+
+    createResponse() => CodeWorkflowResumeLinkResponse();
+    getResponseTypeName() => "CodeWorkflowResumeLinkResponse";
+    getTypeName() => "OpenCodeWorkflowResumeLink";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Beta: answers a workflow's waiting step with a one-click link — no sign-in; the run goes on as the workflow's execution identity.
+*/
+// @Route("/{version}/code/workflows/resume/{Token}", "POST")
+// @Api(Description="Beta: answers a workflow's waiting step with a one-click link — no sign-in; the run goes on as the workflow's execution identity.")
+// @DataContract
+class UseCodeWorkflowResumeLink extends RequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * The signed link token.
+    */
+    // @DataMember
+    // @ApiMember(Description="The signed link token.", IsRequired=true)
+    String token = "";
+
+    UseCodeWorkflowResumeLink({this.token=""});
+    UseCodeWorkflowResumeLink.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        token = json['token'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'token': token
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "UseCodeWorkflowResumeLink";
     TypeContext? context = _ctx;
 }
 
@@ -48960,6 +52362,110 @@ class GetPaymentsWebhookLog extends CodeMashRequestBase implements IReturn<GetPa
     createResponse() => GetPaymentsWebhookLogResponse();
     getResponseTypeName() => "GetPaymentsWebhookLogResponse";
     getTypeName() => "GetPaymentsWebhookLog";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists the received payment webhooks of the request's environment, newest first
+*/
+// @Route("/{version}/payments/webhooks/runs", "GET")
+// @Api(Description="Lists the received payment webhooks of the request's environment, newest first")
+class GetPaymentsWebhookRuns extends CodeMashListPaginationRequestBase implements IReturn<GetPaymentsWebhookRunsResponse>, IConvertible, IGet
+{
+    /**
+    * Only events posted to this payments integration (int_…).
+    */
+    // @ApiMember(Description="Only events posted to this payments integration (int_…).")
+    String? integrationId;
+
+    /**
+    * Only this provider event name (e.g. payment_intent.succeeded, payment.success).
+    */
+    // @ApiMember(Description="Only this provider event name (e.g. payment_intent.succeeded, payment.success).")
+    String? eventName;
+
+    /**
+    * Only events that reached this trigger (trg_…).
+    */
+    // @ApiMember(Description="Only events that reached this trigger (trg_…).")
+    String? triggerId;
+
+    /**
+    * applied (processed) · ignored (200, e.g. duplicate) · refused (4xx) · failed (5xx) · all (default).
+    */
+    // @ApiMember(Description="applied (processed) · ignored (200, e.g. duplicate) · refused (4xx) · failed (5xx) · all (default).")
+    String? outcome;
+
+    /**
+    * Received at or after this UTC time.
+    */
+    // @ApiMember(DataType="string", Description="Received at or after this UTC time.", Format="date-time")
+    DateTime? fromUtc;
+
+    /**
+    * Received at or before this UTC time.
+    */
+    // @ApiMember(DataType="string", Description="Received at or before this UTC time.", Format="date-time")
+    DateTime? toUtc;
+
+    GetPaymentsWebhookRuns({this.integrationId,this.eventName,this.triggerId,this.outcome,this.fromUtc,this.toUtc});
+    GetPaymentsWebhookRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationId = json['integrationId'];
+        eventName = json['eventName'];
+        triggerId = json['triggerId'];
+        outcome = json['outcome'];
+        fromUtc = JsonConverters.fromJson(json['fromUtc'],'DateTime',context!);
+        toUtc = JsonConverters.fromJson(json['toUtc'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationId': integrationId,
+        'eventName': eventName,
+        'triggerId': triggerId,
+        'outcome': outcome,
+        'fromUtc': JsonConverters.toJson(fromUtc,'DateTime',context!),
+        'toUtc': JsonConverters.toJson(toUtc,'DateTime',context!)
+    });
+
+    createResponse() => GetPaymentsWebhookRunsResponse();
+    getResponseTypeName() => "GetPaymentsWebhookRunsResponse";
+    getTypeName() => "GetPaymentsWebhookRuns";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Reads one received payment webhook with its masked raw call
+*/
+// @Route("/{version}/payments/webhooks/runs/{Id}", "GET")
+// @Api(Description="Reads one received payment webhook with its masked raw call")
+class GetPaymentsWebhookRun extends CodeMashRequestBase implements IReturn<GetPaymentsWebhookRunResponse>, IConvertible, IGet
+{
+    /**
+    * The run id (pwr_…).
+    */
+    // @ApiMember(Description="The run id (pwr_…).", IsRequired=true)
+    String id = "";
+
+    GetPaymentsWebhookRun({this.id=""});
+    GetPaymentsWebhookRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id
+    });
+
+    createResponse() => GetPaymentsWebhookRunResponse();
+    getResponseTypeName() => "GetPaymentsWebhookRunResponse";
+    getTypeName() => "GetPaymentsWebhookRun";
     TypeContext? context = _ctx;
 }
 
@@ -54240,6 +57746,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SseDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => SseDeliverySettingsDto()),
     'TriggerActionSseDto': TypeInfo(TypeOf.Class, create:() => TriggerActionSseDto()),
     'TriggerActionMarketplaceDto': TypeInfo(TypeOf.Class, create:() => TriggerActionMarketplaceDto()),
+    'TriggerActionWorkflowDto': TypeInfo(TypeOf.Class, create:() => TriggerActionWorkflowDto()),
     'RequestBase': TypeInfo(TypeOf.Class, create:() => RequestBase()),
     'CodeMashListPaginationRequestBase': TypeInfo(TypeOf.Class, create:() => CodeMashListPaginationRequestBase()),
     'GetTriggers': TypeInfo(TypeOf.Class, create:() => GetTriggers()),
@@ -54291,6 +57798,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AwsLambdaIamCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsLambdaIamCodeIntegrationDto()),
     'AzureFunctionsCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AzureFunctionsCodeIntegrationDto()),
     'GoogleCloudFunctionsCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => GoogleCloudFunctionsCodeIntegrationDto()),
+    'PaymentsIntegrationConnectionDto': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationConnectionDto()),
     'PaymentsIntegrationDto': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationDto()),
     'AdyenPaymentIntegrationDto': TypeInfo(TypeOf.Class, create:() => AdyenPaymentIntegrationDto()),
     'AppleInAppPaymentIntegrationDto': TypeInfo(TypeOf.Class, create:() => AppleInAppPaymentIntegrationDto()),
@@ -54467,14 +57975,18 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AiUsageEventDto': TypeInfo(TypeOf.Class, create:() => AiUsageEventDto()),
     'ScheduledTaskInfoDto': TypeInfo(TypeOf.Class, create:() => ScheduledTaskInfoDto()),
     'MarketplaceFunctionCallDto': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionCallDto()),
+    'WorkflowStepInfoDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepInfoDto()),
     'CodeFunctionDataDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionDataDto()),
     'CodeFunctionEventDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionEventDto()),
     'FakeCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => FakeCodeIntegrationDto()),
     'FakeCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FakeCodeIntegrationRequest()),
     'CodeFunctionSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => CodeFunctionSchedulerTaskRequest()),
     'MarketplaceFunctionSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => MarketplaceFunctionSchedulerTaskRequest()),
+    'WorkflowSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => WorkflowSchedulerTaskRequest()),
     'AwsCloudWatchLoggingIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AwsCloudWatchLoggingIntegrationRequest()),
     'AwsCloudWatchLoggingIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsCloudWatchLoggingIntegrationDto()),
+    'QuickConnectProviderDto': TypeInfo(TypeOf.Class, create:() => QuickConnectProviderDto()),
+    'QuickConnectTargetDto': TypeInfo(TypeOf.Class, create:() => QuickConnectTargetDto()),
     'JsonSchemaFieldDto': TypeInfo(TypeOf.AbstractClass),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
     'DecimalFieldDto': TypeInfo(TypeOf.Class, create:() => DecimalFieldDto()),
@@ -54549,6 +58061,12 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveEmailTemplate': TypeInfo(TypeOf.Class, create:() => SaveEmailTemplate()),
     'TranslationDto': TypeInfo(TypeOf.Class, create:() => TranslationDto()),
     'SaveSmsTemplate': TypeInfo(TypeOf.Class, create:() => SaveSmsTemplate()),
+    'WorkflowStepRetryDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepRetryDto()),
+    'WorkflowOnErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowOnErrorDto()),
+    'WorkflowStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepDto()),
+    'WorkflowLimitsDto': TypeInfo(TypeOf.Class, create:() => WorkflowLimitsDto()),
+    'WorkflowDefinitionDto': TypeInfo(TypeOf.Class, create:() => WorkflowDefinitionDto()),
+    'List<WorkflowStepDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStepDto>[]),
     'MarketplaceAccessLevel': TypeInfo(TypeOf.Enum, enumValues:MarketplaceAccessLevel.values),
     'SavePushTemplate': TypeInfo(TypeOf.Class, create:() => SavePushTemplate()),
     'DeviceType': TypeInfo(TypeOf.Enum, enumValues:DeviceType.values),
@@ -54566,6 +58084,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EchoAgentDto': TypeInfo(TypeOf.Class, create:() => EchoAgentDto()),
     'List<EchoAgentSnippetDto>': TypeInfo(TypeOf.Class, create:() => <EchoAgentSnippetDto>[]),
     'EchoHostingPlatformDto': TypeInfo(TypeOf.Class, create:() => EchoHostingPlatformDto()),
+    'EchoConnectDto': TypeInfo(TypeOf.Class, create:() => EchoConnectDto()),
+    'List<QuickConnectProviderDto>': TypeInfo(TypeOf.Class, create:() => <QuickConnectProviderDto>[]),
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
@@ -54833,6 +58353,30 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<SmsRecipientDto>': TypeInfo(TypeOf.Class, create:() => <SmsRecipientDto>[]),
     'SmsCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchDto()),
     'SmsCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchNotificationDto()),
+    'WorkflowVersionSummaryDto': TypeInfo(TypeOf.Class, create:() => WorkflowVersionSummaryDto()),
+    'WorkflowValidationIssueDto': TypeInfo(TypeOf.Class, create:() => WorkflowValidationIssueDto()),
+    'WorkflowDto': TypeInfo(TypeOf.Class, create:() => WorkflowDto()),
+    'List<WorkflowVersionSummaryDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowVersionSummaryDto>[]),
+    'List<WorkflowValidationIssueDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowValidationIssueDto>[]),
+    'WorkflowStepDiffDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepDiffDto()),
+    'WorkflowVersionDiffDto': TypeInfo(TypeOf.Class, create:() => WorkflowVersionDiffDto()),
+    'List<WorkflowStepDiffDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStepDiffDto>[]),
+    'WorkflowLastRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowLastRunDto()),
+    'WorkflowListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowListProjection()),
+    'WorkflowStepKindSchemaDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepKindSchemaDto()),
+    'WorkflowBindingFamilyDto': TypeInfo(TypeOf.Class, create:() => WorkflowBindingFamilyDto()),
+    'WorkflowSchemaDto': TypeInfo(TypeOf.Class, create:() => WorkflowSchemaDto()),
+    'List<WorkflowStepKindSchemaDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStepKindSchemaDto>[]),
+    'List<WorkflowBindingFamilyDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowBindingFamilyDto>[]),
+    'WorkflowRunErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunErrorDto()),
+    'WorkflowRunActorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunActorDto()),
+    'WorkflowWaitingOnDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitingOnDto()),
+    'WorkflowRunStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunStepDto()),
+    'WorkflowRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunDto()),
+    'List<WorkflowWaitingOnDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitingOnDto>[]),
+    'List<WorkflowRunStepDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowRunStepDto>[]),
+    'WorkflowRunListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowRunListProjection()),
+    'TenantLogEntryDto': TypeInfo(TypeOf.Class, create:() => TenantLogEntryDto()),
     'MarketplaceListingProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceListingProjection()),
     'MarketplaceAccessCustomPolicyDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessCustomPolicyDto()),
     'MarketplaceAccessRoleDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessRoleDto()),
@@ -54866,10 +58410,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<NotificationReadMarkDto>': TypeInfo(TypeOf.Class, create:() => <NotificationReadMarkDto>[]),
     'InAppNotificationDto': TypeInfo(TypeOf.Class, create:() => InAppNotificationDto()),
     'PaymentsWebhookLogEntry': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookLogEntry()),
+    'PaymentsWebhookRunOrderDto': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookRunOrderDto()),
+    'PaymentsWebhookRunActionDto': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookRunActionDto()),
+    'PaymentsWebhookRunDto': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookRunDto()),
+    'List<PaymentsWebhookRunActionDto>': TypeInfo(TypeOf.Class, create:() => <PaymentsWebhookRunActionDto>[]),
+    'PaymentsWebhookRawCallDto': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookRawCallDto()),
+    'PaymentsWebhookRunDetailsDto': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookRunDetailsDto()),
     'PaymentTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => PaymentTriggerProjectionList()),
     'PaymentsIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => PaymentsIntegrationListProjection()),
     'LoggingIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => LoggingIntegrationListProjection()),
-    'TenantLogEntryDto': TypeInfo(TypeOf.Class, create:() => TenantLogEntryDto()),
     'AgentOnboardingSnippet': TypeInfo(TypeOf.Class, create:() => AgentOnboardingSnippet()),
     'AiProjectContextCallerWireDto': TypeInfo(TypeOf.Class, create:() => AiProjectContextCallerWireDto()),
     'AiProjectContextIntegrationWireDto': TypeInfo(TypeOf.Class, create:() => AiProjectContextIntegrationWireDto()),
@@ -55201,6 +58750,18 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PreviewSmsNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotificationResponse()),
     'RetryFailedSmsNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsResponse()),
     'GetSmsCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesResponse()),
+    'WorkflowResponse': TypeInfo(TypeOf.Class, create:() => WorkflowResponse()),
+    'WorkflowVersionsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowVersionsResponse()),
+    'WorkflowVersionDiffResponse': TypeInfo(TypeOf.Class, create:() => WorkflowVersionDiffResponse()),
+    'ValidateCodeWorkflowResponse': TypeInfo(TypeOf.Class, create:() => ValidateCodeWorkflowResponse()),
+    'WorkflowsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowsResponse()),
+    'PaginatedResponse<WorkflowListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowListProjection>()),
+    'WorkflowSchemaResponse': TypeInfo(TypeOf.Class, create:() => WorkflowSchemaResponse()),
+    'InvokeCodeWorkflowResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflowResponse()),
+    'WorkflowRunsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunsResponse()),
+    'PaginatedResponse<WorkflowRunListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowRunListProjection>()),
+    'WorkflowRunResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunResponse()),
+    'WorkflowRunLogsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunLogsResponse()),
     'GetMarketplaceListingResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceListingResponse()),
     'GetMarketplaceTokensResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceTokensResponse()),
     'GetMarketplaceListingsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceListingsResponse()),
@@ -55242,6 +58803,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetCodeFunctionRunsResponse': TypeInfo(TypeOf.Class, create:() => GetCodeFunctionRunsResponse()),
     'List<CodeFunctionRunDto>': TypeInfo(TypeOf.Class, create:() => <CodeFunctionRunDto>[]),
     'InvokeCodeFunctionResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeFunctionResponse()),
+    'CodeWorkflowResumeLinkResponse': TypeInfo(TypeOf.Class, create:() => CodeWorkflowResumeLinkResponse()),
     'GetPushTemplateResponse': TypeInfo(TypeOf.Class, create:() => GetPushTemplateResponse()),
     'GetPushTemplatesResponse': TypeInfo(TypeOf.Class, create:() => GetPushTemplatesResponse()),
     'PaginatedResponse<PushTemplateListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushTemplateListProjection>()),
@@ -55275,6 +58837,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MarkAllNotificationsReadResponse': TypeInfo(TypeOf.Class, create:() => MarkAllNotificationsReadResponse()),
     'GetPaymentsWebhookLogResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentsWebhookLogResponse()),
     'IReadOnlyList<PaymentsWebhookLogEntry>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<PaymentsWebhookLogEntry>()),
+    'GetPaymentsWebhookRunsResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentsWebhookRunsResponse()),
+    'PaginatedResponse<PaymentsWebhookRunDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PaymentsWebhookRunDto>()),
+    'GetPaymentsWebhookRunResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentsWebhookRunResponse()),
     'GetPaymentsTriggerResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentsTriggerResponse()),
     'GetPaymentsTriggersResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentsTriggersResponse()),
     'PaginatedResponse<PaymentTriggerProjectionList>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PaymentTriggerProjectionList>()),
@@ -55282,6 +58847,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentsIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentsIntegrationsResponse()),
     'PaginatedResponse<PaymentsIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PaymentsIntegrationListProjection>()),
     'TestPaymentsIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestPaymentsIntegrationResponse()),
+    'GetQuickConnectProvidersResponse': TypeInfo(TypeOf.Class, create:() => GetQuickConnectProvidersResponse()),
+    'StartIntegrationConnectResponse': TypeInfo(TypeOf.Class, create:() => StartIntegrationConnectResponse()),
+    'GetIntegrationConnectTargetsResponse': TypeInfo(TypeOf.Class, create:() => GetIntegrationConnectTargetsResponse()),
+    'List<QuickConnectTargetDto>': TypeInfo(TypeOf.Class, create:() => <QuickConnectTargetDto>[]),
+    'DisconnectPaymentsIntegrationConnectResponse': TypeInfo(TypeOf.Class, create:() => DisconnectPaymentsIntegrationConnectResponse()),
     'GetLoggingIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetLoggingIntegrationResponse()),
     'GetLoggingIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetLoggingIntegrationsResponse()),
     'PaginatedResponse<LoggingIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<LoggingIntegrationListProjection>()),
@@ -55413,6 +58983,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'InvokeMarketplaceFunction': TypeInfo(TypeOf.Class, create:() => InvokeMarketplaceFunction()),
     'GetMarketplaceListing': TypeInfo(TypeOf.Class, create:() => GetMarketplaceListing()),
     'TestMarketplaceIntegration': TypeInfo(TypeOf.Class, create:() => TestMarketplaceIntegration()),
+    'GetQuickConnectProviders': TypeInfo(TypeOf.Class, create:() => GetQuickConnectProviders()),
+    'StartPaymentsIntegrationConnect': TypeInfo(TypeOf.Class, create:() => StartPaymentsIntegrationConnect()),
+    'GetIntegrationConnectTargets': TypeInfo(TypeOf.Class, create:() => GetIntegrationConnectTargets()),
+    'CompletePaymentsIntegrationConnect': TypeInfo(TypeOf.Class, create:() => CompletePaymentsIntegrationConnect()),
+    'DisconnectPaymentsIntegrationConnect': TypeInfo(TypeOf.Class, create:() => DisconnectPaymentsIntegrationConnect()),
     'InternalsTypeGen': TypeInfo(TypeOf.Class, create:() => InternalsTypeGen()),
     'SharedTypeGen': TypeInfo(TypeOf.Class, create:() => SharedTypeGen()),
     'Echo': TypeInfo(TypeOf.Class, create:() => Echo()),
@@ -55758,6 +59333,28 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RetryFailedSmsNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsRequest()),
     'StopSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopSmsCampaignRequest()),
     'GetSmsCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesRequest()),
+    'SaveCodeWorkflow': TypeInfo(TypeOf.Class, create:() => SaveCodeWorkflow()),
+    'PublishCodeWorkflow': TypeInfo(TypeOf.Class, create:() => PublishCodeWorkflow()),
+    'GetCodeWorkflowDraft': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowDraft()),
+    'DiscardCodeWorkflowDraft': TypeInfo(TypeOf.Class, create:() => DiscardCodeWorkflowDraft()),
+    'GetCodeWorkflowVersions': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowVersions()),
+    'GetCodeWorkflowVersionDiff': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowVersionDiff()),
+    'ValidateCodeWorkflow': TypeInfo(TypeOf.Class, create:() => ValidateCodeWorkflow()),
+    'GetCodeWorkflows': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflows()),
+    'GetCodeWorkflow': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflow()),
+    'DeleteCodeWorkflow': TypeInfo(TypeOf.Class, create:() => DeleteCodeWorkflow()),
+    'EnableCodeWorkflow': TypeInfo(TypeOf.Class, create:() => EnableCodeWorkflow()),
+    'DisableCodeWorkflow': TypeInfo(TypeOf.Class, create:() => DisableCodeWorkflow()),
+    'GetCodeWorkflowSchema': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowSchema()),
+    'EnableCodeWorkflows': TypeInfo(TypeOf.Class, create:() => EnableCodeWorkflows()),
+    'DisableCodeWorkflows': TypeInfo(TypeOf.Class, create:() => DisableCodeWorkflows()),
+    'InvokeCodeWorkflow': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflow()),
+    'GetCodeWorkflowRuns': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRuns()),
+    'GetCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRun()),
+    'GetCodeWorkflowRunLogs': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRunLogs()),
+    'ResumeCodeWorkflowRunByKey': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRunByKey()),
+    'RetryCodeWorkflowRunStep': TypeInfo(TypeOf.Class, create:() => RetryCodeWorkflowRunStep()),
+    'CancelCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => CancelCodeWorkflowRun()),
     'GetMarketplaceIntegrationAccess': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationAccess()),
     'SetMarketplaceIntegrationRoleAccess': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationRoleAccess()),
     'SaveMarketplaceIntegrationCustomAccess': TypeInfo(TypeOf.Class, create:() => SaveMarketplaceIntegrationCustomAccess()),
@@ -55774,6 +59371,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetCodeFunctionQualifiers': TypeInfo(TypeOf.Class, create:() => GetCodeFunctionQualifiers()),
     'GetCodeFunctionRuns': TypeInfo(TypeOf.Class, create:() => GetCodeFunctionRuns()),
     'InvokeCodeFunction': TypeInfo(TypeOf.Class, create:() => InvokeCodeFunction()),
+    'GetCodeWorkflowWaitingRuns': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowWaitingRuns()),
+    'ResumeCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRun()),
+    'OpenCodeWorkflowResumeLink': TypeInfo(TypeOf.Class, create:() => OpenCodeWorkflowResumeLink()),
+    'UseCodeWorkflowResumeLink': TypeInfo(TypeOf.Class, create:() => UseCodeWorkflowResumeLink()),
     'DisablePush': TypeInfo(TypeOf.Class, create:() => DisablePush()),
     'GetPushDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetPushDisableDependencies()),
     'EnablePush': TypeInfo(TypeOf.Class, create:() => EnablePush()),
@@ -55821,6 +59422,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DisablePayments': TypeInfo(TypeOf.Class, create:() => DisablePayments()),
     'EnablePayments': TypeInfo(TypeOf.Class, create:() => EnablePayments()),
     'GetPaymentsWebhookLog': TypeInfo(TypeOf.Class, create:() => GetPaymentsWebhookLog()),
+    'GetPaymentsWebhookRuns': TypeInfo(TypeOf.Class, create:() => GetPaymentsWebhookRuns()),
+    'GetPaymentsWebhookRun': TypeInfo(TypeOf.Class, create:() => GetPaymentsWebhookRun()),
     'DeletePaymentsTrigger': TypeInfo(TypeOf.Class, create:() => DeletePaymentsTrigger()),
     'DisablePaymentsTrigger': TypeInfo(TypeOf.Class, create:() => DisablePaymentsTrigger()),
     'EnablePaymentsTrigger': TypeInfo(TypeOf.Class, create:() => EnablePaymentsTrigger()),
