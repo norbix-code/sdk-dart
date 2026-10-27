@@ -56,8 +56,8 @@ There is no `client.api.xxx` or `client.hub.xxx` middle layer.
 
 | Client | Resources |
 |--------|-----------|
-| `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `database`, `files`, `logs`, `payments`, `publicProjects`, `userAuth`, `users` |
-| `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
+| `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `code`, `database`, `files`, `logs`, `payments`, `publicProjects`, `userAuth`, `users` |
+| `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `code`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
 
 ## Configuration
 
@@ -1157,8 +1157,8 @@ Norbix does not host code: a trigger's `Code` action, a scheduler
 `CodeFunctionalCall` task or a manual call runs a function in **your** cloud
 (AWS Lambda, Azure Functions, Google Cloud Functions) through a Code
 integration (`hub.code.getCodeIntegrations`, `saveCodeIntegration`,
-`testCodeIntegration`, …). `hub.code` covers every Code Hub endpoint (44);
-the five cloud-function routes:
+`testCodeIntegration`, …). `hub.code` covers every Code Hub endpoint (70,
+with the 26 workflow routes below); the five cloud-function routes:
 
 | Method | Call |
 |--------|------|
@@ -1215,6 +1215,60 @@ for (final run in (res['runs'] as List? ?? const []).cast<Map<String, Object?>>(
   // details['items']: marketplace:run:started → marketplace:run:step … → completed | failed | skipped
 }
 ```
+
+### Workflows (beta)
+
+Workflows are in beta; bugs may occur. A workflow is a definition of steps
+that Norbix runs for you; a run can wait for an approval, an event or a delay.
+The shapes (`WorkflowDefinitionDto`, `WorkflowRunDto`, …) are in
+`references/hub.dtos.dart`. Every workflow method's doc starts with `Beta:`.
+
+| Method | Route |
+|--------|-------|
+| `getCodeWorkflows(query:)` | `GET /{version}/code/workflows` — `isEnabled?` + paging |
+| `saveCodeWorkflow(body:)` | `PUT /{version}/code/workflows` — `definition` |
+| `getCodeWorkflow(id:, query:)` | `GET /{version}/code/workflows/{Id}` — `pinnedVersion?` |
+| `deleteCodeWorkflow(id:)` | `DELETE /{version}/code/workflows/{Id}` |
+| `enableCodeWorkflow(id:)` | `PUT /{version}/code/workflows/{Id}/enable` |
+| `disableCodeWorkflow(id:)` | `PUT /{version}/code/workflows/{Id}/disable` |
+| `publishCodeWorkflow(id:)` | `POST /{version}/code/workflows/{Id}/publish` |
+| `getCodeWorkflowDraft(id:)` | `GET /{version}/code/workflows/{Id}/draft` |
+| `discardCodeWorkflowDraft(id:)` | `DELETE /{version}/code/workflows/{Id}/draft` |
+| `getCodeWorkflowVersions(id:)` | `GET /{version}/code/workflows/{Id}/versions` |
+| `getCodeWorkflowVersionDiff(id:, query:)` | `GET /{version}/code/workflows/{Id}/versions/diff` — `fromVersion`, `toVersion` |
+| `invokeCodeWorkflow(id:, body:)` | `POST /{version}/code/workflows/{Id}/invoke` — `payload?`, `waitSeconds?` (0–30), `runVersion?` |
+| `getCodeWorkflowRuns(id:, query:)` | `GET /{version}/code/workflows/{Id}/runs` — `status?`, `from?`, `to?` + paging |
+| `resumeCodeWorkflowRunByKey(id:, body:)` | `POST /{version}/code/workflows/{Id}/resume` — `key`, `stepId?`, `decision?`, `payload?` |
+| `validateCodeWorkflow(body:)` | `POST /{version}/code/workflows/validate` — `definition` |
+| `getCodeWorkflowSchema()` | `GET /{version}/code/workflows/schema` |
+| `enableCodeWorkflows()` | `PUT /{version}/code/workflows/enable` — the Workflows switch |
+| `disableCodeWorkflows()` | `PUT /{version}/code/workflows/disable` |
+| `getCodeWorkflowWaitingRuns(query:)` | `GET /{version}/code/workflows/runs` — `status?`, `waitingKind?`, `assignee?`, `workflowId?`, `key?` + paging |
+| `getCodeWorkflowRun(runId:)` | `GET /{version}/code/workflows/runs/{RunId}` |
+| `getCodeWorkflowRunLogs(runId:, query:)` | `GET /{version}/code/workflows/runs/{RunId}/logs` — `stepId?`, `level?` + paging |
+| `resumeCodeWorkflowRun(runId:, body:)` | `POST /{version}/code/workflows/runs/{RunId}/resume` — `stepId?`, `decision?`, `payload?` |
+| `retryCodeWorkflowRunStep(runId:, body:)` | `POST /{version}/code/workflows/runs/{RunId}/retry` — `stepId?` |
+| `cancelCodeWorkflowRun(runId:, body:)` | `POST /{version}/code/workflows/runs/{RunId}/cancel` — `reason?` |
+| `openCodeWorkflowResumeLink(token:)` | `GET /{version}/code/workflows/resume/{Token}` |
+| `useCodeWorkflowResumeLink(token:, body:)` | `POST /{version}/code/workflows/resume/{Token}` |
+
+`api.code` (a project user) has four of them: `getCodeWorkflowWaitingRuns`,
+`resumeCodeWorkflowRun`, `openCodeWorkflowResumeLink` and
+`useCodeWorkflowResumeLink`. The resume link's token is its own key: the call
+goes out with the client's credential when it has one, and with none (no
+error) when it has none.
+
+```dart
+final run = await hub.code.invokeCodeWorkflow(
+    id: 'wf_1', body: {'payload': {'orderId': 'ord_1'}, 'waitSeconds': 10});
+final waiting = await api.code.getCodeWorkflowWaitingRuns(
+    query: {'waitingKind': 'approval', 'assignee': 'me'});
+await api.code.resumeCodeWorkflowRun(
+    runId: 'run_1', body: {'stepId': 'approve', 'decision': 'approved'});
+```
+
+Every workflow route is asserted in `test/hub/code_test.dart` and
+`test/api/code_test.dart`.
 
 ## Repo layout
 

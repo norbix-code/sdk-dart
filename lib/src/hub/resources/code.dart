@@ -3,7 +3,10 @@
 
 import '../../core/resource.dart';
 
-/// Code integrations, the marketplace and cloud functions.
+/// Code integrations, the marketplace, cloud functions and workflows.
+///
+/// The workflow methods (`/{version}/code/workflows…`) are Beta: Workflows are
+/// in beta; bugs may occur.
 class CodeResource extends Resource {
   CodeResource(super.transport);
 
@@ -755,6 +758,487 @@ class CodeResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'IntegrationViewId': integrationViewId},
+    );
+  }
+
+  // Workflows (beta). Workflows are in beta; bugs may occur.
+
+  /// Beta: `GET /{version}/code/workflows`
+  ///
+  /// The project's workflows. Query: `isEnabled?` and paging (`pageSize`,
+  /// `startingAfter`, `endingBefore`). Answers `WorkflowsResponse`.
+  Future<Object?> getCodeWorkflows(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// Beta: `PUT /{version}/code/workflows`
+  ///
+  /// Create or update a workflow draft. Body: `definition` (the workflow
+  /// definition JSON). Answers `WorkflowResponse`.
+  Future<Object?> saveCodeWorkflow(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/{Id}`
+  ///
+  /// One workflow. Query: `pinnedVersion?`. Answers `WorkflowResponse`.
+  Future<Object?> getCodeWorkflow(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `DELETE /{version}/code/workflows/{Id}`
+  ///
+  /// Delete a workflow. Answers `EmptyResponse`.
+  Future<Object?> deleteCodeWorkflow(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `PUT /{version}/code/workflows/{Id}/enable`
+  ///
+  /// Turn one workflow on. Answers `WorkflowResponse`.
+  Future<Object?> enableCodeWorkflow(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/enable',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `PUT /{version}/code/workflows/{Id}/disable`
+  ///
+  /// Turn one workflow off. Answers `WorkflowResponse`.
+  Future<Object?> disableCodeWorkflow(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/disable',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/{Id}/publish`
+  ///
+  /// Publish the draft as a new version. Answers `WorkflowResponse`.
+  Future<Object?> publishCodeWorkflow(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/publish',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/{Id}/draft`
+  ///
+  /// The unpublished draft of a workflow. Answers `WorkflowResponse`.
+  Future<Object?> getCodeWorkflowDraft(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/draft',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `DELETE /{version}/code/workflows/{Id}/draft`
+  ///
+  /// Throw the draft away. Answers `EmptyResponse`.
+  Future<Object?> discardCodeWorkflowDraft(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/draft',
+      method: 'DELETE',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/{Id}/versions`
+  ///
+  /// The published versions. Answers `WorkflowVersionsResponse`.
+  Future<Object?> getCodeWorkflowVersions(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/versions',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/{Id}/versions/diff`
+  ///
+  /// Compare two versions. Query: `fromVersion`, `toVersion`. Answers
+  /// `WorkflowVersionDiffResponse`.
+  Future<Object?> getCodeWorkflowVersionDiff(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/versions/diff',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/{Id}/invoke`
+  ///
+  /// Start a run. Body: `payload?`, `waitSeconds?` (0–30), `runVersion?`
+  /// (`draft` or a version number as a string). Answers
+  /// `InvokeCodeWorkflowResponse`.
+  Future<Object?> invokeCodeWorkflow(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/invoke',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/{Id}/runs`
+  ///
+  /// The runs of one workflow. Query: `status?`, `from?`, `to?` and paging.
+  /// Answers `WorkflowRunsResponse`.
+  Future<Object?> getCodeWorkflowRuns(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/runs',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/{Id}/resume`
+  ///
+  /// Resume the waiting run of a workflow found by its key. Body: `key`,
+  /// `stepId?`, `decision?` (`approved` / `rejected`), `payload?`. Answers
+  /// `WorkflowRunResponse`.
+  Future<Object?> resumeCodeWorkflowRunByKey(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/resume',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/validate`
+  ///
+  /// Check a definition without saving it. Body: `definition`. Answers
+  /// `ValidateCodeWorkflowResponse`.
+  Future<Object?> validateCodeWorkflow(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/validate',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/schema`
+  ///
+  /// The step kinds and bindings a definition can use. Answers
+  /// `WorkflowSchemaResponse`.
+  Future<Object?> getCodeWorkflowSchema(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/schema',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// Beta: `PUT /{version}/code/workflows/enable`
+  ///
+  /// Turn the Workflows feature on. Answers `EmptyResponse`.
+  Future<Object?> enableCodeWorkflows(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/enable',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// Beta: `PUT /{version}/code/workflows/disable`
+  ///
+  /// Turn the Workflows feature off. Answers `EmptyResponse`.
+  Future<Object?> disableCodeWorkflows(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/disable',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/runs`
+  ///
+  /// Runs across workflows (waiting by default). Query: `status?`,
+  /// `waitingKind?`, `assignee?` (`me` or a `usr_…` id), `workflowId?`,
+  /// `key?` and paging. Answers `WorkflowRunsResponse`.
+  Future<Object?> getCodeWorkflowWaitingRuns(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/runs',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/runs/{RunId}`
+  ///
+  /// One run with its steps. Answers `WorkflowRunResponse`.
+  Future<Object?> getCodeWorkflowRun(
+      {required Object runId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/runs/{RunId}',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'RunId': runId},
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/runs/{RunId}/logs`
+  ///
+  /// The log lines of a run. Query: `stepId?`, `level?` and paging. Answers
+  /// `WorkflowRunLogsResponse`.
+  Future<Object?> getCodeWorkflowRunLogs(
+      {required Object runId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/runs/{RunId}/logs',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'RunId': runId},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/runs/{RunId}/resume`
+  ///
+  /// Resume a waiting run. Body: `stepId?`, `decision?` (`approved` /
+  /// `rejected`), `payload?`. Answers `WorkflowRunResponse`.
+  Future<Object?> resumeCodeWorkflowRun(
+      {required Object runId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/runs/{RunId}/resume',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'RunId': runId},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/runs/{RunId}/retry`
+  ///
+  /// Retry the failed step of a run. Body: `stepId?`. Answers
+  /// `WorkflowRunResponse`.
+  Future<Object?> retryCodeWorkflowRunStep(
+      {required Object runId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/runs/{RunId}/retry',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'RunId': runId},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/runs/{RunId}/cancel`
+  ///
+  /// Cancel a run. Body: `reason?`. Answers `WorkflowRunResponse`.
+  Future<Object?> cancelCodeWorkflowRun(
+      {required Object runId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/runs/{RunId}/cancel',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'RunId': runId},
+    );
+  }
+
+  /// Beta: `GET /{version}/code/workflows/resume/{Token}`
+  ///
+  /// Open a signed resume link (an approval in an e-mail). The token is the
+  /// key: no sign-in needed — auth is sent when the client has it, never
+  /// required. Answers `CodeWorkflowResumeLinkResponse`.
+  Future<Object?> openCodeWorkflowResumeLink(
+      {required Object token,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/resume/{Token}',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Token': token},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/resume/{Token}`
+  ///
+  /// Act on a signed resume link. Body: `decision?`, `payload?`. The token
+  /// is the key: no sign-in needed. Answers `WorkflowRunResponse`.
+  Future<Object?> useCodeWorkflowResumeLink(
+      {required Object token,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/resume/{Token}',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Token': token},
     );
   }
 }
