@@ -8,6 +8,7 @@ import '../core/transport.dart';
 import 'resources/ai_chat.dart';
 import 'resources/api_keys.dart';
 import 'resources/auth.dart';
+import 'resources/code.dart';
 import 'resources/database.dart';
 import 'resources/files.dart';
 import 'resources/logs.dart';
@@ -143,6 +144,7 @@ class NorbixApi {
   late final AiChatResource aiChat = AiChatResource(_transport);
   late final ApiKeysResource apiKeys = ApiKeysResource(_transport);
   late final AuthResource auth = AuthResource(_transport);
+  late final CodeResource code = CodeResource(_transport);
   late final DatabaseResource database = DatabaseResource(_transport);
   late final FilesResource files = FilesResource(_transport);
   late final LogsResource logs = LogsResource(_transport);
