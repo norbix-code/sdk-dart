@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-28 14:31:30
+Date: 2026-10-28 14:56:26
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -114,9 +114,9 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
 {
     EmailProvider? provider;
     /**
-    * Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).
+    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).
     */
-    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).")
     CloudAuthMode? authMode;
 
     String awsRegion = "";
@@ -141,9 +141,9 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
     String? secretKey;
 
     /**
-    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).
     */
-    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
     bool? deliveryEventsEnabled;
@@ -1120,9 +1120,9 @@ class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IC
 {
     FileProvider? provider;
     /**
-    * Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).
+    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).
     */
-    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).")
     CloudAuthMode? authMode;
 
     String bucketName = "";
@@ -1146,9 +1146,9 @@ class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IC
     String? secretKey;
 
     /**
-    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).
     */
-    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
     AwsS3FilesIntegrationRequest({this.provider,this.authMode,this.bucketName="",this.region="",this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk});
@@ -1213,9 +1213,9 @@ class AzureBlobFilesIntegrationRequest extends FilesIntegrationRequest implement
 {
     FileProvider? provider;
     /**
-    * Keyless (default, no stored secret) or AccessKey (a stored connection string, less secure).
+    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored connection string, less secure).
     */
-    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored connection string, less secure).")
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored connection string, less secure).")
     CloudAuthMode? authMode;
 
     /**
@@ -1249,9 +1249,9 @@ class AzureBlobFilesIntegrationRequest extends FilesIntegrationRequest implement
     String connectionString = "";
 
     /**
-    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).
     */
-    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
     AzureBlobFilesIntegrationRequest({this.provider,this.authMode,this.blobName="",this.storageAccount,this.tenantId,this.clientId,this.connectionString="",this.acceptKeyRisk});
@@ -3526,9 +3526,9 @@ class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements 
 {
     CodeProvider? provider;
     /**
-    * Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).
+    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).
     */
-    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).")
     CloudAuthMode? authMode;
 
     String region = "";
@@ -3551,9 +3551,9 @@ class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements 
     String? secretKey;
 
     /**
-    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).
     */
-    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
     AwsLambdaCodeIntegrationRequest({this.provider,this.authMode,this.region="",this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk});
