@@ -20,7 +20,9 @@ void main() {
           body: '{"integrationId":"int_1","module":"files","cloud":"aws",'
               '"issuer":"https://issuer.example","available":true,'
               '"subject":"p/proj/e/PROD/files/i/int_1","audience":"sts.amazonaws.com",'
-              '"script":"aws iam create-role ..."}',
+              '"script":"aws iam create-role ...",'
+              '"templates":[{"kind":"terraform","fileName":"norbix-files-aws.tf",'
+              '"content":"resource \\"aws_iam_role\\" ..."}]}',
         ));
 
     final result =
@@ -40,5 +42,10 @@ void main() {
     expect(answer['available'], isTrue);
     expect(answer['subject'], equals('p/proj/e/PROD/files/i/int_1'));
     expect(answer['script'], equals('aws iam create-role ...'));
+    final template =
+        (answer['templates'] as List).first as Map<String, dynamic>;
+    expect(template['kind'], equals('terraform'));
+    expect(template['fileName'], equals('norbix-files-aws.tf'));
+    expect(template['content'], equals('resource "aws_iam_role" ...'));
   });
 }

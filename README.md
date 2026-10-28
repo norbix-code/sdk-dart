@@ -836,7 +836,8 @@ final setup = await hub.integrations.getKeylessIntegrationSetup(
   query: {'module': 'files', 'cloud': 'aws'},
 ) as Map<String, dynamic>;
 // setup['available'], setup['unavailableReason'], setup['subject'],
-// setup['audience'], setup['script'], setup['integrationId']
+// setup['audience'], setup['script'], setup['integrationId'],
+// setup['templates'] — templates: ready CloudFormation / Bicep / Terraform files for this integration
 ```
 
 ## Payments
