@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-27 15:24:45
+Date: 2026-10-28 14:31:30
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -104,40 +104,65 @@ class SmtpEmailIntegrationRequest extends EmailIntegrationRequest implements ICo
     TypeContext? context = _ctx;
 }
 
-enum AwsIntegrationType
+enum CloudAuthMode
 {
-    Iam,
-    CrossAccountRole,
+    AccessKey,
+    Keyless,
 }
 
 class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements IConvertible
 {
     EmailProvider? provider;
-    AwsIntegrationType? integrationType;
+    /**
+    * Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).
+    */
+    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    CloudAuthMode? authMode;
+
     String awsRegion = "";
     String emailIdentityArn = "";
     String? configurationSet;
+    /**
+    * Keyless: the ARN of the role that trusts this integration's Norbix token.
+    */
+    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token.")
     String? roleArn;
-    String? externalId;
+
+    /**
+    * AccessKey: the IAM access key id.
+    */
+    // @ApiMember(Description="AccessKey: the IAM access key id.")
     String? accessKey;
+
+    /**
+    * AccessKey: the IAM secret access key.
+    */
+    // @ApiMember(Description="AccessKey: the IAM secret access key.")
     String? secretKey;
+
+    /**
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    */
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    bool? acceptKeyRisk;
+
     bool? deliveryEventsEnabled;
     String? snsTopicArn;
 
-    AwsSesEmailIntegrationRequest({this.provider,this.integrationType,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.externalId,this.accessKey,this.secretKey,this.deliveryEventsEnabled,this.snsTopicArn});
+    AwsSesEmailIntegrationRequest({this.provider,this.authMode,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk,this.deliveryEventsEnabled,this.snsTopicArn});
     AwsSesEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'EmailProvider',context!);
-        integrationType = JsonConverters.fromJson(json['integrationType'],'AwsIntegrationType',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         awsRegion = json['awsRegion'] ?? "";
         emailIdentityArn = json['emailIdentityArn'] ?? "";
         configurationSet = json['configurationSet'];
         roleArn = json['roleArn'];
-        externalId = json['externalId'];
         accessKey = json['accessKey'];
         secretKey = json['secretKey'];
+        acceptKeyRisk = json['acceptKeyRisk'];
         deliveryEventsEnabled = json['deliveryEventsEnabled'];
         snsTopicArn = json['snsTopicArn'];
         return this;
@@ -145,14 +170,14 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'EmailProvider',context!),
-        'integrationType': JsonConverters.toJson(integrationType,'AwsIntegrationType',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'awsRegion': awsRegion,
         'emailIdentityArn': emailIdentityArn,
         'configurationSet': configurationSet,
         'roleArn': roleArn,
-        'externalId': externalId,
         'accessKey': accessKey,
         'secretKey': secretKey,
+        'acceptKeyRisk': acceptKeyRisk,
         'deliveryEventsEnabled': deliveryEventsEnabled,
         'snsTopicArn': snsTopicArn
     });
@@ -233,18 +258,26 @@ class MailGunEmailIntegrationRequest extends EmailIntegrationRequest implements 
 class AzureCommunicationEmailIntegrationRequest extends EmailIntegrationRequest implements IConvertible
 {
     EmailProvider? provider;
+    CloudAuthMode? authMode;
     String endpoint = "";
+    String? tenantId;
+    String? clientId;
+    bool? acceptKeyRisk;
     String accessKey = "";
     bool? deliveryEventsEnabled;
     String? eventGridKey;
 
-    AzureCommunicationEmailIntegrationRequest({this.provider,this.endpoint="",this.accessKey="",this.deliveryEventsEnabled,this.eventGridKey});
+    AzureCommunicationEmailIntegrationRequest({this.provider,this.authMode,this.endpoint="",this.tenantId,this.clientId,this.acceptKeyRisk,this.accessKey="",this.deliveryEventsEnabled,this.eventGridKey});
     AzureCommunicationEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'EmailProvider',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         endpoint = json['endpoint'] ?? "";
+        tenantId = json['tenantId'];
+        clientId = json['clientId'];
+        acceptKeyRisk = json['acceptKeyRisk'];
         accessKey = json['accessKey'] ?? "";
         deliveryEventsEnabled = json['deliveryEventsEnabled'];
         eventGridKey = json['eventGridKey'];
@@ -253,7 +286,11 @@ class AzureCommunicationEmailIntegrationRequest extends EmailIntegrationRequest 
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'EmailProvider',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'endpoint': endpoint,
+        'tenantId': tenantId,
+        'clientId': clientId,
+        'acceptKeyRisk': acceptKeyRisk,
         'accessKey': accessKey,
         'deliveryEventsEnabled': deliveryEventsEnabled,
         'eventGridKey': eventGridKey
@@ -1079,48 +1116,66 @@ class AppleICloudFilesIntegrationRequest extends FilesIntegrationRequest impleme
     TypeContext? context = _ctx;
 }
 
-enum AwsS3IntegrationType
-{
-    Iam,
-    CrossAccountRole,
-}
-
 class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IConvertible
 {
     FileProvider? provider;
-    AwsS3IntegrationType? integrationType;
+    /**
+    * Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).
+    */
+    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    CloudAuthMode? authMode;
+
     String bucketName = "";
     String region = "";
+    /**
+    * Keyless: the ARN of the role that trusts this integration's Norbix token (arn:aws:iam::<account>:role/<name>).
+    */
+    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token (arn:aws:iam::<account>:role/<name>).")
     String? roleArn;
-    String? externalId;
+
+    /**
+    * AccessKey: the IAM access key id.
+    */
+    // @ApiMember(Description="AccessKey: the IAM access key id.")
     String? accessKey;
+
+    /**
+    * AccessKey: the IAM secret access key.
+    */
+    // @ApiMember(Description="AccessKey: the IAM secret access key.")
     String? secretKey;
 
-    AwsS3FilesIntegrationRequest({this.provider,this.integrationType,this.bucketName="",this.region="",this.roleArn,this.externalId,this.accessKey,this.secretKey});
+    /**
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    */
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    bool? acceptKeyRisk;
+
+    AwsS3FilesIntegrationRequest({this.provider,this.authMode,this.bucketName="",this.region="",this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk});
     AwsS3FilesIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'FileProvider',context!);
-        integrationType = JsonConverters.fromJson(json['integrationType'],'AwsS3IntegrationType',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         bucketName = json['bucketName'] ?? "";
         region = json['region'] ?? "";
         roleArn = json['roleArn'];
-        externalId = json['externalId'];
         accessKey = json['accessKey'];
         secretKey = json['secretKey'];
+        acceptKeyRisk = json['acceptKeyRisk'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'FileProvider',context!),
-        'integrationType': JsonConverters.toJson(integrationType,'AwsS3IntegrationType',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'bucketName': bucketName,
         'region': region,
         'roleArn': roleArn,
-        'externalId': externalId,
         'accessKey': accessKey,
-        'secretKey': secretKey
+        'secretKey': secretKey,
+        'acceptKeyRisk': acceptKeyRisk
     });
 
     getTypeName() => "AwsS3FilesIntegrationRequest";
@@ -1157,24 +1212,73 @@ class GoogleCloudFilesIntegrationRequest extends FilesIntegrationRequest impleme
 class AzureBlobFilesIntegrationRequest extends FilesIntegrationRequest implements IConvertible
 {
     FileProvider? provider;
+    /**
+    * Keyless (default, no stored secret) or AccessKey (a stored connection string, less secure).
+    */
+    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored connection string, less secure).")
+    CloudAuthMode? authMode;
+
+    /**
+    * The container.
+    */
+    // @ApiMember(Description="The container.")
     String blobName = "";
+
+    /**
+    * Keyless: the storage account name (3–24 lowercase letters and digits).
+    */
+    // @ApiMember(Description="Keyless: the storage account name (3–24 lowercase letters and digits).")
+    String? storageAccount;
+
+    /**
+    * Keyless: the Entra tenant id of the managed identity.
+    */
+    // @ApiMember(Description="Keyless: the Entra tenant id of the managed identity.")
+    String? tenantId;
+
+    /**
+    * Keyless: the managed identity's client id.
+    */
+    // @ApiMember(Description="Keyless: the managed identity's client id.")
+    String? clientId;
+
+    /**
+    * AccessKey: the storage account connection string.
+    */
+    // @ApiMember(Description="AccessKey: the storage account connection string.")
     String connectionString = "";
 
-    AzureBlobFilesIntegrationRequest({this.provider,this.blobName="",this.connectionString=""});
+    /**
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    */
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    bool? acceptKeyRisk;
+
+    AzureBlobFilesIntegrationRequest({this.provider,this.authMode,this.blobName="",this.storageAccount,this.tenantId,this.clientId,this.connectionString="",this.acceptKeyRisk});
     AzureBlobFilesIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'FileProvider',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         blobName = json['blobName'] ?? "";
+        storageAccount = json['storageAccount'];
+        tenantId = json['tenantId'];
+        clientId = json['clientId'];
         connectionString = json['connectionString'] ?? "";
+        acceptKeyRisk = json['acceptKeyRisk'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'FileProvider',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'blobName': blobName,
-        'connectionString': connectionString
+        'storageAccount': storageAccount,
+        'tenantId': tenantId,
+        'clientId': clientId,
+        'connectionString': connectionString,
+        'acceptKeyRisk': acceptKeyRisk
     });
 
     getTypeName() => "AzureBlobFilesIntegrationRequest";
@@ -3418,45 +3522,63 @@ abstract class CodeIntegrationRequest
     TypeContext? context = _ctx;
 }
 
-enum AwsLambdaIntegrationType
-{
-    Iam,
-    CrossAccountRole,
-}
-
 class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements IConvertible
 {
     CodeProvider? provider;
-    AwsLambdaIntegrationType? integrationType;
+    /**
+    * Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).
+    */
+    // @ApiMember(Description="Keyless (default, no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    CloudAuthMode? authMode;
+
     String region = "";
+    /**
+    * Keyless: the ARN of the role that trusts this integration's Norbix token.
+    */
+    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token.")
     String? roleArn;
-    String? externalId;
+
+    /**
+    * AccessKey: the IAM access key id.
+    */
+    // @ApiMember(Description="AccessKey: the IAM access key id.")
     String? accessKey;
+
+    /**
+    * AccessKey: the IAM secret access key.
+    */
+    // @ApiMember(Description="AccessKey: the IAM secret access key.")
     String? secretKey;
 
-    AwsLambdaCodeIntegrationRequest({this.provider,this.integrationType,this.region="",this.roleArn,this.externalId,this.accessKey,this.secretKey});
+    /**
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).
+    */
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey).")
+    bool? acceptKeyRisk;
+
+    AwsLambdaCodeIntegrationRequest({this.provider,this.authMode,this.region="",this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk});
     AwsLambdaCodeIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'CodeProvider',context!);
-        integrationType = JsonConverters.fromJson(json['integrationType'],'AwsLambdaIntegrationType',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         region = json['region'] ?? "";
         roleArn = json['roleArn'];
-        externalId = json['externalId'];
         accessKey = json['accessKey'];
         secretKey = json['secretKey'];
+        acceptKeyRisk = json['acceptKeyRisk'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'CodeProvider',context!),
-        'integrationType': JsonConverters.toJson(integrationType,'AwsLambdaIntegrationType',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'region': region,
         'roleArn': roleArn,
-        'externalId': externalId,
         'accessKey': accessKey,
-        'secretKey': secretKey
+        'secretKey': secretKey,
+        'acceptKeyRisk': acceptKeyRisk
     });
 
     getTypeName() => "AwsLambdaCodeIntegrationRequest";
@@ -3466,27 +3588,42 @@ class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements 
 class AzureFunctionsCodeIntegrationRequest extends CodeIntegrationRequest implements IConvertible
 {
     CodeProvider? provider;
+    CloudAuthMode? authMode;
     String functionAppName = "";
     String? resourceGroup;
+    String? subscriptionId;
+    String? tenantId;
+    String? clientId;
     String connectionStringOrKey = "";
+    bool? acceptKeyRisk;
 
-    AzureFunctionsCodeIntegrationRequest({this.provider,this.functionAppName="",this.resourceGroup,this.connectionStringOrKey=""});
+    AzureFunctionsCodeIntegrationRequest({this.provider,this.authMode,this.functionAppName="",this.resourceGroup,this.subscriptionId,this.tenantId,this.clientId,this.connectionStringOrKey="",this.acceptKeyRisk});
     AzureFunctionsCodeIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'CodeProvider',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         functionAppName = json['functionAppName'] ?? "";
         resourceGroup = json['resourceGroup'];
+        subscriptionId = json['subscriptionId'];
+        tenantId = json['tenantId'];
+        clientId = json['clientId'];
         connectionStringOrKey = json['connectionStringOrKey'] ?? "";
+        acceptKeyRisk = json['acceptKeyRisk'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'CodeProvider',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'functionAppName': functionAppName,
         'resourceGroup': resourceGroup,
-        'connectionStringOrKey': connectionStringOrKey
+        'subscriptionId': subscriptionId,
+        'tenantId': tenantId,
+        'clientId': clientId,
+        'connectionStringOrKey': connectionStringOrKey,
+        'acceptKeyRisk': acceptKeyRisk
     });
 
     getTypeName() => "AzureFunctionsCodeIntegrationRequest";
@@ -6272,48 +6409,51 @@ class CodeIntegrationDto extends IntegrationDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class AwsLambdaCrossAccountRoleCodeIntegrationDto extends CodeIntegrationDto implements IConvertible
+class AwsLambdaKeylessCodeIntegrationDto extends CodeIntegrationDto implements IConvertible
 {
     String region = "";
     String roleArn = "";
-    String externalId = "";
+    CloudAuthMode? authMode;
 
-    AwsLambdaCrossAccountRoleCodeIntegrationDto({this.region="",this.roleArn="",this.externalId=""});
-    AwsLambdaCrossAccountRoleCodeIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    AwsLambdaKeylessCodeIntegrationDto({this.region="",this.roleArn="",this.authMode});
+    AwsLambdaKeylessCodeIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         region = json['region'] ?? "";
         roleArn = json['roleArn'] ?? "";
-        externalId = json['externalId'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'region': region,
         'roleArn': roleArn,
-        'externalId': externalId
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
     });
 
-    getTypeName() => "AwsLambdaCrossAccountRoleCodeIntegrationDto";
+    getTypeName() => "AwsLambdaKeylessCodeIntegrationDto";
     TypeContext? context = _ctx;
 }
 
 class AwsLambdaIamCodeIntegrationDto extends CodeIntegrationDto implements IConvertible
 {
     String region = "";
+    CloudAuthMode? authMode;
 
-    AwsLambdaIamCodeIntegrationDto({this.region=""});
+    AwsLambdaIamCodeIntegrationDto({this.region="",this.authMode});
     AwsLambdaIamCodeIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         region = json['region'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'region': region
+        'region': region,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
     });
 
     getTypeName() => "AwsLambdaIamCodeIntegrationDto";
@@ -6324,20 +6464,32 @@ class AzureFunctionsCodeIntegrationDto extends CodeIntegrationDto implements ICo
 {
     String functionAppName = "";
     String? resourceGroup;
+    CloudAuthMode? authMode;
+    String? subscriptionId;
+    String? tenantId;
+    String? clientId;
 
-    AzureFunctionsCodeIntegrationDto({this.functionAppName="",this.resourceGroup});
+    AzureFunctionsCodeIntegrationDto({this.functionAppName="",this.resourceGroup,this.authMode,this.subscriptionId,this.tenantId,this.clientId});
     AzureFunctionsCodeIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionAppName = json['functionAppName'] ?? "";
         resourceGroup = json['resourceGroup'];
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        subscriptionId = json['subscriptionId'];
+        tenantId = json['tenantId'];
+        clientId = json['clientId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionAppName': functionAppName,
-        'resourceGroup': resourceGroup
+        'resourceGroup': resourceGroup,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
+        'subscriptionId': subscriptionId,
+        'tenantId': tenantId,
+        'clientId': clientId
     });
 
     getTypeName() => "AzureFunctionsCodeIntegrationDto";
@@ -7805,22 +7957,22 @@ class AppleICloudFilesIntegrationDto extends FilesIntegrationDto implements ICon
     TypeContext? context = _ctx;
 }
 
-class AwsS3CrossAccountRoleFilesIntegrationDto extends FilesIntegrationDto implements IConvertible
+class AwsS3KeylessFilesIntegrationDto extends FilesIntegrationDto implements IConvertible
 {
     String bucketName = "";
     String region = "";
     String roleArn = "";
-    String externalId = "";
+    CloudAuthMode? authMode;
 
-    AwsS3CrossAccountRoleFilesIntegrationDto({this.bucketName="",this.region="",this.roleArn="",this.externalId=""});
-    AwsS3CrossAccountRoleFilesIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    AwsS3KeylessFilesIntegrationDto({this.bucketName="",this.region="",this.roleArn="",this.authMode});
+    AwsS3KeylessFilesIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         bucketName = json['bucketName'] ?? "";
         region = json['region'] ?? "";
         roleArn = json['roleArn'] ?? "";
-        externalId = json['externalId'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         return this;
     }
 
@@ -7828,10 +7980,10 @@ class AwsS3CrossAccountRoleFilesIntegrationDto extends FilesIntegrationDto imple
         'bucketName': bucketName,
         'region': region,
         'roleArn': roleArn,
-        'externalId': externalId
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
     });
 
-    getTypeName() => "AwsS3CrossAccountRoleFilesIntegrationDto";
+    getTypeName() => "AwsS3KeylessFilesIntegrationDto";
     TypeContext? context = _ctx;
 }
 
@@ -7839,20 +7991,23 @@ class AwsS3IamFilesIntegrationDto extends FilesIntegrationDto implements IConver
 {
     String bucketName = "";
     String region = "";
+    CloudAuthMode? authMode;
 
-    AwsS3IamFilesIntegrationDto({this.bucketName="",this.region=""});
+    AwsS3IamFilesIntegrationDto({this.bucketName="",this.region="",this.authMode});
     AwsS3IamFilesIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         bucketName = json['bucketName'] ?? "";
         region = json['region'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'bucketName': bucketName,
-        'region': region
+        'region': region,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
     });
 
     getTypeName() => "AwsS3IamFilesIntegrationDto";
@@ -7862,18 +8017,30 @@ class AwsS3IamFilesIntegrationDto extends FilesIntegrationDto implements IConver
 class AzureBlobFilesIntegrationDto extends FilesIntegrationDto implements IConvertible
 {
     String blobName = "";
+    CloudAuthMode? authMode;
+    String? storageAccount;
+    String? tenantId;
+    String? clientId;
 
-    AzureBlobFilesIntegrationDto({this.blobName=""});
+    AzureBlobFilesIntegrationDto({this.blobName="",this.authMode,this.storageAccount,this.tenantId,this.clientId});
     AzureBlobFilesIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         blobName = json['blobName'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        storageAccount = json['storageAccount'];
+        tenantId = json['tenantId'];
+        clientId = json['clientId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'blobName': blobName
+        'blobName': blobName,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
+        'storageAccount': storageAccount,
+        'tenantId': tenantId,
+        'clientId': clientId
     });
 
     getTypeName() => "AzureBlobFilesIntegrationDto";
@@ -8572,40 +8739,47 @@ abstract class AwsSesEmailIntegrationDto extends EmailIntegrationDto
     TypeContext? context = _ctx;
 }
 
-class AwsCrossAccountRoleEmailIntegrationDto extends AwsSesEmailIntegrationDto implements IConvertible
+class AwsKeylessEmailIntegrationDto extends AwsSesEmailIntegrationDto implements IConvertible
 {
     String roleArn = "";
-    String externalId = "";
+    CloudAuthMode? authMode;
 
-    AwsCrossAccountRoleEmailIntegrationDto({this.roleArn="",this.externalId=""});
-    AwsCrossAccountRoleEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    AwsKeylessEmailIntegrationDto({this.roleArn="",this.authMode});
+    AwsKeylessEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         roleArn = json['roleArn'] ?? "";
-        externalId = json['externalId'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'roleArn': roleArn,
-        'externalId': externalId
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
     });
 
-    getTypeName() => "AwsCrossAccountRoleEmailIntegrationDto";
+    getTypeName() => "AwsKeylessEmailIntegrationDto";
     TypeContext? context = _ctx;
 }
 
 class AwsIamEmailIntegrationDto extends AwsSesEmailIntegrationDto implements IConvertible
 {
-    AwsIamEmailIntegrationDto();
-    AwsIamEmailIntegrationDto.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    CloudAuthMode? authMode;
+
+    AwsIamEmailIntegrationDto({this.authMode});
+    AwsIamEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
+    });
+
     getTypeName() => "AwsIamEmailIntegrationDto";
     TypeContext? context = _ctx;
 }
@@ -8691,19 +8865,34 @@ class AzureCommunicationEmailIntegrationDto extends EmailIntegrationDto implemen
     // @DataMember
     bool? deliveryEventsEnabled;
 
-    AzureCommunicationEmailIntegrationDto({this.endpoint="",this.deliveryEventsEnabled});
+    // @DataMember
+    CloudAuthMode? authMode;
+
+    // @DataMember
+    String? tenantId;
+
+    // @DataMember
+    String? clientId;
+
+    AzureCommunicationEmailIntegrationDto({this.endpoint="",this.deliveryEventsEnabled,this.authMode,this.tenantId,this.clientId});
     AzureCommunicationEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         endpoint = json['endpoint'] ?? "";
         deliveryEventsEnabled = json['deliveryEventsEnabled'];
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        tenantId = json['tenantId'];
+        clientId = json['clientId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'endpoint': endpoint,
-        'deliveryEventsEnabled': deliveryEventsEnabled
+        'deliveryEventsEnabled': deliveryEventsEnabled,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
+        'tenantId': tenantId,
+        'clientId': clientId
     });
 
     getTypeName() => "AzureCommunicationEmailIntegrationDto";
@@ -13952,11 +14141,11 @@ class WorkflowDefinitionDto implements IConvertible
     bool? isEnabled;
 
     /**
-    * usr_… — the service user every step runs as.
+    * usr_… — the service user every step runs as (the execution identity). Optional: absent = the env's default identity; until that exists the save is refused CM-ERRORS-WORKFLOWS-009.
     */
     // @DataMember
-    // @ApiMember(Description="usr_… — the service user every step runs as.", IsRequired=true)
-    String executionIdentityId = "";
+    // @ApiMember(Description="usr_… — the service user every step runs as (the execution identity). Optional: absent = the env's default identity; until that exists the save is refused CM-ERRORS-WORKFLOWS-009.")
+    String? executionIdentityId;
 
     /**
     * Optional JSON Schema (draft 2020-12, type object) of the manual-invoke payload.
@@ -13981,7 +14170,7 @@ class WorkflowDefinitionDto implements IConvertible
     // @DataMember
     WorkflowLimitsDto? limits;
 
-    WorkflowDefinitionDto({this.schemaVersion="",this.workflowId,this.name="",this.description,this.version,this.isEnabled,this.executionIdentityId="",this.inputs,this.start,this.steps=const [],this.onError,this.limits});
+    WorkflowDefinitionDto({this.schemaVersion="",this.workflowId,this.name="",this.description,this.version,this.isEnabled,this.executionIdentityId,this.inputs,this.start,this.steps=const [],this.onError,this.limits});
     WorkflowDefinitionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -13991,7 +14180,7 @@ class WorkflowDefinitionDto implements IConvertible
         description = json['description'];
         version = json['version'];
         isEnabled = json['isEnabled'];
-        executionIdentityId = json['executionIdentityId'] ?? "";
+        executionIdentityId = json['executionIdentityId'];
         inputs = JsonConverters.fromJson(json['inputs'],'Map<String,dynamic?>',context!);
         start = json['start'];
         steps = JsonConverters.fromJson(json['steps'],'List<WorkflowStepDto>',context!) ?? [];
@@ -14462,6 +14651,32 @@ class EchoConnectDto implements IConvertible
     };
 
     getTypeName() => "EchoConnectDto";
+    TypeContext? context = _ctx;
+}
+
+class EchoKeylessDto implements IConvertible
+{
+    String issuer = "";
+    bool? available;
+    String? unavailableReason;
+
+    EchoKeylessDto({this.issuer="",this.available,this.unavailableReason});
+    EchoKeylessDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        issuer = json['issuer'] ?? "";
+        available = json['available'];
+        unavailableReason = json['unavailableReason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'issuer': issuer,
+        'available': available,
+        'unavailableReason': unavailableReason
+    };
+
+    getTypeName() => "EchoKeylessDto";
     TypeContext? context = _ctx;
 }
 
@@ -27871,8 +28086,9 @@ class EchoResponse implements IConvertible
     EchoAgentDto? agent;
     EchoHostingPlatformDto? hostingPlatform;
     EchoConnectDto? connect;
+    EchoKeylessDto? keyless;
 
-    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -27891,6 +28107,7 @@ class EchoResponse implements IConvertible
         agent = JsonConverters.fromJson(json['agent'],'EchoAgentDto',context!);
         hostingPlatform = JsonConverters.fromJson(json['hostingPlatform'],'EchoHostingPlatformDto',context!);
         connect = JsonConverters.fromJson(json['connect'],'EchoConnectDto',context!);
+        keyless = JsonConverters.fromJson(json['keyless'],'EchoKeylessDto',context!);
         return this;
     }
 
@@ -27909,7 +28126,8 @@ class EchoResponse implements IConvertible
         'regions': JsonConverters.toJson(regions,'List<EchoRegionDto>',context!),
         'agent': JsonConverters.toJson(agent,'EchoAgentDto',context!),
         'hostingPlatform': JsonConverters.toJson(hostingPlatform,'EchoHostingPlatformDto',context!),
-        'connect': JsonConverters.toJson(connect,'EchoConnectDto',context!)
+        'connect': JsonConverters.toJson(connect,'EchoConnectDto',context!),
+        'keyless': JsonConverters.toJson(keyless,'EchoKeylessDto',context!)
     };
 
     getTypeName() => "EchoResponse";
@@ -30316,6 +30534,54 @@ class GetFilesIntegrationsResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetFilesIntegrationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetKeylessIntegrationSetupResponse extends ResponseBase implements IConvertible
+{
+    String? integrationId;
+    String? env;
+    String? module;
+    String? cloud;
+    String? issuer;
+    bool? available;
+    String? unavailableReason;
+    String? subject;
+    String? audience;
+    String? script;
+
+    GetKeylessIntegrationSetupResponse({this.integrationId,this.env,this.module,this.cloud,this.issuer,this.available,this.unavailableReason,this.subject,this.audience,this.script});
+    GetKeylessIntegrationSetupResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationId = json['integrationId'];
+        env = json['env'];
+        module = json['module'];
+        cloud = json['cloud'];
+        issuer = json['issuer'];
+        available = json['available'];
+        unavailableReason = json['unavailableReason'];
+        subject = json['subject'];
+        audience = json['audience'];
+        script = json['script'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationId': integrationId,
+        'env': env,
+        'module': module,
+        'cloud': cloud,
+        'issuer': issuer,
+        'available': available,
+        'unavailableReason': unavailableReason,
+        'subject': subject,
+        'audience': audience,
+        'script': script
+    });
+
+    getTypeName() => "GetKeylessIntegrationSetupResponse";
     TypeContext? context = _ctx;
 }
 
@@ -36046,7 +36312,7 @@ class InternalsTypeGen implements IConvertible, IGet
     DockerMcpIntegrationDto? typegen_111_DockerMcpIntegrationDto;
     GoogleCalendarMcpIntegrationDto? typegen_112_GoogleCalendarMcpIntegrationDto;
     ObsidianMcpIntegrationDto? typegen_113_ObsidianMcpIntegrationDto;
-    AwsLambdaCrossAccountRoleCodeIntegrationDto? typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto;
+    AwsLambdaKeylessCodeIntegrationDto? typegen_114_AwsLambdaKeylessCodeIntegrationDto;
     AwsLambdaIamCodeIntegrationDto? typegen_115_AwsLambdaIamCodeIntegrationDto;
     AzureFunctionsCodeIntegrationDto? typegen_116_AzureFunctionsCodeIntegrationDto;
     GoogleCloudFunctionsCodeIntegrationDto? typegen_118_GoogleCloudFunctionsCodeIntegrationDto;
@@ -36091,7 +36357,7 @@ class InternalsTypeGen implements IConvertible, IGet
     PrometheusLoggingIntegrationDto? typegen_149_PrometheusLoggingIntegrationDto;
     SplunkLoggingIntegrationDto? typegen_150_SplunkLoggingIntegrationDto;
     AppleICloudFilesIntegrationDto? typegen_153_AppleICloudFilesIntegrationDto;
-    AwsS3CrossAccountRoleFilesIntegrationDto? typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto;
+    AwsS3KeylessFilesIntegrationDto? typegen_154_AwsS3KeylessFilesIntegrationDto;
     AwsS3IamFilesIntegrationDto? typegen_155_AwsS3IamFilesIntegrationDto;
     AzureBlobFilesIntegrationDto? typegen_156_AzureBlobFilesIntegrationDto;
     DropBoxFilesIntegrationDto? typegen_157_DropBoxFilesIntegrationDto;
@@ -36117,7 +36383,7 @@ class InternalsTypeGen implements IConvertible, IGet
     FirefoxWebPushIntegrationDto? typegen_177_FirefoxWebPushIntegrationDto;
     SafariPushIntegrationDto? typegen_178_SafariPushIntegrationDto;
     FakePushIntegrationDto? typegen_247_FakePushIntegrationDto;
-    AwsCrossAccountRoleEmailIntegrationDto? typegen_179_AwsCrossAccountRoleEmailIntegrationDto;
+    AwsKeylessEmailIntegrationDto? typegen_179_AwsKeylessEmailIntegrationDto;
     AwsIamEmailIntegrationDto? typegen_180_AwsIamEmailIntegrationDto;
     MailGunEmailIntegrationDto? typegen_181_MailGunEmailIntegrationDto;
     SendGridEmailIntegrationDto? typegen_182_SendGridEmailIntegrationDto;
@@ -36206,7 +36472,7 @@ class InternalsTypeGen implements IConvertible, IGet
     DisconnectPaymentsIntegrationConnect? typegen_316_DisconnectPaymentsIntegrationConnect;
     PaymentsIntegrationConnectionDto? typegen_317_PaymentsIntegrationConnectionDto;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_297_FakeEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_298_FakePushIntegrationRequest,this.typegen_299_BirdSmsIntegrationRequest,this.typegen_300_PlivoSmsIntegrationRequest,this.typegen_301_SinchSmsIntegrationRequest,this.typegen_302_TelesignSmsIntegrationRequest,this.typegen_303_TelnyxSmsIntegrationRequest,this.typegen_304_TwilioSmsIntegrationRequest,this.typegen_305_VonageSmsIntegrationRequest,this.typegen_306_FakeSmsIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_308_TriggerActionWorkflowDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_307_AzureCommunicationEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_309_WorkflowSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto,this.typegen_310_GetQuickConnectProviders,this.typegen_311_StartPaymentsIntegrationConnect,this.typegen_312_GetIntegrationConnectTargets,this.typegen_313_CompletePaymentsIntegrationConnect,this.typegen_314_QuickConnectProviderDto,this.typegen_315_QuickConnectTargetDto,this.typegen_316_DisconnectPaymentsIntegrationConnect,this.typegen_317_PaymentsIntegrationConnectionDto});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_297_FakeEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_298_FakePushIntegrationRequest,this.typegen_299_BirdSmsIntegrationRequest,this.typegen_300_PlivoSmsIntegrationRequest,this.typegen_301_SinchSmsIntegrationRequest,this.typegen_302_TelesignSmsIntegrationRequest,this.typegen_303_TelnyxSmsIntegrationRequest,this.typegen_304_TwilioSmsIntegrationRequest,this.typegen_305_VonageSmsIntegrationRequest,this.typegen_306_FakeSmsIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_308_TriggerActionWorkflowDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaKeylessCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3KeylessFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsKeylessEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_307_AzureCommunicationEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_309_WorkflowSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto,this.typegen_310_GetQuickConnectProviders,this.typegen_311_StartPaymentsIntegrationConnect,this.typegen_312_GetIntegrationConnectTargets,this.typegen_313_CompletePaymentsIntegrationConnect,this.typegen_314_QuickConnectProviderDto,this.typegen_315_QuickConnectTargetDto,this.typegen_316_DisconnectPaymentsIntegrationConnect,this.typegen_317_PaymentsIntegrationConnectionDto});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -36347,7 +36613,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_111_DockerMcpIntegrationDto = JsonConverters.fromJson(json['typegen_111_DockerMcpIntegrationDto'],'DockerMcpIntegrationDto',context!);
         typegen_112_GoogleCalendarMcpIntegrationDto = JsonConverters.fromJson(json['typegen_112_GoogleCalendarMcpIntegrationDto'],'GoogleCalendarMcpIntegrationDto',context!);
         typegen_113_ObsidianMcpIntegrationDto = JsonConverters.fromJson(json['typegen_113_ObsidianMcpIntegrationDto'],'ObsidianMcpIntegrationDto',context!);
-        typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto = JsonConverters.fromJson(json['typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto'],'AwsLambdaCrossAccountRoleCodeIntegrationDto',context!);
+        typegen_114_AwsLambdaKeylessCodeIntegrationDto = JsonConverters.fromJson(json['typegen_114_AwsLambdaKeylessCodeIntegrationDto'],'AwsLambdaKeylessCodeIntegrationDto',context!);
         typegen_115_AwsLambdaIamCodeIntegrationDto = JsonConverters.fromJson(json['typegen_115_AwsLambdaIamCodeIntegrationDto'],'AwsLambdaIamCodeIntegrationDto',context!);
         typegen_116_AzureFunctionsCodeIntegrationDto = JsonConverters.fromJson(json['typegen_116_AzureFunctionsCodeIntegrationDto'],'AzureFunctionsCodeIntegrationDto',context!);
         typegen_118_GoogleCloudFunctionsCodeIntegrationDto = JsonConverters.fromJson(json['typegen_118_GoogleCloudFunctionsCodeIntegrationDto'],'GoogleCloudFunctionsCodeIntegrationDto',context!);
@@ -36392,7 +36658,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_149_PrometheusLoggingIntegrationDto = JsonConverters.fromJson(json['typegen_149_PrometheusLoggingIntegrationDto'],'PrometheusLoggingIntegrationDto',context!);
         typegen_150_SplunkLoggingIntegrationDto = JsonConverters.fromJson(json['typegen_150_SplunkLoggingIntegrationDto'],'SplunkLoggingIntegrationDto',context!);
         typegen_153_AppleICloudFilesIntegrationDto = JsonConverters.fromJson(json['typegen_153_AppleICloudFilesIntegrationDto'],'AppleICloudFilesIntegrationDto',context!);
-        typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto = JsonConverters.fromJson(json['typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto'],'AwsS3CrossAccountRoleFilesIntegrationDto',context!);
+        typegen_154_AwsS3KeylessFilesIntegrationDto = JsonConverters.fromJson(json['typegen_154_AwsS3KeylessFilesIntegrationDto'],'AwsS3KeylessFilesIntegrationDto',context!);
         typegen_155_AwsS3IamFilesIntegrationDto = JsonConverters.fromJson(json['typegen_155_AwsS3IamFilesIntegrationDto'],'AwsS3IamFilesIntegrationDto',context!);
         typegen_156_AzureBlobFilesIntegrationDto = JsonConverters.fromJson(json['typegen_156_AzureBlobFilesIntegrationDto'],'AzureBlobFilesIntegrationDto',context!);
         typegen_157_DropBoxFilesIntegrationDto = JsonConverters.fromJson(json['typegen_157_DropBoxFilesIntegrationDto'],'DropBoxFilesIntegrationDto',context!);
@@ -36418,7 +36684,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_177_FirefoxWebPushIntegrationDto = JsonConverters.fromJson(json['typegen_177_FirefoxWebPushIntegrationDto'],'FirefoxWebPushIntegrationDto',context!);
         typegen_178_SafariPushIntegrationDto = JsonConverters.fromJson(json['typegen_178_SafariPushIntegrationDto'],'SafariPushIntegrationDto',context!);
         typegen_247_FakePushIntegrationDto = JsonConverters.fromJson(json['typegen_247_FakePushIntegrationDto'],'FakePushIntegrationDto',context!);
-        typegen_179_AwsCrossAccountRoleEmailIntegrationDto = JsonConverters.fromJson(json['typegen_179_AwsCrossAccountRoleEmailIntegrationDto'],'AwsCrossAccountRoleEmailIntegrationDto',context!);
+        typegen_179_AwsKeylessEmailIntegrationDto = JsonConverters.fromJson(json['typegen_179_AwsKeylessEmailIntegrationDto'],'AwsKeylessEmailIntegrationDto',context!);
         typegen_180_AwsIamEmailIntegrationDto = JsonConverters.fromJson(json['typegen_180_AwsIamEmailIntegrationDto'],'AwsIamEmailIntegrationDto',context!);
         typegen_181_MailGunEmailIntegrationDto = JsonConverters.fromJson(json['typegen_181_MailGunEmailIntegrationDto'],'MailGunEmailIntegrationDto',context!);
         typegen_182_SendGridEmailIntegrationDto = JsonConverters.fromJson(json['typegen_182_SendGridEmailIntegrationDto'],'SendGridEmailIntegrationDto',context!);
@@ -36647,7 +36913,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_111_DockerMcpIntegrationDto': JsonConverters.toJson(typegen_111_DockerMcpIntegrationDto,'DockerMcpIntegrationDto',context!),
         'typegen_112_GoogleCalendarMcpIntegrationDto': JsonConverters.toJson(typegen_112_GoogleCalendarMcpIntegrationDto,'GoogleCalendarMcpIntegrationDto',context!),
         'typegen_113_ObsidianMcpIntegrationDto': JsonConverters.toJson(typegen_113_ObsidianMcpIntegrationDto,'ObsidianMcpIntegrationDto',context!),
-        'typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto': JsonConverters.toJson(typegen_114_AwsLambdaCrossAccountRoleCodeIntegrationDto,'AwsLambdaCrossAccountRoleCodeIntegrationDto',context!),
+        'typegen_114_AwsLambdaKeylessCodeIntegrationDto': JsonConverters.toJson(typegen_114_AwsLambdaKeylessCodeIntegrationDto,'AwsLambdaKeylessCodeIntegrationDto',context!),
         'typegen_115_AwsLambdaIamCodeIntegrationDto': JsonConverters.toJson(typegen_115_AwsLambdaIamCodeIntegrationDto,'AwsLambdaIamCodeIntegrationDto',context!),
         'typegen_116_AzureFunctionsCodeIntegrationDto': JsonConverters.toJson(typegen_116_AzureFunctionsCodeIntegrationDto,'AzureFunctionsCodeIntegrationDto',context!),
         'typegen_118_GoogleCloudFunctionsCodeIntegrationDto': JsonConverters.toJson(typegen_118_GoogleCloudFunctionsCodeIntegrationDto,'GoogleCloudFunctionsCodeIntegrationDto',context!),
@@ -36692,7 +36958,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_149_PrometheusLoggingIntegrationDto': JsonConverters.toJson(typegen_149_PrometheusLoggingIntegrationDto,'PrometheusLoggingIntegrationDto',context!),
         'typegen_150_SplunkLoggingIntegrationDto': JsonConverters.toJson(typegen_150_SplunkLoggingIntegrationDto,'SplunkLoggingIntegrationDto',context!),
         'typegen_153_AppleICloudFilesIntegrationDto': JsonConverters.toJson(typegen_153_AppleICloudFilesIntegrationDto,'AppleICloudFilesIntegrationDto',context!),
-        'typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto': JsonConverters.toJson(typegen_154_AwsS3CrossAccountRoleFilesIntegrationDto,'AwsS3CrossAccountRoleFilesIntegrationDto',context!),
+        'typegen_154_AwsS3KeylessFilesIntegrationDto': JsonConverters.toJson(typegen_154_AwsS3KeylessFilesIntegrationDto,'AwsS3KeylessFilesIntegrationDto',context!),
         'typegen_155_AwsS3IamFilesIntegrationDto': JsonConverters.toJson(typegen_155_AwsS3IamFilesIntegrationDto,'AwsS3IamFilesIntegrationDto',context!),
         'typegen_156_AzureBlobFilesIntegrationDto': JsonConverters.toJson(typegen_156_AzureBlobFilesIntegrationDto,'AzureBlobFilesIntegrationDto',context!),
         'typegen_157_DropBoxFilesIntegrationDto': JsonConverters.toJson(typegen_157_DropBoxFilesIntegrationDto,'DropBoxFilesIntegrationDto',context!),
@@ -36718,7 +36984,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_177_FirefoxWebPushIntegrationDto': JsonConverters.toJson(typegen_177_FirefoxWebPushIntegrationDto,'FirefoxWebPushIntegrationDto',context!),
         'typegen_178_SafariPushIntegrationDto': JsonConverters.toJson(typegen_178_SafariPushIntegrationDto,'SafariPushIntegrationDto',context!),
         'typegen_247_FakePushIntegrationDto': JsonConverters.toJson(typegen_247_FakePushIntegrationDto,'FakePushIntegrationDto',context!),
-        'typegen_179_AwsCrossAccountRoleEmailIntegrationDto': JsonConverters.toJson(typegen_179_AwsCrossAccountRoleEmailIntegrationDto,'AwsCrossAccountRoleEmailIntegrationDto',context!),
+        'typegen_179_AwsKeylessEmailIntegrationDto': JsonConverters.toJson(typegen_179_AwsKeylessEmailIntegrationDto,'AwsKeylessEmailIntegrationDto',context!),
         'typegen_180_AwsIamEmailIntegrationDto': JsonConverters.toJson(typegen_180_AwsIamEmailIntegrationDto,'AwsIamEmailIntegrationDto',context!),
         'typegen_181_MailGunEmailIntegrationDto': JsonConverters.toJson(typegen_181_MailGunEmailIntegrationDto,'MailGunEmailIntegrationDto',context!),
         'typegen_182_SendGridEmailIntegrationDto': JsonConverters.toJson(typegen_182_SendGridEmailIntegrationDto,'SendGridEmailIntegrationDto',context!),
@@ -45711,6 +45977,50 @@ class GetFilesIntegrations extends CodeMashListPaginationRequestBase implements 
     createResponse() => GetFilesIntegrationsResponse();
     getResponseTypeName() => "GetFilesIntegrationsResponse";
     getTypeName() => "GetFilesIntegrations";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/integrations/keyless/setup", "GET")
+class GetKeylessIntegrationSetup extends CodeMashRequestBase implements IReturn<GetKeylessIntegrationSetupResponse>, IConvertible, IGet
+{
+    /**
+    * files, email or code.
+    */
+    // @ApiMember(Description="files, email or code.", IsRequired=true)
+    String module = "";
+
+    /**
+    * azure, aws or google.
+    */
+    // @ApiMember(Description="azure, aws or google.", IsRequired=true)
+    String cloud = "";
+
+    /**
+    * The integration view id; empty = a new one is made for the save.
+    */
+    // @ApiMember(Description="The integration view id; empty = a new one is made for the save.")
+    String? integrationId;
+
+    GetKeylessIntegrationSetup({this.module="",this.cloud="",this.integrationId});
+    GetKeylessIntegrationSetup.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        module = json['module'] ?? "";
+        cloud = json['cloud'] ?? "";
+        integrationId = json['integrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'module': module,
+        'cloud': cloud,
+        'integrationId': integrationId
+    });
+
+    createResponse() => GetKeylessIntegrationSetupResponse();
+    getResponseTypeName() => "GetKeylessIntegrationSetupResponse";
+    getTypeName() => "GetKeylessIntegrationSetup";
     TypeContext? context = _ctx;
 }
 
@@ -57557,12 +57867,12 @@ class RunDiagnosticHealthCheckRequest extends CodeMashRequestBase implements IRe
     TypeContext? context = _ctx;
 }
 
-TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
+TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'EmailProvider': TypeInfo(TypeOf.Enum, enumValues:EmailProvider.values),
     'EmailIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SmtpPorts': TypeInfo(TypeOf.Enum, enumValues:SmtpPorts.values),
     'SmtpEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => SmtpEmailIntegrationRequest()),
-    'AwsIntegrationType': TypeInfo(TypeOf.Enum, enumValues:AwsIntegrationType.values),
+    'CloudAuthMode': TypeInfo(TypeOf.Enum, enumValues:CloudAuthMode.values),
     'AwsSesEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AwsSesEmailIntegrationRequest()),
     'SendGridEmailIntegrationRequest': TypeInfo(TypeOf.Class, create:() => SendGridEmailIntegrationRequest()),
     'MailGunRegion': TypeInfo(TypeOf.Enum, enumValues:MailGunRegion.values),
@@ -57603,7 +57913,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'FtpFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FtpFilesIntegrationRequest()),
     'DropBoxFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DropBoxFilesIntegrationRequest()),
     'AppleICloudFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AppleICloudFilesIntegrationRequest()),
-    'AwsS3IntegrationType': TypeInfo(TypeOf.Enum, enumValues:AwsS3IntegrationType.values),
     'AwsS3FilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AwsS3FilesIntegrationRequest()),
     'GoogleCloudFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => GoogleCloudFilesIntegrationRequest()),
     'AzureBlobFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AzureBlobFilesIntegrationRequest()),
@@ -57680,7 +57989,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'FakeSmsIntegrationRequest': TypeInfo(TypeOf.Class, create:() => FakeSmsIntegrationRequest()),
     'CodeProvider': TypeInfo(TypeOf.Enum, enumValues:CodeProvider.values),
     'CodeIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
-    'AwsLambdaIntegrationType': TypeInfo(TypeOf.Enum, enumValues:AwsLambdaIntegrationType.values),
     'AwsLambdaCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AwsLambdaCodeIntegrationRequest()),
     'AzureFunctionsCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => AzureFunctionsCodeIntegrationRequest()),
     'GoogleCloudFunctionsCodeIntegrationRequest': TypeInfo(TypeOf.Class, create:() => GoogleCloudFunctionsCodeIntegrationRequest()),
@@ -57794,7 +58102,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GoogleCalendarMcpIntegrationDto': TypeInfo(TypeOf.Class, create:() => GoogleCalendarMcpIntegrationDto()),
     'ObsidianMcpIntegrationDto': TypeInfo(TypeOf.Class, create:() => ObsidianMcpIntegrationDto()),
     'CodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => CodeIntegrationDto()),
-    'AwsLambdaCrossAccountRoleCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsLambdaCrossAccountRoleCodeIntegrationDto()),
+    'AwsLambdaKeylessCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsLambdaKeylessCodeIntegrationDto()),
     'AwsLambdaIamCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsLambdaIamCodeIntegrationDto()),
     'AzureFunctionsCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AzureFunctionsCodeIntegrationDto()),
     'GoogleCloudFunctionsCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => GoogleCloudFunctionsCodeIntegrationDto()),
@@ -57850,7 +58158,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SplunkLoggingIntegrationDto': TypeInfo(TypeOf.Class, create:() => SplunkLoggingIntegrationDto()),
     'FilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => FilesIntegrationDto()),
     'AppleICloudFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AppleICloudFilesIntegrationDto()),
-    'AwsS3CrossAccountRoleFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsS3CrossAccountRoleFilesIntegrationDto()),
+    'AwsS3KeylessFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsS3KeylessFilesIntegrationDto()),
     'AwsS3IamFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsS3IamFilesIntegrationDto()),
     'AzureBlobFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AzureBlobFilesIntegrationDto()),
     'DropBoxFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => DropBoxFilesIntegrationDto()),
@@ -57882,7 +58190,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'FakePushIntegrationDto': TypeInfo(TypeOf.Class, create:() => FakePushIntegrationDto()),
     'EmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => EmailIntegrationDto()),
     'AwsSesEmailIntegrationDto': TypeInfo(TypeOf.AbstractClass),
-    'AwsCrossAccountRoleEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsCrossAccountRoleEmailIntegrationDto()),
+    'AwsKeylessEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsKeylessEmailIntegrationDto()),
     'AwsIamEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsIamEmailIntegrationDto()),
     'MailGunEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => MailGunEmailIntegrationDto()),
     'SendGridEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => SendGridEmailIntegrationDto()),
@@ -58086,6 +58394,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EchoHostingPlatformDto': TypeInfo(TypeOf.Class, create:() => EchoHostingPlatformDto()),
     'EchoConnectDto': TypeInfo(TypeOf.Class, create:() => EchoConnectDto()),
     'List<QuickConnectProviderDto>': TypeInfo(TypeOf.Class, create:() => <QuickConnectProviderDto>[]),
+    'EchoKeylessDto': TypeInfo(TypeOf.Class, create:() => EchoKeylessDto()),
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
@@ -58687,6 +58996,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetFilesIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetFilesIntegrationsResponse()),
     'PaginatedResponse<FilesIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FilesIntegrationListProjection>()),
     'List<FileProvider>': TypeInfo(TypeOf.Class, create:() => <FileProvider>[]),
+    'GetKeylessIntegrationSetupResponse': TypeInfo(TypeOf.Class, create:() => GetKeylessIntegrationSetupResponse()),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
     'GetFileByIdResponse': TypeInfo(TypeOf.Class, create:() => GetFileByIdResponse()),
     'GetFolderFilesResponse': TypeInfo(TypeOf.Class, create:() => GetFolderFilesResponse()),
@@ -59242,6 +59552,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EnableFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => EnableFilesIntegrationRequest()),
     'GetFilesIntegration': TypeInfo(TypeOf.Class, create:() => GetFilesIntegration()),
     'GetFilesIntegrations': TypeInfo(TypeOf.Class, create:() => GetFilesIntegrations()),
+    'GetKeylessIntegrationSetup': TypeInfo(TypeOf.Class, create:() => GetKeylessIntegrationSetup()),
     'SaveFilesIntegration': TypeInfo(TypeOf.Class, create:() => SaveFilesIntegration()),
     'SetFilesIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetFilesIntegrationAsDefaultRequest()),
     'TestFilesIntegration': TypeInfo(TypeOf.Class, create:() => TestFilesIntegration()),
