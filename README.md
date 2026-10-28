@@ -57,7 +57,7 @@ There is no `client.api.xxx` or `client.hub.xxx` middle layer.
 | Client | Resources |
 |--------|-----------|
 | `NorbixApi` | `aiChat`, `apiKeys`, `auth`, `code`, `database`, `files`, `logs`, `payments`, `publicProjects`, `userAuth`, `users` |
-| `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `code`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
+| `NorbixHub` | `accounts`, `aiIntegrations`, `apiKeys`, `auth`, `code`, `contacts`, `database`, `echo`, `emailNotifications`, `emailUnsubscribe`, `environments`, `files`, `integrations`, `logs`, `membership`, `payments`, `projects`, `pushNotifications`, `scheduler`, `smsNotifications`, `userNotificationPreferences`, `webhooks` |
 
 ## Configuration
 
@@ -820,6 +820,23 @@ final res = await api.files.testFilesIntegration(filesIntegrationId: 'nbin_1')
 for (final step in res['items'] as List) {
   print('${step['operation']}: ${step['result']}'); // UploadFile: OK, GetFile: OK, ...
 }
+```
+
+## Keyless cloud connections
+
+The AWS (S3, SES, Lambda) and Azure (Blob, Communication Services, Functions)
+save requests take `authMode`: `Keyless` (the gateway default when left out)
+or `AccessKey`. Keyless stores no secret: ask for the setup, run the script it
+returns in the cloud account, then save with the same integration id and the
+role ARN (AWS) or tenant + client id (Azure). A key mode needs
+`acceptKeyRisk: true`, or the save is refused (`CM-ERRORS-INTEGRATIONS-034`).
+
+```dart
+final setup = await hub.integrations.getKeylessIntegrationSetup(
+  query: {'module': 'files', 'cloud': 'aws'},
+) as Map<String, dynamic>;
+// setup['available'], setup['unavailableReason'], setup['subject'],
+// setup['audience'], setup['script'], setup['integrationId']
 ```
 
 ## Payments
