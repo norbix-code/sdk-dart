@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-28 18:58:14
+Date: 2026-10-28 21:07:30
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -21116,6 +21116,32 @@ class FilesIntegrationListProjection extends IntegrationListProjection implement
     TypeContext? context = _ctx;
 }
 
+class KeylessIntegrationSetupTemplate implements IConvertible
+{
+    String kind = "";
+    String fileName = "";
+    String content = "";
+
+    KeylessIntegrationSetupTemplate({this.kind="",this.fileName="",this.content=""});
+    KeylessIntegrationSetupTemplate.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        kind = json['kind'] ?? "";
+        fileName = json['fileName'] ?? "";
+        content = json['content'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'kind': kind,
+        'fileName': fileName,
+        'content': content
+    };
+
+    getTypeName() => "KeylessIntegrationSetupTemplate";
+    TypeContext? context = _ctx;
+}
+
 // @DataContract
 class PublicFolderDto implements IConvertible
 {
@@ -30693,8 +30719,9 @@ class GetKeylessIntegrationSetupResponse extends ResponseBase implements IConver
     String? subject;
     String? audience;
     String? script;
+    List<KeylessIntegrationSetupTemplate>? templates;
 
-    GetKeylessIntegrationSetupResponse({this.integrationId,this.env,this.module,this.cloud,this.issuer,this.available,this.unavailableReason,this.subject,this.audience,this.script});
+    GetKeylessIntegrationSetupResponse({this.integrationId,this.env,this.module,this.cloud,this.issuer,this.available,this.unavailableReason,this.subject,this.audience,this.script,this.templates});
     GetKeylessIntegrationSetupResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -30709,6 +30736,7 @@ class GetKeylessIntegrationSetupResponse extends ResponseBase implements IConver
         subject = json['subject'];
         audience = json['audience'];
         script = json['script'];
+        templates = JsonConverters.fromJson(json['templates'],'List<KeylessIntegrationSetupTemplate>',context!);
         return this;
     }
 
@@ -30722,7 +30750,8 @@ class GetKeylessIntegrationSetupResponse extends ResponseBase implements IConver
         'unavailableReason': unavailableReason,
         'subject': subject,
         'audience': audience,
-        'script': script
+        'script': script,
+        'templates': JsonConverters.toJson(templates,'List<KeylessIntegrationSetupTemplate>',context!)
     });
 
     getTypeName() => "GetKeylessIntegrationSetupResponse";
@@ -58746,6 +58775,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'MongoDbAggregateListProjection': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateListProjection()),
     'FilesTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => FilesTriggerProjectionList()),
     'FilesIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => FilesIntegrationListProjection()),
+    'KeylessIntegrationSetupTemplate': TypeInfo(TypeOf.Class, create:() => KeylessIntegrationSetupTemplate()),
     'PublicFolderDto': TypeInfo(TypeOf.Class, create:() => PublicFolderDto()),
     'NotificationModuleDependencyItemDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDependencyItemDto()),
     'NotificationModuleDisableDependenciesDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDisableDependenciesDto()),
@@ -59141,6 +59171,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'PaginatedResponse<FilesIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FilesIntegrationListProjection>()),
     'List<FileProvider>': TypeInfo(TypeOf.Class, create:() => <FileProvider>[]),
     'GetKeylessIntegrationSetupResponse': TypeInfo(TypeOf.Class, create:() => GetKeylessIntegrationSetupResponse()),
+    'List<KeylessIntegrationSetupTemplate>': TypeInfo(TypeOf.Class, create:() => <KeylessIntegrationSetupTemplate>[]),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
     'GetFileByIdResponse': TypeInfo(TypeOf.Class, create:() => GetFileByIdResponse()),
     'GetFolderFilesResponse': TypeInfo(TypeOf.Class, create:() => GetFolderFilesResponse()),
