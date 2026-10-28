@@ -19,6 +19,7 @@ import 'resources/email_notifications.dart';
 import 'resources/email_unsubscribe.dart';
 import 'resources/environments.dart';
 import 'resources/files.dart';
+import 'resources/integrations.dart';
 import 'resources/logs.dart';
 import 'resources/membership.dart';
 import 'resources/payments.dart';
@@ -224,6 +225,8 @@ class NorbixHub {
   late final EnvironmentsResource environments =
       EnvironmentsResource(_transport);
   late final FilesResource files = FilesResource(_transport);
+  late final IntegrationsResource integrations =
+      IntegrationsResource(_transport);
   late final LogsResource logs = LogsResource(_transport);
   late final MembershipResource membership = MembershipResource(_transport);
   late final PaymentsResource payments = PaymentsResource(_transport);
