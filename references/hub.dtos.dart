@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-28 18:48:54
+Date: 2026-10-28 18:58:14
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -1225,7 +1225,7 @@ class GoogleCloudFilesIntegrationRequest extends FilesIntegrationRequest impleme
     * AccessKey: the service-account JSON key.
     */
     // @ApiMember(Description="AccessKey: the service-account JSON key.")
-    String serviceAccountJsonKey = "";
+    String? serviceAccountJsonKey;
 
     /**
     * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).
@@ -1233,7 +1233,7 @@ class GoogleCloudFilesIntegrationRequest extends FilesIntegrationRequest impleme
     // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
-    GoogleCloudFilesIntegrationRequest({this.provider,this.authMode,this.bucketName="",this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail,this.serviceAccountJsonKey="",this.acceptKeyRisk});
+    GoogleCloudFilesIntegrationRequest({this.provider,this.authMode,this.bucketName="",this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail,this.serviceAccountJsonKey,this.acceptKeyRisk});
     GoogleCloudFilesIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1245,7 +1245,7 @@ class GoogleCloudFilesIntegrationRequest extends FilesIntegrationRequest impleme
         poolId = json['poolId'];
         providerId = json['providerId'];
         serviceAccountEmail = json['serviceAccountEmail'];
-        serviceAccountJsonKey = json['serviceAccountJsonKey'] ?? "";
+        serviceAccountJsonKey = json['serviceAccountJsonKey'];
         acceptKeyRisk = json['acceptKeyRisk'];
         return this;
     }
