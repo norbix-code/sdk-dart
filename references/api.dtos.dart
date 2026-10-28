@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-27 15:24:45
+Date: 2026-10-28 14:31:34
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -1405,6 +1405,32 @@ class EchoConnectDto implements IConvertible
     };
 
     getTypeName() => "EchoConnectDto";
+    TypeContext? context = _ctx;
+}
+
+class EchoKeylessDto implements IConvertible
+{
+    String issuer = "";
+    bool? available;
+    String? unavailableReason;
+
+    EchoKeylessDto({this.issuer="",this.available,this.unavailableReason});
+    EchoKeylessDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        issuer = json['issuer'] ?? "";
+        available = json['available'];
+        unavailableReason = json['unavailableReason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'issuer': issuer,
+        'available': available,
+        'unavailableReason': unavailableReason
+    };
+
+    getTypeName() => "EchoKeylessDto";
     TypeContext? context = _ctx;
 }
 
@@ -3899,8 +3925,9 @@ class EchoResponse implements IConvertible
     EchoAgentDto? agent;
     EchoHostingPlatformDto? hostingPlatform;
     EchoConnectDto? connect;
+    EchoKeylessDto? keyless;
 
-    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -3919,6 +3946,7 @@ class EchoResponse implements IConvertible
         agent = JsonConverters.fromJson(json['agent'],'EchoAgentDto',context!);
         hostingPlatform = JsonConverters.fromJson(json['hostingPlatform'],'EchoHostingPlatformDto',context!);
         connect = JsonConverters.fromJson(json['connect'],'EchoConnectDto',context!);
+        keyless = JsonConverters.fromJson(json['keyless'],'EchoKeylessDto',context!);
         return this;
     }
 
@@ -3937,7 +3965,8 @@ class EchoResponse implements IConvertible
         'regions': JsonConverters.toJson(regions,'List<EchoRegionDto>',context!),
         'agent': JsonConverters.toJson(agent,'EchoAgentDto',context!),
         'hostingPlatform': JsonConverters.toJson(hostingPlatform,'EchoHostingPlatformDto',context!),
-        'connect': JsonConverters.toJson(connect,'EchoConnectDto',context!)
+        'connect': JsonConverters.toJson(connect,'EchoConnectDto',context!),
+        'keyless': JsonConverters.toJson(keyless,'EchoKeylessDto',context!)
     };
 
     getTypeName() => "EchoResponse";
@@ -10410,7 +10439,7 @@ class MarkAllNotificationsReadRequest extends CodeMashRequestBase implements IRe
     TypeContext? context = _ctx;
 }
 
-TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
+TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'JsonSchemaFieldDto': TypeInfo(TypeOf.AbstractClass),
     'StringFieldDto': TypeInfo(TypeOf.Class, create:() => StringFieldDto()),
     'IReadOnlyDictionary<String,String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyDictionary<String,String>()),
@@ -10465,6 +10494,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'QuickConnectProviderDto': TypeInfo(TypeOf.Class, create:() => QuickConnectProviderDto()),
     'EchoConnectDto': TypeInfo(TypeOf.Class, create:() => EchoConnectDto()),
     'List<QuickConnectProviderDto>': TypeInfo(TypeOf.Class, create:() => <QuickConnectProviderDto>[]),
+    'EchoKeylessDto': TypeInfo(TypeOf.Class, create:() => EchoKeylessDto()),
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
