@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-28 14:56:26
+Date: 2026-10-28 18:48:54
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -1185,24 +1185,81 @@ class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IC
 class GoogleCloudFilesIntegrationRequest extends FilesIntegrationRequest implements IConvertible
 {
     FileProvider? provider;
+    /**
+    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored service-account JSON key, less secure).
+    */
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored service-account JSON key, less secure).")
+    CloudAuthMode? authMode;
+
+    /**
+    * The Cloud Storage bucket.
+    */
+    // @ApiMember(Description="The Cloud Storage bucket.")
     String bucketName = "";
+
+    /**
+    * Keyless: the Google Cloud project NUMBER (digits) that holds the workload identity pool.
+    */
+    // @ApiMember(Description="Keyless: the Google Cloud project NUMBER (digits) that holds the workload identity pool.")
+    String? projectNumber;
+
+    /**
+    * Keyless: the workload identity pool id (4–32 lowercase letters, digits and hyphens).
+    */
+    // @ApiMember(Description="Keyless: the workload identity pool id (4–32 lowercase letters, digits and hyphens).")
+    String? poolId;
+
+    /**
+    * Keyless: the workload identity pool provider id (4–32 lowercase letters, digits and hyphens).
+    */
+    // @ApiMember(Description="Keyless: the workload identity pool provider id (4–32 lowercase letters, digits and hyphens).")
+    String? providerId;
+
+    /**
+    * Keyless: the email of the service account Norbix acts as (…@<project>.iam.gserviceaccount.com).
+    */
+    // @ApiMember(Description="Keyless: the email of the service account Norbix acts as (…@<project>.iam.gserviceaccount.com).")
+    String? serviceAccountEmail;
+
+    /**
+    * AccessKey: the service-account JSON key.
+    */
+    // @ApiMember(Description="AccessKey: the service-account JSON key.")
     String serviceAccountJsonKey = "";
 
-    GoogleCloudFilesIntegrationRequest({this.provider,this.bucketName="",this.serviceAccountJsonKey=""});
+    /**
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).
+    */
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
+    bool? acceptKeyRisk;
+
+    GoogleCloudFilesIntegrationRequest({this.provider,this.authMode,this.bucketName="",this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail,this.serviceAccountJsonKey="",this.acceptKeyRisk});
     GoogleCloudFilesIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'FileProvider',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         bucketName = json['bucketName'] ?? "";
+        projectNumber = json['projectNumber'];
+        poolId = json['poolId'];
+        providerId = json['providerId'];
+        serviceAccountEmail = json['serviceAccountEmail'];
         serviceAccountJsonKey = json['serviceAccountJsonKey'] ?? "";
+        acceptKeyRisk = json['acceptKeyRisk'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'FileProvider',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'bucketName': bucketName,
-        'serviceAccountJsonKey': serviceAccountJsonKey
+        'projectNumber': projectNumber,
+        'poolId': poolId,
+        'providerId': providerId,
+        'serviceAccountEmail': serviceAccountEmail,
+        'serviceAccountJsonKey': serviceAccountJsonKey,
+        'acceptKeyRisk': acceptKeyRisk
     });
 
     getTypeName() => "GoogleCloudFilesIntegrationRequest";
@@ -3633,27 +3690,84 @@ class AzureFunctionsCodeIntegrationRequest extends CodeIntegrationRequest implem
 class GoogleCloudFunctionsCodeIntegrationRequest extends CodeIntegrationRequest implements IConvertible
 {
     CodeProvider? provider;
-    String projectId = "";
-    String? region;
-    String serviceAccountJsonKey = "";
+    /**
+    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored service-account JSON key, less secure).
+    */
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored service-account JSON key, less secure).")
+    CloudAuthMode? authMode;
 
-    GoogleCloudFunctionsCodeIntegrationRequest({this.provider,this.projectId="",this.region,this.serviceAccountJsonKey=""});
+    /**
+    * The Google Cloud project id the functions live in.
+    */
+    // @ApiMember(Description="The Google Cloud project id the functions live in.")
+    String projectId = "";
+
+    String? region;
+    /**
+    * Keyless: the Google Cloud project NUMBER (digits) that holds the workload identity pool.
+    */
+    // @ApiMember(Description="Keyless: the Google Cloud project NUMBER (digits) that holds the workload identity pool.")
+    String? projectNumber;
+
+    /**
+    * Keyless: the workload identity pool id (4–32 lowercase letters, digits and hyphens).
+    */
+    // @ApiMember(Description="Keyless: the workload identity pool id (4–32 lowercase letters, digits and hyphens).")
+    String? poolId;
+
+    /**
+    * Keyless: the workload identity pool provider id (4–32 lowercase letters, digits and hyphens).
+    */
+    // @ApiMember(Description="Keyless: the workload identity pool provider id (4–32 lowercase letters, digits and hyphens).")
+    String? providerId;
+
+    /**
+    * Keyless: the email of the service account Norbix acts as (…@<project>.iam.gserviceaccount.com).
+    */
+    // @ApiMember(Description="Keyless: the email of the service account Norbix acts as (…@<project>.iam.gserviceaccount.com).")
+    String? serviceAccountEmail;
+
+    /**
+    * AccessKey: the service-account JSON key.
+    */
+    // @ApiMember(Description="AccessKey: the service-account JSON key.")
+    String? serviceAccountJsonKey;
+
+    /**
+    * AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).
+    */
+    // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
+    bool? acceptKeyRisk;
+
+    GoogleCloudFunctionsCodeIntegrationRequest({this.provider,this.authMode,this.projectId="",this.region,this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail,this.serviceAccountJsonKey,this.acceptKeyRisk});
     GoogleCloudFunctionsCodeIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'CodeProvider',context!);
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         projectId = json['projectId'] ?? "";
         region = json['region'];
-        serviceAccountJsonKey = json['serviceAccountJsonKey'] ?? "";
+        projectNumber = json['projectNumber'];
+        poolId = json['poolId'];
+        providerId = json['providerId'];
+        serviceAccountEmail = json['serviceAccountEmail'];
+        serviceAccountJsonKey = json['serviceAccountJsonKey'];
+        acceptKeyRisk = json['acceptKeyRisk'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'CodeProvider',context!),
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'projectId': projectId,
         'region': region,
-        'serviceAccountJsonKey': serviceAccountJsonKey
+        'projectNumber': projectNumber,
+        'poolId': poolId,
+        'providerId': providerId,
+        'serviceAccountEmail': serviceAccountEmail,
+        'serviceAccountJsonKey': serviceAccountJsonKey,
+        'acceptKeyRisk': acceptKeyRisk
     });
 
     getTypeName() => "GoogleCloudFunctionsCodeIntegrationRequest";
@@ -6500,20 +6614,35 @@ class GoogleCloudFunctionsCodeIntegrationDto extends CodeIntegrationDto implemen
 {
     String projectId = "";
     String? region;
+    CloudAuthMode? authMode;
+    String? projectNumber;
+    String? poolId;
+    String? providerId;
+    String? serviceAccountEmail;
 
-    GoogleCloudFunctionsCodeIntegrationDto({this.projectId="",this.region});
+    GoogleCloudFunctionsCodeIntegrationDto({this.projectId="",this.region,this.authMode,this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail});
     GoogleCloudFunctionsCodeIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         projectId = json['projectId'] ?? "";
         region = json['region'];
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        projectNumber = json['projectNumber'];
+        poolId = json['poolId'];
+        providerId = json['providerId'];
+        serviceAccountEmail = json['serviceAccountEmail'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'projectId': projectId,
-        'region': region
+        'region': region,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
+        'projectNumber': projectNumber,
+        'poolId': poolId,
+        'providerId': providerId,
+        'serviceAccountEmail': serviceAccountEmail
     });
 
     getTypeName() => "GoogleCloudFunctionsCodeIntegrationDto";
@@ -8101,18 +8230,33 @@ class FtpFilesIntegrationDto extends FilesIntegrationDto implements IConvertible
 class GoogleCloudFilesIntegrationDto extends FilesIntegrationDto implements IConvertible
 {
     String bucketName = "";
+    CloudAuthMode? authMode;
+    String? projectNumber;
+    String? poolId;
+    String? providerId;
+    String? serviceAccountEmail;
 
-    GoogleCloudFilesIntegrationDto({this.bucketName=""});
+    GoogleCloudFilesIntegrationDto({this.bucketName="",this.authMode,this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail});
     GoogleCloudFilesIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         bucketName = json['bucketName'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        projectNumber = json['projectNumber'];
+        poolId = json['poolId'];
+        providerId = json['providerId'];
+        serviceAccountEmail = json['serviceAccountEmail'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'bucketName': bucketName
+        'bucketName': bucketName,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
+        'projectNumber': projectNumber,
+        'poolId': poolId,
+        'providerId': providerId,
+        'serviceAccountEmail': serviceAccountEmail
     });
 
     getTypeName() => "GoogleCloudFilesIntegrationDto";
