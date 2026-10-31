@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-31 09:57:13
+Date: 2026-10-31 10:59:26
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -27174,6 +27174,7 @@ enum NotificationAttemptOutcome
 {
     Accepted,
     Failed,
+    Blocked,
 }
 
 enum SendErrorCategory
