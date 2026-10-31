@@ -441,4 +441,36 @@ class MembershipResource extends Resource {
       pathParams: null,
     );
   }
+
+  /// `GET /{version}/membership/execution-identities`
+  ///
+  /// The service users a trigger, task or workflow can run as, the default first.
+  Future<Object?> getExecutionIdentities(
+      {Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/execution-identities',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/membership/execution-identities`
+  ///
+  /// Creates a service user (`name`) with roles (`roleIds`) in one call.
+  Future<Object?> createExecutionIdentity(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/execution-identities',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
 }
