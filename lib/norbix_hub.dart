@@ -38,6 +38,7 @@ export 'src/hub/resources/projects.dart';
 export 'src/hub/resources/push_notifications.dart';
 export 'src/hub/resources/resources.dart';
 export 'src/hub/resources/scheduler.dart';
+export 'src/hub/resources/triggers.dart';
 export 'src/hub/resources/sms_notifications.dart';
 export 'src/hub/resources/user_notification_preferences.dart';
 export 'src/hub/resources/webhooks.dart';

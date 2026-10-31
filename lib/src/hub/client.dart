@@ -27,6 +27,7 @@ import 'resources/projects.dart';
 import 'resources/push_notifications.dart';
 import 'resources/resources.dart';
 import 'resources/scheduler.dart';
+import 'resources/triggers.dart';
 import 'resources/sms_notifications.dart';
 import 'resources/user_notification_preferences.dart';
 import 'resources/webhooks.dart';
@@ -235,6 +236,9 @@ class NorbixHub {
       PushNotificationsResource(_transport);
   late final ResourcesResource resources = ResourcesResource(_transport);
   late final SchedulerResource scheduler = SchedulerResource(_transport);
+
+  /// Trigger endpoints that span every module.
+  late final TriggersResource triggers = TriggersResource(_transport);
   late final SmsNotificationsResource smsNotifications =
       SmsNotificationsResource(_transport);
   late final UserNotificationPreferencesResource userNotificationPreferences =

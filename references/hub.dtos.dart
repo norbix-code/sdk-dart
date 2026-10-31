@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-28 21:07:30
+Date: 2026-10-31 10:59:26
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -108,25 +108,32 @@ enum CloudAuthMode
 {
     AccessKey,
     Keyless,
+    CrossAccountRole,
 }
 
 class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements IConvertible
 {
     EmailProvider? provider;
     /**
-    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).
+    * Keyless (the default when omitted; no stored secret), CrossAccountRole (no stored secret; the install must run on AWS) or AccessKey (a stored IAM access key, less secure).
     */
-    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret), CrossAccountRole (no stored secret; the install must run on AWS) or AccessKey (a stored IAM access key, less secure).")
     CloudAuthMode? authMode;
 
     String awsRegion = "";
     String emailIdentityArn = "";
     String? configurationSet;
     /**
-    * Keyless: the ARN of the role that trusts this integration's Norbix token.
+    * Keyless: the ARN of the role that trusts this integration's Norbix token. CrossAccountRole: the ARN of the role that trusts this install's AWS account.
     */
-    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token.")
+    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token. CrossAccountRole: the ARN of the role that trusts this install's AWS account.")
     String? roleArn;
+
+    /**
+    * CrossAccountRole: this Norbix account's id (the role's trust names it as sts:ExternalId). Any other value is refused.
+    */
+    // @ApiMember(Description="CrossAccountRole: this Norbix account's id (the role's trust names it as sts:ExternalId). Any other value is refused.")
+    String? externalId;
 
     /**
     * AccessKey: the IAM access key id.
@@ -149,7 +156,7 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
     bool? deliveryEventsEnabled;
     String? snsTopicArn;
 
-    AwsSesEmailIntegrationRequest({this.provider,this.authMode,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk,this.deliveryEventsEnabled,this.snsTopicArn});
+    AwsSesEmailIntegrationRequest({this.provider,this.authMode,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.externalId,this.accessKey,this.secretKey,this.acceptKeyRisk,this.deliveryEventsEnabled,this.snsTopicArn});
     AwsSesEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -160,6 +167,7 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
         emailIdentityArn = json['emailIdentityArn'] ?? "";
         configurationSet = json['configurationSet'];
         roleArn = json['roleArn'];
+        externalId = json['externalId'];
         accessKey = json['accessKey'];
         secretKey = json['secretKey'];
         acceptKeyRisk = json['acceptKeyRisk'];
@@ -175,6 +183,7 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
         'emailIdentityArn': emailIdentityArn,
         'configurationSet': configurationSet,
         'roleArn': roleArn,
+        'externalId': externalId,
         'accessKey': accessKey,
         'secretKey': secretKey,
         'acceptKeyRisk': acceptKeyRisk,
@@ -328,6 +337,7 @@ enum EmailCampaignRecipientsSourceTypes
     AccountUsers,
     Email,
     Collection,
+    TriggerSubject,
 }
 
 enum TokenMappingResolverType
@@ -677,8 +687,9 @@ abstract class SaveTriggerRequest
     int? order;
     bool? breakOnError;
     TriggerActionDto? action;
+    String? executionIdentityId;
 
-    SaveTriggerRequest({this.type,this.triggerId,this.name="",this.description,this.isEnabled,this.preExecuteCode,this.order,this.breakOnError,this.action});
+    SaveTriggerRequest({this.type,this.triggerId,this.name="",this.description,this.isEnabled,this.preExecuteCode,this.order,this.breakOnError,this.action,this.executionIdentityId});
     SaveTriggerRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -691,6 +702,7 @@ abstract class SaveTriggerRequest
         order = json['order'];
         breakOnError = json['breakOnError'];
         action = JsonConverters.fromJson(json['action'],'TriggerActionDto',context!);
+        executionIdentityId = json['executionIdentityId'];
         return this;
     }
 
@@ -703,7 +715,8 @@ abstract class SaveTriggerRequest
         'preExecuteCode': preExecuteCode,
         'order': order,
         'breakOnError': breakOnError,
-        'action': JsonConverters.toJson(action,'TriggerActionDto',context!)
+        'action': JsonConverters.toJson(action,'TriggerActionDto',context!),
+        'executionIdentityId': executionIdentityId
     };
 
     getTypeName() => "SaveTriggerRequest";
@@ -1120,18 +1133,24 @@ class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IC
 {
     FileProvider? provider;
     /**
-    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).
+    * Keyless (the default when omitted; no stored secret), CrossAccountRole (no stored secret; the install must run on AWS) or AccessKey (a stored IAM access key, less secure).
     */
-    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret), CrossAccountRole (no stored secret; the install must run on AWS) or AccessKey (a stored IAM access key, less secure).")
     CloudAuthMode? authMode;
 
     String bucketName = "";
     String region = "";
     /**
-    * Keyless: the ARN of the role that trusts this integration's Norbix token (arn:aws:iam::<account>:role/<name>).
+    * Keyless: the ARN of the role that trusts this integration's Norbix token (arn:aws:iam::<account>:role/<name>). CrossAccountRole: the ARN of the role that trusts this install's AWS account.
     */
-    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token (arn:aws:iam::<account>:role/<name>).")
+    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token (arn:aws:iam::<account>:role/<name>). CrossAccountRole: the ARN of the role that trusts this install's AWS account.")
     String? roleArn;
+
+    /**
+    * CrossAccountRole: this Norbix account's id (the role's trust names it as sts:ExternalId). Any other value is refused.
+    */
+    // @ApiMember(Description="CrossAccountRole: this Norbix account's id (the role's trust names it as sts:ExternalId). Any other value is refused.")
+    String? externalId;
 
     /**
     * AccessKey: the IAM access key id.
@@ -1151,7 +1170,7 @@ class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IC
     // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
-    AwsS3FilesIntegrationRequest({this.provider,this.authMode,this.bucketName="",this.region="",this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk});
+    AwsS3FilesIntegrationRequest({this.provider,this.authMode,this.bucketName="",this.region="",this.roleArn,this.externalId,this.accessKey,this.secretKey,this.acceptKeyRisk});
     AwsS3FilesIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1161,6 +1180,7 @@ class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IC
         bucketName = json['bucketName'] ?? "";
         region = json['region'] ?? "";
         roleArn = json['roleArn'];
+        externalId = json['externalId'];
         accessKey = json['accessKey'];
         secretKey = json['secretKey'];
         acceptKeyRisk = json['acceptKeyRisk'];
@@ -1173,6 +1193,7 @@ class AwsS3FilesIntegrationRequest extends FilesIntegrationRequest implements IC
         'bucketName': bucketName,
         'region': region,
         'roleArn': roleArn,
+        'externalId': externalId,
         'accessKey': accessKey,
         'secretKey': secretKey,
         'acceptKeyRisk': acceptKeyRisk
@@ -3583,17 +3604,23 @@ class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements 
 {
     CodeProvider? provider;
     /**
-    * Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).
+    * Keyless (the default when omitted; no stored secret), CrossAccountRole (no stored secret; the install must run on AWS) or AccessKey (a stored IAM access key, less secure).
     */
-    // @ApiMember(Description="Keyless (the default when omitted; no stored secret) or AccessKey (a stored IAM access key, less secure).")
+    // @ApiMember(Description="Keyless (the default when omitted; no stored secret), CrossAccountRole (no stored secret; the install must run on AWS) or AccessKey (a stored IAM access key, less secure).")
     CloudAuthMode? authMode;
 
     String region = "";
     /**
-    * Keyless: the ARN of the role that trusts this integration's Norbix token.
+    * Keyless: the ARN of the role that trusts this integration's Norbix token. CrossAccountRole: the ARN of the role that trusts this install's AWS account.
     */
-    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token.")
+    // @ApiMember(Description="Keyless: the ARN of the role that trusts this integration's Norbix token. CrossAccountRole: the ARN of the role that trusts this install's AWS account.")
     String? roleArn;
+
+    /**
+    * CrossAccountRole: this Norbix account's id (the role's trust names it as sts:ExternalId). Any other value is refused.
+    */
+    // @ApiMember(Description="CrossAccountRole: this Norbix account's id (the role's trust names it as sts:ExternalId). Any other value is refused.")
+    String? externalId;
 
     /**
     * AccessKey: the IAM access key id.
@@ -3613,7 +3640,7 @@ class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements 
     // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
-    AwsLambdaCodeIntegrationRequest({this.provider,this.authMode,this.region="",this.roleArn,this.accessKey,this.secretKey,this.acceptKeyRisk});
+    AwsLambdaCodeIntegrationRequest({this.provider,this.authMode,this.region="",this.roleArn,this.externalId,this.accessKey,this.secretKey,this.acceptKeyRisk});
     AwsLambdaCodeIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -3622,6 +3649,7 @@ class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements 
         authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
         region = json['region'] ?? "";
         roleArn = json['roleArn'];
+        externalId = json['externalId'];
         accessKey = json['accessKey'];
         secretKey = json['secretKey'];
         acceptKeyRisk = json['acceptKeyRisk'];
@@ -3633,6 +3661,7 @@ class AwsLambdaCodeIntegrationRequest extends CodeIntegrationRequest implements 
         'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
         'region': region,
         'roleArn': roleArn,
+        'externalId': externalId,
         'accessKey': accessKey,
         'secretKey': secretKey,
         'acceptKeyRisk': acceptKeyRisk
@@ -4921,6 +4950,7 @@ enum PushCampaignRecipientsSourceTypes
     Collection,
     Devices,
     AccountUsers,
+    TriggerSubject,
 }
 
 // @DataContract
@@ -5075,9 +5105,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     FunctionRefDto? functionRef;
 
     // @DataMember
-    String? runAsUserId;
-
-    // @DataMember
     CodeInvocationType? invocationType;
 
     // @DataMember
@@ -5095,13 +5122,12 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? meta;
 
-    TriggerActionCodeDto({this.functionRef,this.runAsUserId,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
+    TriggerActionCodeDto({this.functionRef,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
     TriggerActionCodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionRef = JsonConverters.fromJson(json['functionRef'],'FunctionRefDto',context!);
-        runAsUserId = json['runAsUserId'];
         invocationType = JsonConverters.fromJson(json['invocationType'],'CodeInvocationType',context!);
         config = json['config'];
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'CodeDeliverySettingsDto',context!);
@@ -5113,7 +5139,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionRef': JsonConverters.toJson(functionRef,'FunctionRefDto',context!),
-        'runAsUserId': runAsUserId,
         'invocationType': JsonConverters.toJson(invocationType,'CodeInvocationType',context!),
         'config': config,
         'deliverySettings': JsonConverters.toJson(deliverySettings,'CodeDeliverySettingsDto',context!),
@@ -5198,6 +5223,7 @@ enum SmsCampaignRecipientsSourceTypes
     AccountUsers,
     PhoneNumbers,
     Collection,
+    TriggerSubject,
 }
 
 // @DataContract
@@ -5359,24 +5385,19 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    // @DataMember
-    String? runAsUserId;
-
-    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
+    TriggerActionMarketplaceDto({this.functionId="",this.payload});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
-        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
         'payload': payload,
-        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -6155,6 +6176,100 @@ class SmsToPhoneNumbersDeliverySettingsDto extends SmsCampaignDeliverySettingsDt
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class EmailToTriggerSubjectDeliverySettingsDto extends EmailCampaignDeliverySettingsDto implements IConvertible
+{
+    // @DataMember
+    String? subjectAuthId;
+
+    // @DataMember
+    String? subjectEmail;
+
+    // @DataMember
+    String? subjectLanguage;
+
+    EmailToTriggerSubjectDeliverySettingsDto({this.subjectAuthId,this.subjectEmail,this.subjectLanguage});
+    EmailToTriggerSubjectDeliverySettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        subjectAuthId = json['subjectAuthId'];
+        subjectEmail = json['subjectEmail'];
+        subjectLanguage = json['subjectLanguage'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'subjectAuthId': subjectAuthId,
+        'subjectEmail': subjectEmail,
+        'subjectLanguage': subjectLanguage
+    });
+
+    getTypeName() => "EmailToTriggerSubjectDeliverySettingsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PushToTriggerSubjectDeliverySettingsDto extends PushCampaignDeliverySettingsDto implements IConvertible
+{
+    // @DataMember
+    String? subjectAuthId;
+
+    // @DataMember
+    String? subjectLanguage;
+
+    PushToTriggerSubjectDeliverySettingsDto({this.subjectAuthId,this.subjectLanguage});
+    PushToTriggerSubjectDeliverySettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        subjectAuthId = json['subjectAuthId'];
+        subjectLanguage = json['subjectLanguage'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'subjectAuthId': subjectAuthId,
+        'subjectLanguage': subjectLanguage
+    });
+
+    getTypeName() => "PushToTriggerSubjectDeliverySettingsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SmsToTriggerSubjectDeliverySettingsDto extends SmsCampaignDeliverySettingsDto implements IConvertible
+{
+    // @DataMember
+    String? subjectAuthId;
+
+    // @DataMember
+    String? subjectPhone;
+
+    // @DataMember
+    String? subjectLanguage;
+
+    SmsToTriggerSubjectDeliverySettingsDto({this.subjectAuthId,this.subjectPhone,this.subjectLanguage});
+    SmsToTriggerSubjectDeliverySettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        subjectAuthId = json['subjectAuthId'];
+        subjectPhone = json['subjectPhone'];
+        subjectLanguage = json['subjectLanguage'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'subjectAuthId': subjectAuthId,
+        'subjectPhone': subjectPhone,
+        'subjectLanguage': subjectLanguage
+    });
+
+    getTypeName() => "SmsToTriggerSubjectDeliverySettingsDto";
+    TypeContext? context = _ctx;
+}
+
 class IntegrationDto implements IHasViewId, IConvertible
 {
     String viewId = "";
@@ -6547,6 +6662,36 @@ class AwsLambdaKeylessCodeIntegrationDto extends CodeIntegrationDto implements I
     });
 
     getTypeName() => "AwsLambdaKeylessCodeIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
+class AwsLambdaCrossAccountRoleCodeIntegrationDto extends CodeIntegrationDto implements IConvertible
+{
+    String region = "";
+    String roleArn = "";
+    String externalId = "";
+    CloudAuthMode? authMode;
+
+    AwsLambdaCrossAccountRoleCodeIntegrationDto({this.region="",this.roleArn="",this.externalId="",this.authMode});
+    AwsLambdaCrossAccountRoleCodeIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        region = json['region'] ?? "";
+        roleArn = json['roleArn'] ?? "";
+        externalId = json['externalId'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'region': region,
+        'roleArn': roleArn,
+        'externalId': externalId,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
+    });
+
+    getTypeName() => "AwsLambdaCrossAccountRoleCodeIntegrationDto";
     TypeContext? context = _ctx;
 }
 
@@ -8116,6 +8261,39 @@ class AwsS3KeylessFilesIntegrationDto extends FilesIntegrationDto implements ICo
     TypeContext? context = _ctx;
 }
 
+class AwsS3CrossAccountRoleFilesIntegrationDto extends FilesIntegrationDto implements IConvertible
+{
+    String bucketName = "";
+    String region = "";
+    String roleArn = "";
+    String externalId = "";
+    CloudAuthMode? authMode;
+
+    AwsS3CrossAccountRoleFilesIntegrationDto({this.bucketName="",this.region="",this.roleArn="",this.externalId="",this.authMode});
+    AwsS3CrossAccountRoleFilesIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        bucketName = json['bucketName'] ?? "";
+        region = json['region'] ?? "";
+        roleArn = json['roleArn'] ?? "";
+        externalId = json['externalId'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'bucketName': bucketName,
+        'region': region,
+        'roleArn': roleArn,
+        'externalId': externalId,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
+    });
+
+    getTypeName() => "AwsS3CrossAccountRoleFilesIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
 class AwsS3IamFilesIntegrationDto extends FilesIntegrationDto implements IConvertible
 {
     String bucketName = "";
@@ -8907,6 +9085,33 @@ class AwsKeylessEmailIntegrationDto extends AwsSesEmailIntegrationDto implements
     TypeContext? context = _ctx;
 }
 
+class AwsCrossAccountRoleEmailIntegrationDto extends AwsSesEmailIntegrationDto implements IConvertible
+{
+    String roleArn = "";
+    String externalId = "";
+    CloudAuthMode? authMode;
+
+    AwsCrossAccountRoleEmailIntegrationDto({this.roleArn="",this.externalId="",this.authMode});
+    AwsCrossAccountRoleEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        roleArn = json['roleArn'] ?? "";
+        externalId = json['externalId'] ?? "";
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'roleArn': roleArn,
+        'externalId': externalId,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!)
+    });
+
+    getTypeName() => "AwsCrossAccountRoleEmailIntegrationDto";
+    TypeContext? context = _ctx;
+}
+
 class AwsIamEmailIntegrationDto extends AwsSesEmailIntegrationDto implements IConvertible
 {
     CloudAuthMode? authMode;
@@ -9143,6 +9348,43 @@ enum SchedulerTaskType
 }
 
 // @DataContract
+class ExecutionIdentitySummaryDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    bool? isDefault;
+
+    // @DataMember
+    String status = "";
+
+    ExecutionIdentitySummaryDto({this.id="",this.name="",this.isDefault,this.status=""});
+    ExecutionIdentitySummaryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        isDefault = json['isDefault'];
+        status = json['status'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'isDefault': isDefault,
+        'status': status
+    };
+
+    getTypeName() => "ExecutionIdentitySummaryDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class SchedulerTaskDto implements IConvertible
 {
     // @DataMember
@@ -9188,6 +9430,12 @@ class SchedulerTaskDto implements IConvertible
     int? endsAtUnix;
 
     // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    ExecutionIdentitySummaryDto? executionIdentity;
+
+    // @DataMember
     bool? hasEnded;
 
     // @DataMember
@@ -9199,7 +9447,7 @@ class SchedulerTaskDto implements IConvertible
     // @DataMember
     int? lastFailedAtUnix;
 
-    SchedulerTaskDto({this.projectId="",this.taskId="",this.name="",this.description,this.cron="",this.type,this.payloadJson="",this.initiatorId="",this.isEnabled,this.stopOnError,this.env,this.createdAtUnix,this.updatedAtUnix,this.endsAtUnix,this.hasEnded,this.isFailing,this.lastFailureReason,this.lastFailedAtUnix});
+    SchedulerTaskDto({this.projectId="",this.taskId="",this.name="",this.description,this.cron="",this.type,this.payloadJson="",this.initiatorId="",this.isEnabled,this.stopOnError,this.env,this.createdAtUnix,this.updatedAtUnix,this.endsAtUnix,this.executionIdentityId,this.executionIdentity,this.hasEnded,this.isFailing,this.lastFailureReason,this.lastFailedAtUnix});
     SchedulerTaskDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -9217,6 +9465,8 @@ class SchedulerTaskDto implements IConvertible
         createdAtUnix = json['createdAtUnix'];
         updatedAtUnix = json['updatedAtUnix'];
         endsAtUnix = json['endsAtUnix'];
+        executionIdentityId = json['executionIdentityId'];
+        executionIdentity = JsonConverters.fromJson(json['executionIdentity'],'ExecutionIdentitySummaryDto',context!);
         hasEnded = json['hasEnded'];
         isFailing = json['isFailing'];
         lastFailureReason = json['lastFailureReason'];
@@ -9239,6 +9489,8 @@ class SchedulerTaskDto implements IConvertible
         'createdAtUnix': createdAtUnix,
         'updatedAtUnix': updatedAtUnix,
         'endsAtUnix': endsAtUnix,
+        'executionIdentityId': executionIdentityId,
+        'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!),
         'hasEnded': hasEnded,
         'isFailing': isFailing,
         'lastFailureReason': lastFailureReason,
@@ -13761,42 +14013,6 @@ class SchemaListSettingsDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class ImportColumnMappingDto implements IConvertible
-{
-    // @DataMember
-    int csvColumnIndex = 0;
-
-    // @DataMember
-    String? csvHeader;
-
-    // @DataMember
-    String? propertyName;
-
-    // @DataMember
-    bool? dontImportOnError;
-
-    ImportColumnMappingDto({this.csvColumnIndex=0,this.csvHeader,this.propertyName,this.dontImportOnError});
-    ImportColumnMappingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        csvColumnIndex = json['csvColumnIndex'] ?? 0;
-        csvHeader = json['csvHeader'];
-        propertyName = json['propertyName'];
-        dontImportOnError = json['dontImportOnError'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'csvColumnIndex': csvColumnIndex,
-        'csvHeader': csvHeader,
-        'propertyName': propertyName,
-        'dontImportOnError': dontImportOnError
-    };
-
-    getTypeName() => "ImportColumnMappingDto";
-    TypeContext? context = _ctx;
-}
-
 // @DataContract
 enum EmailValidationProvider
 {
@@ -14574,6 +14790,42 @@ abstract class EmbeddingIntegrationRequest
     TypeContext? context = _ctx;
 }
 
+class ImportColumnMappingDto implements IConvertible
+{
+    // @DataMember
+    int csvColumnIndex = 0;
+
+    // @DataMember
+    String? csvHeader;
+
+    // @DataMember
+    String? propertyName;
+
+    // @DataMember
+    bool? dontImportOnError;
+
+    ImportColumnMappingDto({this.csvColumnIndex=0,this.csvHeader,this.propertyName,this.dontImportOnError});
+    ImportColumnMappingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        csvColumnIndex = json['csvColumnIndex'] ?? 0;
+        csvHeader = json['csvHeader'];
+        propertyName = json['propertyName'];
+        dontImportOnError = json['dontImportOnError'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'csvColumnIndex': csvColumnIndex,
+        'csvHeader': csvHeader,
+        'propertyName': propertyName,
+        'dontImportOnError': dontImportOnError
+    };
+
+    getTypeName() => "ImportColumnMappingDto";
+    TypeContext? context = _ctx;
+}
+
 enum CaseResolutionFixKind
 {
     CodeFix,
@@ -14973,6 +15225,33 @@ class PublicAiChatDto implements IConvertible
 }
 
 // @DataContract
+class ExecutionIdentityRefusalDto implements IConvertible
+{
+    // @DataMember
+    String errorCode = "";
+
+    // @DataMember
+    String message = "";
+
+    ExecutionIdentityRefusalDto({this.errorCode="",this.message=""});
+    ExecutionIdentityRefusalDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        errorCode = json['errorCode'] ?? "";
+        message = json['message'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'errorCode': errorCode,
+        'message': message
+    };
+
+    getTypeName() => "ExecutionIdentityRefusalDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class TriggerAttentionDto implements IConvertible
 {
     // @DataMember
@@ -15006,6 +15285,284 @@ class TriggerAttentionDto implements IConvertible
     };
 
     getTypeName() => "TriggerAttentionDto";
+    TypeContext? context = _ctx;
+}
+
+class PaginatedResponse<TViewModelProjection> implements IConvertible
+{
+    List<TViewModelProjection>? items;
+    bool? hasMore;
+    bool? hasPrevious;
+    String? startingAfter;
+    String? endingBefore;
+
+    PaginatedResponse({this.items,this.hasMore,this.hasPrevious,this.startingAfter,this.endingBefore});
+    PaginatedResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        items = JsonConverters.fromJson(json['items'],'IList<${runtimeGenericTypeDefs(this,[0]).join(",")}>',context!);
+        hasMore = json['hasMore'];
+        hasPrevious = json['hasPrevious'];
+        startingAfter = json['startingAfter'];
+        endingBefore = json['endingBefore'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'items': JsonConverters.toJson(items,'List<TViewModelProjection>',context!),
+        'hasMore': hasMore,
+        'hasPrevious': hasPrevious,
+        'startingAfter': startingAfter,
+        'endingBefore': endingBefore
+    };
+
+    getTypeName() => "PaginatedResponse<$TViewModelProjection>";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunActorDto implements IConvertible
+{
+    // @DataMember
+    String? userId;
+
+    // @DataMember
+    String kind = "";
+
+    WorkflowRunActorDto({this.userId,this.kind=""});
+    WorkflowRunActorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'];
+        kind = json['kind'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'kind': kind
+    };
+
+    getTypeName() => "WorkflowRunActorDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunErrorDto implements IConvertible
+{
+    // @DataMember
+    String? code;
+
+    // @DataMember
+    String? stepId;
+
+    // @DataMember
+    String? reason;
+
+    // @DataMember
+    String? message;
+
+    WorkflowRunErrorDto({this.code,this.stepId,this.reason,this.message});
+    WorkflowRunErrorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        code = json['code'];
+        stepId = json['stepId'];
+        reason = json['reason'];
+        message = json['message'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'code': code,
+        'stepId': stepId,
+        'reason': reason,
+        'message': message
+    };
+
+    getTypeName() => "WorkflowRunErrorDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TriggerRunProducedDto implements IConvertible
+{
+    // @DataMember
+    String kind = "";
+
+    // @DataMember
+    String? id;
+
+    TriggerRunProducedDto({this.kind="",this.id});
+    TriggerRunProducedDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        kind = json['kind'] ?? "";
+        id = json['id'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'kind': kind,
+        'id': id
+    };
+
+    getTypeName() => "TriggerRunProducedDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TriggerRunListProjection implements IConvertible
+{
+    // @DataMember
+    String runId = "";
+
+    // @DataMember
+    String triggerId = "";
+
+    // @DataMember
+    TriggerType? triggerType;
+
+    // @DataMember
+    String? triggerName;
+
+    // @DataMember
+    String event = "";
+
+    // @DataMember
+    String? action;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    WorkflowRunActorDto? startedBy;
+
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    String? executionIdentityName;
+
+    // @DataMember
+    bool? executionIdentityIsDefault;
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    // @DataMember
+    TriggerRunProducedDto? produced;
+
+    TriggerRunListProjection({this.runId="",this.triggerId="",this.triggerType,this.triggerName,this.event="",this.action,this.status="",this.startedAt,this.finishedAt,this.durationMs,this.startedBy,this.executionIdentityId,this.executionIdentityName,this.executionIdentityIsDefault,this.error,this.produced});
+    TriggerRunListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        runId = json['runId'] ?? "";
+        triggerId = json['triggerId'] ?? "";
+        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
+        triggerName = json['triggerName'];
+        event = json['event'] ?? "";
+        action = json['action'];
+        status = json['status'] ?? "";
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        durationMs = json['durationMs'];
+        startedBy = JsonConverters.fromJson(json['startedBy'],'WorkflowRunActorDto',context!);
+        executionIdentityId = json['executionIdentityId'];
+        executionIdentityName = json['executionIdentityName'];
+        executionIdentityIsDefault = json['executionIdentityIsDefault'];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        produced = JsonConverters.fromJson(json['produced'],'TriggerRunProducedDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'runId': runId,
+        'triggerId': triggerId,
+        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!),
+        'triggerName': triggerName,
+        'event': event,
+        'action': action,
+        'status': status,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'durationMs': durationMs,
+        'startedBy': JsonConverters.toJson(startedBy,'WorkflowRunActorDto',context!),
+        'executionIdentityId': executionIdentityId,
+        'executionIdentityName': executionIdentityName,
+        'executionIdentityIsDefault': executionIdentityIsDefault,
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!),
+        'produced': JsonConverters.toJson(produced,'TriggerRunProducedDto',context!)
+    };
+
+    getTypeName() => "TriggerRunListProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TriggerRunDto extends TriggerRunListProjection implements IConvertible
+{
+    // @DataMember
+    String? schemaId;
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    String? queue;
+
+    // @DataMember
+    String? messageId;
+
+    // @DataMember
+    String? missingPermissions;
+
+    // @DataMember
+    int? deliveries;
+
+    // @DataMember
+    int? recordCount;
+
+    TriggerRunDto({this.schemaId,this.env="",this.correlationId,this.queue,this.messageId,this.missingPermissions,this.deliveries,this.recordCount});
+    TriggerRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        schemaId = json['schemaId'];
+        env = json['env'] ?? "";
+        correlationId = json['correlationId'];
+        queue = json['queue'];
+        messageId = json['messageId'];
+        missingPermissions = json['missingPermissions'];
+        deliveries = json['deliveries'];
+        recordCount = json['recordCount'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'schemaId': schemaId,
+        'env': env,
+        'correlationId': correlationId,
+        'queue': queue,
+        'messageId': messageId,
+        'missingPermissions': missingPermissions,
+        'deliveries': deliveries,
+        'recordCount': recordCount
+    });
+
+    getTypeName() => "TriggerRunDto";
     TypeContext? context = _ctx;
 }
 
@@ -16120,6 +16677,33 @@ class ProjectEnvironmentAdminUrlDto implements IConvertible
 }
 
 // @DataContract
+class ProjectEnvironmentExecutionIdentityDto implements IConvertible
+{
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String userId = "";
+
+    ProjectEnvironmentExecutionIdentityDto({this.env="",this.userId=""});
+    ProjectEnvironmentExecutionIdentityDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        env = json['env'] ?? "";
+        userId = json['userId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'env': env,
+        'userId': userId
+    };
+
+    getTypeName() => "ProjectEnvironmentExecutionIdentityDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class AuthenticationFlowPasswordPolicyDto implements IConvertible
 {
     // @DataMember
@@ -16370,7 +16954,13 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
     // @DataMember
     String? savedByAuthId;
 
-    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.order,this.breakOnError,this.savedByAuthId});
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    ExecutionIdentitySummaryDto? executionIdentity;
+
+    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.order,this.breakOnError,this.savedByAuthId,this.executionIdentityId,this.executionIdentity});
     TriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16384,6 +16974,8 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         order = json['order'];
         breakOnError = json['breakOnError'];
         savedByAuthId = json['savedByAuthId'];
+        executionIdentityId = json['executionIdentityId'];
+        executionIdentity = JsonConverters.fromJson(json['executionIdentity'],'ExecutionIdentitySummaryDto',context!);
         return this;
     }
 
@@ -16397,7 +16989,9 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         'activationCode': activationCode,
         'order': order,
         'breakOnError': breakOnError,
-        'savedByAuthId': savedByAuthId
+        'savedByAuthId': savedByAuthId,
+        'executionIdentityId': executionIdentityId,
+        'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!)
     };
 
     getTypeName() => "TriggerDto";
@@ -17097,6 +17691,9 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     List<ProjectEnvironmentAdminUrlDto>? environmentAdminUrls;
 
     // @DataMember
+    List<ProjectEnvironmentExecutionIdentityDto>? defaultExecutionIdentities;
+
+    // @DataMember
     bool? exposeBrandToAdminPortal;
 
     // @DataMember
@@ -17204,7 +17801,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     // @DataMember
     int connections = 0;
 
-    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.canonicalAdminUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.environmentAdminUrls,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalEnabled,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
+    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.canonicalAdminUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.environmentAdminUrls,this.defaultExecutionIdentities,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalEnabled,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
     ProjectDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -17230,6 +17827,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         notificationSettings = JsonConverters.fromJson(json['notificationSettings'],'NotificationSettingsDto',context!);
         allowedOrigins = JsonConverters.fromJson(json['allowedOrigins'],'List<String>',context!);
         environmentAdminUrls = JsonConverters.fromJson(json['environmentAdminUrls'],'List<ProjectEnvironmentAdminUrlDto>',context!);
+        defaultExecutionIdentities = JsonConverters.fromJson(json['defaultExecutionIdentities'],'List<ProjectEnvironmentExecutionIdentityDto>',context!);
         exposeBrandToAdminPortal = json['exposeBrandToAdminPortal'];
         exposeAuthToAdminPortal = json['exposeAuthToAdminPortal'];
         adminPortalEnabled = json['adminPortalEnabled'];
@@ -17292,6 +17890,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         'notificationSettings': JsonConverters.toJson(notificationSettings,'NotificationSettingsDto',context!),
         'allowedOrigins': JsonConverters.toJson(allowedOrigins,'List<String>',context!),
         'environmentAdminUrls': JsonConverters.toJson(environmentAdminUrls,'List<ProjectEnvironmentAdminUrlDto>',context!),
+        'defaultExecutionIdentities': JsonConverters.toJson(defaultExecutionIdentities,'List<ProjectEnvironmentExecutionIdentityDto>',context!),
         'exposeBrandToAdminPortal': exposeBrandToAdminPortal,
         'exposeAuthToAdminPortal': exposeAuthToAdminPortal,
         'adminPortalEnabled': adminPortalEnabled,
@@ -17811,38 +18410,6 @@ class TemplateLanguageGapDto implements IConvertible
     };
 
     getTypeName() => "TemplateLanguageGapDto";
-    TypeContext? context = _ctx;
-}
-
-class PaginatedResponse<TViewModelProjection> implements IConvertible
-{
-    List<TViewModelProjection>? items;
-    bool? hasMore;
-    bool? hasPrevious;
-    String? startingAfter;
-    String? endingBefore;
-
-    PaginatedResponse({this.items,this.hasMore,this.hasPrevious,this.startingAfter,this.endingBefore});
-    PaginatedResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        items = JsonConverters.fromJson(json['items'],'IList<${runtimeGenericTypeDefs(this,[0]).join(",")}>',context!);
-        hasMore = json['hasMore'];
-        hasPrevious = json['hasPrevious'];
-        startingAfter = json['startingAfter'];
-        endingBefore = json['endingBefore'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'items': JsonConverters.toJson(items,'List<TViewModelProjection>',context!),
-        'hasMore': hasMore,
-        'hasPrevious': hasPrevious,
-        'startingAfter': startingAfter,
-        'endingBefore': endingBefore
-    };
-
-    getTypeName() => "PaginatedResponse<$TViewModelProjection>";
     TypeContext? context = _ctx;
 }
 
@@ -19018,7 +19585,10 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
     // @DataMember
     bool? breakOnError;
 
-    TriggerProjectionList({this.viewId="",this.name="",this.actionType,this.hasPreExecuteCode,this.isEnabled,this.order,this.breakOnError});
+    // @DataMember
+    String? executionIdentityId;
+
+    TriggerProjectionList({this.viewId="",this.name="",this.actionType,this.hasPreExecuteCode,this.isEnabled,this.order,this.breakOnError,this.executionIdentityId});
     TriggerProjectionList.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19029,6 +19599,7 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
         isEnabled = json['isEnabled'];
         order = json['order'];
         breakOnError = json['breakOnError'];
+        executionIdentityId = json['executionIdentityId'];
         return this;
     }
 
@@ -19039,7 +19610,8 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
         'hasPreExecuteCode': hasPreExecuteCode,
         'isEnabled': isEnabled,
         'order': order,
-        'breakOnError': breakOnError
+        'breakOnError': breakOnError,
+        'executionIdentityId': executionIdentityId
     };
 
     getTypeName() => "TriggerProjectionList";
@@ -19210,6 +19782,90 @@ class MembershipIntegrationListProjection extends IntegrationListProjection impl
     });
 
     getTypeName() => "MembershipIntegrationListProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ExecutionIdentityUsageDto implements IConvertible
+{
+    // @DataMember
+    int triggers = 0;
+
+    // @DataMember
+    int tasks = 0;
+
+    // @DataMember
+    int workflows = 0;
+
+    ExecutionIdentityUsageDto({this.triggers=0,this.tasks=0,this.workflows=0});
+    ExecutionIdentityUsageDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        triggers = json['triggers'] ?? 0;
+        tasks = json['tasks'] ?? 0;
+        workflows = json['workflows'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'triggers': triggers,
+        'tasks': tasks,
+        'workflows': workflows
+    };
+
+    getTypeName() => "ExecutionIdentityUsageDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ExecutionIdentityDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String name = "";
+
+    // @DataMember
+    bool? isDefault;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    List<String> roleIds = [];
+
+    // @DataMember
+    bool? canAssign;
+
+    // @DataMember
+    ExecutionIdentityUsageDto? usedBy;
+
+    ExecutionIdentityDto({this.id="",this.name="",this.isDefault,this.status="",this.roleIds=const [],this.canAssign,this.usedBy});
+    ExecutionIdentityDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        name = json['name'] ?? "";
+        isDefault = json['isDefault'];
+        status = json['status'] ?? "";
+        roleIds = JsonConverters.fromJson(json['roleIds'],'List<String>',context!) ?? [];
+        canAssign = json['canAssign'];
+        usedBy = JsonConverters.fromJson(json['usedBy'],'ExecutionIdentityUsageDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'isDefault': isDefault,
+        'status': status,
+        'roleIds': JsonConverters.toJson(roleIds,'List<String>',context!),
+        'canAssign': canAssign,
+        'usedBy': JsonConverters.toJson(usedBy,'ExecutionIdentityUsageDto',context!)
+    };
+
+    getTypeName() => "ExecutionIdentityDto";
     TypeContext? context = _ctx;
 }
 
@@ -20814,227 +21470,6 @@ class IntegrationTestResultItemDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-// @DataContract
-class SchemaRefDto implements IConvertible
-{
-    // @DataMember(Order=1)
-    String schemaId = "";
-
-    // @DataMember(Order=2)
-    String schemaName = "";
-
-    // @DataMember(Order=3)
-    String databaseIntegrationId = "";
-
-    SchemaRefDto({this.schemaId="",this.schemaName="",this.databaseIntegrationId=""});
-    SchemaRefDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        schemaId = json['schemaId'] ?? "";
-        schemaName = json['schemaName'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'schemaId': schemaId,
-        'schemaName': schemaName,
-        'databaseIntegrationId': databaseIntegrationId
-    };
-
-    getTypeName() => "SchemaRefDto";
-    TypeContext? context = _ctx;
-}
-
-class CollectionImportDto implements IConvertible
-{
-    // @DataMember
-    String id = "";
-
-    // @DataMember
-    SchemaRefDto? schema;
-
-    // @DataMember
-    FileResourceRefDto? file;
-
-    // @DataMember
-    FileResourceRefDto? errorFile;
-
-    // @DataMember
-    String delimiter = "";
-
-    // @DataMember
-    bool? hasHeader;
-
-    // @DataMember
-    String status = "";
-
-    // @DataMember
-    int totalRows = 0;
-
-    // @DataMember
-    int totalImported = 0;
-
-    // @DataMember
-    int totalErrors = 0;
-
-    // @DataMember
-    String? failureReason;
-
-    // @DataMember
-    List<ImportColumnMappingDto>? mapping;
-
-    // @DataMember
-    DateTime? createdOn;
-
-    // @DataMember
-    DateTime? startedOn;
-
-    // @DataMember
-    DateTime? completedOn;
-
-    CollectionImportDto({this.id="",this.schema,this.file,this.errorFile,this.delimiter="",this.hasHeader,this.status="",this.totalRows=0,this.totalImported=0,this.totalErrors=0,this.failureReason,this.mapping,this.createdOn,this.startedOn,this.completedOn});
-    CollectionImportDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        schema = JsonConverters.fromJson(json['schema'],'SchemaRefDto',context!);
-        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
-        errorFile = JsonConverters.fromJson(json['errorFile'],'FileResourceRefDto',context!);
-        delimiter = json['delimiter'] ?? "";
-        hasHeader = json['hasHeader'];
-        status = json['status'] ?? "";
-        totalRows = json['totalRows'] ?? 0;
-        totalImported = json['totalImported'] ?? 0;
-        totalErrors = json['totalErrors'] ?? 0;
-        failureReason = json['failureReason'];
-        mapping = JsonConverters.fromJson(json['mapping'],'List<ImportColumnMappingDto>',context!);
-        createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
-        startedOn = JsonConverters.fromJson(json['startedOn'],'DateTime',context!);
-        completedOn = JsonConverters.fromJson(json['completedOn'],'DateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'schema': JsonConverters.toJson(schema,'SchemaRefDto',context!),
-        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
-        'errorFile': JsonConverters.toJson(errorFile,'FileResourceRefDto',context!),
-        'delimiter': delimiter,
-        'hasHeader': hasHeader,
-        'status': status,
-        'totalRows': totalRows,
-        'totalImported': totalImported,
-        'totalErrors': totalErrors,
-        'failureReason': failureReason,
-        'mapping': JsonConverters.toJson(mapping,'List<ImportColumnMappingDto>',context!),
-        'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!),
-        'startedOn': JsonConverters.toJson(startedOn,'DateTime',context!),
-        'completedOn': JsonConverters.toJson(completedOn,'DateTime',context!)
-    };
-
-    getTypeName() => "CollectionImportDto";
-    TypeContext? context = _ctx;
-}
-
-class ImportUploadTargetDto implements IConvertible
-{
-    // @DataMember
-    String url = "";
-
-    // @DataMember
-    String contentType = "";
-
-    // @DataMember
-    FileResourceRefDto? file;
-
-    ImportUploadTargetDto({this.url="",this.contentType="",this.file});
-    ImportUploadTargetDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        url = json['url'] ?? "";
-        contentType = json['contentType'] ?? "";
-        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'url': url,
-        'contentType': contentType,
-        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!)
-    };
-
-    getTypeName() => "ImportUploadTargetDto";
-    TypeContext? context = _ctx;
-}
-
-class ImportFileColumnDto implements IConvertible
-{
-    // @DataMember
-    int index = 0;
-
-    // @DataMember
-    String header = "";
-
-    // @DataMember
-    List<String> samples = [];
-
-    // @DataMember
-    String detectedType = "";
-
-    ImportFileColumnDto({this.index=0,this.header="",this.samples=const [],this.detectedType=""});
-    ImportFileColumnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        index = json['index'] ?? 0;
-        header = json['header'] ?? "";
-        samples = JsonConverters.fromJson(json['samples'],'List<String>',context!) ?? [];
-        detectedType = json['detectedType'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'index': index,
-        'header': header,
-        'samples': JsonConverters.toJson(samples,'List<String>',context!),
-        'detectedType': detectedType
-    };
-
-    getTypeName() => "ImportFileColumnDto";
-    TypeContext? context = _ctx;
-}
-
-class ImportFileAnalysisDto implements IConvertible
-{
-    // @DataMember
-    FileResourceRefDto? file;
-
-    // @DataMember
-    List<ImportFileColumnDto> columns = [];
-
-    // @DataMember
-    int sampleRowCount = 0;
-
-    ImportFileAnalysisDto({this.file,this.columns=const [],this.sampleRowCount=0});
-    ImportFileAnalysisDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
-        columns = JsonConverters.fromJson(json['columns'],'List<ImportFileColumnDto>',context!) ?? [];
-        sampleRowCount = json['sampleRowCount'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
-        'columns': JsonConverters.toJson(columns,'List<ImportFileColumnDto>',context!),
-        'sampleRowCount': sampleRowCount
-    };
-
-    getTypeName() => "ImportFileAnalysisDto";
-    TypeContext? context = _ctx;
-}
-
 class MongoDbAggregateListProjection implements IHasViewId, IConvertible
 {
     // @DataMember
@@ -21139,43 +21574,6 @@ class KeylessIntegrationSetupTemplate implements IConvertible
     };
 
     getTypeName() => "KeylessIntegrationSetupTemplate";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PublicFolderDto implements IConvertible
-{
-    // @DataMember(Order=1)
-    String path = "";
-
-    // @DataMember(Order=2)
-    String publicId = "";
-
-    // @DataMember(Order=3)
-    String? publicUrl;
-
-    // @DataMember(Order=4)
-    bool? inherited;
-
-    PublicFolderDto({this.path="",this.publicId="",this.publicUrl,this.inherited});
-    PublicFolderDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        path = json['path'] ?? "";
-        publicId = json['publicId'] ?? "";
-        publicUrl = json['publicUrl'];
-        inherited = json['inherited'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'path': path,
-        'publicId': publicId,
-        'publicUrl': publicUrl,
-        'inherited': inherited
-    };
-
-    getTypeName() => "PublicFolderDto";
     TypeContext? context = _ctx;
 }
 
@@ -21679,799 +22077,6 @@ class EmailLinkPreferencesDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-enum CampaignStatus
-{
-    Pending,
-    Registered,
-    Scheduled,
-    Started,
-    Stopped,
-    Processing,
-    Completed,
-    Failed,
-}
-
-class CampaignStatusChangeEntryDto implements IConvertible
-{
-    DateTime? time;
-    CampaignStatus? status;
-    List<ErrorDto>? errors;
-
-    CampaignStatusChangeEntryDto({this.time,this.status,this.errors});
-    CampaignStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        time = JsonConverters.fromJson(json['time'],'DateTime',context!) ?? DateTime(0);
-        status = JsonConverters.fromJson(json['status'],'CampaignStatus',context!);
-        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'time': JsonConverters.toJson(time,'DateTime',context!),
-        'status': JsonConverters.toJson(status,'CampaignStatus',context!),
-        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
-    };
-
-    getTypeName() => "CampaignStatusChangeEntryDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class CampaignDto implements IHasResponsibleUserId, IHasDatabaseId, IConvertible
-{
-    // @DataMember
-    String viewId = "";
-
-    // @DataMember
-    DateTime? createdOn;
-
-    // @DataMember
-    String language = "";
-
-    // @DataMember
-    bool? forceCampaignLanguage;
-
-    // @DataMember
-    String? campaignProcessingIntegrationId;
-
-    // @DataMember
-    List<CampaignStatusChangeEntryDto> statusHistory = [];
-
-    // @DataMember
-    CampaignStatusChangeEntryDto? status;
-
-    // @DataMember
-    List<TokenMappingDto>? tokenMappingValues;
-
-    // @DataMember
-    String? notes;
-
-    // @DataMember
-    String? createdById;
-
-    // @DataMember
-    String? timeZoneId;
-
-    // @DataMember
-    String userId = "";
-
-    // @DataMember
-    String? id;
-
-    CampaignDto({this.viewId="",this.createdOn,this.language="",this.forceCampaignLanguage,this.campaignProcessingIntegrationId,this.statusHistory=const [],this.status,this.tokenMappingValues,this.notes,this.createdById,this.timeZoneId,this.userId="",this.id});
-    CampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        viewId = json['viewId'] ?? "";
-        createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
-        language = json['language'] ?? "";
-        forceCampaignLanguage = json['forceCampaignLanguage'];
-        campaignProcessingIntegrationId = json['campaignProcessingIntegrationId'];
-        statusHistory = JsonConverters.fromJson(json['statusHistory'],'List<CampaignStatusChangeEntryDto>',context!) ?? [];
-        status = JsonConverters.fromJson(json['status'],'CampaignStatusChangeEntryDto',context!);
-        tokenMappingValues = JsonConverters.fromJson(json['tokenMappingValues'],'List<TokenMappingDto>',context!);
-        notes = json['notes'];
-        createdById = json['createdById'];
-        timeZoneId = json['timeZoneId'];
-        userId = json['userId'] ?? "";
-        id = json['id'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'viewId': viewId,
-        'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!),
-        'language': language,
-        'forceCampaignLanguage': forceCampaignLanguage,
-        'campaignProcessingIntegrationId': campaignProcessingIntegrationId,
-        'statusHistory': JsonConverters.toJson(statusHistory,'List<CampaignStatusChangeEntryDto>',context!),
-        'status': JsonConverters.toJson(status,'CampaignStatusChangeEntryDto',context!),
-        'tokenMappingValues': JsonConverters.toJson(tokenMappingValues,'List<TokenMappingDto>',context!),
-        'notes': notes,
-        'createdById': createdById,
-        'timeZoneId': timeZoneId,
-        'userId': userId,
-        'id': id
-    };
-
-    getTypeName() => "CampaignDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailCampaignDto extends CampaignDto implements IConvertible
-{
-    // @DataMember
-    EmailCampaignDeliverySettingsDto? deliverySettings;
-
-    // @DataMember
-    EmailTemplateDto? template;
-
-    // @DataMember
-    String? validationIntegrationId;
-
-    // @DataMember
-    bool? templateIsSystem;
-
-    EmailCampaignDto({this.deliverySettings,this.template,this.validationIntegrationId,this.templateIsSystem});
-    EmailCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'EmailCampaignDeliverySettingsDto',context!);
-        template = JsonConverters.fromJson(json['template'],'EmailTemplateDto',context!);
-        validationIntegrationId = json['validationIntegrationId'];
-        templateIsSystem = json['templateIsSystem'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'deliverySettings': JsonConverters.toJson(deliverySettings,'EmailCampaignDeliverySettingsDto',context!),
-        'template': JsonConverters.toJson(template,'EmailTemplateDto',context!),
-        'validationIntegrationId': validationIntegrationId,
-        'templateIsSystem': templateIsSystem
-    });
-
-    getTypeName() => "EmailCampaignDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailCampaignListProjection implements IConvertible
-{
-    // @DataMember
-    String viewId = "";
-
-    // @DataMember
-    String templateName = "";
-
-    // @DataMember
-    String templateId = "";
-
-    // @DataMember
-    String? integrationId;
-
-    // @DataMember
-    String language = "";
-
-    // @DataMember
-    String strategy = "";
-
-    // @DataMember
-    CampaignStatus? latestStatus;
-
-    // @DataMember
-    DateTime? createdOn;
-
-    EmailCampaignListProjection({this.viewId="",this.templateName="",this.templateId="",this.integrationId,this.language="",this.strategy="",this.latestStatus,this.createdOn});
-    EmailCampaignListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        viewId = json['viewId'] ?? "";
-        templateName = json['templateName'] ?? "";
-        templateId = json['templateId'] ?? "";
-        integrationId = json['integrationId'];
-        language = json['language'] ?? "";
-        strategy = json['strategy'] ?? "";
-        latestStatus = JsonConverters.fromJson(json['latestStatus'],'CampaignStatus',context!);
-        createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'viewId': viewId,
-        'templateName': templateName,
-        'templateId': templateId,
-        'integrationId': integrationId,
-        'language': language,
-        'strategy': strategy,
-        'latestStatus': JsonConverters.toJson(latestStatus,'CampaignStatus',context!),
-        'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!)
-    };
-
-    getTypeName() => "EmailCampaignListProjection";
-    TypeContext? context = _ctx;
-}
-
-enum CampaignBatchStatus
-{
-    Registered,
-    Processing,
-    Completed,
-    Failed,
-}
-
-class BatchStatusChangeEntryDto implements IConvertible
-{
-    DateTime? time;
-    CampaignBatchStatus? status;
-    List<ErrorDto>? errors;
-
-    BatchStatusChangeEntryDto({this.time,this.status,this.errors});
-    BatchStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        time = JsonConverters.fromJson(json['time'],'DateTime',context!) ?? DateTime(0);
-        status = JsonConverters.fromJson(json['status'],'CampaignBatchStatus',context!);
-        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'time': JsonConverters.toJson(time,'DateTime',context!),
-        'status': JsonConverters.toJson(status,'CampaignBatchStatus',context!),
-        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
-    };
-
-    getTypeName() => "BatchStatusChangeEntryDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class CampaignBatchDto implements IHasDatabaseId, IConvertible
-{
-    // @DataMember
-    String campaignId = "";
-
-    // @DataMember
-    String batchId = "";
-
-    // @DataMember
-    String? startAfter;
-
-    // @DataMember
-    List<BatchStatusChangeEntryDto> statusHistory = [];
-
-    // @DataMember
-    String id = "";
-
-    CampaignBatchDto({this.campaignId="",this.batchId="",this.startAfter,this.statusHistory=const [],this.id=""});
-    CampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = json['campaignId'] ?? "";
-        batchId = json['batchId'] ?? "";
-        startAfter = json['startAfter'];
-        statusHistory = JsonConverters.fromJson(json['statusHistory'],'List<BatchStatusChangeEntryDto>',context!) ?? [];
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': campaignId,
-        'batchId': batchId,
-        'startAfter': startAfter,
-        'statusHistory': JsonConverters.toJson(statusHistory,'List<BatchStatusChangeEntryDto>',context!),
-        'id': id
-    };
-
-    getTypeName() => "CampaignBatchDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailRecipientDto implements IConvertible
-{
-    // @DataMember
-    String emailAddress = "";
-
-    // @DataMember
-    String? language;
-
-    // @DataMember
-    String? timeZoneId;
-
-    // @DataMember
-    List<TokenMappingDto>? userTokenMappings;
-
-    EmailRecipientDto({this.emailAddress="",this.language,this.timeZoneId,this.userTokenMappings});
-    EmailRecipientDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        emailAddress = json['emailAddress'] ?? "";
-        language = json['language'];
-        timeZoneId = json['timeZoneId'];
-        userTokenMappings = JsonConverters.fromJson(json['userTokenMappings'],'List<TokenMappingDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'emailAddress': emailAddress,
-        'language': language,
-        'timeZoneId': timeZoneId,
-        'userTokenMappings': JsonConverters.toJson(userTokenMappings,'List<TokenMappingDto>',context!)
-    };
-
-    getTypeName() => "EmailRecipientDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailRecipientsDto implements IConvertible
-{
-    // @DataMember
-    List<EmailRecipientDto>? to;
-
-    // @DataMember
-    List<EmailRecipientDto>? cc;
-
-    // @DataMember
-    List<EmailRecipientDto>? bcc;
-
-    // @DataMember
-    String? startingAfter;
-
-    // @DataMember
-    bool? hasMore;
-
-    EmailRecipientsDto({this.to,this.cc,this.bcc,this.startingAfter,this.hasMore});
-    EmailRecipientsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        to = JsonConverters.fromJson(json['to'],'List<EmailRecipientDto>',context!);
-        cc = JsonConverters.fromJson(json['cc'],'List<EmailRecipientDto>',context!);
-        bcc = JsonConverters.fromJson(json['bcc'],'List<EmailRecipientDto>',context!);
-        startingAfter = json['startingAfter'];
-        hasMore = json['hasMore'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'to': JsonConverters.toJson(to,'List<EmailRecipientDto>',context!),
-        'cc': JsonConverters.toJson(cc,'List<EmailRecipientDto>',context!),
-        'bcc': JsonConverters.toJson(bcc,'List<EmailRecipientDto>',context!),
-        'startingAfter': startingAfter,
-        'hasMore': hasMore
-    };
-
-    getTypeName() => "EmailRecipientsDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailCampaignBatchDto extends CampaignBatchDto implements IConvertible
-{
-    // @DataMember
-    EmailRecipientsDto? recipients;
-
-    EmailCampaignBatchDto({this.recipients});
-    EmailCampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        recipients = JsonConverters.fromJson(json['recipients'],'EmailRecipientsDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'recipients': JsonConverters.toJson(recipients,'EmailRecipientsDto',context!)
-    });
-
-    getTypeName() => "EmailCampaignBatchDto";
-    TypeContext? context = _ctx;
-}
-
-enum CampaignNotificationStatus
-{
-    Completed,
-    BlockedByUserPreferenceBlockAll,
-    BlockedByUserPreferenceBlockByTag,
-    Failed,
-    Viewed,
-    Clicked,
-    BlockedByValidation,
-}
-
-class NotificationStatusChangeEntryDto implements IConvertible
-{
-    DateTime? time;
-    CampaignNotificationStatus? status;
-    String? sourceId;
-    List<ErrorDto>? errors;
-    List<String>? tags;
-
-    NotificationStatusChangeEntryDto({this.time,this.status,this.sourceId,this.errors,this.tags});
-    NotificationStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        time = JsonConverters.fromJson(json['time'],'DateTime',context!) ?? DateTime(0);
-        status = JsonConverters.fromJson(json['status'],'CampaignNotificationStatus',context!);
-        sourceId = json['sourceId'];
-        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
-        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'time': JsonConverters.toJson(time,'DateTime',context!),
-        'status': JsonConverters.toJson(status,'CampaignNotificationStatus',context!),
-        'sourceId': sourceId,
-        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!),
-        'tags': JsonConverters.toJson(tags,'List<String>',context!)
-    };
-
-    getTypeName() => "NotificationStatusChangeEntryDto";
-    TypeContext? context = _ctx;
-}
-
-enum NotificationDeliveryState
-{
-    Pending,
-    Sending,
-    Retrying,
-    Accepted,
-    Failed,
-    Blocked,
-    Cancelled,
-}
-
-enum NotificationAttemptOutcome
-{
-    Accepted,
-    Failed,
-}
-
-enum SendErrorCategory
-{
-    Unknown,
-    Transient,
-    Permanent,
-    Ambiguous,
-}
-
-enum NotificationAttemptTrigger
-{
-    Initial,
-    AutoRetry,
-    ManualRetry,
-}
-
-// @DataContract
-class NotificationAttemptDto implements IConvertible
-{
-    // @DataMember
-    String attemptId = "";
-
-    // @DataMember
-    int number = 0;
-
-    // @DataMember
-    DateTime? startedAt;
-
-    // @DataMember
-    DateTime? finishedAt;
-
-    // @DataMember
-    NotificationAttemptOutcome? outcome;
-
-    // @DataMember
-    SendErrorCategory? category;
-
-    // @DataMember
-    int? statusCode;
-
-    // @DataMember
-    String? errorCode;
-
-    // @DataMember
-    String? message;
-
-    // @DataMember
-    String? providerRef;
-
-    // @DataMember
-    int? retryAfterSeconds;
-
-    // @DataMember
-    bool? exhausted;
-
-    // @DataMember
-    DateTime? nextRetryAt;
-
-    // @DataMember
-    String? correlationId;
-
-    // @DataMember
-    NotificationAttemptTrigger? trigger;
-
-    // @DataMember
-    String? retryRequestId;
-
-    NotificationAttemptDto({this.attemptId="",this.number=0,this.startedAt,this.finishedAt,this.outcome,this.category,this.statusCode,this.errorCode,this.message,this.providerRef,this.retryAfterSeconds,this.exhausted,this.nextRetryAt,this.correlationId,this.trigger,this.retryRequestId});
-    NotificationAttemptDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        attemptId = json['attemptId'] ?? "";
-        number = json['number'] ?? 0;
-        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
-        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
-        outcome = JsonConverters.fromJson(json['outcome'],'NotificationAttemptOutcome',context!);
-        category = JsonConverters.fromJson(json['category'],'SendErrorCategory',context!);
-        statusCode = json['statusCode'];
-        errorCode = json['errorCode'];
-        message = json['message'];
-        providerRef = json['providerRef'];
-        retryAfterSeconds = json['retryAfterSeconds'];
-        exhausted = json['exhausted'];
-        nextRetryAt = JsonConverters.fromJson(json['nextRetryAt'],'DateTime',context!);
-        correlationId = json['correlationId'];
-        trigger = JsonConverters.fromJson(json['trigger'],'NotificationAttemptTrigger',context!);
-        retryRequestId = json['retryRequestId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'attemptId': attemptId,
-        'number': number,
-        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
-        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
-        'outcome': JsonConverters.toJson(outcome,'NotificationAttemptOutcome',context!),
-        'category': JsonConverters.toJson(category,'SendErrorCategory',context!),
-        'statusCode': statusCode,
-        'errorCode': errorCode,
-        'message': message,
-        'providerRef': providerRef,
-        'retryAfterSeconds': retryAfterSeconds,
-        'exhausted': exhausted,
-        'nextRetryAt': JsonConverters.toJson(nextRetryAt,'DateTime',context!),
-        'correlationId': correlationId,
-        'trigger': JsonConverters.toJson(trigger,'NotificationAttemptTrigger',context!),
-        'retryRequestId': retryRequestId
-    };
-
-    getTypeName() => "NotificationAttemptDto";
-    TypeContext? context = _ctx;
-}
-
-enum DeliveryEventOutcome
-{
-    Delivered,
-    Bounced,
-    Complained,
-    Rejected,
-    Deferred,
-}
-
-// @DataContract
-class NotificationDeliveryEventDto implements IConvertible
-{
-    // @DataMember
-    String? eventId;
-
-    // @DataMember
-    DeliveryEventOutcome? outcome;
-
-    // @DataMember
-    DateTime? at;
-
-    // @DataMember
-    String provider = "";
-
-    // @DataMember
-    String? providerRef;
-
-    // @DataMember
-    String? reason;
-
-    NotificationDeliveryEventDto({this.eventId,this.outcome,this.at,this.provider="",this.providerRef,this.reason});
-    NotificationDeliveryEventDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        eventId = json['eventId'];
-        outcome = JsonConverters.fromJson(json['outcome'],'DeliveryEventOutcome',context!);
-        at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
-        provider = json['provider'] ?? "";
-        providerRef = json['providerRef'];
-        reason = json['reason'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'eventId': eventId,
-        'outcome': JsonConverters.toJson(outcome,'DeliveryEventOutcome',context!),
-        'at': JsonConverters.toJson(at,'DateTime',context!),
-        'provider': provider,
-        'providerRef': providerRef,
-        'reason': reason
-    };
-
-    getTypeName() => "NotificationDeliveryEventDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
-{
-    // @DataMember
-    String campaignId = "";
-
-    // @DataMember
-    String batchId = "";
-
-    // @DataMember
-    String notificationId = "";
-
-    // @DataMember
-    String? refNotificationId;
-
-    // @DataMember
-    String? body;
-
-    // @DataMember
-    Map<String,String?>? model;
-
-    // @DataMember
-    List<NotificationStatusChangeEntryDto> statusHistory = [];
-
-    // @DataMember
-    NotificationDeliveryState? state;
-
-    // @DataMember
-    DateTime? stateChangedAt;
-
-    // @DataMember
-    List<NotificationAttemptDto>? attempts;
-
-    // @DataMember
-    List<NotificationDeliveryEventDto>? deliveryEvents;
-
-    // @DataMember
-    DeliveryEventOutcome? deliveryOutcome;
-
-    // @DataMember
-    int? deliveryOutcomeRank;
-
-    // @DataMember
-    String id = "";
-
-    CampaignBatchNotificationDto({this.campaignId="",this.batchId="",this.notificationId="",this.refNotificationId,this.body,this.model,this.statusHistory=const [],this.state,this.stateChangedAt,this.attempts,this.deliveryEvents,this.deliveryOutcome,this.deliveryOutcomeRank,this.id=""});
-    CampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        campaignId = json['campaignId'] ?? "";
-        batchId = json['batchId'] ?? "";
-        notificationId = json['notificationId'] ?? "";
-        refNotificationId = json['refNotificationId'];
-        body = json['body'];
-        model = JsonConverters.toStringMap(json['model']);
-        statusHistory = JsonConverters.fromJson(json['statusHistory'],'List<NotificationStatusChangeEntryDto>',context!) ?? [];
-        state = JsonConverters.fromJson(json['state'],'NotificationDeliveryState',context!);
-        stateChangedAt = JsonConverters.fromJson(json['stateChangedAt'],'DateTime',context!);
-        attempts = JsonConverters.fromJson(json['attempts'],'List<NotificationAttemptDto>',context!);
-        deliveryEvents = JsonConverters.fromJson(json['deliveryEvents'],'List<NotificationDeliveryEventDto>',context!);
-        deliveryOutcome = JsonConverters.fromJson(json['deliveryOutcome'],'DeliveryEventOutcome',context!);
-        deliveryOutcomeRank = json['deliveryOutcomeRank'];
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'campaignId': campaignId,
-        'batchId': batchId,
-        'notificationId': notificationId,
-        'refNotificationId': refNotificationId,
-        'body': body,
-        'model': model,
-        'statusHistory': JsonConverters.toJson(statusHistory,'List<NotificationStatusChangeEntryDto>',context!),
-        'state': JsonConverters.toJson(state,'NotificationDeliveryState',context!),
-        'stateChangedAt': JsonConverters.toJson(stateChangedAt,'DateTime',context!),
-        'attempts': JsonConverters.toJson(attempts,'List<NotificationAttemptDto>',context!),
-        'deliveryEvents': JsonConverters.toJson(deliveryEvents,'List<NotificationDeliveryEventDto>',context!),
-        'deliveryOutcome': JsonConverters.toJson(deliveryOutcome,'DeliveryEventOutcome',context!),
-        'deliveryOutcomeRank': deliveryOutcomeRank,
-        'id': id
-    };
-
-    getTypeName() => "CampaignBatchNotificationDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
-{
-    // @DataMember
-    String? subject;
-
-    // @DataMember
-    EmailRecipientsDto? recipients;
-
-    // @DataMember
-    EmailMessageContentDto? content;
-
-    // @DataMember
-    String? transactionalKind;
-
-    EmailCampaignBatchNotificationDto({this.subject,this.recipients,this.content,this.transactionalKind});
-    EmailCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        subject = json['subject'];
-        recipients = JsonConverters.fromJson(json['recipients'],'EmailRecipientsDto',context!);
-        content = JsonConverters.fromJson(json['content'],'EmailMessageContentDto',context!);
-        transactionalKind = json['transactionalKind'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'subject': subject,
-        'recipients': JsonConverters.toJson(recipients,'EmailRecipientsDto',context!),
-        'content': JsonConverters.toJson(content,'EmailMessageContentDto',context!),
-        'transactionalKind': transactionalKind
-    });
-
-    getTypeName() => "EmailCampaignBatchNotificationDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class CampaignStatsDto implements IConvertible
-{
-    // @DataMember
-    int batches = 0;
-
-    // @DataMember
-    int sent = 0;
-
-    // @DataMember
-    int failed = 0;
-
-    // @DataMember
-    int failedRetryable = 0;
-
-    // @DataMember
-    int cancelled = 0;
-
-    // @DataMember
-    double successRate = 0;
-
-    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.failedRetryable=0,this.cancelled=0,this.successRate=0});
-    CampaignStatsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        batches = json['batches'] ?? 0;
-        sent = json['sent'] ?? 0;
-        failed = json['failed'] ?? 0;
-        failedRetryable = json['failedRetryable'] ?? 0;
-        cancelled = json['cancelled'] ?? 0;
-        successRate = JsonConverters.toDouble(json['successRate']) ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'batches': batches,
-        'sent': sent,
-        'failed': failed,
-        'failedRetryable': failedRetryable,
-        'cancelled': cancelled,
-        'successRate': successRate
-    };
-
-    getTypeName() => "CampaignStatsDto";
-    TypeContext? context = _ctx;
-}
-
 // @DataContract
 class SmsTemplateListProjection extends TemplateListProjection implements IConvertible
 {
@@ -22527,164 +22132,6 @@ class SmsIntegrationListProjection extends IntegrationListProjection implements 
     });
 
     getTypeName() => "SmsIntegrationListProjection";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class SmsCampaignDto extends CampaignDto implements IConvertible
-{
-    // @DataMember
-    SmsCampaignDeliverySettingsDto? recipients;
-
-    // @DataMember
-    SmsTemplateDto? template;
-
-    SmsCampaignDto({this.recipients,this.template});
-    SmsCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        recipients = JsonConverters.fromJson(json['recipients'],'SmsCampaignDeliverySettingsDto',context!);
-        template = JsonConverters.fromJson(json['template'],'SmsTemplateDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'recipients': JsonConverters.toJson(recipients,'SmsCampaignDeliverySettingsDto',context!),
-        'template': JsonConverters.toJson(template,'SmsTemplateDto',context!)
-    });
-
-    getTypeName() => "SmsCampaignDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class SmsRecipientDto implements IConvertible
-{
-    // @DataMember
-    String phoneNumber = "";
-
-    // @DataMember
-    String userId = "";
-
-    // @DataMember
-    String? language;
-
-    // @DataMember
-    List<TokenMappingDto>? userTokenMappings;
-
-    // @DataMember
-    String? timeZoneId;
-
-    // @DataMember
-    String? record;
-
-    SmsRecipientDto({this.phoneNumber="",this.userId="",this.language,this.userTokenMappings,this.timeZoneId,this.record});
-    SmsRecipientDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        phoneNumber = json['phoneNumber'] ?? "";
-        userId = json['userId'] ?? "";
-        language = json['language'];
-        userTokenMappings = JsonConverters.fromJson(json['userTokenMappings'],'List<TokenMappingDto>',context!);
-        timeZoneId = json['timeZoneId'];
-        record = json['record'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'phoneNumber': phoneNumber,
-        'userId': userId,
-        'language': language,
-        'userTokenMappings': JsonConverters.toJson(userTokenMappings,'List<TokenMappingDto>',context!),
-        'timeZoneId': timeZoneId,
-        'record': record
-    };
-
-    getTypeName() => "SmsRecipientDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class SmsRecipientsDto implements IConvertible
-{
-    // @DataMember
-    List<SmsRecipientDto>? to;
-
-    // @DataMember
-    String? startingAfter;
-
-    // @DataMember
-    bool? hasMore;
-
-    SmsRecipientsDto({this.to,this.startingAfter,this.hasMore});
-    SmsRecipientsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        to = JsonConverters.fromJson(json['to'],'List<SmsRecipientDto>',context!);
-        startingAfter = json['startingAfter'];
-        hasMore = json['hasMore'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'to': JsonConverters.toJson(to,'List<SmsRecipientDto>',context!),
-        'startingAfter': startingAfter,
-        'hasMore': hasMore
-    };
-
-    getTypeName() => "SmsRecipientsDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class SmsCampaignBatchDto extends CampaignBatchDto implements IConvertible
-{
-    // @DataMember
-    SmsRecipientsDto? recipients;
-
-    SmsCampaignBatchDto({this.recipients});
-    SmsCampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        recipients = JsonConverters.fromJson(json['recipients'],'SmsRecipientsDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'recipients': JsonConverters.toJson(recipients,'SmsRecipientsDto',context!)
-    });
-
-    getTypeName() => "SmsCampaignBatchDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class SmsCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
-{
-    // @DataMember
-    SmsRecipientsDto? recipients;
-
-    // @DataMember
-    SmsMessageContentDto? content;
-
-    SmsCampaignBatchNotificationDto({this.recipients,this.content});
-    SmsCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        recipients = JsonConverters.fromJson(json['recipients'],'SmsRecipientsDto',context!);
-        content = JsonConverters.fromJson(json['content'],'SmsMessageContentDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'recipients': JsonConverters.toJson(recipients,'SmsRecipientsDto',context!),
-        'content': JsonConverters.toJson(content,'SmsMessageContentDto',context!)
-    });
-
-    getTypeName() => "SmsCampaignBatchNotificationDto";
     TypeContext? context = _ctx;
 }
 
@@ -23164,70 +22611,6 @@ class WorkflowSchemaDto implements IConvertible
 }
 
 // @DataContract
-class WorkflowRunErrorDto implements IConvertible
-{
-    // @DataMember
-    String? code;
-
-    // @DataMember
-    String? stepId;
-
-    // @DataMember
-    String? reason;
-
-    // @DataMember
-    String? message;
-
-    WorkflowRunErrorDto({this.code,this.stepId,this.reason,this.message});
-    WorkflowRunErrorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        code = json['code'];
-        stepId = json['stepId'];
-        reason = json['reason'];
-        message = json['message'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'code': code,
-        'stepId': stepId,
-        'reason': reason,
-        'message': message
-    };
-
-    getTypeName() => "WorkflowRunErrorDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class WorkflowRunActorDto implements IConvertible
-{
-    // @DataMember
-    String? userId;
-
-    // @DataMember
-    String kind = "";
-
-    WorkflowRunActorDto({this.userId,this.kind=""});
-    WorkflowRunActorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        userId = json['userId'];
-        kind = json['kind'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'userId': userId,
-        'kind': kind
-    };
-
-    getTypeName() => "WorkflowRunActorDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
 class WorkflowWaitingOnDto implements IConvertible
 {
     // @DataMember
@@ -23412,6 +22795,12 @@ class WorkflowRunDto implements IConvertible
     String? executionIdentityId;
 
     // @DataMember
+    String? executionIdentityName;
+
+    // @DataMember
+    bool? executionIdentityIsDefault;
+
+    // @DataMember
     DateTime? startedAt;
 
     // @DataMember
@@ -23441,7 +22830,7 @@ class WorkflowRunDto implements IConvertible
     // @DataMember
     Map<String,dynamic?>? trigger;
 
-    WorkflowRunDto({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedBy,this.triggerId,this.taskId,this.parentRunId,this.depth=0,this.env="",this.correlationId,this.executionIdentityId,this.startedAt,this.finishedAt,this.durationMs,this.waitingOn=const [],this.error,this.output,this.stepRuns=0,this.steps=const [],this.request,this.trigger});
+    WorkflowRunDto({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedBy,this.triggerId,this.taskId,this.parentRunId,this.depth=0,this.env="",this.correlationId,this.executionIdentityId,this.executionIdentityName,this.executionIdentityIsDefault,this.startedAt,this.finishedAt,this.durationMs,this.waitingOn=const [],this.error,this.output,this.stepRuns=0,this.steps=const [],this.request,this.trigger});
     WorkflowRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -23459,6 +22848,8 @@ class WorkflowRunDto implements IConvertible
         env = json['env'] ?? "";
         correlationId = json['correlationId'];
         executionIdentityId = json['executionIdentityId'];
+        executionIdentityName = json['executionIdentityName'];
+        executionIdentityIsDefault = json['executionIdentityIsDefault'];
         startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
         finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
         durationMs = json['durationMs'];
@@ -23487,6 +22878,8 @@ class WorkflowRunDto implements IConvertible
         'env': env,
         'correlationId': correlationId,
         'executionIdentityId': executionIdentityId,
+        'executionIdentityName': executionIdentityName,
+        'executionIdentityIsDefault': executionIdentityIsDefault,
         'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
         'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
         'durationMs': durationMs,
@@ -23500,165 +22893,6 @@ class WorkflowRunDto implements IConvertible
     };
 
     getTypeName() => "WorkflowRunDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class WorkflowRunListProjection implements IConvertible
-{
-    // @DataMember
-    String runId = "";
-
-    // @DataMember
-    String workflowId = "";
-
-    // @DataMember
-    int? version;
-
-    // @DataMember
-    bool? isDraft;
-
-    // @DataMember
-    String status = "";
-
-    // @DataMember
-    String source = "";
-
-    // @DataMember
-    DateTime? startedAt;
-
-    // @DataMember
-    DateTime? finishedAt;
-
-    // @DataMember
-    int? durationMs;
-
-    // @DataMember
-    List<String> currentStepIds = [];
-
-    // @DataMember
-    List<WorkflowWaitingOnDto> waitingOn = [];
-
-    // @DataMember
-    WorkflowRunErrorDto? error;
-
-    WorkflowRunListProjection({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedAt,this.finishedAt,this.durationMs,this.currentStepIds=const [],this.waitingOn=const [],this.error});
-    WorkflowRunListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        runId = json['runId'] ?? "";
-        workflowId = json['workflowId'] ?? "";
-        version = json['version'];
-        isDraft = json['isDraft'];
-        status = json['status'] ?? "";
-        source = json['source'] ?? "";
-        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
-        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
-        durationMs = json['durationMs'];
-        currentStepIds = JsonConverters.fromJson(json['currentStepIds'],'List<String>',context!) ?? [];
-        waitingOn = JsonConverters.fromJson(json['waitingOn'],'List<WorkflowWaitingOnDto>',context!) ?? [];
-        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'runId': runId,
-        'workflowId': workflowId,
-        'version': version,
-        'isDraft': isDraft,
-        'status': status,
-        'source': source,
-        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
-        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
-        'durationMs': durationMs,
-        'currentStepIds': JsonConverters.toJson(currentStepIds,'List<String>',context!),
-        'waitingOn': JsonConverters.toJson(waitingOn,'List<WorkflowWaitingOnDto>',context!),
-        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!)
-    };
-
-    getTypeName() => "WorkflowRunListProjection";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class TenantLogEntryDto implements IConvertible
-{
-    // @DataMember
-    String id = "";
-
-    // @DataMember
-    DateTime? timestamp;
-
-    // @DataMember
-    String module = "";
-
-    // @DataMember
-    String level = "";
-
-    // @DataMember
-    String eventCode = "";
-
-    // @DataMember
-    String title = "";
-
-    // @DataMember
-    String message = "";
-
-    // @DataMember
-    String? correlationId;
-
-    // @DataMember
-    String? traceId;
-
-    // @DataMember
-    String? spanId;
-
-    // @DataMember
-    String env = "";
-
-    // @DataMember
-    String origin = "";
-
-    // @DataMember
-    IReadOnlyDictionary<String,String>? meta;
-
-    TenantLogEntryDto({this.id="",this.timestamp,this.module="",this.level="",this.eventCode="",this.title="",this.message="",this.correlationId,this.traceId,this.spanId,this.env="",this.origin="",this.meta});
-    TenantLogEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        timestamp = JsonConverters.fromJson(json['timestamp'],'DateTime',context!) ?? DateTime(0);
-        module = json['module'] ?? "";
-        level = json['level'] ?? "";
-        eventCode = json['eventCode'] ?? "";
-        title = json['title'] ?? "";
-        message = json['message'] ?? "";
-        correlationId = json['correlationId'];
-        traceId = json['traceId'];
-        spanId = json['spanId'];
-        env = json['env'] ?? "";
-        origin = json['origin'] ?? "";
-        meta = JsonConverters.fromJson(json['meta'],'IReadOnlyDictionary<String,String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'timestamp': JsonConverters.toJson(timestamp,'DateTime',context!),
-        'module': module,
-        'level': level,
-        'eventCode': eventCode,
-        'title': title,
-        'message': message,
-        'correlationId': correlationId,
-        'traceId': traceId,
-        'spanId': spanId,
-        'env': env,
-        'origin': origin,
-        'meta': JsonConverters.toJson(meta,'IReadOnlyDictionary<String,String>',context!)
-    };
-
-    getTypeName() => "TenantLogEntryDto";
     TypeContext? context = _ctx;
 }
 
@@ -24431,7 +23665,19 @@ class CodeFunctionRunDto implements IConvertible
     // @DataMember
     String? input;
 
-    CodeFunctionRunDto({this.firedAt,this.event="",this.source="",this.succeeded,this.statusCode,this.durationMs,this.error,this.requestId,this.input});
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    String? executionIdentityName;
+
+    // @DataMember
+    bool? executionIdentityIsDefault;
+
+    // @DataMember
+    String? triggerRunId;
+
+    CodeFunctionRunDto({this.firedAt,this.event="",this.source="",this.succeeded,this.statusCode,this.durationMs,this.error,this.requestId,this.input,this.executionIdentityId,this.executionIdentityName,this.executionIdentityIsDefault,this.triggerRunId});
     CodeFunctionRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -24444,6 +23690,10 @@ class CodeFunctionRunDto implements IConvertible
         error = json['error'];
         requestId = json['requestId'];
         input = json['input'];
+        executionIdentityId = json['executionIdentityId'];
+        executionIdentityName = json['executionIdentityName'];
+        executionIdentityIsDefault = json['executionIdentityIsDefault'];
+        triggerRunId = json['triggerRunId'];
         return this;
     }
 
@@ -24456,10 +23706,193 @@ class CodeFunctionRunDto implements IConvertible
         'durationMs': durationMs,
         'error': error,
         'requestId': requestId,
-        'input': input
+        'input': input,
+        'executionIdentityId': executionIdentityId,
+        'executionIdentityName': executionIdentityName,
+        'executionIdentityIsDefault': executionIdentityIsDefault,
+        'triggerRunId': triggerRunId
     };
 
     getTypeName() => "CodeFunctionRunDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunListProjection implements IConvertible
+{
+    // @DataMember
+    String runId = "";
+
+    // @DataMember
+    String workflowId = "";
+
+    // @DataMember
+    int? version;
+
+    // @DataMember
+    bool? isDraft;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    String source = "";
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    WorkflowRunActorDto? startedBy;
+
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    String? executionIdentityName;
+
+    // @DataMember
+    bool? executionIdentityIsDefault;
+
+    // @DataMember
+    List<String> currentStepIds = [];
+
+    // @DataMember
+    List<WorkflowWaitingOnDto> waitingOn = [];
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    WorkflowRunListProjection({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedAt,this.finishedAt,this.durationMs,this.startedBy,this.executionIdentityId,this.executionIdentityName,this.executionIdentityIsDefault,this.currentStepIds=const [],this.waitingOn=const [],this.error});
+    WorkflowRunListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        runId = json['runId'] ?? "";
+        workflowId = json['workflowId'] ?? "";
+        version = json['version'];
+        isDraft = json['isDraft'];
+        status = json['status'] ?? "";
+        source = json['source'] ?? "";
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        durationMs = json['durationMs'];
+        startedBy = JsonConverters.fromJson(json['startedBy'],'WorkflowRunActorDto',context!);
+        executionIdentityId = json['executionIdentityId'];
+        executionIdentityName = json['executionIdentityName'];
+        executionIdentityIsDefault = json['executionIdentityIsDefault'];
+        currentStepIds = JsonConverters.fromJson(json['currentStepIds'],'List<String>',context!) ?? [];
+        waitingOn = JsonConverters.fromJson(json['waitingOn'],'List<WorkflowWaitingOnDto>',context!) ?? [];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'runId': runId,
+        'workflowId': workflowId,
+        'version': version,
+        'isDraft': isDraft,
+        'status': status,
+        'source': source,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'durationMs': durationMs,
+        'startedBy': JsonConverters.toJson(startedBy,'WorkflowRunActorDto',context!),
+        'executionIdentityId': executionIdentityId,
+        'executionIdentityName': executionIdentityName,
+        'executionIdentityIsDefault': executionIdentityIsDefault,
+        'currentStepIds': JsonConverters.toJson(currentStepIds,'List<String>',context!),
+        'waitingOn': JsonConverters.toJson(waitingOn,'List<WorkflowWaitingOnDto>',context!),
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!)
+    };
+
+    getTypeName() => "WorkflowRunListProjection";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TenantLogEntryDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    DateTime? timestamp;
+
+    // @DataMember
+    String module = "";
+
+    // @DataMember
+    String level = "";
+
+    // @DataMember
+    String eventCode = "";
+
+    // @DataMember
+    String title = "";
+
+    // @DataMember
+    String message = "";
+
+    // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    String? traceId;
+
+    // @DataMember
+    String? spanId;
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String origin = "";
+
+    // @DataMember
+    IReadOnlyDictionary<String,String>? meta;
+
+    TenantLogEntryDto({this.id="",this.timestamp,this.module="",this.level="",this.eventCode="",this.title="",this.message="",this.correlationId,this.traceId,this.spanId,this.env="",this.origin="",this.meta});
+    TenantLogEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        timestamp = JsonConverters.fromJson(json['timestamp'],'DateTime',context!) ?? DateTime(0);
+        module = json['module'] ?? "";
+        level = json['level'] ?? "";
+        eventCode = json['eventCode'] ?? "";
+        title = json['title'] ?? "";
+        message = json['message'] ?? "";
+        correlationId = json['correlationId'];
+        traceId = json['traceId'];
+        spanId = json['spanId'];
+        env = json['env'] ?? "";
+        origin = json['origin'] ?? "";
+        meta = JsonConverters.fromJson(json['meta'],'IReadOnlyDictionary<String,String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'timestamp': JsonConverters.toJson(timestamp,'DateTime',context!),
+        'module': module,
+        'level': level,
+        'eventCode': eventCode,
+        'title': title,
+        'message': message,
+        'correlationId': correlationId,
+        'traceId': traceId,
+        'spanId': spanId,
+        'env': env,
+        'origin': origin,
+        'meta': JsonConverters.toJson(meta,'IReadOnlyDictionary<String,String>',context!)
+    };
+
+    getTypeName() => "TenantLogEntryDto";
     TypeContext? context = _ctx;
 }
 
@@ -24668,238 +24101,6 @@ class TeamPushDeviceListProjection extends PushDeviceListProjection implements I
     });
 
     getTypeName() => "TeamPushDeviceListProjection";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushAudienceCountDto implements IConvertible
-{
-    // @DataMember
-    int devices = 0;
-
-    // @DataMember
-    int recipients = 0;
-
-    // @DataMember
-    int skippedUserIds = 0;
-
-    // @DataMember
-    bool? isCapped;
-
-    PushAudienceCountDto({this.devices=0,this.recipients=0,this.skippedUserIds=0,this.isCapped});
-    PushAudienceCountDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        devices = json['devices'] ?? 0;
-        recipients = json['recipients'] ?? 0;
-        skippedUserIds = json['skippedUserIds'] ?? 0;
-        isCapped = json['isCapped'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'devices': devices,
-        'recipients': recipients,
-        'skippedUserIds': skippedUserIds,
-        'isCapped': isCapped
-    };
-
-    getTypeName() => "PushAudienceCountDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushCampaignDto extends CampaignDto implements IConvertible
-{
-    // @DataMember
-    PushCampaignDeliverySettingsDto? recipients;
-
-    // @DataMember
-    PushTemplateDto? template;
-
-    PushCampaignDto({this.recipients,this.template});
-    PushCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        recipients = JsonConverters.fromJson(json['recipients'],'PushCampaignDeliverySettingsDto',context!);
-        template = JsonConverters.fromJson(json['template'],'PushTemplateDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'recipients': JsonConverters.toJson(recipients,'PushCampaignDeliverySettingsDto',context!),
-        'template': JsonConverters.toJson(template,'PushTemplateDto',context!)
-    });
-
-    getTypeName() => "PushCampaignDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushRecipientDto implements IConvertible
-{
-    // @DataMember
-    List<PushDeviceDeliveryTokenDto> deviceTokens = [];
-
-    // @DataMember
-    String userId = "";
-
-    // @DataMember
-    String? language;
-
-    // @DataMember
-    List<TokenMappingDto>? userTokenMappings;
-
-    // @DataMember
-    String? timeZoneId;
-
-    // @DataMember
-    String? record;
-
-    PushRecipientDto({this.deviceTokens=const [],this.userId="",this.language,this.userTokenMappings,this.timeZoneId,this.record});
-    PushRecipientDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        deviceTokens = JsonConverters.fromJson(json['deviceTokens'],'List<PushDeviceDeliveryTokenDto>',context!) ?? [];
-        userId = json['userId'] ?? "";
-        language = json['language'];
-        userTokenMappings = JsonConverters.fromJson(json['userTokenMappings'],'List<TokenMappingDto>',context!);
-        timeZoneId = json['timeZoneId'];
-        record = json['record'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'deviceTokens': JsonConverters.toJson(deviceTokens,'List<PushDeviceDeliveryTokenDto>',context!),
-        'userId': userId,
-        'language': language,
-        'userTokenMappings': JsonConverters.toJson(userTokenMappings,'List<TokenMappingDto>',context!),
-        'timeZoneId': timeZoneId,
-        'record': record
-    };
-
-    getTypeName() => "PushRecipientDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushRecipientsDto implements IConvertible
-{
-    // @DataMember
-    List<PushRecipientDto>? to;
-
-    // @DataMember
-    String? startingAfter;
-
-    // @DataMember
-    bool? hasMore;
-
-    PushRecipientsDto({this.to,this.startingAfter,this.hasMore});
-    PushRecipientsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        to = JsonConverters.fromJson(json['to'],'List<PushRecipientDto>',context!);
-        startingAfter = json['startingAfter'];
-        hasMore = json['hasMore'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'to': JsonConverters.toJson(to,'List<PushRecipientDto>',context!),
-        'startingAfter': startingAfter,
-        'hasMore': hasMore
-    };
-
-    getTypeName() => "PushRecipientsDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushCampaignBatchDto extends CampaignBatchDto implements IConvertible
-{
-    // @DataMember
-    PushRecipientsDto? recipients;
-
-    PushCampaignBatchDto({this.recipients});
-    PushCampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        recipients = JsonConverters.fromJson(json['recipients'],'PushRecipientsDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'recipients': JsonConverters.toJson(recipients,'PushRecipientsDto',context!)
-    });
-
-    getTypeName() => "PushCampaignBatchDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class NotificationReadMarkDto implements IConvertible
-{
-    // @DataMember
-    String userId = "";
-
-    // @DataMember
-    DateTime? readAtUtc;
-
-    NotificationReadMarkDto({this.userId="",this.readAtUtc});
-    NotificationReadMarkDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        userId = json['userId'] ?? "";
-        readAtUtc = JsonConverters.fromJson(json['readAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'userId': userId,
-        'readAtUtc': JsonConverters.toJson(readAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "NotificationReadMarkDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class PushCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
-{
-    // @DataMember
-    String? subject;
-
-    // @DataMember
-    PushRecipientsDto? recipients;
-
-    // @DataMember
-    PushMessageContentDto? content;
-
-    // @DataMember
-    List<NotificationReadMarkDto>? readBy;
-
-    PushCampaignBatchNotificationDto({this.subject,this.recipients,this.content,this.readBy});
-    PushCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        subject = json['subject'];
-        recipients = JsonConverters.fromJson(json['recipients'],'PushRecipientsDto',context!);
-        content = JsonConverters.fromJson(json['content'],'PushMessageContentDto',context!);
-        readBy = JsonConverters.fromJson(json['readBy'],'List<NotificationReadMarkDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'subject': subject,
-        'recipients': JsonConverters.toJson(recipients,'PushRecipientsDto',context!),
-        'content': JsonConverters.toJson(content,'PushMessageContentDto',context!),
-        'readBy': JsonConverters.toJson(readBy,'List<NotificationReadMarkDto>',context!)
-    });
-
-    getTypeName() => "PushCampaignBatchNotificationDto";
     TypeContext? context = _ctx;
 }
 
@@ -26811,9 +26012,12 @@ class SchedulerTaskListProjection implements IHasViewId, IConvertible
     bool? hasEnded;
 
     // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
     String viewId = "";
 
-    SchedulerTaskListProjection({this.taskId="",this.name="",this.cron="",this.type,this.isEnabled,this.isFailing,this.lastFailureReason,this.lastFailedAtUnix,this.endsAtUnix,this.hasEnded,this.viewId=""});
+    SchedulerTaskListProjection({this.taskId="",this.name="",this.cron="",this.type,this.isEnabled,this.isFailing,this.lastFailureReason,this.lastFailedAtUnix,this.endsAtUnix,this.hasEnded,this.executionIdentityId,this.viewId=""});
     SchedulerTaskListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -26827,6 +26031,7 @@ class SchedulerTaskListProjection implements IHasViewId, IConvertible
         lastFailedAtUnix = json['lastFailedAtUnix'];
         endsAtUnix = json['endsAtUnix'];
         hasEnded = json['hasEnded'];
+        executionIdentityId = json['executionIdentityId'];
         viewId = json['viewId'] ?? "";
         return this;
     }
@@ -26842,6 +26047,7 @@ class SchedulerTaskListProjection implements IHasViewId, IConvertible
         'lastFailedAtUnix': lastFailedAtUnix,
         'endsAtUnix': endsAtUnix,
         'hasEnded': hasEnded,
+        'executionIdentityId': executionIdentityId,
         'viewId': viewId
     };
 
@@ -26880,7 +26086,16 @@ class SchedulerTaskRunDto implements IConvertible
     // @DataMember
     String? correlationId;
 
-    SchedulerTaskRunDto({this.logId="",this.atUtc,this.atUnix=0,this.outcome,this.reason,this.detail,this.correlationId});
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    String? executionIdentityName;
+
+    // @DataMember
+    bool? executionIdentityIsDefault;
+
+    SchedulerTaskRunDto({this.logId="",this.atUtc,this.atUnix=0,this.outcome,this.reason,this.detail,this.correlationId,this.executionIdentityId,this.executionIdentityName,this.executionIdentityIsDefault});
     SchedulerTaskRunDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -26891,6 +26106,9 @@ class SchedulerTaskRunDto implements IConvertible
         reason = json['reason'];
         detail = json['detail'];
         correlationId = json['correlationId'];
+        executionIdentityId = json['executionIdentityId'];
+        executionIdentityName = json['executionIdentityName'];
+        executionIdentityIsDefault = json['executionIdentityIsDefault'];
         return this;
     }
 
@@ -26901,7 +26119,10 @@ class SchedulerTaskRunDto implements IConvertible
         'outcome': JsonConverters.toJson(outcome,'SchedulerTaskRunOutcome',context!),
         'reason': reason,
         'detail': detail,
-        'correlationId': correlationId
+        'correlationId': correlationId,
+        'executionIdentityId': executionIdentityId,
+        'executionIdentityName': executionIdentityName,
+        'executionIdentityIsDefault': executionIdentityIsDefault
     };
 
     getTypeName() => "SchedulerTaskRunDto";
@@ -27174,6 +26395,1586 @@ class ContactRolesRepairDto implements IConvertible
     };
 
     getTypeName() => "ContactRolesRepairDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PublicFolderDto implements IConvertible
+{
+    // @DataMember(Order=1)
+    String path = "";
+
+    // @DataMember(Order=2)
+    String publicId = "";
+
+    // @DataMember(Order=3)
+    String? publicUrl;
+
+    // @DataMember(Order=4)
+    bool? inherited;
+
+    PublicFolderDto({this.path="",this.publicId="",this.publicUrl,this.inherited});
+    PublicFolderDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        path = json['path'] ?? "";
+        publicId = json['publicId'] ?? "";
+        publicUrl = json['publicUrl'];
+        inherited = json['inherited'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'path': path,
+        'publicId': publicId,
+        'publicUrl': publicUrl,
+        'inherited': inherited
+    };
+
+    getTypeName() => "PublicFolderDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SchemaRefDto implements IConvertible
+{
+    // @DataMember(Order=1)
+    String schemaId = "";
+
+    // @DataMember(Order=2)
+    String schemaName = "";
+
+    // @DataMember(Order=3)
+    String databaseIntegrationId = "";
+
+    SchemaRefDto({this.schemaId="",this.schemaName="",this.databaseIntegrationId=""});
+    SchemaRefDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        schemaId = json['schemaId'] ?? "";
+        schemaName = json['schemaName'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'schemaId': schemaId,
+        'schemaName': schemaName,
+        'databaseIntegrationId': databaseIntegrationId
+    };
+
+    getTypeName() => "SchemaRefDto";
+    TypeContext? context = _ctx;
+}
+
+class CollectionImportDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    SchemaRefDto? schema;
+
+    // @DataMember
+    FileResourceRefDto? file;
+
+    // @DataMember
+    FileResourceRefDto? errorFile;
+
+    // @DataMember
+    String delimiter = "";
+
+    // @DataMember
+    bool? hasHeader;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    int totalRows = 0;
+
+    // @DataMember
+    int totalImported = 0;
+
+    // @DataMember
+    int totalErrors = 0;
+
+    // @DataMember
+    String? failureReason;
+
+    // @DataMember
+    List<ImportColumnMappingDto>? mapping;
+
+    // @DataMember
+    DateTime? createdOn;
+
+    // @DataMember
+    DateTime? startedOn;
+
+    // @DataMember
+    DateTime? completedOn;
+
+    CollectionImportDto({this.id="",this.schema,this.file,this.errorFile,this.delimiter="",this.hasHeader,this.status="",this.totalRows=0,this.totalImported=0,this.totalErrors=0,this.failureReason,this.mapping,this.createdOn,this.startedOn,this.completedOn});
+    CollectionImportDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        schema = JsonConverters.fromJson(json['schema'],'SchemaRefDto',context!);
+        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
+        errorFile = JsonConverters.fromJson(json['errorFile'],'FileResourceRefDto',context!);
+        delimiter = json['delimiter'] ?? "";
+        hasHeader = json['hasHeader'];
+        status = json['status'] ?? "";
+        totalRows = json['totalRows'] ?? 0;
+        totalImported = json['totalImported'] ?? 0;
+        totalErrors = json['totalErrors'] ?? 0;
+        failureReason = json['failureReason'];
+        mapping = JsonConverters.fromJson(json['mapping'],'List<ImportColumnMappingDto>',context!);
+        createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
+        startedOn = JsonConverters.fromJson(json['startedOn'],'DateTime',context!);
+        completedOn = JsonConverters.fromJson(json['completedOn'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'schema': JsonConverters.toJson(schema,'SchemaRefDto',context!),
+        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
+        'errorFile': JsonConverters.toJson(errorFile,'FileResourceRefDto',context!),
+        'delimiter': delimiter,
+        'hasHeader': hasHeader,
+        'status': status,
+        'totalRows': totalRows,
+        'totalImported': totalImported,
+        'totalErrors': totalErrors,
+        'failureReason': failureReason,
+        'mapping': JsonConverters.toJson(mapping,'List<ImportColumnMappingDto>',context!),
+        'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!),
+        'startedOn': JsonConverters.toJson(startedOn,'DateTime',context!),
+        'completedOn': JsonConverters.toJson(completedOn,'DateTime',context!)
+    };
+
+    getTypeName() => "CollectionImportDto";
+    TypeContext? context = _ctx;
+}
+
+class ImportUploadTargetDto implements IConvertible
+{
+    // @DataMember
+    String url = "";
+
+    // @DataMember
+    String contentType = "";
+
+    // @DataMember
+    FileResourceRefDto? file;
+
+    ImportUploadTargetDto({this.url="",this.contentType="",this.file});
+    ImportUploadTargetDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        url = json['url'] ?? "";
+        contentType = json['contentType'] ?? "";
+        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'url': url,
+        'contentType': contentType,
+        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!)
+    };
+
+    getTypeName() => "ImportUploadTargetDto";
+    TypeContext? context = _ctx;
+}
+
+class ImportFileColumnDto implements IConvertible
+{
+    // @DataMember
+    int index = 0;
+
+    // @DataMember
+    String header = "";
+
+    // @DataMember
+    List<String> samples = [];
+
+    // @DataMember
+    String detectedType = "";
+
+    ImportFileColumnDto({this.index=0,this.header="",this.samples=const [],this.detectedType=""});
+    ImportFileColumnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        index = json['index'] ?? 0;
+        header = json['header'] ?? "";
+        samples = JsonConverters.fromJson(json['samples'],'List<String>',context!) ?? [];
+        detectedType = json['detectedType'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'index': index,
+        'header': header,
+        'samples': JsonConverters.toJson(samples,'List<String>',context!),
+        'detectedType': detectedType
+    };
+
+    getTypeName() => "ImportFileColumnDto";
+    TypeContext? context = _ctx;
+}
+
+class ImportFileAnalysisDto implements IConvertible
+{
+    // @DataMember
+    FileResourceRefDto? file;
+
+    // @DataMember
+    List<ImportFileColumnDto> columns = [];
+
+    // @DataMember
+    int sampleRowCount = 0;
+
+    ImportFileAnalysisDto({this.file,this.columns=const [],this.sampleRowCount=0});
+    ImportFileAnalysisDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
+        columns = JsonConverters.fromJson(json['columns'],'List<ImportFileColumnDto>',context!) ?? [];
+        sampleRowCount = json['sampleRowCount'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
+        'columns': JsonConverters.toJson(columns,'List<ImportFileColumnDto>',context!),
+        'sampleRowCount': sampleRowCount
+    };
+
+    getTypeName() => "ImportFileAnalysisDto";
+    TypeContext? context = _ctx;
+}
+
+enum CampaignStatus
+{
+    Pending,
+    Registered,
+    Scheduled,
+    Started,
+    Stopped,
+    Processing,
+    Completed,
+    Failed,
+}
+
+class CampaignStatusChangeEntryDto implements IConvertible
+{
+    DateTime? time;
+    CampaignStatus? status;
+    List<ErrorDto>? errors;
+
+    CampaignStatusChangeEntryDto({this.time,this.status,this.errors});
+    CampaignStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        time = JsonConverters.fromJson(json['time'],'DateTime',context!) ?? DateTime(0);
+        status = JsonConverters.fromJson(json['status'],'CampaignStatus',context!);
+        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'time': JsonConverters.toJson(time,'DateTime',context!),
+        'status': JsonConverters.toJson(status,'CampaignStatus',context!),
+        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
+    };
+
+    getTypeName() => "CampaignStatusChangeEntryDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CampaignOutcomeDto implements IConvertible
+{
+    // @DataMember
+    int sent = 0;
+
+    // @DataMember
+    int failed = 0;
+
+    // @DataMember
+    int blocked = 0;
+
+    // @DataMember
+    int cancelled = 0;
+
+    // @DataMember
+    int removedRecipients = 0;
+
+    // @DataMember
+    String? blockedReason;
+
+    CampaignOutcomeDto({this.sent=0,this.failed=0,this.blocked=0,this.cancelled=0,this.removedRecipients=0,this.blockedReason});
+    CampaignOutcomeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        sent = json['sent'] ?? 0;
+        failed = json['failed'] ?? 0;
+        blocked = json['blocked'] ?? 0;
+        cancelled = json['cancelled'] ?? 0;
+        removedRecipients = json['removedRecipients'] ?? 0;
+        blockedReason = json['blockedReason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'sent': sent,
+        'failed': failed,
+        'blocked': blocked,
+        'cancelled': cancelled,
+        'removedRecipients': removedRecipients,
+        'blockedReason': blockedReason
+    };
+
+    getTypeName() => "CampaignOutcomeDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CampaignDto implements IHasResponsibleUserId, IHasDatabaseId, IConvertible
+{
+    // @DataMember
+    String viewId = "";
+
+    // @DataMember
+    DateTime? createdOn;
+
+    // @DataMember
+    String language = "";
+
+    // @DataMember
+    bool? forceCampaignLanguage;
+
+    // @DataMember
+    String? campaignProcessingIntegrationId;
+
+    // @DataMember
+    List<CampaignStatusChangeEntryDto> statusHistory = [];
+
+    // @DataMember
+    CampaignStatusChangeEntryDto? status;
+
+    // @DataMember
+    List<TokenMappingDto>? tokenMappingValues;
+
+    // @DataMember
+    String? notes;
+
+    // @DataMember
+    String? createdById;
+
+    // @DataMember
+    String? timeZoneId;
+
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String? triggerId;
+
+    // @DataMember
+    TriggerType? triggerType;
+
+    // @DataMember
+    CampaignOutcomeDto? outcome;
+
+    // @DataMember
+    String? id;
+
+    CampaignDto({this.viewId="",this.createdOn,this.language="",this.forceCampaignLanguage,this.campaignProcessingIntegrationId,this.statusHistory=const [],this.status,this.tokenMappingValues,this.notes,this.createdById,this.timeZoneId,this.userId="",this.triggerId,this.triggerType,this.outcome,this.id});
+    CampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        viewId = json['viewId'] ?? "";
+        createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
+        language = json['language'] ?? "";
+        forceCampaignLanguage = json['forceCampaignLanguage'];
+        campaignProcessingIntegrationId = json['campaignProcessingIntegrationId'];
+        statusHistory = JsonConverters.fromJson(json['statusHistory'],'List<CampaignStatusChangeEntryDto>',context!) ?? [];
+        status = JsonConverters.fromJson(json['status'],'CampaignStatusChangeEntryDto',context!);
+        tokenMappingValues = JsonConverters.fromJson(json['tokenMappingValues'],'List<TokenMappingDto>',context!);
+        notes = json['notes'];
+        createdById = json['createdById'];
+        timeZoneId = json['timeZoneId'];
+        userId = json['userId'] ?? "";
+        triggerId = json['triggerId'];
+        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
+        outcome = JsonConverters.fromJson(json['outcome'],'CampaignOutcomeDto',context!);
+        id = json['id'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'viewId': viewId,
+        'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!),
+        'language': language,
+        'forceCampaignLanguage': forceCampaignLanguage,
+        'campaignProcessingIntegrationId': campaignProcessingIntegrationId,
+        'statusHistory': JsonConverters.toJson(statusHistory,'List<CampaignStatusChangeEntryDto>',context!),
+        'status': JsonConverters.toJson(status,'CampaignStatusChangeEntryDto',context!),
+        'tokenMappingValues': JsonConverters.toJson(tokenMappingValues,'List<TokenMappingDto>',context!),
+        'notes': notes,
+        'createdById': createdById,
+        'timeZoneId': timeZoneId,
+        'userId': userId,
+        'triggerId': triggerId,
+        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!),
+        'outcome': JsonConverters.toJson(outcome,'CampaignOutcomeDto',context!),
+        'id': id
+    };
+
+    getTypeName() => "CampaignDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class EmailCampaignDto extends CampaignDto implements IConvertible
+{
+    // @DataMember
+    EmailCampaignDeliverySettingsDto? deliverySettings;
+
+    // @DataMember
+    EmailTemplateDto? template;
+
+    // @DataMember
+    String? validationIntegrationId;
+
+    // @DataMember
+    bool? templateIsSystem;
+
+    EmailCampaignDto({this.deliverySettings,this.template,this.validationIntegrationId,this.templateIsSystem});
+    EmailCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'EmailCampaignDeliverySettingsDto',context!);
+        template = JsonConverters.fromJson(json['template'],'EmailTemplateDto',context!);
+        validationIntegrationId = json['validationIntegrationId'];
+        templateIsSystem = json['templateIsSystem'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'deliverySettings': JsonConverters.toJson(deliverySettings,'EmailCampaignDeliverySettingsDto',context!),
+        'template': JsonConverters.toJson(template,'EmailTemplateDto',context!),
+        'validationIntegrationId': validationIntegrationId,
+        'templateIsSystem': templateIsSystem
+    });
+
+    getTypeName() => "EmailCampaignDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class EmailCampaignListProjection implements IConvertible
+{
+    // @DataMember
+    String viewId = "";
+
+    // @DataMember
+    String templateName = "";
+
+    // @DataMember
+    String templateId = "";
+
+    // @DataMember
+    String? integrationId;
+
+    // @DataMember
+    String language = "";
+
+    // @DataMember
+    String strategy = "";
+
+    // @DataMember
+    CampaignStatus? latestStatus;
+
+    // @DataMember
+    DateTime? createdOn;
+
+    // @DataMember
+    CampaignOutcomeDto? outcome;
+
+    EmailCampaignListProjection({this.viewId="",this.templateName="",this.templateId="",this.integrationId,this.language="",this.strategy="",this.latestStatus,this.createdOn,this.outcome});
+    EmailCampaignListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        viewId = json['viewId'] ?? "";
+        templateName = json['templateName'] ?? "";
+        templateId = json['templateId'] ?? "";
+        integrationId = json['integrationId'];
+        language = json['language'] ?? "";
+        strategy = json['strategy'] ?? "";
+        latestStatus = JsonConverters.fromJson(json['latestStatus'],'CampaignStatus',context!);
+        createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
+        outcome = JsonConverters.fromJson(json['outcome'],'CampaignOutcomeDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'viewId': viewId,
+        'templateName': templateName,
+        'templateId': templateId,
+        'integrationId': integrationId,
+        'language': language,
+        'strategy': strategy,
+        'latestStatus': JsonConverters.toJson(latestStatus,'CampaignStatus',context!),
+        'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!),
+        'outcome': JsonConverters.toJson(outcome,'CampaignOutcomeDto',context!)
+    };
+
+    getTypeName() => "EmailCampaignListProjection";
+    TypeContext? context = _ctx;
+}
+
+enum CampaignBatchStatus
+{
+    Registered,
+    Processing,
+    Completed,
+    Failed,
+}
+
+class BatchStatusChangeEntryDto implements IConvertible
+{
+    DateTime? time;
+    CampaignBatchStatus? status;
+    List<ErrorDto>? errors;
+
+    BatchStatusChangeEntryDto({this.time,this.status,this.errors});
+    BatchStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        time = JsonConverters.fromJson(json['time'],'DateTime',context!) ?? DateTime(0);
+        status = JsonConverters.fromJson(json['status'],'CampaignBatchStatus',context!);
+        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'time': JsonConverters.toJson(time,'DateTime',context!),
+        'status': JsonConverters.toJson(status,'CampaignBatchStatus',context!),
+        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!)
+    };
+
+    getTypeName() => "BatchStatusChangeEntryDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CampaignBatchDto implements IHasDatabaseId, IConvertible
+{
+    // @DataMember
+    String campaignId = "";
+
+    // @DataMember
+    String batchId = "";
+
+    // @DataMember
+    String? startAfter;
+
+    // @DataMember
+    List<BatchStatusChangeEntryDto> statusHistory = [];
+
+    // @DataMember
+    String id = "";
+
+    CampaignBatchDto({this.campaignId="",this.batchId="",this.startAfter,this.statusHistory=const [],this.id=""});
+    CampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        campaignId = json['campaignId'] ?? "";
+        batchId = json['batchId'] ?? "";
+        startAfter = json['startAfter'];
+        statusHistory = JsonConverters.fromJson(json['statusHistory'],'List<BatchStatusChangeEntryDto>',context!) ?? [];
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'campaignId': campaignId,
+        'batchId': batchId,
+        'startAfter': startAfter,
+        'statusHistory': JsonConverters.toJson(statusHistory,'List<BatchStatusChangeEntryDto>',context!),
+        'id': id
+    };
+
+    getTypeName() => "CampaignBatchDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class EmailRecipientDto implements IConvertible
+{
+    // @DataMember
+    String emailAddress = "";
+
+    // @DataMember
+    String? language;
+
+    // @DataMember
+    String? timeZoneId;
+
+    // @DataMember
+    List<TokenMappingDto>? userTokenMappings;
+
+    EmailRecipientDto({this.emailAddress="",this.language,this.timeZoneId,this.userTokenMappings});
+    EmailRecipientDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        emailAddress = json['emailAddress'] ?? "";
+        language = json['language'];
+        timeZoneId = json['timeZoneId'];
+        userTokenMappings = JsonConverters.fromJson(json['userTokenMappings'],'List<TokenMappingDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'emailAddress': emailAddress,
+        'language': language,
+        'timeZoneId': timeZoneId,
+        'userTokenMappings': JsonConverters.toJson(userTokenMappings,'List<TokenMappingDto>',context!)
+    };
+
+    getTypeName() => "EmailRecipientDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class EmailRecipientsDto implements IConvertible
+{
+    // @DataMember
+    List<EmailRecipientDto>? to;
+
+    // @DataMember
+    List<EmailRecipientDto>? cc;
+
+    // @DataMember
+    List<EmailRecipientDto>? bcc;
+
+    // @DataMember
+    String? startingAfter;
+
+    // @DataMember
+    bool? hasMore;
+
+    EmailRecipientsDto({this.to,this.cc,this.bcc,this.startingAfter,this.hasMore});
+    EmailRecipientsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        to = JsonConverters.fromJson(json['to'],'List<EmailRecipientDto>',context!);
+        cc = JsonConverters.fromJson(json['cc'],'List<EmailRecipientDto>',context!);
+        bcc = JsonConverters.fromJson(json['bcc'],'List<EmailRecipientDto>',context!);
+        startingAfter = json['startingAfter'];
+        hasMore = json['hasMore'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'to': JsonConverters.toJson(to,'List<EmailRecipientDto>',context!),
+        'cc': JsonConverters.toJson(cc,'List<EmailRecipientDto>',context!),
+        'bcc': JsonConverters.toJson(bcc,'List<EmailRecipientDto>',context!),
+        'startingAfter': startingAfter,
+        'hasMore': hasMore
+    };
+
+    getTypeName() => "EmailRecipientsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class EmailCampaignBatchDto extends CampaignBatchDto implements IConvertible
+{
+    // @DataMember
+    EmailRecipientsDto? recipients;
+
+    EmailCampaignBatchDto({this.recipients});
+    EmailCampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        recipients = JsonConverters.fromJson(json['recipients'],'EmailRecipientsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'recipients': JsonConverters.toJson(recipients,'EmailRecipientsDto',context!)
+    });
+
+    getTypeName() => "EmailCampaignBatchDto";
+    TypeContext? context = _ctx;
+}
+
+enum CampaignNotificationStatus
+{
+    Completed,
+    BlockedByUserPreferenceBlockAll,
+    BlockedByUserPreferenceBlockByTag,
+    Failed,
+    Viewed,
+    Clicked,
+    BlockedByValidation,
+}
+
+class NotificationStatusChangeEntryDto implements IConvertible
+{
+    DateTime? time;
+    CampaignNotificationStatus? status;
+    String? sourceId;
+    List<ErrorDto>? errors;
+    List<String>? tags;
+
+    NotificationStatusChangeEntryDto({this.time,this.status,this.sourceId,this.errors,this.tags});
+    NotificationStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        time = JsonConverters.fromJson(json['time'],'DateTime',context!) ?? DateTime(0);
+        status = JsonConverters.fromJson(json['status'],'CampaignNotificationStatus',context!);
+        sourceId = json['sourceId'];
+        errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
+        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'time': JsonConverters.toJson(time,'DateTime',context!),
+        'status': JsonConverters.toJson(status,'CampaignNotificationStatus',context!),
+        'sourceId': sourceId,
+        'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!),
+        'tags': JsonConverters.toJson(tags,'List<String>',context!)
+    };
+
+    getTypeName() => "NotificationStatusChangeEntryDto";
+    TypeContext? context = _ctx;
+}
+
+enum NotificationDeliveryState
+{
+    Pending,
+    Sending,
+    Retrying,
+    Accepted,
+    Failed,
+    Blocked,
+    Cancelled,
+}
+
+enum NotificationAttemptOutcome
+{
+    Accepted,
+    Failed,
+    Blocked,
+}
+
+enum SendErrorCategory
+{
+    Unknown,
+    Transient,
+    Permanent,
+    Ambiguous,
+}
+
+enum NotificationAttemptTrigger
+{
+    Initial,
+    AutoRetry,
+    ManualRetry,
+}
+
+// @DataContract
+class NotificationAttemptDto implements IConvertible
+{
+    // @DataMember
+    String attemptId = "";
+
+    // @DataMember
+    int number = 0;
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    NotificationAttemptOutcome? outcome;
+
+    // @DataMember
+    SendErrorCategory? category;
+
+    // @DataMember
+    int? statusCode;
+
+    // @DataMember
+    String? errorCode;
+
+    // @DataMember
+    String? message;
+
+    // @DataMember
+    String? providerRef;
+
+    // @DataMember
+    int? retryAfterSeconds;
+
+    // @DataMember
+    bool? exhausted;
+
+    // @DataMember
+    DateTime? nextRetryAt;
+
+    // @DataMember
+    String? correlationId;
+
+    // @DataMember
+    NotificationAttemptTrigger? trigger;
+
+    // @DataMember
+    String? retryRequestId;
+
+    NotificationAttemptDto({this.attemptId="",this.number=0,this.startedAt,this.finishedAt,this.outcome,this.category,this.statusCode,this.errorCode,this.message,this.providerRef,this.retryAfterSeconds,this.exhausted,this.nextRetryAt,this.correlationId,this.trigger,this.retryRequestId});
+    NotificationAttemptDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        attemptId = json['attemptId'] ?? "";
+        number = json['number'] ?? 0;
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        outcome = JsonConverters.fromJson(json['outcome'],'NotificationAttemptOutcome',context!);
+        category = JsonConverters.fromJson(json['category'],'SendErrorCategory',context!);
+        statusCode = json['statusCode'];
+        errorCode = json['errorCode'];
+        message = json['message'];
+        providerRef = json['providerRef'];
+        retryAfterSeconds = json['retryAfterSeconds'];
+        exhausted = json['exhausted'];
+        nextRetryAt = JsonConverters.fromJson(json['nextRetryAt'],'DateTime',context!);
+        correlationId = json['correlationId'];
+        trigger = JsonConverters.fromJson(json['trigger'],'NotificationAttemptTrigger',context!);
+        retryRequestId = json['retryRequestId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'attemptId': attemptId,
+        'number': number,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'outcome': JsonConverters.toJson(outcome,'NotificationAttemptOutcome',context!),
+        'category': JsonConverters.toJson(category,'SendErrorCategory',context!),
+        'statusCode': statusCode,
+        'errorCode': errorCode,
+        'message': message,
+        'providerRef': providerRef,
+        'retryAfterSeconds': retryAfterSeconds,
+        'exhausted': exhausted,
+        'nextRetryAt': JsonConverters.toJson(nextRetryAt,'DateTime',context!),
+        'correlationId': correlationId,
+        'trigger': JsonConverters.toJson(trigger,'NotificationAttemptTrigger',context!),
+        'retryRequestId': retryRequestId
+    };
+
+    getTypeName() => "NotificationAttemptDto";
+    TypeContext? context = _ctx;
+}
+
+enum DeliveryEventOutcome
+{
+    Delivered,
+    Bounced,
+    Complained,
+    Rejected,
+    Deferred,
+}
+
+// @DataContract
+class NotificationDeliveryEventDto implements IConvertible
+{
+    // @DataMember
+    String? eventId;
+
+    // @DataMember
+    DeliveryEventOutcome? outcome;
+
+    // @DataMember
+    DateTime? at;
+
+    // @DataMember
+    String provider = "";
+
+    // @DataMember
+    String? providerRef;
+
+    // @DataMember
+    String? reason;
+
+    NotificationDeliveryEventDto({this.eventId,this.outcome,this.at,this.provider="",this.providerRef,this.reason});
+    NotificationDeliveryEventDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        eventId = json['eventId'];
+        outcome = JsonConverters.fromJson(json['outcome'],'DeliveryEventOutcome',context!);
+        at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
+        provider = json['provider'] ?? "";
+        providerRef = json['providerRef'];
+        reason = json['reason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'eventId': eventId,
+        'outcome': JsonConverters.toJson(outcome,'DeliveryEventOutcome',context!),
+        'at': JsonConverters.toJson(at,'DateTime',context!),
+        'provider': provider,
+        'providerRef': providerRef,
+        'reason': reason
+    };
+
+    getTypeName() => "NotificationDeliveryEventDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
+{
+    // @DataMember
+    String campaignId = "";
+
+    // @DataMember
+    String batchId = "";
+
+    // @DataMember
+    String notificationId = "";
+
+    // @DataMember
+    String? refNotificationId;
+
+    // @DataMember
+    String? body;
+
+    // @DataMember
+    Map<String,String?>? model;
+
+    // @DataMember
+    List<NotificationStatusChangeEntryDto> statusHistory = [];
+
+    // @DataMember
+    NotificationDeliveryState? state;
+
+    // @DataMember
+    DateTime? stateChangedAt;
+
+    // @DataMember
+    List<NotificationAttemptDto>? attempts;
+
+    // @DataMember
+    List<NotificationDeliveryEventDto>? deliveryEvents;
+
+    // @DataMember
+    DeliveryEventOutcome? deliveryOutcome;
+
+    // @DataMember
+    int? deliveryOutcomeRank;
+
+    // @DataMember
+    String id = "";
+
+    CampaignBatchNotificationDto({this.campaignId="",this.batchId="",this.notificationId="",this.refNotificationId,this.body,this.model,this.statusHistory=const [],this.state,this.stateChangedAt,this.attempts,this.deliveryEvents,this.deliveryOutcome,this.deliveryOutcomeRank,this.id=""});
+    CampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        campaignId = json['campaignId'] ?? "";
+        batchId = json['batchId'] ?? "";
+        notificationId = json['notificationId'] ?? "";
+        refNotificationId = json['refNotificationId'];
+        body = json['body'];
+        model = JsonConverters.toStringMap(json['model']);
+        statusHistory = JsonConverters.fromJson(json['statusHistory'],'List<NotificationStatusChangeEntryDto>',context!) ?? [];
+        state = JsonConverters.fromJson(json['state'],'NotificationDeliveryState',context!);
+        stateChangedAt = JsonConverters.fromJson(json['stateChangedAt'],'DateTime',context!);
+        attempts = JsonConverters.fromJson(json['attempts'],'List<NotificationAttemptDto>',context!);
+        deliveryEvents = JsonConverters.fromJson(json['deliveryEvents'],'List<NotificationDeliveryEventDto>',context!);
+        deliveryOutcome = JsonConverters.fromJson(json['deliveryOutcome'],'DeliveryEventOutcome',context!);
+        deliveryOutcomeRank = json['deliveryOutcomeRank'];
+        id = json['id'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'campaignId': campaignId,
+        'batchId': batchId,
+        'notificationId': notificationId,
+        'refNotificationId': refNotificationId,
+        'body': body,
+        'model': model,
+        'statusHistory': JsonConverters.toJson(statusHistory,'List<NotificationStatusChangeEntryDto>',context!),
+        'state': JsonConverters.toJson(state,'NotificationDeliveryState',context!),
+        'stateChangedAt': JsonConverters.toJson(stateChangedAt,'DateTime',context!),
+        'attempts': JsonConverters.toJson(attempts,'List<NotificationAttemptDto>',context!),
+        'deliveryEvents': JsonConverters.toJson(deliveryEvents,'List<NotificationDeliveryEventDto>',context!),
+        'deliveryOutcome': JsonConverters.toJson(deliveryOutcome,'DeliveryEventOutcome',context!),
+        'deliveryOutcomeRank': deliveryOutcomeRank,
+        'id': id
+    };
+
+    getTypeName() => "CampaignBatchNotificationDto";
+    TypeContext? context = _ctx;
+}
+
+enum EmailRecipientField
+{
+    To,
+    Cc,
+    Bcc,
+}
+
+enum RecipientRemovalReason
+{
+    OptedOut,
+    Compliance,
+    Undeliverable,
+}
+
+// @DataContract
+class RemovedRecipientDto implements IConvertible
+{
+    // @DataMember
+    String address = "";
+
+    // @DataMember
+    EmailRecipientField? field;
+
+    // @DataMember
+    RecipientRemovalReason? reason;
+
+    // @DataMember
+    String? tag;
+
+    RemovedRecipientDto({this.address="",this.field,this.reason,this.tag});
+    RemovedRecipientDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        address = json['address'] ?? "";
+        field = JsonConverters.fromJson(json['field'],'EmailRecipientField',context!);
+        reason = JsonConverters.fromJson(json['reason'],'RecipientRemovalReason',context!);
+        tag = json['tag'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'address': address,
+        'field': JsonConverters.toJson(field,'EmailRecipientField',context!),
+        'reason': JsonConverters.toJson(reason,'RecipientRemovalReason',context!),
+        'tag': tag
+    };
+
+    getTypeName() => "RemovedRecipientDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
+{
+    // @DataMember
+    String? subject;
+
+    // @DataMember
+    EmailRecipientsDto? recipients;
+
+    // @DataMember
+    List<RemovedRecipientDto>? removedRecipients;
+
+    // @DataMember
+    EmailMessageContentDto? content;
+
+    // @DataMember
+    String? transactionalKind;
+
+    EmailCampaignBatchNotificationDto({this.subject,this.recipients,this.removedRecipients,this.content,this.transactionalKind});
+    EmailCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        subject = json['subject'];
+        recipients = JsonConverters.fromJson(json['recipients'],'EmailRecipientsDto',context!);
+        removedRecipients = JsonConverters.fromJson(json['removedRecipients'],'List<RemovedRecipientDto>',context!);
+        content = JsonConverters.fromJson(json['content'],'EmailMessageContentDto',context!);
+        transactionalKind = json['transactionalKind'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'subject': subject,
+        'recipients': JsonConverters.toJson(recipients,'EmailRecipientsDto',context!),
+        'removedRecipients': JsonConverters.toJson(removedRecipients,'List<RemovedRecipientDto>',context!),
+        'content': JsonConverters.toJson(content,'EmailMessageContentDto',context!),
+        'transactionalKind': transactionalKind
+    });
+
+    getTypeName() => "EmailCampaignBatchNotificationDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CampaignStatsDto implements IConvertible
+{
+    // @DataMember
+    int batches = 0;
+
+    // @DataMember
+    int sent = 0;
+
+    // @DataMember
+    int failed = 0;
+
+    // @DataMember
+    int failedRetryable = 0;
+
+    // @DataMember
+    int cancelled = 0;
+
+    // @DataMember
+    int blocked = 0;
+
+    // @DataMember
+    int inProgress = 0;
+
+    // @DataMember
+    int removedRecipients = 0;
+
+    // @DataMember
+    double successRate = 0;
+
+    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.failedRetryable=0,this.cancelled=0,this.blocked=0,this.inProgress=0,this.removedRecipients=0,this.successRate=0});
+    CampaignStatsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        batches = json['batches'] ?? 0;
+        sent = json['sent'] ?? 0;
+        failed = json['failed'] ?? 0;
+        failedRetryable = json['failedRetryable'] ?? 0;
+        cancelled = json['cancelled'] ?? 0;
+        blocked = json['blocked'] ?? 0;
+        inProgress = json['inProgress'] ?? 0;
+        removedRecipients = json['removedRecipients'] ?? 0;
+        successRate = JsonConverters.toDouble(json['successRate']) ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'batches': batches,
+        'sent': sent,
+        'failed': failed,
+        'failedRetryable': failedRetryable,
+        'cancelled': cancelled,
+        'blocked': blocked,
+        'inProgress': inProgress,
+        'removedRecipients': removedRecipients,
+        'successRate': successRate
+    };
+
+    getTypeName() => "CampaignStatsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SmsCampaignDto extends CampaignDto implements IConvertible
+{
+    // @DataMember
+    SmsCampaignDeliverySettingsDto? recipients;
+
+    // @DataMember
+    SmsTemplateDto? template;
+
+    SmsCampaignDto({this.recipients,this.template});
+    SmsCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        recipients = JsonConverters.fromJson(json['recipients'],'SmsCampaignDeliverySettingsDto',context!);
+        template = JsonConverters.fromJson(json['template'],'SmsTemplateDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'recipients': JsonConverters.toJson(recipients,'SmsCampaignDeliverySettingsDto',context!),
+        'template': JsonConverters.toJson(template,'SmsTemplateDto',context!)
+    });
+
+    getTypeName() => "SmsCampaignDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SmsRecipientDto implements IConvertible
+{
+    // @DataMember
+    String phoneNumber = "";
+
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String? language;
+
+    // @DataMember
+    List<TokenMappingDto>? userTokenMappings;
+
+    // @DataMember
+    String? timeZoneId;
+
+    // @DataMember
+    String? record;
+
+    SmsRecipientDto({this.phoneNumber="",this.userId="",this.language,this.userTokenMappings,this.timeZoneId,this.record});
+    SmsRecipientDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        phoneNumber = json['phoneNumber'] ?? "";
+        userId = json['userId'] ?? "";
+        language = json['language'];
+        userTokenMappings = JsonConverters.fromJson(json['userTokenMappings'],'List<TokenMappingDto>',context!);
+        timeZoneId = json['timeZoneId'];
+        record = json['record'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'phoneNumber': phoneNumber,
+        'userId': userId,
+        'language': language,
+        'userTokenMappings': JsonConverters.toJson(userTokenMappings,'List<TokenMappingDto>',context!),
+        'timeZoneId': timeZoneId,
+        'record': record
+    };
+
+    getTypeName() => "SmsRecipientDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SmsRecipientsDto implements IConvertible
+{
+    // @DataMember
+    List<SmsRecipientDto>? to;
+
+    // @DataMember
+    String? startingAfter;
+
+    // @DataMember
+    bool? hasMore;
+
+    SmsRecipientsDto({this.to,this.startingAfter,this.hasMore});
+    SmsRecipientsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        to = JsonConverters.fromJson(json['to'],'List<SmsRecipientDto>',context!);
+        startingAfter = json['startingAfter'];
+        hasMore = json['hasMore'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'to': JsonConverters.toJson(to,'List<SmsRecipientDto>',context!),
+        'startingAfter': startingAfter,
+        'hasMore': hasMore
+    };
+
+    getTypeName() => "SmsRecipientsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SmsCampaignBatchDto extends CampaignBatchDto implements IConvertible
+{
+    // @DataMember
+    SmsRecipientsDto? recipients;
+
+    SmsCampaignBatchDto({this.recipients});
+    SmsCampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        recipients = JsonConverters.fromJson(json['recipients'],'SmsRecipientsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'recipients': JsonConverters.toJson(recipients,'SmsRecipientsDto',context!)
+    });
+
+    getTypeName() => "SmsCampaignBatchDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SmsCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
+{
+    // @DataMember
+    SmsRecipientsDto? recipients;
+
+    // @DataMember
+    SmsMessageContentDto? content;
+
+    SmsCampaignBatchNotificationDto({this.recipients,this.content});
+    SmsCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        recipients = JsonConverters.fromJson(json['recipients'],'SmsRecipientsDto',context!);
+        content = JsonConverters.fromJson(json['content'],'SmsMessageContentDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'recipients': JsonConverters.toJson(recipients,'SmsRecipientsDto',context!),
+        'content': JsonConverters.toJson(content,'SmsMessageContentDto',context!)
+    });
+
+    getTypeName() => "SmsCampaignBatchNotificationDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PushAudienceCountDto implements IConvertible
+{
+    // @DataMember
+    int devices = 0;
+
+    // @DataMember
+    int recipients = 0;
+
+    // @DataMember
+    int skippedUserIds = 0;
+
+    // @DataMember
+    bool? isCapped;
+
+    PushAudienceCountDto({this.devices=0,this.recipients=0,this.skippedUserIds=0,this.isCapped});
+    PushAudienceCountDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        devices = json['devices'] ?? 0;
+        recipients = json['recipients'] ?? 0;
+        skippedUserIds = json['skippedUserIds'] ?? 0;
+        isCapped = json['isCapped'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'devices': devices,
+        'recipients': recipients,
+        'skippedUserIds': skippedUserIds,
+        'isCapped': isCapped
+    };
+
+    getTypeName() => "PushAudienceCountDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PushCampaignDto extends CampaignDto implements IConvertible
+{
+    // @DataMember
+    PushCampaignDeliverySettingsDto? recipients;
+
+    // @DataMember
+    PushTemplateDto? template;
+
+    PushCampaignDto({this.recipients,this.template});
+    PushCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        recipients = JsonConverters.fromJson(json['recipients'],'PushCampaignDeliverySettingsDto',context!);
+        template = JsonConverters.fromJson(json['template'],'PushTemplateDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'recipients': JsonConverters.toJson(recipients,'PushCampaignDeliverySettingsDto',context!),
+        'template': JsonConverters.toJson(template,'PushTemplateDto',context!)
+    });
+
+    getTypeName() => "PushCampaignDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PushRecipientDto implements IConvertible
+{
+    // @DataMember
+    List<PushDeviceDeliveryTokenDto> deviceTokens = [];
+
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String? language;
+
+    // @DataMember
+    List<TokenMappingDto>? userTokenMappings;
+
+    // @DataMember
+    String? timeZoneId;
+
+    // @DataMember
+    String? record;
+
+    PushRecipientDto({this.deviceTokens=const [],this.userId="",this.language,this.userTokenMappings,this.timeZoneId,this.record});
+    PushRecipientDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        deviceTokens = JsonConverters.fromJson(json['deviceTokens'],'List<PushDeviceDeliveryTokenDto>',context!) ?? [];
+        userId = json['userId'] ?? "";
+        language = json['language'];
+        userTokenMappings = JsonConverters.fromJson(json['userTokenMappings'],'List<TokenMappingDto>',context!);
+        timeZoneId = json['timeZoneId'];
+        record = json['record'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'deviceTokens': JsonConverters.toJson(deviceTokens,'List<PushDeviceDeliveryTokenDto>',context!),
+        'userId': userId,
+        'language': language,
+        'userTokenMappings': JsonConverters.toJson(userTokenMappings,'List<TokenMappingDto>',context!),
+        'timeZoneId': timeZoneId,
+        'record': record
+    };
+
+    getTypeName() => "PushRecipientDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PushRecipientsDto implements IConvertible
+{
+    // @DataMember
+    List<PushRecipientDto>? to;
+
+    // @DataMember
+    String? startingAfter;
+
+    // @DataMember
+    bool? hasMore;
+
+    PushRecipientsDto({this.to,this.startingAfter,this.hasMore});
+    PushRecipientsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        to = JsonConverters.fromJson(json['to'],'List<PushRecipientDto>',context!);
+        startingAfter = json['startingAfter'];
+        hasMore = json['hasMore'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'to': JsonConverters.toJson(to,'List<PushRecipientDto>',context!),
+        'startingAfter': startingAfter,
+        'hasMore': hasMore
+    };
+
+    getTypeName() => "PushRecipientsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PushCampaignBatchDto extends CampaignBatchDto implements IConvertible
+{
+    // @DataMember
+    PushRecipientsDto? recipients;
+
+    PushCampaignBatchDto({this.recipients});
+    PushCampaignBatchDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        recipients = JsonConverters.fromJson(json['recipients'],'PushRecipientsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'recipients': JsonConverters.toJson(recipients,'PushRecipientsDto',context!)
+    });
+
+    getTypeName() => "PushCampaignBatchDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class NotificationReadMarkDto implements IConvertible
+{
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    DateTime? readAtUtc;
+
+    NotificationReadMarkDto({this.userId="",this.readAtUtc});
+    NotificationReadMarkDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'] ?? "";
+        readAtUtc = JsonConverters.fromJson(json['readAtUtc'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'readAtUtc': JsonConverters.toJson(readAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "NotificationReadMarkDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class PushCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
+{
+    // @DataMember
+    String? subject;
+
+    // @DataMember
+    PushRecipientsDto? recipients;
+
+    // @DataMember
+    PushMessageContentDto? content;
+
+    // @DataMember
+    List<NotificationReadMarkDto>? readBy;
+
+    PushCampaignBatchNotificationDto({this.subject,this.recipients,this.content,this.readBy});
+    PushCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        subject = json['subject'];
+        recipients = JsonConverters.fromJson(json['recipients'],'PushRecipientsDto',context!);
+        content = JsonConverters.fromJson(json['content'],'PushMessageContentDto',context!);
+        readBy = JsonConverters.fromJson(json['readBy'],'List<NotificationReadMarkDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'subject': subject,
+        'recipients': JsonConverters.toJson(recipients,'PushRecipientsDto',context!),
+        'content': JsonConverters.toJson(content,'PushMessageContentDto',context!),
+        'readBy': JsonConverters.toJson(readBy,'List<NotificationReadMarkDto>',context!)
+    });
+
+    getTypeName() => "PushCampaignBatchNotificationDto";
     TypeContext? context = _ctx;
 }
 
@@ -28366,6 +29167,54 @@ class PublicLegalDocumentDto implements IConvertible
 }
 
 // @DataContract
+class CheckTriggerExecutionIdentityResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    bool? isDefault;
+
+    // @DataMember
+    bool? canAssign;
+
+    // @DataMember
+    List<String> missingPermissions = [];
+
+    // @DataMember
+    List<String> callerMissingPermissions = [];
+
+    // @DataMember
+    List<ExecutionIdentityRefusalDto> refusals = [];
+
+    CheckTriggerExecutionIdentityResponse({this.executionIdentityId,this.isDefault,this.canAssign,this.missingPermissions=const [],this.callerMissingPermissions=const [],this.refusals=const []});
+    CheckTriggerExecutionIdentityResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        executionIdentityId = json['executionIdentityId'];
+        isDefault = json['isDefault'];
+        canAssign = json['canAssign'];
+        missingPermissions = JsonConverters.fromJson(json['missingPermissions'],'List<String>',context!) ?? [];
+        callerMissingPermissions = JsonConverters.fromJson(json['callerMissingPermissions'],'List<String>',context!) ?? [];
+        refusals = JsonConverters.fromJson(json['refusals'],'List<ExecutionIdentityRefusalDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'executionIdentityId': executionIdentityId,
+        'isDefault': isDefault,
+        'canAssign': canAssign,
+        'missingPermissions': JsonConverters.toJson(missingPermissions,'List<String>',context!),
+        'callerMissingPermissions': JsonConverters.toJson(callerMissingPermissions,'List<String>',context!),
+        'refusals': JsonConverters.toJson(refusals,'List<ExecutionIdentityRefusalDto>',context!)
+    });
+
+    getTypeName() => "CheckTriggerExecutionIdentityResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class GetTriggerDefinitionResponse extends ResponseBase implements IConvertible
 {
     // @DataMember
@@ -28408,6 +29257,48 @@ class GetTriggersNeedingAttentionResponse extends ResponseBase implements IConve
     });
 
     getTypeName() => "GetTriggersNeedingAttentionResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetTriggerRunsResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<TriggerRunListProjection>? list;
+
+    GetTriggerRunsResponse({this.list});
+    GetTriggerRunsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<TriggerRunListProjection>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<TriggerRunListProjection>',context!)
+    });
+
+    getTypeName() => "GetTriggerRunsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetTriggerRunResponse extends ResponseBase implements IConvertible
+{
+    TriggerRunDto? item;
+
+    GetTriggerRunResponse({this.item});
+    GetTriggerRunResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'TriggerRunDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'TriggerRunDto',context!)
+    });
+
+    getTypeName() => "GetTriggerRunResponse";
     TypeContext? context = _ctx;
 }
 
@@ -29748,6 +30639,27 @@ class GetMembershipIntegrationsResponse extends ResponseBase implements IConvert
     TypeContext? context = _ctx;
 }
 
+class GetExecutionIdentitiesResponse extends ResponseBase implements IConvertible
+{
+    List<ExecutionIdentityDto> identities = [];
+
+    GetExecutionIdentitiesResponse({this.identities=const []});
+    GetExecutionIdentitiesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        identities = JsonConverters.fromJson(json['identities'],'List<ExecutionIdentityDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'identities': JsonConverters.toJson(identities,'List<ExecutionIdentityDto>',context!)
+    });
+
+    getTypeName() => "GetExecutionIdentitiesResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetAuthorizationSettingsResponse extends ResponseBase implements IConvertible
 {
     MembershipAuthorizationViewDto? result;
@@ -30470,90 +31382,6 @@ class TestDatabaseIntegrationResponse extends ResponseBase implements IConvertib
     TypeContext? context = _ctx;
 }
 
-class GetCollectionImportResponse extends ResponseBase implements IConvertible
-{
-    CollectionImportDto? result;
-
-    GetCollectionImportResponse({this.result});
-    GetCollectionImportResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = JsonConverters.fromJson(json['result'],'CollectionImportDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': JsonConverters.toJson(result,'CollectionImportDto',context!)
-    });
-
-    getTypeName() => "GetCollectionImportResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetCollectionImportsResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<CollectionImportDto>? result;
-
-    GetCollectionImportsResponse({this.result});
-    GetCollectionImportsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = JsonConverters.fromJson(json['result'],'PaginatedResponse<CollectionImportDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': JsonConverters.toJson(result,'PaginatedResponse<CollectionImportDto>',context!)
-    });
-
-    getTypeName() => "GetCollectionImportsResponse";
-    TypeContext? context = _ctx;
-}
-
-class RequestImportUploadUrlResponse extends ResponseBase implements IConvertible
-{
-    ImportUploadTargetDto? result;
-
-    RequestImportUploadUrlResponse({this.result});
-    RequestImportUploadUrlResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = JsonConverters.fromJson(json['result'],'ImportUploadTargetDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': JsonConverters.toJson(result,'ImportUploadTargetDto',context!)
-    });
-
-    getTypeName() => "RequestImportUploadUrlResponse";
-    TypeContext? context = _ctx;
-}
-
-class AnalyzeImportFileResponse extends ResponseBase implements IConvertible
-{
-    ImportFileAnalysisDto? result;
-
-    AnalyzeImportFileResponse({this.result});
-    AnalyzeImportFileResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = JsonConverters.fromJson(json['result'],'ImportFileAnalysisDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': JsonConverters.toJson(result,'ImportFileAnalysisDto',context!)
-    });
-
-    getTypeName() => "AnalyzeImportFileResponse";
-    TypeContext? context = _ctx;
-}
-
 class GetDatabaseAggregateResponse extends ResponseBase implements IConvertible
 {
     MongoDbAggregateDto? item;
@@ -30805,33 +31633,6 @@ class GetFileByIdResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetFileByIdResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetFolderFilesResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<FileResourceRefDto>? list;
-    List<String>? folders;
-    List<PublicFolderDto>? publicFolders;
-
-    GetFolderFilesResponse({this.list,this.folders,this.publicFolders});
-    GetFolderFilesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<FileResourceRefDto>',context!);
-        folders = JsonConverters.fromJson(json['folders'],'List<String>',context!);
-        publicFolders = JsonConverters.fromJson(json['publicFolders'],'List<PublicFolderDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<FileResourceRefDto>',context!),
-        'folders': JsonConverters.toJson(folders,'List<String>',context!),
-        'publicFolders': JsonConverters.toJson(publicFolders,'List<PublicFolderDto>',context!)
-    });
-
-    getTypeName() => "GetFolderFilesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -31233,223 +32034,6 @@ class GetEmailPreferencesByLinkResponse extends ResponseBase implements IConvert
     TypeContext? context = _ctx;
 }
 
-class GetEmailCampaignResponse extends ResponseBase implements IConvertible
-{
-    EmailCampaignDto? item;
-
-    GetEmailCampaignResponse({this.item});
-    GetEmailCampaignResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        item = JsonConverters.fromJson(json['item'],'EmailCampaignDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'item': JsonConverters.toJson(item,'EmailCampaignDto',context!)
-    });
-
-    getTypeName() => "GetEmailCampaignResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEmailCampaignsResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<EmailCampaignListProjection>? list;
-
-    GetEmailCampaignsResponse({this.list});
-    GetEmailCampaignsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignListProjection>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignListProjection>',context!)
-    });
-
-    getTypeName() => "GetEmailCampaignsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEmailCampaignBatchesResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<EmailCampaignBatchDto>? list;
-
-    GetEmailCampaignBatchesResponse({this.list});
-    GetEmailCampaignBatchesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignBatchDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignBatchDto>',context!)
-    });
-
-    getTypeName() => "GetEmailCampaignBatchesResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEmailCampaignBatchNotificationResponse extends ResponseBase implements IConvertible
-{
-    EmailCampaignBatchNotificationDto? campaignNotification;
-
-    GetEmailCampaignBatchNotificationResponse({this.campaignNotification});
-    GetEmailCampaignBatchNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaignNotification = JsonConverters.fromJson(json['campaignNotification'],'EmailCampaignBatchNotificationDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaignNotification': JsonConverters.toJson(campaignNotification,'EmailCampaignBatchNotificationDto',context!)
-    });
-
-    getTypeName() => "GetEmailCampaignBatchNotificationResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEmailCampaignBatchNotificationsResponse extends ResponseBase implements IConvertible
-{
-    List<BatchStatusChangeEntryDto>? batchStatusHistory;
-    PaginatedResponse<EmailCampaignBatchNotificationDto>? list;
-
-    GetEmailCampaignBatchNotificationsResponse({this.batchStatusHistory,this.list});
-    GetEmailCampaignBatchNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        batchStatusHistory = JsonConverters.fromJson(json['batchStatusHistory'],'List<BatchStatusChangeEntryDto>',context!);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'batchStatusHistory': JsonConverters.toJson(batchStatusHistory,'List<BatchStatusChangeEntryDto>',context!),
-        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!)
-    });
-
-    getTypeName() => "GetEmailCampaignBatchNotificationsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEmailCampaignStatisticsResponse extends ResponseBase implements IConvertible
-{
-    CampaignStatsDto? stats;
-
-    GetEmailCampaignStatisticsResponse({this.stats});
-    GetEmailCampaignStatisticsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        stats = JsonConverters.fromJson(json['stats'],'CampaignStatsDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'stats': JsonConverters.toJson(stats,'CampaignStatsDto',context!)
-    });
-
-    getTypeName() => "GetEmailCampaignStatisticsResponse";
-    TypeContext? context = _ctx;
-}
-
-class PreviewEmailNotificationResponse extends ResponseBase implements IConvertible
-{
-    String? subject;
-    String? body;
-
-    PreviewEmailNotificationResponse({this.subject,this.body});
-    PreviewEmailNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        subject = json['subject'];
-        body = json['body'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'subject': subject,
-        'body': body
-    });
-
-    getTypeName() => "PreviewEmailNotificationResponse";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class RetryFailedEmailNotificationsResponse extends ResponseBase implements IConvertible
-{
-    // @DataMember
-    String? retryRequestId;
-
-    // @DataMember
-    int selected = 0;
-
-    // @DataMember
-    Map<String,int?>? skipped;
-
-    // @DataMember
-    bool? replayed;
-
-    // @DataMember
-    String? warning;
-
-    RetryFailedEmailNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
-    RetryFailedEmailNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        retryRequestId = json['retryRequestId'];
-        selected = json['selected'] ?? 0;
-        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
-        replayed = json['replayed'];
-        warning = json['warning'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'retryRequestId': retryRequestId,
-        'selected': selected,
-        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
-        'replayed': replayed,
-        'warning': warning
-    });
-
-    getTypeName() => "RetryFailedEmailNotificationsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetEmailCampaignMessagesResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<EmailCampaignBatchNotificationDto>? list;
-
-    GetEmailCampaignMessagesResponse({this.list});
-    GetEmailCampaignMessagesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!)
-    });
-
-    getTypeName() => "GetEmailCampaignMessagesResponse";
-    TypeContext? context = _ctx;
-}
-
 class GetSmsTemplateResponse extends ResponseBase implements IConvertible
 {
     SmsTemplateDto? item;
@@ -31623,220 +32207,6 @@ class TestSmsIntegrationResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "TestSmsIntegrationResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetSmsCampaignResponse extends ResponseBase implements IConvertible
-{
-    SmsCampaignDto? smsCampaign;
-
-    GetSmsCampaignResponse({this.smsCampaign});
-    GetSmsCampaignResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        smsCampaign = JsonConverters.fromJson(json['smsCampaign'],'SmsCampaignDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'smsCampaign': JsonConverters.toJson(smsCampaign,'SmsCampaignDto',context!)
-    });
-
-    getTypeName() => "GetSmsCampaignResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetSmsCampaignsResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<SmsCampaignDto>? list;
-
-    GetSmsCampaignsResponse({this.list});
-    GetSmsCampaignsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignDto>',context!)
-    });
-
-    getTypeName() => "GetSmsCampaignsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetSmsCampaignBatchesResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<SmsCampaignBatchDto>? list;
-
-    GetSmsCampaignBatchesResponse({this.list});
-    GetSmsCampaignBatchesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignBatchDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignBatchDto>',context!)
-    });
-
-    getTypeName() => "GetSmsCampaignBatchesResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetSmsCampaignBatchNotificationResponse extends ResponseBase implements IConvertible
-{
-    SmsCampaignBatchNotificationDto? campaignNotification;
-
-    GetSmsCampaignBatchNotificationResponse({this.campaignNotification});
-    GetSmsCampaignBatchNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaignNotification = JsonConverters.fromJson(json['campaignNotification'],'SmsCampaignBatchNotificationDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaignNotification': JsonConverters.toJson(campaignNotification,'SmsCampaignBatchNotificationDto',context!)
-    });
-
-    getTypeName() => "GetSmsCampaignBatchNotificationResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetSmsCampaignBatchNotificationsResponse extends ResponseBase implements IConvertible
-{
-    List<BatchStatusChangeEntryDto>? batchStatusHistory;
-    PaginatedResponse<SmsCampaignBatchNotificationDto>? list;
-
-    GetSmsCampaignBatchNotificationsResponse({this.batchStatusHistory,this.list});
-    GetSmsCampaignBatchNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        batchStatusHistory = JsonConverters.fromJson(json['batchStatusHistory'],'List<BatchStatusChangeEntryDto>',context!);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'batchStatusHistory': JsonConverters.toJson(batchStatusHistory,'List<BatchStatusChangeEntryDto>',context!),
-        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!)
-    });
-
-    getTypeName() => "GetSmsCampaignBatchNotificationsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetSmsCampaignStatisticsResponse extends ResponseBase implements IConvertible
-{
-    CampaignStatsDto? stats;
-
-    GetSmsCampaignStatisticsResponse({this.stats});
-    GetSmsCampaignStatisticsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        stats = JsonConverters.fromJson(json['stats'],'CampaignStatsDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'stats': JsonConverters.toJson(stats,'CampaignStatsDto',context!)
-    });
-
-    getTypeName() => "GetSmsCampaignStatisticsResponse";
-    TypeContext? context = _ctx;
-}
-
-class PreviewSmsNotificationResponse extends ResponseBase implements IConvertible
-{
-    String? body;
-
-    PreviewSmsNotificationResponse({this.body});
-    PreviewSmsNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        body = json['body'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'body': body
-    });
-
-    getTypeName() => "PreviewSmsNotificationResponse";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class RetryFailedSmsNotificationsResponse extends ResponseBase implements IConvertible
-{
-    // @DataMember
-    String? retryRequestId;
-
-    // @DataMember
-    int selected = 0;
-
-    // @DataMember
-    Map<String,int?>? skipped;
-
-    // @DataMember
-    bool? replayed;
-
-    // @DataMember
-    String? warning;
-
-    RetryFailedSmsNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
-    RetryFailedSmsNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        retryRequestId = json['retryRequestId'];
-        selected = json['selected'] ?? 0;
-        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
-        replayed = json['replayed'];
-        warning = json['warning'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'retryRequestId': retryRequestId,
-        'selected': selected,
-        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
-        'replayed': replayed,
-        'warning': warning
-    });
-
-    getTypeName() => "RetryFailedSmsNotificationsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetSmsCampaignMessagesResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<SmsCampaignBatchNotificationDto>? list;
-
-    GetSmsCampaignMessagesResponse({this.list});
-    GetSmsCampaignMessagesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!)
-    });
-
-    getTypeName() => "GetSmsCampaignMessagesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -32033,75 +32403,6 @@ class InvokeCodeWorkflowResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "InvokeCodeWorkflowResponse";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class WorkflowRunsResponse extends ResponseBase implements IConvertible
-{
-    // @DataMember
-    PaginatedResponse<WorkflowRunListProjection>? list;
-
-    WorkflowRunsResponse({this.list});
-    WorkflowRunsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<WorkflowRunListProjection>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<WorkflowRunListProjection>',context!)
-    });
-
-    getTypeName() => "WorkflowRunsResponse";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class WorkflowRunResponse extends ResponseBase implements IConvertible
-{
-    // @DataMember
-    WorkflowRunDto? run;
-
-    WorkflowRunResponse({this.run});
-    WorkflowRunResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        run = JsonConverters.fromJson(json['run'],'WorkflowRunDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'run': JsonConverters.toJson(run,'WorkflowRunDto',context!)
-    });
-
-    getTypeName() => "WorkflowRunResponse";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class WorkflowRunLogsResponse extends ResponseBase implements IConvertible
-{
-    // @DataMember
-    PaginatedResponse<TenantLogEntryDto>? list;
-
-    WorkflowRunLogsResponse({this.list});
-    WorkflowRunLogsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<TenantLogEntryDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<TenantLogEntryDto>',context!)
-    });
-
-    getTypeName() => "WorkflowRunLogsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -32743,6 +33044,52 @@ class InvokeCodeFunctionResponse extends ResponseBase implements IConvertible
 }
 
 // @DataContract
+class WorkflowRunsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    PaginatedResponse<WorkflowRunListProjection>? list;
+
+    WorkflowRunsResponse({this.list});
+    WorkflowRunsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<WorkflowRunListProjection>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<WorkflowRunListProjection>',context!)
+    });
+
+    getTypeName() => "WorkflowRunsResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    WorkflowRunDto? run;
+
+    WorkflowRunResponse({this.run});
+    WorkflowRunResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        run = JsonConverters.fromJson(json['run'],'WorkflowRunDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'run': JsonConverters.toJson(run,'WorkflowRunDto',context!)
+    });
+
+    getTypeName() => "WorkflowRunResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class CodeWorkflowResumeLinkResponse extends ResponseBase implements IConvertible
 {
     // @DataMember
@@ -32807,6 +33154,29 @@ class CodeWorkflowResumeLinkResponse extends ResponseBase implements IConvertibl
     });
 
     getTypeName() => "CodeWorkflowResumeLinkResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunLogsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    PaginatedResponse<TenantLogEntryDto>? list;
+
+    WorkflowRunLogsResponse({this.list});
+    WorkflowRunLogsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<TenantLogEntryDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<TenantLogEntryDto>',context!)
+    });
+
+    getTypeName() => "WorkflowRunLogsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -33014,247 +33384,6 @@ class GetPushDevicesResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetPushDevicesResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignAudienceCountResponse extends ResponseBase implements IConvertible
-{
-    PushAudienceCountDto? result;
-
-    GetPushCampaignAudienceCountResponse({this.result});
-    GetPushCampaignAudienceCountResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = JsonConverters.fromJson(json['result'],'PushAudienceCountDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': JsonConverters.toJson(result,'PushAudienceCountDto',context!)
-    });
-
-    getTypeName() => "GetPushCampaignAudienceCountResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignResponse extends ResponseBase implements IConvertible
-{
-    PushCampaignDto? item;
-
-    GetPushCampaignResponse({this.item});
-    GetPushCampaignResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        item = JsonConverters.fromJson(json['item'],'PushCampaignDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'item': JsonConverters.toJson(item,'PushCampaignDto',context!)
-    });
-
-    getTypeName() => "GetPushCampaignResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignsResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<PushCampaignDto>? list;
-
-    GetPushCampaignsResponse({this.list});
-    GetPushCampaignsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignDto>',context!)
-    });
-
-    getTypeName() => "GetPushCampaignsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignBatchesResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<PushCampaignBatchDto>? list;
-
-    GetPushCampaignBatchesResponse({this.list});
-    GetPushCampaignBatchesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignBatchDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignBatchDto>',context!)
-    });
-
-    getTypeName() => "GetPushCampaignBatchesResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignBatchNotificationResponse extends ResponseBase implements IConvertible
-{
-    PushCampaignBatchNotificationDto? campaignNotification;
-
-    GetPushCampaignBatchNotificationResponse({this.campaignNotification});
-    GetPushCampaignBatchNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaignNotification = JsonConverters.fromJson(json['campaignNotification'],'PushCampaignBatchNotificationDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaignNotification': JsonConverters.toJson(campaignNotification,'PushCampaignBatchNotificationDto',context!)
-    });
-
-    getTypeName() => "GetPushCampaignBatchNotificationResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignBatchNotificationsResponse extends ResponseBase implements IConvertible
-{
-    List<BatchStatusChangeEntryDto>? batchStatusHistory;
-    PaginatedResponse<PushCampaignBatchNotificationDto>? list;
-
-    GetPushCampaignBatchNotificationsResponse({this.batchStatusHistory,this.list});
-    GetPushCampaignBatchNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        batchStatusHistory = JsonConverters.fromJson(json['batchStatusHistory'],'List<BatchStatusChangeEntryDto>',context!);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignBatchNotificationDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'batchStatusHistory': JsonConverters.toJson(batchStatusHistory,'List<BatchStatusChangeEntryDto>',context!),
-        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignBatchNotificationDto>',context!)
-    });
-
-    getTypeName() => "GetPushCampaignBatchNotificationsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignStatisticsResponse extends ResponseBase implements IConvertible
-{
-    CampaignStatsDto? stats;
-
-    GetPushCampaignStatisticsResponse({this.stats});
-    GetPushCampaignStatisticsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        stats = JsonConverters.fromJson(json['stats'],'CampaignStatsDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'stats': JsonConverters.toJson(stats,'CampaignStatsDto',context!)
-    });
-
-    getTypeName() => "GetPushCampaignStatisticsResponse";
-    TypeContext? context = _ctx;
-}
-
-class PreviewPushNotificationResponse extends ResponseBase implements IConvertible
-{
-    String? title;
-    String? body;
-    String? subtitle;
-
-    PreviewPushNotificationResponse({this.title,this.body,this.subtitle});
-    PreviewPushNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        title = json['title'];
-        body = json['body'];
-        subtitle = json['subtitle'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'title': title,
-        'body': body,
-        'subtitle': subtitle
-    });
-
-    getTypeName() => "PreviewPushNotificationResponse";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class RetryFailedPushNotificationsResponse extends ResponseBase implements IConvertible
-{
-    // @DataMember
-    String? retryRequestId;
-
-    // @DataMember
-    int selected = 0;
-
-    // @DataMember
-    Map<String,int?>? skipped;
-
-    // @DataMember
-    bool? replayed;
-
-    // @DataMember
-    String? warning;
-
-    RetryFailedPushNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
-    RetryFailedPushNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        retryRequestId = json['retryRequestId'];
-        selected = json['selected'] ?? 0;
-        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
-        replayed = json['replayed'];
-        warning = json['warning'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'retryRequestId': retryRequestId,
-        'selected': selected,
-        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
-        'replayed': replayed,
-        'warning': warning
-    });
-
-    getTypeName() => "RetryFailedPushNotificationsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetPushCampaignMessagesResponse extends ResponseBase implements IConvertible
-{
-    PaginatedResponse<PushCampaignBatchNotificationDto>? list;
-
-    GetPushCampaignMessagesResponse({this.list});
-    GetPushCampaignMessagesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignBatchNotificationDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignBatchNotificationDto>',context!)
-    });
-
-    getTypeName() => "GetPushCampaignMessagesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -35043,6 +35172,789 @@ class RepairContactRolesResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class GetFolderFilesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<FileResourceRefDto>? list;
+    List<String>? folders;
+    List<PublicFolderDto>? publicFolders;
+
+    GetFolderFilesResponse({this.list,this.folders,this.publicFolders});
+    GetFolderFilesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<FileResourceRefDto>',context!);
+        folders = JsonConverters.fromJson(json['folders'],'List<String>',context!);
+        publicFolders = JsonConverters.fromJson(json['publicFolders'],'List<PublicFolderDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<FileResourceRefDto>',context!),
+        'folders': JsonConverters.toJson(folders,'List<String>',context!),
+        'publicFolders': JsonConverters.toJson(publicFolders,'List<PublicFolderDto>',context!)
+    });
+
+    getTypeName() => "GetFolderFilesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetCollectionImportResponse extends ResponseBase implements IConvertible
+{
+    CollectionImportDto? result;
+
+    GetCollectionImportResponse({this.result});
+    GetCollectionImportResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'CollectionImportDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'CollectionImportDto',context!)
+    });
+
+    getTypeName() => "GetCollectionImportResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetCollectionImportsResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<CollectionImportDto>? result;
+
+    GetCollectionImportsResponse({this.result});
+    GetCollectionImportsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'PaginatedResponse<CollectionImportDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'PaginatedResponse<CollectionImportDto>',context!)
+    });
+
+    getTypeName() => "GetCollectionImportsResponse";
+    TypeContext? context = _ctx;
+}
+
+class RequestImportUploadUrlResponse extends ResponseBase implements IConvertible
+{
+    ImportUploadTargetDto? result;
+
+    RequestImportUploadUrlResponse({this.result});
+    RequestImportUploadUrlResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'ImportUploadTargetDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'ImportUploadTargetDto',context!)
+    });
+
+    getTypeName() => "RequestImportUploadUrlResponse";
+    TypeContext? context = _ctx;
+}
+
+class AnalyzeImportFileResponse extends ResponseBase implements IConvertible
+{
+    ImportFileAnalysisDto? result;
+
+    AnalyzeImportFileResponse({this.result});
+    AnalyzeImportFileResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'ImportFileAnalysisDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'ImportFileAnalysisDto',context!)
+    });
+
+    getTypeName() => "AnalyzeImportFileResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmailCampaignResponse extends ResponseBase implements IConvertible
+{
+    EmailCampaignDto? item;
+
+    GetEmailCampaignResponse({this.item});
+    GetEmailCampaignResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'EmailCampaignDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'EmailCampaignDto',context!)
+    });
+
+    getTypeName() => "GetEmailCampaignResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmailCampaignsResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<EmailCampaignListProjection>? list;
+
+    GetEmailCampaignsResponse({this.list});
+    GetEmailCampaignsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignListProjection>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignListProjection>',context!)
+    });
+
+    getTypeName() => "GetEmailCampaignsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmailCampaignBatchesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<EmailCampaignBatchDto>? list;
+
+    GetEmailCampaignBatchesResponse({this.list});
+    GetEmailCampaignBatchesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignBatchDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignBatchDto>',context!)
+    });
+
+    getTypeName() => "GetEmailCampaignBatchesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmailCampaignBatchNotificationResponse extends ResponseBase implements IConvertible
+{
+    EmailCampaignBatchNotificationDto? campaignNotification;
+
+    GetEmailCampaignBatchNotificationResponse({this.campaignNotification});
+    GetEmailCampaignBatchNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaignNotification = JsonConverters.fromJson(json['campaignNotification'],'EmailCampaignBatchNotificationDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaignNotification': JsonConverters.toJson(campaignNotification,'EmailCampaignBatchNotificationDto',context!)
+    });
+
+    getTypeName() => "GetEmailCampaignBatchNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmailCampaignBatchNotificationsResponse extends ResponseBase implements IConvertible
+{
+    List<BatchStatusChangeEntryDto>? batchStatusHistory;
+    PaginatedResponse<EmailCampaignBatchNotificationDto>? list;
+
+    GetEmailCampaignBatchNotificationsResponse({this.batchStatusHistory,this.list});
+    GetEmailCampaignBatchNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        batchStatusHistory = JsonConverters.fromJson(json['batchStatusHistory'],'List<BatchStatusChangeEntryDto>',context!);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'batchStatusHistory': JsonConverters.toJson(batchStatusHistory,'List<BatchStatusChangeEntryDto>',context!),
+        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!)
+    });
+
+    getTypeName() => "GetEmailCampaignBatchNotificationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmailCampaignStatisticsResponse extends ResponseBase implements IConvertible
+{
+    CampaignStatsDto? stats;
+
+    GetEmailCampaignStatisticsResponse({this.stats});
+    GetEmailCampaignStatisticsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        stats = JsonConverters.fromJson(json['stats'],'CampaignStatsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'stats': JsonConverters.toJson(stats,'CampaignStatsDto',context!)
+    });
+
+    getTypeName() => "GetEmailCampaignStatisticsResponse";
+    TypeContext? context = _ctx;
+}
+
+class PreviewEmailNotificationResponse extends ResponseBase implements IConvertible
+{
+    String? subject;
+    String? body;
+
+    PreviewEmailNotificationResponse({this.subject,this.body});
+    PreviewEmailNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        subject = json['subject'];
+        body = json['body'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'subject': subject,
+        'body': body
+    });
+
+    getTypeName() => "PreviewEmailNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RetryFailedEmailNotificationsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? retryRequestId;
+
+    // @DataMember
+    int selected = 0;
+
+    // @DataMember
+    Map<String,int?>? skipped;
+
+    // @DataMember
+    bool? replayed;
+
+    // @DataMember
+    String? warning;
+
+    RetryFailedEmailNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
+    RetryFailedEmailNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        retryRequestId = json['retryRequestId'];
+        selected = json['selected'] ?? 0;
+        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
+        replayed = json['replayed'];
+        warning = json['warning'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'retryRequestId': retryRequestId,
+        'selected': selected,
+        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
+        'replayed': replayed,
+        'warning': warning
+    });
+
+    getTypeName() => "RetryFailedEmailNotificationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEmailCampaignMessagesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<EmailCampaignBatchNotificationDto>? list;
+
+    GetEmailCampaignMessagesResponse({this.list});
+    GetEmailCampaignMessagesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<EmailCampaignBatchNotificationDto>',context!)
+    });
+
+    getTypeName() => "GetEmailCampaignMessagesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSmsCampaignResponse extends ResponseBase implements IConvertible
+{
+    SmsCampaignDto? smsCampaign;
+
+    GetSmsCampaignResponse({this.smsCampaign});
+    GetSmsCampaignResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        smsCampaign = JsonConverters.fromJson(json['smsCampaign'],'SmsCampaignDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'smsCampaign': JsonConverters.toJson(smsCampaign,'SmsCampaignDto',context!)
+    });
+
+    getTypeName() => "GetSmsCampaignResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSmsCampaignsResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<SmsCampaignDto>? list;
+
+    GetSmsCampaignsResponse({this.list});
+    GetSmsCampaignsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignDto>',context!)
+    });
+
+    getTypeName() => "GetSmsCampaignsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSmsCampaignBatchesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<SmsCampaignBatchDto>? list;
+
+    GetSmsCampaignBatchesResponse({this.list});
+    GetSmsCampaignBatchesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignBatchDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignBatchDto>',context!)
+    });
+
+    getTypeName() => "GetSmsCampaignBatchesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSmsCampaignBatchNotificationResponse extends ResponseBase implements IConvertible
+{
+    SmsCampaignBatchNotificationDto? campaignNotification;
+
+    GetSmsCampaignBatchNotificationResponse({this.campaignNotification});
+    GetSmsCampaignBatchNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaignNotification = JsonConverters.fromJson(json['campaignNotification'],'SmsCampaignBatchNotificationDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaignNotification': JsonConverters.toJson(campaignNotification,'SmsCampaignBatchNotificationDto',context!)
+    });
+
+    getTypeName() => "GetSmsCampaignBatchNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSmsCampaignBatchNotificationsResponse extends ResponseBase implements IConvertible
+{
+    List<BatchStatusChangeEntryDto>? batchStatusHistory;
+    PaginatedResponse<SmsCampaignBatchNotificationDto>? list;
+
+    GetSmsCampaignBatchNotificationsResponse({this.batchStatusHistory,this.list});
+    GetSmsCampaignBatchNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        batchStatusHistory = JsonConverters.fromJson(json['batchStatusHistory'],'List<BatchStatusChangeEntryDto>',context!);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'batchStatusHistory': JsonConverters.toJson(batchStatusHistory,'List<BatchStatusChangeEntryDto>',context!),
+        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!)
+    });
+
+    getTypeName() => "GetSmsCampaignBatchNotificationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSmsCampaignStatisticsResponse extends ResponseBase implements IConvertible
+{
+    CampaignStatsDto? stats;
+
+    GetSmsCampaignStatisticsResponse({this.stats});
+    GetSmsCampaignStatisticsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        stats = JsonConverters.fromJson(json['stats'],'CampaignStatsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'stats': JsonConverters.toJson(stats,'CampaignStatsDto',context!)
+    });
+
+    getTypeName() => "GetSmsCampaignStatisticsResponse";
+    TypeContext? context = _ctx;
+}
+
+class PreviewSmsNotificationResponse extends ResponseBase implements IConvertible
+{
+    String? body;
+
+    PreviewSmsNotificationResponse({this.body});
+    PreviewSmsNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        body = json['body'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'body': body
+    });
+
+    getTypeName() => "PreviewSmsNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RetryFailedSmsNotificationsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? retryRequestId;
+
+    // @DataMember
+    int selected = 0;
+
+    // @DataMember
+    Map<String,int?>? skipped;
+
+    // @DataMember
+    bool? replayed;
+
+    // @DataMember
+    String? warning;
+
+    RetryFailedSmsNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
+    RetryFailedSmsNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        retryRequestId = json['retryRequestId'];
+        selected = json['selected'] ?? 0;
+        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
+        replayed = json['replayed'];
+        warning = json['warning'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'retryRequestId': retryRequestId,
+        'selected': selected,
+        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
+        'replayed': replayed,
+        'warning': warning
+    });
+
+    getTypeName() => "RetryFailedSmsNotificationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSmsCampaignMessagesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<SmsCampaignBatchNotificationDto>? list;
+
+    GetSmsCampaignMessagesResponse({this.list});
+    GetSmsCampaignMessagesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<SmsCampaignBatchNotificationDto>',context!)
+    });
+
+    getTypeName() => "GetSmsCampaignMessagesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignAudienceCountResponse extends ResponseBase implements IConvertible
+{
+    PushAudienceCountDto? result;
+
+    GetPushCampaignAudienceCountResponse({this.result});
+    GetPushCampaignAudienceCountResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'PushAudienceCountDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'PushAudienceCountDto',context!)
+    });
+
+    getTypeName() => "GetPushCampaignAudienceCountResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignResponse extends ResponseBase implements IConvertible
+{
+    PushCampaignDto? item;
+
+    GetPushCampaignResponse({this.item});
+    GetPushCampaignResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'PushCampaignDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'PushCampaignDto',context!)
+    });
+
+    getTypeName() => "GetPushCampaignResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignsResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<PushCampaignDto>? list;
+
+    GetPushCampaignsResponse({this.list});
+    GetPushCampaignsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignDto>',context!)
+    });
+
+    getTypeName() => "GetPushCampaignsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignBatchesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<PushCampaignBatchDto>? list;
+
+    GetPushCampaignBatchesResponse({this.list});
+    GetPushCampaignBatchesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignBatchDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignBatchDto>',context!)
+    });
+
+    getTypeName() => "GetPushCampaignBatchesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignBatchNotificationResponse extends ResponseBase implements IConvertible
+{
+    PushCampaignBatchNotificationDto? campaignNotification;
+
+    GetPushCampaignBatchNotificationResponse({this.campaignNotification});
+    GetPushCampaignBatchNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaignNotification = JsonConverters.fromJson(json['campaignNotification'],'PushCampaignBatchNotificationDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaignNotification': JsonConverters.toJson(campaignNotification,'PushCampaignBatchNotificationDto',context!)
+    });
+
+    getTypeName() => "GetPushCampaignBatchNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignBatchNotificationsResponse extends ResponseBase implements IConvertible
+{
+    List<BatchStatusChangeEntryDto>? batchStatusHistory;
+    PaginatedResponse<PushCampaignBatchNotificationDto>? list;
+
+    GetPushCampaignBatchNotificationsResponse({this.batchStatusHistory,this.list});
+    GetPushCampaignBatchNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        batchStatusHistory = JsonConverters.fromJson(json['batchStatusHistory'],'List<BatchStatusChangeEntryDto>',context!);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignBatchNotificationDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'batchStatusHistory': JsonConverters.toJson(batchStatusHistory,'List<BatchStatusChangeEntryDto>',context!),
+        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignBatchNotificationDto>',context!)
+    });
+
+    getTypeName() => "GetPushCampaignBatchNotificationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignStatisticsResponse extends ResponseBase implements IConvertible
+{
+    CampaignStatsDto? stats;
+
+    GetPushCampaignStatisticsResponse({this.stats});
+    GetPushCampaignStatisticsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        stats = JsonConverters.fromJson(json['stats'],'CampaignStatsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'stats': JsonConverters.toJson(stats,'CampaignStatsDto',context!)
+    });
+
+    getTypeName() => "GetPushCampaignStatisticsResponse";
+    TypeContext? context = _ctx;
+}
+
+class PreviewPushNotificationResponse extends ResponseBase implements IConvertible
+{
+    String? title;
+    String? body;
+    String? subtitle;
+
+    PreviewPushNotificationResponse({this.title,this.body,this.subtitle});
+    PreviewPushNotificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        title = json['title'];
+        body = json['body'];
+        subtitle = json['subtitle'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'title': title,
+        'body': body,
+        'subtitle': subtitle
+    });
+
+    getTypeName() => "PreviewPushNotificationResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RetryFailedPushNotificationsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? retryRequestId;
+
+    // @DataMember
+    int selected = 0;
+
+    // @DataMember
+    Map<String,int?>? skipped;
+
+    // @DataMember
+    bool? replayed;
+
+    // @DataMember
+    String? warning;
+
+    RetryFailedPushNotificationsResponse({this.retryRequestId,this.selected=0,this.skipped,this.replayed,this.warning});
+    RetryFailedPushNotificationsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        retryRequestId = json['retryRequestId'];
+        selected = json['selected'] ?? 0;
+        skipped = JsonConverters.fromJson(json['skipped'],'Map<String,int?>',context!);
+        replayed = json['replayed'];
+        warning = json['warning'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'retryRequestId': retryRequestId,
+        'selected': selected,
+        'skipped': JsonConverters.toJson(skipped,'Map<String,int?>',context!),
+        'replayed': replayed,
+        'warning': warning
+    });
+
+    getTypeName() => "RetryFailedPushNotificationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetPushCampaignMessagesResponse extends ResponseBase implements IConvertible
+{
+    PaginatedResponse<PushCampaignBatchNotificationDto>? list;
+
+    GetPushCampaignMessagesResponse({this.list});
+    GetPushCampaignMessagesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        list = JsonConverters.fromJson(json['list'],'PaginatedResponse<PushCampaignBatchNotificationDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'list': JsonConverters.toJson(list,'PaginatedResponse<PushCampaignBatchNotificationDto>',context!)
+    });
+
+    getTypeName() => "GetPushCampaignMessagesResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetComplianceSettingsResponse extends ResponseBase implements IConvertible
 {
     ProjectComplianceDto? settings;
@@ -36474,6 +37386,9 @@ class InternalsTypeGen implements IConvertible, IGet
     SmsToAccountUsersDeliverySettingsDto? typegen_249_SmsToAccountUsersDeliverySettingsDto;
     SmsToCollectionRecordsDeliverySettingsDto? typegen_101_SmsToCollectionRecordsDeliverySettingsDto;
     SmsToPhoneNumbersDeliverySettingsDto? typegen_102_SmsToPhoneNumbersDeliverySettingsDto;
+    EmailToTriggerSubjectDeliverySettingsDto? typegen_318_EmailToTriggerSubjectDeliverySettingsDto;
+    PushToTriggerSubjectDeliverySettingsDto? typegen_319_PushToTriggerSubjectDeliverySettingsDto;
+    SmsToTriggerSubjectDeliverySettingsDto? typegen_320_SmsToTriggerSubjectDeliverySettingsDto;
     OpenAiLlmIntegrationDto? typegen_103_OpenAiLlmIntegrationDto;
     AnthropicLlmIntegrationDto? typegen_104_AnthropicLlmIntegrationDto;
     OllamaLlmIntegrationDto? typegen_105_OllamaLlmIntegrationDto;
@@ -36486,6 +37401,7 @@ class InternalsTypeGen implements IConvertible, IGet
     GoogleCalendarMcpIntegrationDto? typegen_112_GoogleCalendarMcpIntegrationDto;
     ObsidianMcpIntegrationDto? typegen_113_ObsidianMcpIntegrationDto;
     AwsLambdaKeylessCodeIntegrationDto? typegen_114_AwsLambdaKeylessCodeIntegrationDto;
+    AwsLambdaCrossAccountRoleCodeIntegrationDto? typegen_321_AwsLambdaCrossAccountRoleCodeIntegrationDto;
     AwsLambdaIamCodeIntegrationDto? typegen_115_AwsLambdaIamCodeIntegrationDto;
     AzureFunctionsCodeIntegrationDto? typegen_116_AzureFunctionsCodeIntegrationDto;
     GoogleCloudFunctionsCodeIntegrationDto? typegen_118_GoogleCloudFunctionsCodeIntegrationDto;
@@ -36531,6 +37447,7 @@ class InternalsTypeGen implements IConvertible, IGet
     SplunkLoggingIntegrationDto? typegen_150_SplunkLoggingIntegrationDto;
     AppleICloudFilesIntegrationDto? typegen_153_AppleICloudFilesIntegrationDto;
     AwsS3KeylessFilesIntegrationDto? typegen_154_AwsS3KeylessFilesIntegrationDto;
+    AwsS3CrossAccountRoleFilesIntegrationDto? typegen_322_AwsS3CrossAccountRoleFilesIntegrationDto;
     AwsS3IamFilesIntegrationDto? typegen_155_AwsS3IamFilesIntegrationDto;
     AzureBlobFilesIntegrationDto? typegen_156_AzureBlobFilesIntegrationDto;
     DropBoxFilesIntegrationDto? typegen_157_DropBoxFilesIntegrationDto;
@@ -36557,6 +37474,7 @@ class InternalsTypeGen implements IConvertible, IGet
     SafariPushIntegrationDto? typegen_178_SafariPushIntegrationDto;
     FakePushIntegrationDto? typegen_247_FakePushIntegrationDto;
     AwsKeylessEmailIntegrationDto? typegen_179_AwsKeylessEmailIntegrationDto;
+    AwsCrossAccountRoleEmailIntegrationDto? typegen_323_AwsCrossAccountRoleEmailIntegrationDto;
     AwsIamEmailIntegrationDto? typegen_180_AwsIamEmailIntegrationDto;
     MailGunEmailIntegrationDto? typegen_181_MailGunEmailIntegrationDto;
     SendGridEmailIntegrationDto? typegen_182_SendGridEmailIntegrationDto;
@@ -36645,7 +37563,7 @@ class InternalsTypeGen implements IConvertible, IGet
     DisconnectPaymentsIntegrationConnect? typegen_316_DisconnectPaymentsIntegrationConnect;
     PaymentsIntegrationConnectionDto? typegen_317_PaymentsIntegrationConnectionDto;
 
-    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_297_FakeEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_298_FakePushIntegrationRequest,this.typegen_299_BirdSmsIntegrationRequest,this.typegen_300_PlivoSmsIntegrationRequest,this.typegen_301_SinchSmsIntegrationRequest,this.typegen_302_TelesignSmsIntegrationRequest,this.typegen_303_TelnyxSmsIntegrationRequest,this.typegen_304_TwilioSmsIntegrationRequest,this.typegen_305_VonageSmsIntegrationRequest,this.typegen_306_FakeSmsIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_308_TriggerActionWorkflowDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaKeylessCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3KeylessFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsKeylessEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_307_AzureCommunicationEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_309_WorkflowSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto,this.typegen_310_GetQuickConnectProviders,this.typegen_311_StartPaymentsIntegrationConnect,this.typegen_312_GetIntegrationConnectTargets,this.typegen_313_CompletePaymentsIntegrationConnect,this.typegen_314_QuickConnectProviderDto,this.typegen_315_QuickConnectTargetDto,this.typegen_316_DisconnectPaymentsIntegrationConnect,this.typegen_317_PaymentsIntegrationConnectionDto});
+    InternalsTypeGen({this.typegen_0_SmtpEmailIntegrationRequest,this.typegen_1_AwsSesEmailIntegrationRequest,this.typegen_2_SendGridEmailIntegrationRequest,this.typegen_3_MailGunEmailIntegrationRequest,this.typegen_3a_AzureCommunicationEmailIntegrationRequest,this.typegen_297_FakeEmailIntegrationRequest,this.typegen_4_EmailToAllUsersDeliverySettingsRequest,this.typegen_5_EmailToAccountUsersDeliverySettingsRequest,this.typegen_6_EmailToCollectionRecordsDeliverySettingsRequest,this.typegen_7_EmailToEmailsDeliverySettingsRequest,this.typegen_8_EmailToUsersDeliverySettingsRequest,this.typegen_9_MembershipTriggerRequest,this.typegen_10_SchemaTriggerRequest,this.typegen_11_FilesTriggerRequest,this.typegen_12_PaymentTriggerRequest,this.typegen_15_MongoDbConnectionStringDatabaseIntegrationRequest,this.typegen_16_MongoDbAtlasFlexManagedDatabaseIntegrationRequest,this.typegen_16_GoogleDriveFilesIntegrationRequest,this.typegen_17_FtpFilesIntegrationRequest,this.typegen_18_DropBoxFilesIntegrationRequest,this.typegen_19_AppleICloudFilesIntegrationRequest,this.typegen_20_AwsS3FilesIntegrationRequest,this.typegen_21_GoogleCloudFilesIntegrationRequest,this.typegen_22_AzureBlobFilesIntegrationRequest,this.typegen_23_LocalFilesIntegrationRequest,this.typegen_24_AmqpLoggingIntegrationRequest,this.typegen_25_AwsKinesisLoggingIntegrationRequest,this.typegen_26_AwsS3LoggingIntegrationRequest,this.typegen_28_NewRelicLoggingIntegrationRequest,this.typegen_30_MongoDbLoggingIntegrationRequest,this.typegen_31_KafkaLoggingIntegrationRequest,this.typegen_32_PrometheusLoggingIntegrationRequest,this.typegen_33_DataDogLoggingIntegrationRequest,this.typegen_34_InternalKafkaLoggingIntegrationRequest,this.typegen_35_ElasticSearchLoggingIntegrationRequest,this.typegen_37_SplunkLoggingIntegrationRequest,this.typegen_38_AzureOtelLoggingIntegrationRequest,this.typegen_39_KibanaLoggingIntegrationRequest,this.typegen_40_LocalFileLoggingIntegrationRequest,this.typegen_41_OktaMembershipIntegrationRequest,this.typegen_42_XMembershipIntegrationRequest,this.typegen_43_GoogleMembershipIntegrationRequest,this.typegen_44_MicrosoftMembershipIntegrationRequest,this.typegen_45_GitHubMembershipIntegrationRequest,this.typegen_46_MetaMembershipIntegrationRequest,this.typegen_47_AppleMembershipIntegrationRequest,this.typegen_48_LemonSqueezyPaymentIntegrationRequest,this.typegen_49_AdyenPaymentIntegrationRequest,this.typegen_50_MolliePaymentIntegrationRequest,this.typegen_51_PaddlePaymentIntegrationRequest,this.typegen_52_PayPalPaymentIntegrationRequest,this.typegen_53_StripePaymentIntegrationRequest,this.typegen_54_AppleInAppPaymentIntegrationRequest,this.typegen_55_GoogleInAppPaymentIntegrationRequest,this.typegen_285_MontonioPaymentIntegrationRequest,this.typegen_295_NeopayPaymentIntegrationRequest,this.typegen_287_ShopifyPaymentIntegrationRequest,this.typegen_288_WooCommercePaymentIntegrationRequest,this.typegen_289_MagentoPaymentIntegrationRequest,this.typegen_290_BraintreePaymentIntegrationRequest,this.typegen_291_AuthorizeNetPaymentIntegrationRequest,this.typegen_292_CheckOutComPaymentIntegrationRequest,this.typegen_293_WorldpayPaymentIntegrationRequest,this.typegen_56_EdgeWebPushIntegrationRequest,this.typegen_57_ChromePluginPushIntegrationRequest,this.typegen_58_SafariPushIntegrationRequest,this.typegen_59_ChromeWebPushIntegrationRequest,this.typegen_60_FirefoxWebPushIntegrationRequest,this.typegen_61_AndroidFirebasePushIntegrationRequest,this.typegen_62_AppleApnsPushIntegrationRequest,this.typegen_298_FakePushIntegrationRequest,this.typegen_299_BirdSmsIntegrationRequest,this.typegen_300_PlivoSmsIntegrationRequest,this.typegen_301_SinchSmsIntegrationRequest,this.typegen_302_TelesignSmsIntegrationRequest,this.typegen_303_TelnyxSmsIntegrationRequest,this.typegen_304_TwilioSmsIntegrationRequest,this.typegen_305_VonageSmsIntegrationRequest,this.typegen_306_FakeSmsIntegrationRequest,this.typegen_65_AwsLambdaCodeIntegrationRequest,this.typegen_66_AzureFunctionsCodeIntegrationRequest,this.typegen_67_GoogleCloudFunctionsCodeIntegrationRequest,this.typegen_68_OllamaLlmIntegrationRequest,this.typegen_69_OpenRouterLlmIntegrationRequest,this.typegen_70_MistralLlmIntegrationRequest,this.typegen_71_GrokLlmIntegrationRequest,this.typegen_72_GroqLlmIntegrationRequest,this.typegen_73_GoogleLlmIntegrationRequest,this.typegen_74_AnthropicLlmIntegrationRequest,this.typegen_75_OpenAiLlmIntegrationRequest,this.typegen_76_PlaywrightMcpIntegrationRequest,this.typegen_77_MongoDbMcpIntegrationRequest,this.typegen_78_GitHubMcpIntegrationRequest,this.typegen_79_StripeMcpIntegrationRequest,this.typegen_80_BraveSearchMcpIntegrationRequest,this.typegen_81_ObsidianMcpIntegrationRequest,this.typegen_82_EmailTemplateDto,this.typegen_83_PushTemplateDto,this.typegen_84_SmsTemplateDto,this.typegen_85_SystemEmailTemplateDto,this.typegen_86_TriggerActionEmailDto,this.typegen_87_TriggerActionPushDto,this.typegen_88_TriggerActionCodeDto,this.typegen_89_TriggerActionWebhookDto,this.typegen_236_TriggerActionSmsDto,this.typegen_237_TriggerActionSseDto,this.typegen_238_TriggerActionMarketplaceDto,this.typegen_308_TriggerActionWorkflowDto,this.typegen_239_SseDeliverySettingsDto,this.typegen_240_GetTriggers,this.typegen_241_GetTriggersResponse,this.typegen_90_EmailToAllUsersDeliverySettingsDto,this.typegen_91_EmailToAccountUsersDeliverySettingsDto,this.typegen_92_EmailToUsersDeliverySettingsDto,this.typegen_93_EmailToEmailAddressesDeliverySettingsDto,this.typegen_94_EmailToCollectionRecordsDeliverySettingsDto,this.typegen_95_PushToAllUsersDeliverySettingsDto,this.typegen_96_PushToUsersDeliverySettingsDto,this.typegen_229_PushToAccountUsersDeliverySettingsDto,this.typegen_97_PushToCollectionRecordsDeliverySettingsDto,this.typegen_98_PushToDevicesDeliverySettingsDto,this.typegen_99_SmsToAllUsersDeliverySettingsDto,this.typegen_100_SmsToUsersDeliverySettingsDto,this.typegen_249_SmsToAccountUsersDeliverySettingsDto,this.typegen_101_SmsToCollectionRecordsDeliverySettingsDto,this.typegen_102_SmsToPhoneNumbersDeliverySettingsDto,this.typegen_318_EmailToTriggerSubjectDeliverySettingsDto,this.typegen_319_PushToTriggerSubjectDeliverySettingsDto,this.typegen_320_SmsToTriggerSubjectDeliverySettingsDto,this.typegen_103_OpenAiLlmIntegrationDto,this.typegen_104_AnthropicLlmIntegrationDto,this.typegen_105_OllamaLlmIntegrationDto,this.typegen_106_GroqLlmIntegrationDto,this.typegen_107_GoogleLlmIntegrationDto,this.typegen_108_MistralLlmIntegrationDto,this.typegen_109_OpenRouterLlmIntegrationDto,this.typegen_110_GrokLlmIntegrationDto,this.typegen_111_DockerMcpIntegrationDto,this.typegen_112_GoogleCalendarMcpIntegrationDto,this.typegen_113_ObsidianMcpIntegrationDto,this.typegen_114_AwsLambdaKeylessCodeIntegrationDto,this.typegen_321_AwsLambdaCrossAccountRoleCodeIntegrationDto,this.typegen_115_AwsLambdaIamCodeIntegrationDto,this.typegen_116_AzureFunctionsCodeIntegrationDto,this.typegen_118_GoogleCloudFunctionsCodeIntegrationDto,this.typegen_120_AdyenPaymentIntegrationDto,this.typegen_121_AppleInAppPaymentIntegrationDto,this.typegen_122_GoogleInAppPaymentIntegrationDto,this.typegen_123_LemonSqueezyPaymentIntegrationDto,this.typegen_124_MolliePaymentIntegrationDto,this.typegen_125_PaddlePaymentIntegrationDto,this.typegen_126_PayPalPaymentIntegrationDto,this.typegen_127_StripePaymentIntegrationDto,this.typegen_184_ShopifyPaymentIntegrationDto,this.typegen_185_WooCommercePaymentIntegrationDto,this.typegen_186_MagentoPaymentIntegrationDto,this.typegen_187_BraintreePaymentIntegrationDto,this.typegen_188_AuthorizeNetPaymentIntegrationDto,this.typegen_189_CheckOutComPaymentIntegrationDto,this.typegen_190_WorldpayPaymentIntegrationDto,this.typegen_286_MontonioPaymentIntegrationDto,this.typegen_296_NeopayPaymentIntegrationDto,this.typegen_294_PaymentOrderEventDto,this.typegen_128_AppleSignInMembershipIntegrationDto,this.typegen_129_GitHubMembershipIntegrationDto,this.typegen_130_GoogleMembershipIntegrationDto,this.typegen_131_MetaMembershipIntegrationDto,this.typegen_132_MicrosoftMembershipIntegrationDto,this.typegen_133_OktaMembershipIntegrationDto,this.typegen_134_XMembershipIntegrationDto,this.typegen_135_AmqpLoggingIntegrationDto,this.typegen_136_AwsKinesisLoggingIntegrationDto,this.typegen_137_AwsS3CrossAccountRoleLoggingIntegrationDto,this.typegen_138_AwsS3IamLoggingIntegrationDto,this.typegen_139_AzureOtelLoggingIntegrationDto,this.typegen_140_DataDogLoggingIntegrationDto,this.typegen_141_ElasticSearchLoggingIntegrationDto,this.typegen_142_InternalKafkaLoggingIntegrationDto,this.typegen_143_KafkaLoggingIntegrationDto,this.typegen_144_KibanaLoggingIntegrationDto,this.typegen_145_LocalFileLoggingIntegrationDto,this.typegen_147_MongoDbLoggingIntegrationDto,this.typegen_148_NewRelicLoggingIntegrationDto,this.typegen_149_PrometheusLoggingIntegrationDto,this.typegen_150_SplunkLoggingIntegrationDto,this.typegen_153_AppleICloudFilesIntegrationDto,this.typegen_154_AwsS3KeylessFilesIntegrationDto,this.typegen_322_AwsS3CrossAccountRoleFilesIntegrationDto,this.typegen_155_AwsS3IamFilesIntegrationDto,this.typegen_156_AzureBlobFilesIntegrationDto,this.typegen_157_DropBoxFilesIntegrationDto,this.typegen_158_FtpFilesIntegrationDto,this.typegen_159_GoogleCloudFilesIntegrationDto,this.typegen_160_GoogleDriveFilesIntegrationDto,this.typegen_161_LocalFilesIntegrationDto,this.typegen_164_MongoDbConnectionStringIntegrationDto,this.typegen_165_MongoDbAtlasFlexManagedIntegrationDto,this.typegen_165_BirdSmsIntegrationDto,this.typegen_166_PlivoSmsIntegrationDto,this.typegen_167_SinchSmsIntegrationDto,this.typegen_168_TelesignSmsIntegrationDto,this.typegen_169_TelnyxSmsIntegrationDto,this.typegen_170_TwilioSmsIntegrationDto,this.typegen_171_VonageSmsIntegrationDto,this.typegen_246_FakeSmsIntegrationDto,this.typegen_172_AndroidFirebasePushIntegrationDto,this.typegen_173_AppleApnsPushIntegrationDto,this.typegen_174_ChromePluginPushIntegrationDto,this.typegen_175_ChromeWebPushIntegrationDto,this.typegen_176_EdgeWebPushIntegrationDto,this.typegen_177_FirefoxWebPushIntegrationDto,this.typegen_178_SafariPushIntegrationDto,this.typegen_247_FakePushIntegrationDto,this.typegen_179_AwsKeylessEmailIntegrationDto,this.typegen_323_AwsCrossAccountRoleEmailIntegrationDto,this.typegen_180_AwsIamEmailIntegrationDto,this.typegen_181_MailGunEmailIntegrationDto,this.typegen_182_SendGridEmailIntegrationDto,this.typegen_183_SmtpEmailIntegrationDto,this.typegen_307_AzureCommunicationEmailIntegrationDto,this.typegen_248_FakeEmailIntegrationDto,this.typegen_192_WebhookIntegrationDto,this.typegen_193_WebhookDestinationDto,this.typegen_194_SchedulerTaskDto,this.typegen_249_EmailCampaignSchedulerTaskRequest,this.typegen_250_SmsCampaignSchedulerTaskRequest,this.typegen_251_PushCampaignSchedulerTaskRequest,this.typegen_195_MongoDbAggregateDto,this.typegen_196_MarketplaceIntegrationDto,this.typegen_197_MarketplaceFunctionDto,this.typegen_198_MarketplaceListingDto,this.typegen_199_MarketplaceFunctionDefinitionDto,this.typegen_200_MarketplaceFunctionParameterDto,this.typegen_201_EnableCode,this.typegen_202_DisableCode,this.typegen_203_GetCodeIntegrations,this.typegen_204_GetCodeIntegration,this.typegen_205_SaveCodeIntegration,this.typegen_206_TestCodeIntegration,this.typegen_207_ConfirmCodeIntegrationHumanDeliveryRequest,this.typegen_209_DeleteCodeIntegrationRequest,this.typegen_210_EnableCodeIntegrationRequest,this.typegen_211_DisableCodeIntegrationRequest,this.typegen_212_GetMarketplaceListings,this.typegen_213_GetMarketplaceListingFunctionTokens,this.typegen_214_GetMarketplaceIntegrations,this.typegen_215_GetMarketplaceIntegration,this.typegen_216_SaveMarketplaceIntegration,this.typegen_217_DeleteMarketplaceIntegration,this.typegen_218_EnableMarketplaceIntegration,this.typegen_219_DisableMarketplaceIntegration,this.typegen_221_GetMarketplaceFunctions,this.typegen_222_GetMarketplaceFunction,this.typegen_223_SaveMarketplaceFunction,this.typegen_224_DeleteMarketplaceFunction,this.typegen_225_EnableMarketplaceFunction,this.typegen_226_DisableMarketplaceFunction,this.typegen_227_GetMarketplaceFunctionTokens,this.typegen_228_InvokeMarketplaceFunction,this.typegen_232_GetMarketplaceListing,this.typegen_233_TestMarketplaceIntegration,this.typegen_234_TestMarketplaceIntegrationResponse,this.typegen_235_GetMarketplaceListingResponse,this.typegen_230_AdminPortalStructureDto,this.typegen_231_AdminPortalModuleDto,this.typegen_236_UserMessageEntryWireDto,this.typegen_237_AssistantTextEntryWireDto,this.typegen_238_AssistantQuestionEntryWireDto,this.typegen_239_UserAnswerEntryWireDto,this.typegen_240_PlanEntryWireDto,this.typegen_241_UserDecisionEntryWireDto,this.typegen_242_RunStepEntryWireDto,this.typegen_243_ActionPendingEntryWireDto,this.typegen_244_NoticeEntryWireDto,this.typegen_245_ConversationSnapshotEntryWireDto,this.typegen_269_FunctionRefDto,this.typegen_270_CodeFunctionEventDto,this.typegen_271_CodeFunctionContextDto,this.typegen_272_CodeFunctionCallerDto,this.typegen_273_CodeFunctionRunAsDto,this.typegen_274_CodeFunctionDataDto,this.typegen_275_DatabaseRecordChangeDto,this.typegen_276_UserChangeDto,this.typegen_277_FileChangeDto,this.typegen_278_PaymentFactDto,this.typegen_279_AiUsageEventDto,this.typegen_280_ScheduledTaskInfoDto,this.typegen_281_FakeCodeIntegrationDto,this.typegen_282_FakeCodeIntegrationRequest,this.typegen_283_CodeFunctionSchedulerTaskRequest,this.typegen_284_MarketplaceFunctionSchedulerTaskRequest,this.typegen_309_WorkflowSchedulerTaskRequest,this.typegen_285_AwsCloudWatchLoggingIntegrationRequest,this.typegen_286_AwsCloudWatchLoggingIntegrationDto,this.typegen_310_GetQuickConnectProviders,this.typegen_311_StartPaymentsIntegrationConnect,this.typegen_312_GetIntegrationConnectTargets,this.typegen_313_CompletePaymentsIntegrationConnect,this.typegen_314_QuickConnectProviderDto,this.typegen_315_QuickConnectTargetDto,this.typegen_316_DisconnectPaymentsIntegrationConnect,this.typegen_317_PaymentsIntegrationConnectionDto});
     InternalsTypeGen.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -36775,6 +37693,9 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_249_SmsToAccountUsersDeliverySettingsDto = JsonConverters.fromJson(json['typegen_249_SmsToAccountUsersDeliverySettingsDto'],'SmsToAccountUsersDeliverySettingsDto',context!);
         typegen_101_SmsToCollectionRecordsDeliverySettingsDto = JsonConverters.fromJson(json['typegen_101_SmsToCollectionRecordsDeliverySettingsDto'],'SmsToCollectionRecordsDeliverySettingsDto',context!);
         typegen_102_SmsToPhoneNumbersDeliverySettingsDto = JsonConverters.fromJson(json['typegen_102_SmsToPhoneNumbersDeliverySettingsDto'],'SmsToPhoneNumbersDeliverySettingsDto',context!);
+        typegen_318_EmailToTriggerSubjectDeliverySettingsDto = JsonConverters.fromJson(json['typegen_318_EmailToTriggerSubjectDeliverySettingsDto'],'EmailToTriggerSubjectDeliverySettingsDto',context!);
+        typegen_319_PushToTriggerSubjectDeliverySettingsDto = JsonConverters.fromJson(json['typegen_319_PushToTriggerSubjectDeliverySettingsDto'],'PushToTriggerSubjectDeliverySettingsDto',context!);
+        typegen_320_SmsToTriggerSubjectDeliverySettingsDto = JsonConverters.fromJson(json['typegen_320_SmsToTriggerSubjectDeliverySettingsDto'],'SmsToTriggerSubjectDeliverySettingsDto',context!);
         typegen_103_OpenAiLlmIntegrationDto = JsonConverters.fromJson(json['typegen_103_OpenAiLlmIntegrationDto'],'OpenAiLlmIntegrationDto',context!);
         typegen_104_AnthropicLlmIntegrationDto = JsonConverters.fromJson(json['typegen_104_AnthropicLlmIntegrationDto'],'AnthropicLlmIntegrationDto',context!);
         typegen_105_OllamaLlmIntegrationDto = JsonConverters.fromJson(json['typegen_105_OllamaLlmIntegrationDto'],'OllamaLlmIntegrationDto',context!);
@@ -36787,6 +37708,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_112_GoogleCalendarMcpIntegrationDto = JsonConverters.fromJson(json['typegen_112_GoogleCalendarMcpIntegrationDto'],'GoogleCalendarMcpIntegrationDto',context!);
         typegen_113_ObsidianMcpIntegrationDto = JsonConverters.fromJson(json['typegen_113_ObsidianMcpIntegrationDto'],'ObsidianMcpIntegrationDto',context!);
         typegen_114_AwsLambdaKeylessCodeIntegrationDto = JsonConverters.fromJson(json['typegen_114_AwsLambdaKeylessCodeIntegrationDto'],'AwsLambdaKeylessCodeIntegrationDto',context!);
+        typegen_321_AwsLambdaCrossAccountRoleCodeIntegrationDto = JsonConverters.fromJson(json['typegen_321_AwsLambdaCrossAccountRoleCodeIntegrationDto'],'AwsLambdaCrossAccountRoleCodeIntegrationDto',context!);
         typegen_115_AwsLambdaIamCodeIntegrationDto = JsonConverters.fromJson(json['typegen_115_AwsLambdaIamCodeIntegrationDto'],'AwsLambdaIamCodeIntegrationDto',context!);
         typegen_116_AzureFunctionsCodeIntegrationDto = JsonConverters.fromJson(json['typegen_116_AzureFunctionsCodeIntegrationDto'],'AzureFunctionsCodeIntegrationDto',context!);
         typegen_118_GoogleCloudFunctionsCodeIntegrationDto = JsonConverters.fromJson(json['typegen_118_GoogleCloudFunctionsCodeIntegrationDto'],'GoogleCloudFunctionsCodeIntegrationDto',context!);
@@ -36832,6 +37754,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_150_SplunkLoggingIntegrationDto = JsonConverters.fromJson(json['typegen_150_SplunkLoggingIntegrationDto'],'SplunkLoggingIntegrationDto',context!);
         typegen_153_AppleICloudFilesIntegrationDto = JsonConverters.fromJson(json['typegen_153_AppleICloudFilesIntegrationDto'],'AppleICloudFilesIntegrationDto',context!);
         typegen_154_AwsS3KeylessFilesIntegrationDto = JsonConverters.fromJson(json['typegen_154_AwsS3KeylessFilesIntegrationDto'],'AwsS3KeylessFilesIntegrationDto',context!);
+        typegen_322_AwsS3CrossAccountRoleFilesIntegrationDto = JsonConverters.fromJson(json['typegen_322_AwsS3CrossAccountRoleFilesIntegrationDto'],'AwsS3CrossAccountRoleFilesIntegrationDto',context!);
         typegen_155_AwsS3IamFilesIntegrationDto = JsonConverters.fromJson(json['typegen_155_AwsS3IamFilesIntegrationDto'],'AwsS3IamFilesIntegrationDto',context!);
         typegen_156_AzureBlobFilesIntegrationDto = JsonConverters.fromJson(json['typegen_156_AzureBlobFilesIntegrationDto'],'AzureBlobFilesIntegrationDto',context!);
         typegen_157_DropBoxFilesIntegrationDto = JsonConverters.fromJson(json['typegen_157_DropBoxFilesIntegrationDto'],'DropBoxFilesIntegrationDto',context!);
@@ -36858,6 +37781,7 @@ class InternalsTypeGen implements IConvertible, IGet
         typegen_178_SafariPushIntegrationDto = JsonConverters.fromJson(json['typegen_178_SafariPushIntegrationDto'],'SafariPushIntegrationDto',context!);
         typegen_247_FakePushIntegrationDto = JsonConverters.fromJson(json['typegen_247_FakePushIntegrationDto'],'FakePushIntegrationDto',context!);
         typegen_179_AwsKeylessEmailIntegrationDto = JsonConverters.fromJson(json['typegen_179_AwsKeylessEmailIntegrationDto'],'AwsKeylessEmailIntegrationDto',context!);
+        typegen_323_AwsCrossAccountRoleEmailIntegrationDto = JsonConverters.fromJson(json['typegen_323_AwsCrossAccountRoleEmailIntegrationDto'],'AwsCrossAccountRoleEmailIntegrationDto',context!);
         typegen_180_AwsIamEmailIntegrationDto = JsonConverters.fromJson(json['typegen_180_AwsIamEmailIntegrationDto'],'AwsIamEmailIntegrationDto',context!);
         typegen_181_MailGunEmailIntegrationDto = JsonConverters.fromJson(json['typegen_181_MailGunEmailIntegrationDto'],'MailGunEmailIntegrationDto',context!);
         typegen_182_SendGridEmailIntegrationDto = JsonConverters.fromJson(json['typegen_182_SendGridEmailIntegrationDto'],'SendGridEmailIntegrationDto',context!);
@@ -37075,6 +37999,9 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_249_SmsToAccountUsersDeliverySettingsDto': JsonConverters.toJson(typegen_249_SmsToAccountUsersDeliverySettingsDto,'SmsToAccountUsersDeliverySettingsDto',context!),
         'typegen_101_SmsToCollectionRecordsDeliverySettingsDto': JsonConverters.toJson(typegen_101_SmsToCollectionRecordsDeliverySettingsDto,'SmsToCollectionRecordsDeliverySettingsDto',context!),
         'typegen_102_SmsToPhoneNumbersDeliverySettingsDto': JsonConverters.toJson(typegen_102_SmsToPhoneNumbersDeliverySettingsDto,'SmsToPhoneNumbersDeliverySettingsDto',context!),
+        'typegen_318_EmailToTriggerSubjectDeliverySettingsDto': JsonConverters.toJson(typegen_318_EmailToTriggerSubjectDeliverySettingsDto,'EmailToTriggerSubjectDeliverySettingsDto',context!),
+        'typegen_319_PushToTriggerSubjectDeliverySettingsDto': JsonConverters.toJson(typegen_319_PushToTriggerSubjectDeliverySettingsDto,'PushToTriggerSubjectDeliverySettingsDto',context!),
+        'typegen_320_SmsToTriggerSubjectDeliverySettingsDto': JsonConverters.toJson(typegen_320_SmsToTriggerSubjectDeliverySettingsDto,'SmsToTriggerSubjectDeliverySettingsDto',context!),
         'typegen_103_OpenAiLlmIntegrationDto': JsonConverters.toJson(typegen_103_OpenAiLlmIntegrationDto,'OpenAiLlmIntegrationDto',context!),
         'typegen_104_AnthropicLlmIntegrationDto': JsonConverters.toJson(typegen_104_AnthropicLlmIntegrationDto,'AnthropicLlmIntegrationDto',context!),
         'typegen_105_OllamaLlmIntegrationDto': JsonConverters.toJson(typegen_105_OllamaLlmIntegrationDto,'OllamaLlmIntegrationDto',context!),
@@ -37087,6 +38014,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_112_GoogleCalendarMcpIntegrationDto': JsonConverters.toJson(typegen_112_GoogleCalendarMcpIntegrationDto,'GoogleCalendarMcpIntegrationDto',context!),
         'typegen_113_ObsidianMcpIntegrationDto': JsonConverters.toJson(typegen_113_ObsidianMcpIntegrationDto,'ObsidianMcpIntegrationDto',context!),
         'typegen_114_AwsLambdaKeylessCodeIntegrationDto': JsonConverters.toJson(typegen_114_AwsLambdaKeylessCodeIntegrationDto,'AwsLambdaKeylessCodeIntegrationDto',context!),
+        'typegen_321_AwsLambdaCrossAccountRoleCodeIntegrationDto': JsonConverters.toJson(typegen_321_AwsLambdaCrossAccountRoleCodeIntegrationDto,'AwsLambdaCrossAccountRoleCodeIntegrationDto',context!),
         'typegen_115_AwsLambdaIamCodeIntegrationDto': JsonConverters.toJson(typegen_115_AwsLambdaIamCodeIntegrationDto,'AwsLambdaIamCodeIntegrationDto',context!),
         'typegen_116_AzureFunctionsCodeIntegrationDto': JsonConverters.toJson(typegen_116_AzureFunctionsCodeIntegrationDto,'AzureFunctionsCodeIntegrationDto',context!),
         'typegen_118_GoogleCloudFunctionsCodeIntegrationDto': JsonConverters.toJson(typegen_118_GoogleCloudFunctionsCodeIntegrationDto,'GoogleCloudFunctionsCodeIntegrationDto',context!),
@@ -37132,6 +38060,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_150_SplunkLoggingIntegrationDto': JsonConverters.toJson(typegen_150_SplunkLoggingIntegrationDto,'SplunkLoggingIntegrationDto',context!),
         'typegen_153_AppleICloudFilesIntegrationDto': JsonConverters.toJson(typegen_153_AppleICloudFilesIntegrationDto,'AppleICloudFilesIntegrationDto',context!),
         'typegen_154_AwsS3KeylessFilesIntegrationDto': JsonConverters.toJson(typegen_154_AwsS3KeylessFilesIntegrationDto,'AwsS3KeylessFilesIntegrationDto',context!),
+        'typegen_322_AwsS3CrossAccountRoleFilesIntegrationDto': JsonConverters.toJson(typegen_322_AwsS3CrossAccountRoleFilesIntegrationDto,'AwsS3CrossAccountRoleFilesIntegrationDto',context!),
         'typegen_155_AwsS3IamFilesIntegrationDto': JsonConverters.toJson(typegen_155_AwsS3IamFilesIntegrationDto,'AwsS3IamFilesIntegrationDto',context!),
         'typegen_156_AzureBlobFilesIntegrationDto': JsonConverters.toJson(typegen_156_AzureBlobFilesIntegrationDto,'AzureBlobFilesIntegrationDto',context!),
         'typegen_157_DropBoxFilesIntegrationDto': JsonConverters.toJson(typegen_157_DropBoxFilesIntegrationDto,'DropBoxFilesIntegrationDto',context!),
@@ -37158,6 +38087,7 @@ class InternalsTypeGen implements IConvertible, IGet
         'typegen_178_SafariPushIntegrationDto': JsonConverters.toJson(typegen_178_SafariPushIntegrationDto,'SafariPushIntegrationDto',context!),
         'typegen_247_FakePushIntegrationDto': JsonConverters.toJson(typegen_247_FakePushIntegrationDto,'FakePushIntegrationDto',context!),
         'typegen_179_AwsKeylessEmailIntegrationDto': JsonConverters.toJson(typegen_179_AwsKeylessEmailIntegrationDto,'AwsKeylessEmailIntegrationDto',context!),
+        'typegen_323_AwsCrossAccountRoleEmailIntegrationDto': JsonConverters.toJson(typegen_323_AwsCrossAccountRoleEmailIntegrationDto,'AwsCrossAccountRoleEmailIntegrationDto',context!),
         'typegen_180_AwsIamEmailIntegrationDto': JsonConverters.toJson(typegen_180_AwsIamEmailIntegrationDto,'AwsIamEmailIntegrationDto',context!),
         'typegen_181_MailGunEmailIntegrationDto': JsonConverters.toJson(typegen_181_MailGunEmailIntegrationDto,'MailGunEmailIntegrationDto',context!),
         'typegen_182_SendGridEmailIntegrationDto': JsonConverters.toJson(typegen_182_SendGridEmailIntegrationDto,'SendGridEmailIntegrationDto',context!),
@@ -37418,6 +38348,58 @@ class GetPublicProjectLegal extends RequestBase implements IReturn<PublicLegalDo
 }
 
 /**
+* Check a trigger action's execution identity
+*/
+// @Route("/{version}/triggers/execution-identity/check", "POST")
+// @Api(Description="Check a trigger action's execution identity")
+// @DataContract
+class CheckTriggerExecutionIdentityRequest extends CodeMashRequestBase implements IReturn<CheckTriggerExecutionIdentityResponse>, IConvertible, IPost
+{
+    /**
+    * Which kind of trigger: Schema, Membership, Files, Payments or Ai.
+    */
+    // @DataMember
+    // @ApiMember(Description="Which kind of trigger: Schema, Membership, Files, Payments or Ai.", IsRequired=true)
+    TriggerType? triggerType;
+
+    /**
+    * The service user id (usr_…) to run as. Empty or 'default' = the env's default identity.
+    */
+    // @DataMember
+    // @ApiMember(Description="The service user id (usr_…) to run as. Empty or 'default' = the env's default identity.")
+    String? executionIdentityId;
+
+    /**
+    * The trigger action, as on the trigger save.
+    */
+    // @DataMember
+    // @ApiMember(Description="The trigger action, as on the trigger save.", IsRequired=true)
+    TriggerActionDto? action;
+
+    CheckTriggerExecutionIdentityRequest({this.triggerType,this.executionIdentityId,this.action});
+    CheckTriggerExecutionIdentityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
+        executionIdentityId = json['executionIdentityId'];
+        action = JsonConverters.fromJson(json['action'],'TriggerActionDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!),
+        'executionIdentityId': executionIdentityId,
+        'action': JsonConverters.toJson(action,'TriggerActionDto',context!)
+    });
+
+    createResponse() => CheckTriggerExecutionIdentityResponse();
+    getResponseTypeName() => "CheckTriggerExecutionIdentityResponse";
+    getTypeName() => "CheckTriggerExecutionIdentityRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Get one trigger in the shape its save takes (read → change → save)
 */
 // @Route("/{version}/triggers/{id}/definition", "GET")
@@ -37500,6 +38482,94 @@ class GetTriggersNeedingAttention extends CodeMashRequestBase implements IReturn
     createResponse() => GetTriggersNeedingAttentionResponse();
     getResponseTypeName() => "GetTriggersNeedingAttentionResponse";
     getTypeName() => "GetTriggersNeedingAttention";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Lists one trigger's runs, newest first
+*/
+// @Route("/{version}/triggers/runs", "GET")
+// @Api(Description="Lists one trigger's runs, newest first")
+class GetTriggerRuns extends CodeMashListPaginationRequestBase implements IReturn<GetTriggerRunsResponse>, IConvertible, IGet
+{
+    /**
+    * Which kind of trigger: Membership, Schema, Files, Payments or Ai.
+    */
+    // @ApiMember(Description="Which kind of trigger: Membership, Schema, Files, Payments or Ai.", IsRequired=true)
+    TriggerType? triggerType;
+
+    /**
+    * The trigger (trg_…).
+    */
+    // @ApiMember(Description="The trigger (trg_…).", IsRequired=true)
+    String triggerId = "";
+
+    /**
+    * Only runs in this state: queued, running, succeeded, failed or skipped.
+    */
+    // @ApiMember(Description="Only runs in this state: queued, running, succeeded, failed or skipped.")
+    String? status;
+
+    GetTriggerRuns({this.triggerType,this.triggerId="",this.status});
+    GetTriggerRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
+        triggerId = json['triggerId'] ?? "";
+        status = json['status'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!),
+        'triggerId': triggerId,
+        'status': status
+    });
+
+    createResponse() => GetTriggerRunsResponse();
+    getResponseTypeName() => "GetTriggerRunsResponse";
+    getTypeName() => "GetTriggerRuns";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Reads one trigger run
+*/
+// @Route("/{version}/triggers/runs/{Id}", "GET")
+// @Api(Description="Reads one trigger run")
+class GetTriggerRun extends CodeMashRequestBase implements IReturn<GetTriggerRunResponse>, IConvertible, IGet
+{
+    /**
+    * The run id (trr_…).
+    */
+    // @ApiMember(Description="The run id (trr_…).", IsRequired=true)
+    String id = "";
+
+    /**
+    * Which kind of trigger: Membership, Schema, Files, Payments or Ai.
+    */
+    // @ApiMember(Description="Which kind of trigger: Membership, Schema, Files, Payments or Ai.", IsRequired=true)
+    TriggerType? triggerType;
+
+    GetTriggerRun({this.id="",this.triggerType});
+    GetTriggerRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        triggerType = JsonConverters.fromJson(json['triggerType'],'TriggerType',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'triggerType': JsonConverters.toJson(triggerType,'TriggerType',context!)
+    });
+
+    createResponse() => GetTriggerRunResponse();
+    getResponseTypeName() => "GetTriggerRunResponse";
+    getTypeName() => "GetTriggerRun";
     TypeContext? context = _ctx;
 }
 
@@ -42195,6 +43265,67 @@ class SetMembershipIntegrationAsDefaultRequest extends CodeMashRequestBase imple
 }
 
 /**
+* Lists the execution identities (project service users) of an environment.
+*/
+// @Route("/{version}/membership/execution-identities", "GET")
+// @Api(Description="Lists the execution identities (project service users) of an environment.")
+class GetExecutionIdentitiesRequest extends CodeMashRequestBase implements IReturn<GetExecutionIdentitiesResponse>, IConvertible, IGet
+{
+    GetExecutionIdentitiesRequest();
+    GetExecutionIdentitiesRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetExecutionIdentitiesResponse();
+    getResponseTypeName() => "GetExecutionIdentitiesResponse";
+    getTypeName() => "GetExecutionIdentitiesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Creates an execution identity: a project service user with roles, in one call.
+*/
+// @Route("/{version}/membership/execution-identities", "POST")
+// @Api(Description="Creates an execution identity: a project service user with roles, in one call.")
+class CreateExecutionIdentityRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * Display name of the identity, e.g. 'Orders bot'.
+    */
+    // @ApiMember(Description="Display name of the identity, e.g. 'Orders bot'.", IsRequired=true)
+    String name = "";
+
+    /**
+    * Roles to give: role ids (pr_…_nr_…) or role names from GET membership/roles.
+    */
+    // @ApiMember(Description="Roles to give: role ids (pr_…_nr_…) or role names from GET membership/roles.")
+    List<String> roleIds = [];
+
+    CreateExecutionIdentityRequest({this.name="",this.roleIds=const []});
+    CreateExecutionIdentityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        name = json['name'] ?? "";
+        roleIds = JsonConverters.fromJson(json['roleIds'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'name': name,
+        'roleIds': JsonConverters.toJson(roleIds,'List<String>',context!)
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CreateExecutionIdentityRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Gets the project's membership authorization (role-assignment) settings.
 */
 // @Route("/{version}/membership/authorization", "GET")
@@ -45222,259 +46353,6 @@ class TestDatabaseIntegration extends CodeMashRequestBase implements IReturn<Tes
 }
 
 /**
-* Database
-*/
-// @Route("/{version}/database/imports", "POST")
-// @Api(Description="Database")
-class CreateCollectionImport extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    /**
-    * The uploaded CSV's file ref, from the upload call.
-    */
-    // @ApiMember(Description="The uploaded CSV's file ref, from the upload call.", IsRequired=true)
-    FileResourceRefDto? file;
-
-    /**
-    * The target schema id.
-    */
-    // @ApiMember(Description="The target schema id.", IsRequired=true)
-    String schemaId = "";
-
-    /**
-    * The target collection (schema) name.
-    */
-    // @ApiMember(Description="The target collection (schema) name.", IsRequired=true)
-    String collectionName = "";
-
-    String? databaseIntegrationId;
-    /**
-    * The CSV delimiter used at upload time.
-    */
-    // @ApiMember(Description="The CSV delimiter used at upload time.", IsRequired=true)
-    String delimiter = "";
-
-    bool? hasHeader;
-    /**
-    * Column → property mapping, frozen for this import.
-    */
-    // @ApiMember(Description="Column → property mapping, frozen for this import.", IsRequired=true)
-    List<ImportColumnMappingDto> mapping = [];
-
-    CreateCollectionImport({this.file,this.schemaId="",this.collectionName="",this.databaseIntegrationId,this.delimiter="",this.hasHeader,this.mapping=const []});
-    CreateCollectionImport.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
-        schemaId = json['schemaId'] ?? "";
-        collectionName = json['collectionName'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        delimiter = json['delimiter'] ?? "";
-        hasHeader = json['hasHeader'];
-        mapping = JsonConverters.fromJson(json['mapping'],'List<ImportColumnMappingDto>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
-        'schemaId': schemaId,
-        'collectionName': collectionName,
-        'databaseIntegrationId': databaseIntegrationId,
-        'delimiter': delimiter,
-        'hasHeader': hasHeader,
-        'mapping': JsonConverters.toJson(mapping,'List<ImportColumnMappingDto>',context!)
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "CreateCollectionImport";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Database
-*/
-// @Route("/{version}/database/imports/{Id}", "DELETE")
-// @Api(Description="Database")
-class DeleteCollectionImportRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    /**
-    * The import id (imp_…).
-    */
-    // @ApiMember(Description="The import id (imp_…).", IsRequired=true)
-    String id = "";
-
-    String? databaseIntegrationId;
-
-    DeleteCollectionImportRequest({this.id="",this.databaseIntegrationId});
-    DeleteCollectionImportRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DeleteCollectionImportRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Database
-*/
-// @Route("/{version}/database/imports/{Id}", "GET")
-// @Api(Description="Database")
-class GetCollectionImport extends CodeMashRequestBase implements IReturn<GetCollectionImportResponse>, IConvertible, IGet
-{
-    /**
-    * The import id (imp_…).
-    */
-    // @ApiMember(Description="The import id (imp_…).", IsRequired=true)
-    String id = "";
-
-    String? databaseIntegrationId;
-
-    GetCollectionImport({this.id="",this.databaseIntegrationId});
-    GetCollectionImport.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetCollectionImportResponse();
-    getResponseTypeName() => "GetCollectionImportResponse";
-    getTypeName() => "GetCollectionImport";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Database
-*/
-// @Route("/{version}/database/imports", "GET")
-// @Api(Description="Database")
-class GetCollectionImports extends CodeMashListPaginationRequestBase implements IReturn<GetCollectionImportsResponse>, IConvertible, IGet
-{
-    String? databaseIntegrationId;
-
-    GetCollectionImports({this.databaseIntegrationId});
-    GetCollectionImports.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetCollectionImportsResponse();
-    getResponseTypeName() => "GetCollectionImportsResponse";
-    getTypeName() => "GetCollectionImports";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Database
-*/
-// @Route("/{version}/database/imports/upload-url", "POST")
-// @Api(Description="Database")
-class RequestImportUploadUrlRequest extends CodeMashRequestBase implements IReturn<RequestImportUploadUrlResponse>, IConvertible, IPost
-{
-    String? fileAccountId;
-    /**
-    * The original CSV file name, e.g. people.csv.
-    */
-    // @ApiMember(Description="The original CSV file name, e.g. people.csv.", IsRequired=true)
-    String fileName = "";
-
-    RequestImportUploadUrlRequest({this.fileAccountId,this.fileName=""});
-    RequestImportUploadUrlRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        fileAccountId = json['fileAccountId'];
-        fileName = json['fileName'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'fileAccountId': fileAccountId,
-        'fileName': fileName
-    });
-
-    createResponse() => RequestImportUploadUrlResponse();
-    getResponseTypeName() => "RequestImportUploadUrlResponse";
-    getTypeName() => "RequestImportUploadUrlRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Database
-*/
-// @Route("/{version}/database/imports/analyze", "POST")
-// @Api(Description="Database")
-class AnalyzeImportFileRequest extends CodeMashRequestBase implements IReturn<AnalyzeImportFileResponse>, IConvertible, IPost
-{
-    /**
-    * The uploaded CSV's file ref, from the upload-url call.
-    */
-    // @ApiMember(Description="The uploaded CSV's file ref, from the upload-url call.", IsRequired=true)
-    FileResourceRefDto? file;
-
-    /**
-    * The CSV delimiter, e.g. "," or ";".
-    */
-    // @ApiMember(Description="The CSV delimiter, e.g. \",\" or \";\".", IsRequired=true)
-    String delimiter = "";
-
-    /**
-    * Whether the first row is a header row.
-    */
-    // @ApiMember(Description="Whether the first row is a header row.")
-    bool? hasHeader;
-
-    AnalyzeImportFileRequest({this.file,this.delimiter="",this.hasHeader});
-    AnalyzeImportFileRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
-        delimiter = json['delimiter'] ?? "";
-        hasHeader = json['hasHeader'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
-        'delimiter': delimiter,
-        'hasHeader': hasHeader
-    });
-
-    createResponse() => AnalyzeImportFileResponse();
-    getResponseTypeName() => "AnalyzeImportFileResponse";
-    getTypeName() => "AnalyzeImportFileRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
 * Delete saved Mongo aggregation
 */
 // @Route("/{version}/database/aggregates/{Id}", "DELETE")
@@ -45872,150 +46750,6 @@ class SaveFilesTrigger extends SaveTrigger implements IReturn<IdResponse>, IConv
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/files/item/private", "POST")
-class MakeFilePrivateRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
-{
-    /**
-    * The files integration the file lives on.
-    */
-    // @ApiMember(Description="The files integration the file lives on.", IsRequired=true)
-    String filesIntegrationId = "";
-
-    /**
-    * Path of the file, relative to the integration.
-    */
-    // @ApiMember(Description="Path of the file, relative to the integration.", IsRequired=true)
-    String path = "";
-
-    MakeFilePrivateRequest({this.filesIntegrationId="",this.path=""});
-    MakeFilePrivateRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        filesIntegrationId = json['filesIntegrationId'] ?? "";
-        path = json['path'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'filesIntegrationId': filesIntegrationId,
-        'path': path
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "MakeFilePrivateRequest";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/files/item/public", "POST")
-class MakeFilePublicRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    /**
-    * The files integration the file lives on.
-    */
-    // @ApiMember(Description="The files integration the file lives on.", IsRequired=true)
-    String filesIntegrationId = "";
-
-    /**
-    * Path of the file to publish, relative to the integration.
-    */
-    // @ApiMember(Description="Path of the file to publish, relative to the integration.", IsRequired=true)
-    String path = "";
-
-    MakeFilePublicRequest({this.filesIntegrationId="",this.path=""});
-    MakeFilePublicRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        filesIntegrationId = json['filesIntegrationId'] ?? "";
-        path = json['path'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'filesIntegrationId': filesIntegrationId,
-        'path': path
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "MakeFilePublicRequest";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/files/folder/private", "POST")
-class MakeFolderPrivateRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
-{
-    /**
-    * The files integration the folder lives on.
-    */
-    // @ApiMember(Description="The files integration the folder lives on.", IsRequired=true)
-    String filesIntegrationId = "";
-
-    /**
-    * Folder prefix, relative to the integration.
-    */
-    // @ApiMember(Description="Folder prefix, relative to the integration.", IsRequired=true)
-    String path = "";
-
-    MakeFolderPrivateRequest({this.filesIntegrationId="",this.path=""});
-    MakeFolderPrivateRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        filesIntegrationId = json['filesIntegrationId'] ?? "";
-        path = json['path'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'filesIntegrationId': filesIntegrationId,
-        'path': path
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "MakeFolderPrivateRequest";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/files/folder/public", "POST")
-class MakeFolderPublicRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    /**
-    * The files integration the folder lives on.
-    */
-    // @ApiMember(Description="The files integration the folder lives on.", IsRequired=true)
-    String filesIntegrationId = "";
-
-    /**
-    * Folder prefix to publish, relative to the integration.
-    */
-    // @ApiMember(Description="Folder prefix to publish, relative to the integration.", IsRequired=true)
-    String path = "";
-
-    MakeFolderPublicRequest({this.filesIntegrationId="",this.path=""});
-    MakeFolderPublicRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        filesIntegrationId = json['filesIntegrationId'] ?? "";
-        path = json['path'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'filesIntegrationId': filesIntegrationId,
-        'path': path
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "MakeFolderPublicRequest";
-    TypeContext? context = _ctx;
-}
-
 // @Route("/{version}/files/integrations/{Id}", "DELETE")
 class DeleteFilesIntegrationRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
 {
@@ -46312,42 +47046,6 @@ class GetFileById extends CodeMashRequestBase implements IReturn<GetFileByIdResp
     createResponse() => GetFileByIdResponse();
     getResponseTypeName() => "GetFileByIdResponse";
     getTypeName() => "GetFileById";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/files/folder", "GET")
-class GetFolderFiles extends CodeMashListPaginationRequestBase implements IReturn<GetFolderFilesResponse>, IConvertible, IGet
-{
-    /**
-    * The files integration id to list from, from get_files_integrations.
-    */
-    // @ApiMember(Description="The files integration id to list from, from get_files_integrations.", IsRequired=true)
-    String filesIntegrationId = "";
-
-    /**
-    * Path prefix to list. Empty / null lists the root.
-    */
-    // @ApiMember(Description="Path prefix to list. Empty / null lists the root.")
-    String? path;
-
-    GetFolderFiles({this.filesIntegrationId="",this.path});
-    GetFolderFiles.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        filesIntegrationId = json['filesIntegrationId'] ?? "";
-        path = json['path'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'filesIntegrationId': filesIntegrationId,
-        'path': path
-    });
-
-    createResponse() => GetFolderFilesResponse();
-    getResponseTypeName() => "GetFolderFilesResponse";
-    getTypeName() => "GetFolderFiles";
     TypeContext? context = _ctx;
 }
 
@@ -46846,7 +47544,7 @@ class GetEmailTemplateAvailableTokens extends CodeMashRequestBase implements IRe
 */
 // @Route("/{version}/notifications/email/templates", "PUT")
 // @Api(Description="Update an email template")
-class UpdateEmailTemplateRequest extends SaveEmailTemplate implements IReturn<EmptyResponse>, IConvertible, IPut
+class UpdateEmailTemplateRequest extends SaveEmailTemplate implements IReturn<IdResponse>, IConvertible, IPut
 {
     /**
     * The email template id to update. Get it from get_email_templates.
@@ -46867,8 +47565,8 @@ class UpdateEmailTemplateRequest extends SaveEmailTemplate implements IReturn<Em
         'viewId': viewId
     });
 
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
     getTypeName() => "UpdateEmailTemplateRequest";
     TypeContext? context = _ctx;
 }
@@ -47651,615 +48349,6 @@ class GetEmailPreferencesByLinkRequest extends RequestBase implements IReturn<Ge
 }
 
 /**
-* Create email campaign
-*/
-// @Route("/{version}/notifications/email/campaigns", "POST")
-// @Api(Description="Create email campaign")
-// @DataContract
-class CreateEmailCampaignRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    // @DataMember
-    EmailCampaignRequest? campaign;
-
-    // @DataMember
-    String? databaseIntegrationId;
-
-    /**
-    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.")
-    bool? sendNow;
-
-    CreateEmailCampaignRequest({this.campaign,this.databaseIntegrationId,this.sendNow});
-    CreateEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaign = JsonConverters.fromJson(json['campaign'],'EmailCampaignRequest',context!);
-        databaseIntegrationId = json['databaseIntegrationId'];
-        sendNow = json['sendNow'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaign': JsonConverters.toJson(campaign,'EmailCampaignRequest',context!),
-        'databaseIntegrationId': databaseIntegrationId,
-        'sendNow': sendNow
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "CreateEmailCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Deletes emails campaign from queue
-*/
-// @Route("/{version}/notifications/email/campaigns/{Id}", "DELETE")
-// @Api(Description="Deletes emails campaign from queue")
-// @DataContract
-class DeleteEmailCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    // @DataMember
-    String id = "";
-
-    // @DataMember
-    String? databaseIntegrationId;
-
-    DeleteEmailCampaignRequest({this.id="",this.databaseIntegrationId});
-    DeleteEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DeleteEmailCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets email campaign by id
-*/
-// @Route("/{version}/notifications/email/campaigns/{id}", "GET")
-// @Api(Description="Gets email campaign by id")
-class GetEmailCampaign extends CodeMashRequestBase implements IReturn<GetEmailCampaignResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id.
-    */
-    // @ApiMember(Description="The campaign id.")
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetEmailCampaign({this.id="",this.databaseIntegrationId});
-    GetEmailCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetEmailCampaignResponse();
-    getResponseTypeName() => "GetEmailCampaignResponse";
-    getTypeName() => "GetEmailCampaign";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets email campaigns
-*/
-// @Route("/{version}/notifications/email/campaigns", "GET")
-// @Api(Description="Gets email campaigns")
-class GetEmailCampaigns extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignsResponse>, IConvertible, IGet
-{
-    /**
-    * Optional. When omitted, the project's default database integration is used (resolved server-side from the project state).
-    */
-    // @ApiMember(Description="Optional. When omitted, the project's default database integration is used (resolved server-side from the project state).")
-    String? databaseIntegrationId;
-
-    /**
-    * Optional: return only the campaign with this id.
-    */
-    // @ApiMember(Description="Optional: return only the campaign with this id.")
-    String? campaignId;
-
-    /**
-    * Optional: only campaigns that targeted this email address.
-    */
-    // @ApiMember(Description="Optional: only campaigns that targeted this email address.")
-    String? emailAddress;
-
-    /**
-    * Optional: only campaigns built on this email template id.
-    */
-    // @ApiMember(Description="Optional: only campaigns built on this email template id.")
-    String? templateId;
-
-    /**
-    * Optional lower bound for the campaign time, unix timestamp in seconds (UTC).
-    */
-    // @ApiMember(Description="Optional lower bound for the campaign time, unix timestamp in seconds (UTC).")
-    int? from;
-
-    /**
-    * Optional upper bound for the campaign time, unix timestamp in seconds (UTC).
-    */
-    // @ApiMember(Description="Optional upper bound for the campaign time, unix timestamp in seconds (UTC).")
-    int? to;
-
-    GetEmailCampaigns({this.databaseIntegrationId,this.campaignId,this.emailAddress,this.templateId,this.from,this.to});
-    GetEmailCampaigns.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        databaseIntegrationId = json['databaseIntegrationId'];
-        campaignId = json['campaignId'];
-        emailAddress = json['emailAddress'];
-        templateId = json['templateId'];
-        from = json['from'];
-        to = json['to'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'databaseIntegrationId': databaseIntegrationId,
-        'campaignId': campaignId,
-        'emailAddress': emailAddress,
-        'templateId': templateId,
-        'from': from,
-        'to': to
-    });
-
-    createResponse() => GetEmailCampaignsResponse();
-    getResponseTypeName() => "GetEmailCampaignsResponse";
-    getTypeName() => "GetEmailCampaigns";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get email campaign batches
-*/
-// @Route("/{version}/notifications/email/campaigns/{id}/batches", "GET")
-// @Api(Description="Get email campaign batches")
-class GetEmailCampaignBatches extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchesResponse>, IConvertible, IGet
-{
-    /**
-    * The email campaign id to list batches for. Get it from get_email_campaigns.
-    */
-    // @ApiMember(Description="The email campaign id to list batches for. Get it from get_email_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    /**
-    * Optional batch id to filter to a single batch. Get it from a prior call to this tool.
-    */
-    // @ApiMember(Description="Optional batch id to filter to a single batch. Get it from a prior call to this tool.")
-    String? batchId;
-
-    /**
-    * Optional recipient email address to filter batches by.
-    */
-    // @ApiMember(Description="Optional recipient email address to filter batches by.")
-    String? emailAddress;
-
-    GetEmailCampaignBatches({this.id="",this.databaseIntegrationId,this.batchId,this.emailAddress});
-    GetEmailCampaignBatches.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        batchId = json['batchId'];
-        emailAddress = json['emailAddress'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId,
-        'batchId': batchId,
-        'emailAddress': emailAddress
-    });
-
-    createResponse() => GetEmailCampaignBatchesResponse();
-    getResponseTypeName() => "GetEmailCampaignBatchesResponse";
-    getTypeName() => "GetEmailCampaignBatches";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get an email campaign batch notification
-*/
-// @Route("/{version}/notifications/email/campaigns/{id}/batches/{batchId}/{notificationId}", "GET")
-// @Api(Description="Get an email campaign batch notification")
-class GetEmailCampaignBatchNotification extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchNotificationResponse>, IConvertible, IGet
-{
-    /**
-    * The email campaign id. Get it from get_email_campaigns.
-    */
-    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * The campaign batch id. Get it from get_email_campaign_batches.
-    */
-    // @ApiMember(Description="The campaign batch id. Get it from get_email_campaign_batches.", IsRequired=true)
-    String batchId = "";
-
-    /**
-    * The notification id within the batch. Get it from get_email_campaign_batch_notifications.
-    */
-    // @ApiMember(Description="The notification id within the batch. Get it from get_email_campaign_batch_notifications.", IsRequired=true)
-    String notificationId = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetEmailCampaignBatchNotification({this.id="",this.batchId="",this.notificationId="",this.databaseIntegrationId});
-    GetEmailCampaignBatchNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        batchId = json['batchId'] ?? "";
-        notificationId = json['notificationId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'batchId': batchId,
-        'notificationId': notificationId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetEmailCampaignBatchNotificationResponse();
-    getResponseTypeName() => "GetEmailCampaignBatchNotificationResponse";
-    getTypeName() => "GetEmailCampaignBatchNotification";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get email campaign batch notifications
-*/
-// @Route("/{version}/notifications/email/campaigns/{id}/batches/{batchId}", "GET")
-// @Api(Description="Get email campaign batch notifications")
-class GetEmailCampaignBatchNotifications extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchNotificationsResponse>, IConvertible, IGet
-{
-    /**
-    * The email campaign id. Get it from get_email_campaigns.
-    */
-    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * The campaign batch id to list notifications for. Get it from get_email_campaign_batches.
-    */
-    // @ApiMember(Description="The campaign batch id to list notifications for. Get it from get_email_campaign_batches.", IsRequired=true)
-    String batchId = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetEmailCampaignBatchNotifications({this.id="",this.batchId="",this.databaseIntegrationId});
-    GetEmailCampaignBatchNotifications.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        batchId = json['batchId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'batchId': batchId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetEmailCampaignBatchNotificationsResponse();
-    getResponseTypeName() => "GetEmailCampaignBatchNotificationsResponse";
-    getTypeName() => "GetEmailCampaignBatchNotifications";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get email campaign statistics
-*/
-// @Route("/{version}/notifications/email/campaigns/{id}/stats", "GET")
-// @Api(Description="Get email campaign statistics")
-class GetEmailCampaignStatistics extends CodeMashRequestBase implements IReturn<GetEmailCampaignStatisticsResponse>, IConvertible, IGet
-{
-    /**
-    * The email campaign id to get statistics for. Get it from get_email_campaigns.
-    */
-    // @ApiMember(Description="The email campaign id to get statistics for. Get it from get_email_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetEmailCampaignStatistics({this.id="",this.databaseIntegrationId});
-    GetEmailCampaignStatistics.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetEmailCampaignStatisticsResponse();
-    getResponseTypeName() => "GetEmailCampaignStatisticsResponse";
-    getTypeName() => "GetEmailCampaignStatistics";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Preview an email notification
-*/
-// @Route("/{version}/notifications/email/preview", "GET")
-// @Api(Description="Preview an email notification")
-class PreviewEmailNotification extends RequestBase implements IReturn<PreviewEmailNotificationResponse>, IConvertible, IGet
-{
-    /**
-    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
-    */
-    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
-    String hash = "";
-
-    /**
-    * Signed-in preview by id: the project id. With a hash it must match the hash.
-    */
-    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
-    String? projectId;
-
-    /**
-    * Signed-in preview by id: the notification id (needs email:read). With a hash it must match the hash.
-    */
-    // @ApiMember(Description="Signed-in preview by id: the notification id (needs email:read). With a hash it must match the hash.")
-    String? notificationId;
-
-    PreviewEmailNotification({this.hash="",this.projectId,this.notificationId});
-    PreviewEmailNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        hash = json['hash'] ?? "";
-        projectId = json['projectId'];
-        notificationId = json['notificationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'hash': hash,
-        'projectId': projectId,
-        'notificationId': notificationId
-    });
-
-    createResponse() => PreviewEmailNotificationResponse();
-    getResponseTypeName() => "PreviewEmailNotificationResponse";
-    getTypeName() => "PreviewEmailNotification";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Retries the failed recipients of an email campaign
-*/
-// @Route("/{version}/notifications/email/campaigns/{Id}/retry-failed", "POST")
-// @Api(Description="Retries the failed recipients of an email campaign")
-// @DataContract
-class RetryFailedEmailNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedEmailNotificationsResponse>, IConvertible, IPost
-{
-    /**
-    * The campaign id. Get it from get_email_campaigns.
-    */
-    // @DataMember
-    // @ApiMember(Description="The campaign id. Get it from get_email_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    /**
-    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
-    */
-    // @DataMember
-    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
-    String idempotencyKey = "";
-
-    /**
-    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
-    List<String>? notificationIds;
-
-    /**
-    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
-    bool? includeAmbiguous;
-
-    /**
-    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
-    List<String>? categories;
-
-    RetryFailedEmailNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
-    RetryFailedEmailNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        idempotencyKey = json['idempotencyKey'] ?? "";
-        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
-        includeAmbiguous = json['includeAmbiguous'];
-        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId,
-        'idempotencyKey': idempotencyKey,
-        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
-        'includeAmbiguous': includeAmbiguous,
-        'categories': JsonConverters.toJson(categories,'List<String>',context!)
-    });
-
-    createResponse() => RetryFailedEmailNotificationsResponse();
-    getResponseTypeName() => "RetryFailedEmailNotificationsResponse";
-    getTypeName() => "RetryFailedEmailNotificationsRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Stops a running email campaign
-*/
-// @Route("/{version}/notifications/email/campaigns/{Id}/stop", "POST")
-// @Api(Description="Stops a running email campaign")
-// @DataContract
-class StopEmailCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
-{
-    /**
-    * The campaign id to stop.
-    */
-    // @DataMember
-    // @ApiMember(Description="The campaign id to stop.")
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    StopEmailCampaignRequest({this.id="",this.databaseIntegrationId});
-    StopEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "StopEmailCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get email campaign messages
-*/
-// @Route("/{version}/notifications/emails/campaigns/{campaignId}/messages", "GET")
-// @Api(Description="Get email campaign messages")
-class GetEmailCampaignMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignMessagesResponse>, IConvertible, IGet
-{
-    /**
-    * The email campaign id. Get it from get_email_campaigns.
-    */
-    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
-    String campaignId = "";
-
-    /**
-    * The campaign batch id to list messages for. Get it from get_email_campaign_batches.
-    */
-    // @ApiMember(Description="The campaign batch id to list messages for. Get it from get_email_campaign_batches.", IsRequired=true)
-    String campaignBatchId = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetEmailCampaignMessagesRequest({this.campaignId="",this.campaignBatchId="",this.databaseIntegrationId});
-    GetEmailCampaignMessagesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaignId = json['campaignId'] ?? "";
-        campaignBatchId = json['campaignBatchId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaignId': campaignId,
-        'campaignBatchId': campaignBatchId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetEmailCampaignMessagesResponse();
-    getResponseTypeName() => "GetEmailCampaignMessagesResponse";
-    getTypeName() => "GetEmailCampaignMessagesRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
 * Disable SMS service
 */
 // @Route("/{version}/notifications/sms/disable", "PUT")
@@ -48628,7 +48717,7 @@ class UnArchiveSmsTemplateRequest extends CodeMashRequestBase implements IReturn
 */
 // @Route("/{version}/notifications/sms/templates", "PUT")
 // @Api(Description="Edit sms template")
-class UpdateSmsTemplateRequest extends SaveSmsTemplate implements IReturn<EmptyResponse>, IConvertible, IPut
+class UpdateSmsTemplateRequest extends SaveSmsTemplate implements IReturn<IdResponse>, IConvertible, IPut
 {
     /**
     * The SMS template id to update. Get it from get_sms_templates.
@@ -48649,8 +48738,8 @@ class UpdateSmsTemplateRequest extends SaveSmsTemplate implements IReturn<EmptyR
         'viewId': viewId
     });
 
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
     getTypeName() => "UpdateSmsTemplateRequest";
     TypeContext? context = _ctx;
 }
@@ -48965,549 +49054,6 @@ class TestSmsIntegration extends CodeMashRequestBase implements IReturn<TestSmsI
     createResponse() => TestSmsIntegrationResponse();
     getResponseTypeName() => "TestSmsIntegrationResponse";
     getTypeName() => "TestSmsIntegration";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Deletes sms campaign from queue
-*/
-// @Route("/{version}/notifications/sms/campaigns/{id}", "DELETE")
-// @Api(Description="Deletes sms campaign from queue")
-class DeleteSmsCampaign extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    /**
-    * The campaign id to delete. Get it from get_sms_campaigns.
-    */
-    // @ApiMember(Description="The campaign id to delete. Get it from get_sms_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    DeleteSmsCampaign({this.id="",this.databaseIntegrationId});
-    DeleteSmsCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DeleteSmsCampaign";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get sms campaign by id
-*/
-// @Route("/{version}/notifications/sms/campaigns/{id}", "GET")
-// @Api(Description="Get sms campaign by id")
-class GetSmsCampaign extends CodeMashRequestBase implements IReturn<GetSmsCampaignResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id.
-    */
-    // @ApiMember(Description="The campaign id.")
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetSmsCampaign({this.id="",this.databaseIntegrationId});
-    GetSmsCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetSmsCampaignResponse();
-    getResponseTypeName() => "GetSmsCampaignResponse";
-    getTypeName() => "GetSmsCampaign";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets sms campaigns
-*/
-// @Route("/{version}/notifications/sms/campaigns", "GET")
-// @Api(Description="Gets sms campaigns")
-class GetSmsCampaigns extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignsResponse>, IConvertible, IGet
-{
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    /**
-    * Optional: return only the campaign with this id.
-    */
-    // @ApiMember(Description="Optional: return only the campaign with this id.")
-    String? campaignId;
-
-    /**
-    * Optional: only campaigns built on this SMS template id.
-    */
-    // @ApiMember(Description="Optional: only campaigns built on this SMS template id.")
-    String? templateId;
-
-    /**
-    * Optional lower bound for the campaign time, unix timestamp in seconds (UTC).
-    */
-    // @ApiMember(Description="Optional lower bound for the campaign time, unix timestamp in seconds (UTC).")
-    int? from;
-
-    /**
-    * Optional upper bound for the campaign time, unix timestamp in seconds (UTC).
-    */
-    // @ApiMember(Description="Optional upper bound for the campaign time, unix timestamp in seconds (UTC).")
-    int? to;
-
-    GetSmsCampaigns({this.databaseIntegrationId,this.campaignId,this.templateId,this.from,this.to});
-    GetSmsCampaigns.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        databaseIntegrationId = json['databaseIntegrationId'];
-        campaignId = json['campaignId'];
-        templateId = json['templateId'];
-        from = json['from'];
-        to = json['to'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'databaseIntegrationId': databaseIntegrationId,
-        'campaignId': campaignId,
-        'templateId': templateId,
-        'from': from,
-        'to': to
-    });
-
-    createResponse() => GetSmsCampaignsResponse();
-    getResponseTypeName() => "GetSmsCampaignsResponse";
-    getTypeName() => "GetSmsCampaigns";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets sms campaign batches
-*/
-// @Route("/{version}/notifications/sms/campaigns/{id}/batches", "GET")
-// @Api(Description="Gets sms campaign batches")
-class GetSmsCampaignBatches extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignBatchesResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id. Get it from get_sms_campaigns.
-    */
-    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.")
-    String? id;
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetSmsCampaignBatches({this.id,this.databaseIntegrationId});
-    GetSmsCampaignBatches.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'];
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetSmsCampaignBatchesResponse();
-    getResponseTypeName() => "GetSmsCampaignBatchesResponse";
-    getTypeName() => "GetSmsCampaignBatches";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets sms campaign batch notification
-*/
-// @Route("/{version}/notifications/sms/campaigns/{id}/batches/{batchId}/{notificationId}", "GET")
-// @Api(Description="Gets sms campaign batch notification")
-class GetSmsCampaignBatchNotification extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignBatchNotificationResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id. Get it from get_sms_campaigns.
-    */
-    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * The campaign batch id. Get it from get_sms_campaign_batches.
-    */
-    // @ApiMember(Description="The campaign batch id. Get it from get_sms_campaign_batches.", IsRequired=true)
-    String batchId = "";
-
-    /**
-    * The notification id. Get it from get_sms_campaign_batch_notifications.
-    */
-    // @ApiMember(Description="The notification id. Get it from get_sms_campaign_batch_notifications.", IsRequired=true)
-    String notificationId = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetSmsCampaignBatchNotification({this.id="",this.batchId="",this.notificationId="",this.databaseIntegrationId});
-    GetSmsCampaignBatchNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        batchId = json['batchId'] ?? "";
-        notificationId = json['notificationId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'batchId': batchId,
-        'notificationId': notificationId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetSmsCampaignBatchNotificationResponse();
-    getResponseTypeName() => "GetSmsCampaignBatchNotificationResponse";
-    getTypeName() => "GetSmsCampaignBatchNotification";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets sms campaign batch notifications
-*/
-// @Route("/{version}/notifications/sms/campaigns/{id}/batches/{batchId}", "GET")
-// @Api(Description="Gets sms campaign batch notifications")
-class GetSmsCampaignBatchNotifications extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignBatchNotificationsResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id. Get it from get_sms_campaigns.
-    */
-    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * The campaign batch id. Get it from get_sms_campaign_batches.
-    */
-    // @ApiMember(Description="The campaign batch id. Get it from get_sms_campaign_batches.", IsRequired=true)
-    String batchId = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetSmsCampaignBatchNotifications({this.id="",this.batchId="",this.databaseIntegrationId});
-    GetSmsCampaignBatchNotifications.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        batchId = json['batchId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'batchId': batchId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetSmsCampaignBatchNotificationsResponse();
-    getResponseTypeName() => "GetSmsCampaignBatchNotificationsResponse";
-    getTypeName() => "GetSmsCampaignBatchNotifications";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get sms campaign statistics
-*/
-// @Route("/{version}/notifications/sms/campaigns/{id}/stats", "GET")
-// @Api(Description="Get sms campaign statistics")
-class GetSmsCampaignStatistics extends CodeMashRequestBase implements IReturn<GetSmsCampaignStatisticsResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id. Get it from get_sms_campaigns.
-    */
-    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetSmsCampaignStatistics({this.id="",this.databaseIntegrationId});
-    GetSmsCampaignStatistics.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetSmsCampaignStatisticsResponse();
-    getResponseTypeName() => "GetSmsCampaignStatisticsResponse";
-    getTypeName() => "GetSmsCampaignStatistics";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Returns SMS preview notification body
-*/
-// @Route("/{version}/notifications/sms/preview", "GET")
-// @Api(Description="Returns SMS preview notification body")
-class PreviewSmsNotification extends RequestBase implements IReturn<PreviewSmsNotificationResponse>, IConvertible, IGet
-{
-    /**
-    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
-    */
-    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
-    String hash = "";
-
-    /**
-    * Signed-in preview by id: the project id. With a hash it must match the hash.
-    */
-    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
-    String? projectId;
-
-    /**
-    * Signed-in preview by id: the notification id (needs sms:read). With a hash it must match the hash.
-    */
-    // @ApiMember(Description="Signed-in preview by id: the notification id (needs sms:read). With a hash it must match the hash.")
-    String? notificationId;
-
-    PreviewSmsNotification({this.hash="",this.projectId,this.notificationId});
-    PreviewSmsNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        hash = json['hash'] ?? "";
-        projectId = json['projectId'];
-        notificationId = json['notificationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'hash': hash,
-        'projectId': projectId,
-        'notificationId': notificationId
-    });
-
-    createResponse() => PreviewSmsNotificationResponse();
-    getResponseTypeName() => "PreviewSmsNotificationResponse";
-    getTypeName() => "PreviewSmsNotification";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Retries the failed recipients of an SMS campaign
-*/
-// @Route("/{version}/notifications/sms/campaigns/{Id}/retry-failed", "POST")
-// @Api(Description="Retries the failed recipients of an SMS campaign")
-// @DataContract
-class RetryFailedSmsNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedSmsNotificationsResponse>, IConvertible, IPost
-{
-    /**
-    * The campaign id. Get it from get_sms_campaigns.
-    */
-    // @DataMember
-    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    /**
-    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
-    */
-    // @DataMember
-    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
-    String idempotencyKey = "";
-
-    /**
-    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
-    List<String>? notificationIds;
-
-    /**
-    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
-    bool? includeAmbiguous;
-
-    /**
-    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
-    List<String>? categories;
-
-    RetryFailedSmsNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
-    RetryFailedSmsNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        idempotencyKey = json['idempotencyKey'] ?? "";
-        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
-        includeAmbiguous = json['includeAmbiguous'];
-        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId,
-        'idempotencyKey': idempotencyKey,
-        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
-        'includeAmbiguous': includeAmbiguous,
-        'categories': JsonConverters.toJson(categories,'List<String>',context!)
-    });
-
-    createResponse() => RetryFailedSmsNotificationsResponse();
-    getResponseTypeName() => "RetryFailedSmsNotificationsResponse";
-    getTypeName() => "RetryFailedSmsNotificationsRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Stops a running SMS campaign
-*/
-// @Route("/{version}/notifications/sms/campaigns/{Id}/stop", "POST")
-// @Api(Description="Stops a running SMS campaign")
-class StopSmsCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
-{
-    /**
-    * The campaign id to stop.
-    */
-    // @ApiMember(Description="The campaign id to stop.")
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    StopSmsCampaignRequest({this.id="",this.databaseIntegrationId});
-    StopSmsCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "StopSmsCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets the sms notifications
-*/
-// @Route("/{version}/notifications/sms/campaigns/{campaignId}/messages", "GET")
-// @Api(Description="Gets the sms notifications")
-class GetSmsCampaignMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignMessagesResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id. Get it from get_sms_campaigns.
-    */
-    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
-    String campaignId = "";
-
-    /**
-    * The campaign batch id. Get it from get_sms_campaign_batches.
-    */
-    // @ApiMember(Description="The campaign batch id. Get it from get_sms_campaign_batches.", IsRequired=true)
-    String campaignBatchId = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    GetSmsCampaignMessagesRequest({this.campaignId="",this.campaignBatchId="",this.databaseIntegrationId});
-    GetSmsCampaignMessagesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaignId = json['campaignId'] ?? "";
-        campaignBatchId = json['campaignBatchId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaignId': campaignId,
-        'campaignBatchId': campaignBatchId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetSmsCampaignMessagesResponse();
-    getResponseTypeName() => "GetSmsCampaignMessagesResponse";
-    getTypeName() => "GetSmsCampaignMessagesRequest";
     TypeContext? context = _ctx;
 }
 
@@ -50003,265 +49549,6 @@ class InvokeCodeWorkflow extends CodeMashRequestBase implements IReturn<InvokeCo
     createResponse() => InvokeCodeWorkflowResponse();
     getResponseTypeName() => "InvokeCodeWorkflowResponse";
     getTypeName() => "InvokeCodeWorkflow";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/code/workflows/{Id}/runs", "GET")
-// @DataContract
-class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunsResponse>, IConvertible, IGet
-{
-    /**
-    * wf_…
-    */
-    // @DataMember
-    // @ApiMember(Description="wf_…", IsRequired=true)
-    String id = "";
-
-    /**
-    * running | waiting | succeeded | failed | cancelled
-    */
-    // @DataMember
-    // @ApiMember(Description="running | waiting | succeeded | failed | cancelled")
-    String? status;
-
-    // @DataMember
-    DateTime? from;
-
-    // @DataMember
-    DateTime? to;
-
-    GetCodeWorkflowRuns({this.id="",this.status,this.from,this.to});
-    GetCodeWorkflowRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        status = json['status'];
-        from = JsonConverters.fromJson(json['from'],'DateTime',context!);
-        to = JsonConverters.fromJson(json['to'],'DateTime',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'status': status,
-        'from': JsonConverters.toJson(from,'DateTime',context!),
-        'to': JsonConverters.toJson(to,'DateTime',context!)
-    });
-
-    createResponse() => WorkflowRunsResponse();
-    getResponseTypeName() => "WorkflowRunsResponse";
-    getTypeName() => "GetCodeWorkflowRuns";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/code/workflows/runs/{RunId}", "GET")
-// @DataContract
-class GetCodeWorkflowRun extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IGet
-{
-    /**
-    * wfr_…
-    */
-    // @DataMember
-    // @ApiMember(Description="wfr_…", IsRequired=true)
-    String runId = "";
-
-    GetCodeWorkflowRun({this.runId=""});
-    GetCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        runId = json['runId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'runId': runId
-    });
-
-    createResponse() => WorkflowRunResponse();
-    getResponseTypeName() => "WorkflowRunResponse";
-    getTypeName() => "GetCodeWorkflowRun";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/code/workflows/runs/{RunId}/logs", "GET")
-// @DataContract
-class GetCodeWorkflowRunLogs extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunLogsResponse>, IConvertible, IGet
-{
-    /**
-    * wfr_…
-    */
-    // @DataMember
-    // @ApiMember(Description="wfr_…", IsRequired=true)
-    String runId = "";
-
-    /**
-    * Only this step's lines.
-    */
-    // @DataMember
-    // @ApiMember(Description="Only this step's lines.")
-    String? stepId;
-
-    /**
-    * Information | Warning | Error
-    */
-    // @DataMember
-    // @ApiMember(Description="Information | Warning | Error")
-    String? level;
-
-    GetCodeWorkflowRunLogs({this.runId="",this.stepId,this.level});
-    GetCodeWorkflowRunLogs.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        runId = json['runId'] ?? "";
-        stepId = json['stepId'];
-        level = json['level'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'runId': runId,
-        'stepId': stepId,
-        'level': level
-    });
-
-    createResponse() => WorkflowRunLogsResponse();
-    getResponseTypeName() => "WorkflowRunLogsResponse";
-    getTypeName() => "GetCodeWorkflowRunLogs";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/code/workflows/{Id}/resume", "POST")
-// @DataContract
-class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
-{
-    /**
-    * wf_…
-    */
-    // @DataMember
-    // @ApiMember(Description="wf_…", IsRequired=true)
-    String id = "";
-
-    /**
-    * The wait's rendered key.
-    */
-    // @DataMember
-    // @ApiMember(Description="The wait's rendered key.", IsRequired=true)
-    String key = "";
-
-    // @DataMember
-    String? stepId;
-
-    /**
-    * approved | rejected — required for an approval wait.
-    */
-    // @DataMember
-    // @ApiMember(Description="approved | rejected — required for an approval wait.")
-    String? decision;
-
-    // @DataMember
-    Map<String,dynamic?>? payload;
-
-    ResumeCodeWorkflowRunByKey({this.id="",this.key="",this.stepId,this.decision,this.payload});
-    ResumeCodeWorkflowRunByKey.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        key = json['key'] ?? "";
-        stepId = json['stepId'];
-        decision = json['decision'];
-        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'key': key,
-        'stepId': stepId,
-        'decision': decision,
-        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
-    });
-
-    createResponse() => WorkflowRunResponse();
-    getResponseTypeName() => "WorkflowRunResponse";
-    getTypeName() => "ResumeCodeWorkflowRunByKey";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/code/workflows/runs/{RunId}/retry", "POST")
-// @DataContract
-class RetryCodeWorkflowRunStep extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
-{
-    /**
-    * wfr_…
-    */
-    // @DataMember
-    // @ApiMember(Description="wfr_…", IsRequired=true)
-    String runId = "";
-
-    /**
-    * The failed step; default = the step named in the run's error.
-    */
-    // @DataMember
-    // @ApiMember(Description="The failed step; default = the step named in the run's error.")
-    String? stepId;
-
-    RetryCodeWorkflowRunStep({this.runId="",this.stepId});
-    RetryCodeWorkflowRunStep.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        runId = json['runId'] ?? "";
-        stepId = json['stepId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'runId': runId,
-        'stepId': stepId
-    });
-
-    createResponse() => WorkflowRunResponse();
-    getResponseTypeName() => "WorkflowRunResponse";
-    getTypeName() => "RetryCodeWorkflowRunStep";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/code/workflows/runs/{RunId}/cancel", "POST")
-// @DataContract
-class CancelCodeWorkflowRun extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
-{
-    /**
-    * wfr_…
-    */
-    // @DataMember
-    // @ApiMember(Description="wfr_…", IsRequired=true)
-    String runId = "";
-
-    // @DataMember
-    String? reason;
-
-    CancelCodeWorkflowRun({this.runId="",this.reason});
-    CancelCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        runId = json['runId'] ?? "";
-        reason = json['reason'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'runId': runId,
-        'reason': reason
-    });
-
-    createResponse() => WorkflowRunResponse();
-    getResponseTypeName() => "WorkflowRunResponse";
-    getTypeName() => "CancelCodeWorkflowRun";
     TypeContext? context = _ctx;
 }
 
@@ -51123,6 +50410,265 @@ class UseCodeWorkflowResumeLink extends RequestBase implements IReturn<WorkflowR
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/workflows/{Id}/runs", "GET")
+// @DataContract
+class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunsResponse>, IConvertible, IGet
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * running | waiting | succeeded | failed | cancelled
+    */
+    // @DataMember
+    // @ApiMember(Description="running | waiting | succeeded | failed | cancelled")
+    String? status;
+
+    // @DataMember
+    DateTime? from;
+
+    // @DataMember
+    DateTime? to;
+
+    GetCodeWorkflowRuns({this.id="",this.status,this.from,this.to});
+    GetCodeWorkflowRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        status = json['status'];
+        from = JsonConverters.fromJson(json['from'],'DateTime',context!);
+        to = JsonConverters.fromJson(json['to'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'status': status,
+        'from': JsonConverters.toJson(from,'DateTime',context!),
+        'to': JsonConverters.toJson(to,'DateTime',context!)
+    });
+
+    createResponse() => WorkflowRunsResponse();
+    getResponseTypeName() => "WorkflowRunsResponse";
+    getTypeName() => "GetCodeWorkflowRuns";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}", "GET")
+// @DataContract
+class GetCodeWorkflowRun extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IGet
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    GetCodeWorkflowRun({this.runId=""});
+    GetCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "GetCodeWorkflowRun";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}/logs", "GET")
+// @DataContract
+class GetCodeWorkflowRunLogs extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunLogsResponse>, IConvertible, IGet
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    /**
+    * Only this step's lines.
+    */
+    // @DataMember
+    // @ApiMember(Description="Only this step's lines.")
+    String? stepId;
+
+    /**
+    * Information | Warning | Error
+    */
+    // @DataMember
+    // @ApiMember(Description="Information | Warning | Error")
+    String? level;
+
+    GetCodeWorkflowRunLogs({this.runId="",this.stepId,this.level});
+    GetCodeWorkflowRunLogs.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        stepId = json['stepId'];
+        level = json['level'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'stepId': stepId,
+        'level': level
+    });
+
+    createResponse() => WorkflowRunLogsResponse();
+    getResponseTypeName() => "WorkflowRunLogsResponse";
+    getTypeName() => "GetCodeWorkflowRunLogs";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/resume", "POST")
+// @DataContract
+class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * The wait's rendered key.
+    */
+    // @DataMember
+    // @ApiMember(Description="The wait's rendered key.", IsRequired=true)
+    String key = "";
+
+    // @DataMember
+    String? stepId;
+
+    /**
+    * approved | rejected — required for an approval wait.
+    */
+    // @DataMember
+    // @ApiMember(Description="approved | rejected — required for an approval wait.")
+    String? decision;
+
+    // @DataMember
+    Map<String,dynamic?>? payload;
+
+    ResumeCodeWorkflowRunByKey({this.id="",this.key="",this.stepId,this.decision,this.payload});
+    ResumeCodeWorkflowRunByKey.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        key = json['key'] ?? "";
+        stepId = json['stepId'];
+        decision = json['decision'];
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'key': key,
+        'stepId': stepId,
+        'decision': decision,
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "ResumeCodeWorkflowRunByKey";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}/retry", "POST")
+// @DataContract
+class RetryCodeWorkflowRunStep extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    /**
+    * The failed step; default = the step named in the run's error.
+    */
+    // @DataMember
+    // @ApiMember(Description="The failed step; default = the step named in the run's error.")
+    String? stepId;
+
+    RetryCodeWorkflowRunStep({this.runId="",this.stepId});
+    RetryCodeWorkflowRunStep.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        stepId = json['stepId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'stepId': stepId
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "RetryCodeWorkflowRunStep";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/runs/{RunId}/cancel", "POST")
+// @DataContract
+class CancelCodeWorkflowRun extends CodeMashRequestBase implements IReturn<WorkflowRunResponse>, IConvertible, IPost
+{
+    /**
+    * wfr_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wfr_…", IsRequired=true)
+    String runId = "";
+
+    // @DataMember
+    String? reason;
+
+    CancelCodeWorkflowRun({this.runId="",this.reason});
+    CancelCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'] ?? "";
+        reason = json['reason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'reason': reason
+    });
+
+    createResponse() => WorkflowRunResponse();
+    getResponseTypeName() => "WorkflowRunResponse";
+    getTypeName() => "CancelCodeWorkflowRun";
+    TypeContext? context = _ctx;
+}
+
 /**
 * Disable push service
 */
@@ -51492,7 +51038,7 @@ class UnArchivePushTemplateRequest extends CodeMashRequestBase implements IRetur
 */
 // @Route("/{version}/notifications/push/templates", "PUT")
 // @Api(Description="Edit push template")
-class UpdatePushTemplateRequest extends SavePushTemplate implements IReturn<EmptyResponse>, IConvertible, IPut
+class UpdatePushTemplateRequest extends SavePushTemplate implements IReturn<IdResponse>, IConvertible, IPut
 {
     /**
     * The push template id to update. Get it from get_push_templates.
@@ -51513,8 +51059,8 @@ class UpdatePushTemplateRequest extends SavePushTemplate implements IReturn<Empt
         'viewId': viewId
     });
 
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
     getTypeName() => "UpdatePushTemplateRequest";
     TypeContext? context = _ctx;
 }
@@ -52042,642 +51588,6 @@ class GetPushDevices extends CodeMashListPaginationRequestBase implements IRetur
     createResponse() => GetPushDevicesResponse();
     getResponseTypeName() => "GetPushDevicesResponse";
     getTypeName() => "GetPushDevices";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Count the devices a push campaign audience would reach
-*/
-// @Route("/{version}/notifications/push/campaigns/audience-count", "POST")
-// @Api(Description="Count the devices a push campaign audience would reach")
-// @DataContract
-class GetPushCampaignAudienceCountRequest extends CodeMashRequestBase implements IReturn<GetPushCampaignAudienceCountResponse>, IConvertible, IPost
-{
-    /**
-    * The audience, in the same shape as CreatePushCampaignRequest.campaign. Template and send options are ignored.
-    */
-    // @DataMember
-    // @ApiMember(Description="The audience, in the same shape as CreatePushCampaignRequest.campaign. Template and send options are ignored.")
-    PushCampaignRequest? campaign;
-
-    /**
-    * Optional. When omitted, the default database integration for the request's environment is used.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. When omitted, the default database integration for the request's environment is used.")
-    String? databaseIntegrationId;
-
-    GetPushCampaignAudienceCountRequest({this.campaign,this.databaseIntegrationId});
-    GetPushCampaignAudienceCountRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaign = JsonConverters.fromJson(json['campaign'],'PushCampaignRequest',context!);
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaign': JsonConverters.toJson(campaign,'PushCampaignRequest',context!),
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetPushCampaignAudienceCountResponse();
-    getResponseTypeName() => "GetPushCampaignAudienceCountResponse";
-    getTypeName() => "GetPushCampaignAudienceCountRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Create push campaign
-*/
-// @Route("/{version}/notifications/push/campaigns", "POST")
-// @Api(Description="Create push campaign")
-// @DataContract
-class CreatePushCampaignRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    // @DataMember
-    PushCampaignRequest? campaign;
-
-    // @DataMember
-    String? databaseIntegrationId;
-
-    /**
-    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.")
-    bool? sendNow;
-
-    CreatePushCampaignRequest({this.campaign,this.databaseIntegrationId,this.sendNow});
-    CreatePushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaign = JsonConverters.fromJson(json['campaign'],'PushCampaignRequest',context!);
-        databaseIntegrationId = json['databaseIntegrationId'];
-        sendNow = json['sendNow'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaign': JsonConverters.toJson(campaign,'PushCampaignRequest',context!),
-        'databaseIntegrationId': databaseIntegrationId,
-        'sendNow': sendNow
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "CreatePushCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Deletes push campaign from queue
-*/
-// @Route("/{version}/notifications/push/campaigns/{Id}", "DELETE")
-// @Api(Description="Deletes push campaign from queue")
-// @DataContract
-class DeletePushCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    /**
-    * The push campaign id to delete. Get it from get_push_campaigns.
-    */
-    // @DataMember
-    // @ApiMember(Description="The push campaign id to delete. Get it from get_push_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    DeletePushCampaignRequest({this.id="",this.databaseIntegrationId});
-    DeletePushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DeletePushCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets push campaign by id
-*/
-// @Route("/{version}/notifications/push/campaigns/{id}", "GET")
-// @Api(Description="Gets push campaign by id")
-class GetPushCampaign extends CodeMashRequestBase implements IReturn<GetPushCampaignResponse>, IConvertible, IGet
-{
-    /**
-    * The campaign id.
-    */
-    // @ApiMember(Description="The campaign id.")
-    String id = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    GetPushCampaign({this.id="",this.databaseIntegrationId});
-    GetPushCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetPushCampaignResponse();
-    getResponseTypeName() => "GetPushCampaignResponse";
-    getTypeName() => "GetPushCampaign";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets push campaigns
-*/
-// @Route("/{version}/notifications/push/campaigns", "GET")
-// @Api(Description="Gets push campaigns")
-class GetPushCampaigns extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignsResponse>, IConvertible, IGet
-{
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    /**
-    * Optional: only campaigns built on this push template id.
-    */
-    // @ApiMember(Description="Optional: only campaigns built on this push template id.")
-    String? templateId;
-
-    /**
-    * Optional lower bound for the campaign time, unix timestamp in seconds (UTC).
-    */
-    // @ApiMember(Description="Optional lower bound for the campaign time, unix timestamp in seconds (UTC).")
-    int? from;
-
-    /**
-    * Optional upper bound for the campaign time, unix timestamp in seconds (UTC).
-    */
-    // @ApiMember(Description="Optional upper bound for the campaign time, unix timestamp in seconds (UTC).")
-    int? to;
-
-    GetPushCampaigns({this.databaseIntegrationId,this.templateId,this.from,this.to});
-    GetPushCampaigns.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        databaseIntegrationId = json['databaseIntegrationId'];
-        templateId = json['templateId'];
-        from = json['from'];
-        to = json['to'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'databaseIntegrationId': databaseIntegrationId,
-        'templateId': templateId,
-        'from': from,
-        'to': to
-    });
-
-    createResponse() => GetPushCampaignsResponse();
-    getResponseTypeName() => "GetPushCampaignsResponse";
-    getTypeName() => "GetPushCampaigns";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets push campaign batches
-*/
-// @Route("/{version}/notifications/push/campaigns/{id}/batches", "GET")
-// @Api(Description="Gets push campaign batches")
-class GetPushCampaignBatches extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignBatchesResponse>, IConvertible, IGet
-{
-    /**
-    * The push campaign id to list batches for. Get it from get_push_campaigns.
-    */
-    // @ApiMember(Description="The push campaign id to list batches for. Get it from get_push_campaigns.")
-    String id = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    /**
-    * Optional: only return the batch with this id.
-    */
-    // @ApiMember(Description="Optional: only return the batch with this id.")
-    String? batchId;
-
-    GetPushCampaignBatches({this.id="",this.databaseIntegrationId,this.batchId});
-    GetPushCampaignBatches.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        batchId = json['batchId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId,
-        'batchId': batchId
-    });
-
-    createResponse() => GetPushCampaignBatchesResponse();
-    getResponseTypeName() => "GetPushCampaignBatchesResponse";
-    getTypeName() => "GetPushCampaignBatches";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets a push campaign batch notification
-*/
-// @Route("/{version}/notifications/push/campaigns/{id}/batches/{batchId}/{notificationId}", "GET")
-// @Api(Description="Gets a push campaign batch notification")
-class GetPushCampaignBatchNotification extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignBatchNotificationResponse>, IConvertible, IGet
-{
-    /**
-    * The push campaign id. Get it from get_push_campaigns.
-    */
-    // @ApiMember(Description="The push campaign id. Get it from get_push_campaigns.")
-    String id = "";
-
-    /**
-    * The batch id. Get it from get_push_campaign_batches.
-    */
-    // @ApiMember(Description="The batch id. Get it from get_push_campaign_batches.")
-    String batchId = "";
-
-    /**
-    * The notification id within the batch.
-    */
-    // @ApiMember(Description="The notification id within the batch.")
-    String notificationId = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    GetPushCampaignBatchNotification({this.id="",this.batchId="",this.notificationId="",this.databaseIntegrationId});
-    GetPushCampaignBatchNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        batchId = json['batchId'] ?? "";
-        notificationId = json['notificationId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'batchId': batchId,
-        'notificationId': notificationId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetPushCampaignBatchNotificationResponse();
-    getResponseTypeName() => "GetPushCampaignBatchNotificationResponse";
-    getTypeName() => "GetPushCampaignBatchNotification";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets push campaign batch notifications
-*/
-// @Route("/{version}/notifications/push/campaigns/{id}/batches/{batchId}", "GET")
-// @Api(Description="Gets push campaign batch notifications")
-class GetPushCampaignBatchNotifications extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignBatchNotificationsResponse>, IConvertible, IGet
-{
-    /**
-    * The push campaign id. Get it from get_push_campaigns.
-    */
-    // @ApiMember(Description="The push campaign id. Get it from get_push_campaigns.")
-    String id = "";
-
-    /**
-    * The batch id to list notifications for. Get it from get_push_campaign_batches.
-    */
-    // @ApiMember(Description="The batch id to list notifications for. Get it from get_push_campaign_batches.")
-    String batchId = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    GetPushCampaignBatchNotifications({this.id="",this.batchId="",this.databaseIntegrationId});
-    GetPushCampaignBatchNotifications.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        batchId = json['batchId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'batchId': batchId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetPushCampaignBatchNotificationsResponse();
-    getResponseTypeName() => "GetPushCampaignBatchNotificationsResponse";
-    getTypeName() => "GetPushCampaignBatchNotifications";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Get push campaign statistics
-*/
-// @Route("/{version}/notifications/push/campaigns/{id}/stats", "GET")
-// @Api(Description="Get push campaign statistics")
-class GetPushCampaignStatistics extends CodeMashRequestBase implements IReturn<GetPushCampaignStatisticsResponse>, IConvertible, IGet
-{
-    /**
-    * The push campaign id to get statistics for. Get it from get_push_campaigns.
-    */
-    // @ApiMember(Description="The push campaign id to get statistics for. Get it from get_push_campaigns.")
-    String id = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    GetPushCampaignStatistics({this.id="",this.databaseIntegrationId});
-    GetPushCampaignStatistics.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetPushCampaignStatisticsResponse();
-    getResponseTypeName() => "GetPushCampaignStatisticsResponse";
-    getTypeName() => "GetPushCampaignStatistics";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Returns push preview notification
-*/
-// @Route("/{version}/notifications/push/preview", "GET")
-// @Api(Description="Returns push preview notification")
-class PreviewPushNotification extends RequestBase implements IReturn<PreviewPushNotificationResponse>, IConvertible, IGet
-{
-    /**
-    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
-    */
-    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
-    String hash = "";
-
-    /**
-    * Signed-in preview by id: the project id. With a hash it must match the hash.
-    */
-    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
-    String? projectId;
-
-    /**
-    * Signed-in preview by id: the notification id (needs push:read). With a hash it must match the hash.
-    */
-    // @ApiMember(Description="Signed-in preview by id: the notification id (needs push:read). With a hash it must match the hash.")
-    String? notificationId;
-
-    PreviewPushNotification({this.hash="",this.projectId,this.notificationId});
-    PreviewPushNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        hash = json['hash'] ?? "";
-        projectId = json['projectId'];
-        notificationId = json['notificationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'hash': hash,
-        'projectId': projectId,
-        'notificationId': notificationId
-    });
-
-    createResponse() => PreviewPushNotificationResponse();
-    getResponseTypeName() => "PreviewPushNotificationResponse";
-    getTypeName() => "PreviewPushNotification";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Retries the failed recipients of a push campaign
-*/
-// @Route("/{version}/notifications/push/campaigns/{Id}/retry-failed", "POST")
-// @Api(Description="Retries the failed recipients of a push campaign")
-// @DataContract
-class RetryFailedPushNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedPushNotificationsResponse>, IConvertible, IPost
-{
-    /**
-    * The campaign id. Get it from get_push_campaigns.
-    */
-    // @DataMember
-    // @ApiMember(Description="The campaign id. Get it from get_push_campaigns.", IsRequired=true)
-    String id = "";
-
-    /**
-    * Optional. Omit to use the project default database integration (resolved per environment).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
-    String? databaseIntegrationId;
-
-    /**
-    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
-    */
-    // @DataMember
-    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
-    String idempotencyKey = "";
-
-    /**
-    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
-    List<String>? notificationIds;
-
-    /**
-    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
-    bool? includeAmbiguous;
-
-    /**
-    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
-    List<String>? categories;
-
-    RetryFailedPushNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
-    RetryFailedPushNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        idempotencyKey = json['idempotencyKey'] ?? "";
-        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
-        includeAmbiguous = json['includeAmbiguous'];
-        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId,
-        'idempotencyKey': idempotencyKey,
-        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
-        'includeAmbiguous': includeAmbiguous,
-        'categories': JsonConverters.toJson(categories,'List<String>',context!)
-    });
-
-    createResponse() => RetryFailedPushNotificationsResponse();
-    getResponseTypeName() => "RetryFailedPushNotificationsResponse";
-    getTypeName() => "RetryFailedPushNotificationsRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Stops a running push campaign
-*/
-// @Route("/{version}/notifications/push/campaigns/{Id}/stop", "POST")
-// @Api(Description="Stops a running push campaign")
-// @DataContract
-class StopPushCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
-{
-    /**
-    * The campaign id to stop.
-    */
-    // @DataMember
-    // @ApiMember(Description="The campaign id to stop.")
-    String id = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @DataMember
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    StopPushCampaignRequest({this.id="",this.databaseIntegrationId});
-    StopPushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "StopPushCampaignRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Gets push campaign messages
-*/
-// @Route("/{version}/notifications/push/campaigns/{campaignId}/messages", "GET")
-// @Api(Description="Gets push campaign messages")
-class GetPushCampaignMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignMessagesResponse>, IConvertible, IGet
-{
-    /**
-    * The push campaign id. Get it from get_push_campaigns.
-    */
-    // @ApiMember(Description="The push campaign id. Get it from get_push_campaigns.")
-    String campaignId = "";
-
-    /**
-    * Optional: restrict results to this batch id. Get it from get_push_campaign_batches.
-    */
-    // @ApiMember(Description="Optional: restrict results to this batch id. Get it from get_push_campaign_batches.")
-    String campaignBatchId = "";
-
-    /**
-    * Optional database integration id; omit to use the project's default.
-    */
-    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
-    String? databaseIntegrationId;
-
-    GetPushCampaignMessagesRequest({this.campaignId="",this.campaignBatchId="",this.databaseIntegrationId});
-    GetPushCampaignMessagesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        campaignId = json['campaignId'] ?? "";
-        campaignBatchId = json['campaignBatchId'] ?? "";
-        databaseIntegrationId = json['databaseIntegrationId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'campaignId': campaignId,
-        'campaignBatchId': campaignBatchId,
-        'databaseIntegrationId': databaseIntegrationId
-    });
-
-    createResponse() => GetPushCampaignMessagesResponse();
-    getResponseTypeName() => "GetPushCampaignMessagesResponse";
-    getTypeName() => "GetPushCampaignMessagesRequest";
     TypeContext? context = _ctx;
 }
 
@@ -56499,6 +55409,9 @@ class SaveSchedulerTaskRequest extends CodeMashRequestBase implements IReturn<Id
     String initiatorUserId = "";
 
     // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
     bool? isEnabled;
 
     // @DataMember
@@ -56510,7 +55423,7 @@ class SaveSchedulerTaskRequest extends CodeMashRequestBase implements IReturn<Id
     // @DataMember
     SchedulerTaskRequest? task;
 
-    SaveSchedulerTaskRequest({this.taskId,this.name="",this.description,this.cron="",this.initiatorUserId="",this.isEnabled,this.stopOnError,this.endsAtUnix,this.task});
+    SaveSchedulerTaskRequest({this.taskId,this.name="",this.description,this.cron="",this.initiatorUserId="",this.executionIdentityId,this.isEnabled,this.stopOnError,this.endsAtUnix,this.task});
     SaveSchedulerTaskRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -56520,6 +55433,7 @@ class SaveSchedulerTaskRequest extends CodeMashRequestBase implements IReturn<Id
         description = json['description'];
         cron = json['cron'] ?? "";
         initiatorUserId = json['initiatorUserId'] ?? "";
+        executionIdentityId = json['executionIdentityId'];
         isEnabled = json['isEnabled'];
         stopOnError = json['stopOnError'];
         endsAtUnix = json['endsAtUnix'];
@@ -56533,6 +55447,7 @@ class SaveSchedulerTaskRequest extends CodeMashRequestBase implements IReturn<Id
         'description': description,
         'cron': cron,
         'initiatorUserId': initiatorUserId,
+        'executionIdentityId': executionIdentityId,
         'isEnabled': isEnabled,
         'stopOnError': stopOnError,
         'endsAtUnix': endsAtUnix,
@@ -57190,6 +56105,2227 @@ class RemoveContactIdentityRequest extends CodeMashRequestBase implements IRetur
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "RemoveContactIdentityRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/item/private", "POST")
+class MakeFilePrivateRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the file lives on.
+    */
+    // @ApiMember(Description="The files integration the file lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Path of the file, relative to the integration.
+    */
+    // @ApiMember(Description="Path of the file, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFilePrivateRequest({this.filesIntegrationId="",this.path=""});
+    MakeFilePrivateRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "MakeFilePrivateRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/item/public", "POST")
+class MakeFilePublicRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the file lives on.
+    */
+    // @ApiMember(Description="The files integration the file lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Path of the file to publish, relative to the integration.
+    */
+    // @ApiMember(Description="Path of the file to publish, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFilePublicRequest({this.filesIntegrationId="",this.path=""});
+    MakeFilePublicRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "MakeFilePublicRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/folder/private", "POST")
+class MakeFolderPrivateRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the folder lives on.
+    */
+    // @ApiMember(Description="The files integration the folder lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Folder prefix, relative to the integration.
+    */
+    // @ApiMember(Description="Folder prefix, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFolderPrivateRequest({this.filesIntegrationId="",this.path=""});
+    MakeFolderPrivateRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "MakeFolderPrivateRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/folder/public", "POST")
+class MakeFolderPublicRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * The files integration the folder lives on.
+    */
+    // @ApiMember(Description="The files integration the folder lives on.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Folder prefix to publish, relative to the integration.
+    */
+    // @ApiMember(Description="Folder prefix to publish, relative to the integration.", IsRequired=true)
+    String path = "";
+
+    MakeFolderPublicRequest({this.filesIntegrationId="",this.path=""});
+    MakeFolderPublicRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "MakeFolderPublicRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/files/folder", "GET")
+class GetFolderFiles extends CodeMashListPaginationRequestBase implements IReturn<GetFolderFilesResponse>, IConvertible, IGet
+{
+    /**
+    * The files integration id to list from, from get_files_integrations.
+    */
+    // @ApiMember(Description="The files integration id to list from, from get_files_integrations.", IsRequired=true)
+    String filesIntegrationId = "";
+
+    /**
+    * Path prefix to list. Empty / null lists the root.
+    */
+    // @ApiMember(Description="Path prefix to list. Empty / null lists the root.")
+    String? path;
+
+    GetFolderFiles({this.filesIntegrationId="",this.path});
+    GetFolderFiles.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        filesIntegrationId = json['filesIntegrationId'] ?? "";
+        path = json['path'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'filesIntegrationId': filesIntegrationId,
+        'path': path
+    });
+
+    createResponse() => GetFolderFilesResponse();
+    getResponseTypeName() => "GetFolderFilesResponse";
+    getTypeName() => "GetFolderFiles";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Database
+*/
+// @Route("/{version}/database/imports", "POST")
+// @Api(Description="Database")
+class CreateCollectionImport extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * The uploaded CSV's file ref, from the upload call.
+    */
+    // @ApiMember(Description="The uploaded CSV's file ref, from the upload call.", IsRequired=true)
+    FileResourceRefDto? file;
+
+    /**
+    * The target schema id.
+    */
+    // @ApiMember(Description="The target schema id.", IsRequired=true)
+    String schemaId = "";
+
+    /**
+    * The target collection (schema) name.
+    */
+    // @ApiMember(Description="The target collection (schema) name.", IsRequired=true)
+    String collectionName = "";
+
+    String? databaseIntegrationId;
+    /**
+    * The CSV delimiter used at upload time.
+    */
+    // @ApiMember(Description="The CSV delimiter used at upload time.", IsRequired=true)
+    String delimiter = "";
+
+    bool? hasHeader;
+    /**
+    * Column → property mapping, frozen for this import.
+    */
+    // @ApiMember(Description="Column → property mapping, frozen for this import.", IsRequired=true)
+    List<ImportColumnMappingDto> mapping = [];
+
+    CreateCollectionImport({this.file,this.schemaId="",this.collectionName="",this.databaseIntegrationId,this.delimiter="",this.hasHeader,this.mapping=const []});
+    CreateCollectionImport.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
+        schemaId = json['schemaId'] ?? "";
+        collectionName = json['collectionName'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        delimiter = json['delimiter'] ?? "";
+        hasHeader = json['hasHeader'];
+        mapping = JsonConverters.fromJson(json['mapping'],'List<ImportColumnMappingDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
+        'schemaId': schemaId,
+        'collectionName': collectionName,
+        'databaseIntegrationId': databaseIntegrationId,
+        'delimiter': delimiter,
+        'hasHeader': hasHeader,
+        'mapping': JsonConverters.toJson(mapping,'List<ImportColumnMappingDto>',context!)
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CreateCollectionImport";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Database
+*/
+// @Route("/{version}/database/imports/{Id}", "DELETE")
+// @Api(Description="Database")
+class DeleteCollectionImportRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * The import id (imp_…).
+    */
+    // @ApiMember(Description="The import id (imp_…).", IsRequired=true)
+    String id = "";
+
+    String? databaseIntegrationId;
+
+    DeleteCollectionImportRequest({this.id="",this.databaseIntegrationId});
+    DeleteCollectionImportRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteCollectionImportRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Database
+*/
+// @Route("/{version}/database/imports/{Id}", "GET")
+// @Api(Description="Database")
+class GetCollectionImport extends CodeMashRequestBase implements IReturn<GetCollectionImportResponse>, IConvertible, IGet
+{
+    /**
+    * The import id (imp_…).
+    */
+    // @ApiMember(Description="The import id (imp_…).", IsRequired=true)
+    String id = "";
+
+    String? databaseIntegrationId;
+
+    GetCollectionImport({this.id="",this.databaseIntegrationId});
+    GetCollectionImport.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetCollectionImportResponse();
+    getResponseTypeName() => "GetCollectionImportResponse";
+    getTypeName() => "GetCollectionImport";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Database
+*/
+// @Route("/{version}/database/imports", "GET")
+// @Api(Description="Database")
+class GetCollectionImports extends CodeMashListPaginationRequestBase implements IReturn<GetCollectionImportsResponse>, IConvertible, IGet
+{
+    String? databaseIntegrationId;
+
+    GetCollectionImports({this.databaseIntegrationId});
+    GetCollectionImports.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetCollectionImportsResponse();
+    getResponseTypeName() => "GetCollectionImportsResponse";
+    getTypeName() => "GetCollectionImports";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Database
+*/
+// @Route("/{version}/database/imports/upload-url", "POST")
+// @Api(Description="Database")
+class RequestImportUploadUrlRequest extends CodeMashRequestBase implements IReturn<RequestImportUploadUrlResponse>, IConvertible, IPost
+{
+    String? fileAccountId;
+    /**
+    * The original CSV file name, e.g. people.csv.
+    */
+    // @ApiMember(Description="The original CSV file name, e.g. people.csv.", IsRequired=true)
+    String fileName = "";
+
+    RequestImportUploadUrlRequest({this.fileAccountId,this.fileName=""});
+    RequestImportUploadUrlRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        fileAccountId = json['fileAccountId'];
+        fileName = json['fileName'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'fileAccountId': fileAccountId,
+        'fileName': fileName
+    });
+
+    createResponse() => RequestImportUploadUrlResponse();
+    getResponseTypeName() => "RequestImportUploadUrlResponse";
+    getTypeName() => "RequestImportUploadUrlRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Database
+*/
+// @Route("/{version}/database/imports/analyze", "POST")
+// @Api(Description="Database")
+class AnalyzeImportFileRequest extends CodeMashRequestBase implements IReturn<AnalyzeImportFileResponse>, IConvertible, IPost
+{
+    /**
+    * The uploaded CSV's file ref, from the upload-url call.
+    */
+    // @ApiMember(Description="The uploaded CSV's file ref, from the upload-url call.", IsRequired=true)
+    FileResourceRefDto? file;
+
+    /**
+    * The CSV delimiter, e.g. "," or ";".
+    */
+    // @ApiMember(Description="The CSV delimiter, e.g. \",\" or \";\".", IsRequired=true)
+    String delimiter = "";
+
+    /**
+    * Whether the first row is a header row.
+    */
+    // @ApiMember(Description="Whether the first row is a header row.")
+    bool? hasHeader;
+
+    AnalyzeImportFileRequest({this.file,this.delimiter="",this.hasHeader});
+    AnalyzeImportFileRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        file = JsonConverters.fromJson(json['file'],'FileResourceRefDto',context!);
+        delimiter = json['delimiter'] ?? "";
+        hasHeader = json['hasHeader'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'file': JsonConverters.toJson(file,'FileResourceRefDto',context!),
+        'delimiter': delimiter,
+        'hasHeader': hasHeader
+    });
+
+    createResponse() => AnalyzeImportFileResponse();
+    getResponseTypeName() => "AnalyzeImportFileResponse";
+    getTypeName() => "AnalyzeImportFileRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Create email campaign
+*/
+// @Route("/{version}/notifications/email/campaigns", "POST")
+// @Api(Description="Create email campaign")
+// @DataContract
+class CreateEmailCampaignRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    // @DataMember
+    EmailCampaignRequest? campaign;
+
+    // @DataMember
+    String? databaseIntegrationId;
+
+    /**
+    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.")
+    bool? sendNow;
+
+    CreateEmailCampaignRequest({this.campaign,this.databaseIntegrationId,this.sendNow});
+    CreateEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaign = JsonConverters.fromJson(json['campaign'],'EmailCampaignRequest',context!);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        sendNow = json['sendNow'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaign': JsonConverters.toJson(campaign,'EmailCampaignRequest',context!),
+        'databaseIntegrationId': databaseIntegrationId,
+        'sendNow': sendNow
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CreateEmailCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Deletes emails campaign from queue
+*/
+// @Route("/{version}/notifications/email/campaigns/{Id}", "DELETE")
+// @Api(Description="Deletes emails campaign from queue")
+// @DataContract
+class DeleteEmailCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String? databaseIntegrationId;
+
+    DeleteEmailCampaignRequest({this.id="",this.databaseIntegrationId});
+    DeleteEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteEmailCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets email campaign by id
+*/
+// @Route("/{version}/notifications/email/campaigns/{id}", "GET")
+// @Api(Description="Gets email campaign by id")
+class GetEmailCampaign extends CodeMashRequestBase implements IReturn<GetEmailCampaignResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id.
+    */
+    // @ApiMember(Description="The campaign id.")
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetEmailCampaign({this.id="",this.databaseIntegrationId});
+    GetEmailCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetEmailCampaignResponse();
+    getResponseTypeName() => "GetEmailCampaignResponse";
+    getTypeName() => "GetEmailCampaign";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets email campaigns
+*/
+// @Route("/{version}/notifications/email/campaigns", "GET")
+// @Api(Description="Gets email campaigns")
+class GetEmailCampaigns extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignsResponse>, IConvertible, IGet
+{
+    /**
+    * Optional. When omitted, the project's default database integration is used (resolved server-side from the project state).
+    */
+    // @ApiMember(Description="Optional. When omitted, the project's default database integration is used (resolved server-side from the project state).")
+    String? databaseIntegrationId;
+
+    /**
+    * Optional: return only the campaign with this id.
+    */
+    // @ApiMember(Description="Optional: return only the campaign with this id.")
+    String? campaignId;
+
+    /**
+    * Optional: only campaigns that targeted this email address.
+    */
+    // @ApiMember(Description="Optional: only campaigns that targeted this email address.")
+    String? emailAddress;
+
+    /**
+    * Optional: only campaigns built on this email template id.
+    */
+    // @ApiMember(Description="Optional: only campaigns built on this email template id.")
+    String? templateId;
+
+    /**
+    * Optional lower bound for the campaign time, unix timestamp in seconds (UTC).
+    */
+    // @ApiMember(Description="Optional lower bound for the campaign time, unix timestamp in seconds (UTC).")
+    int? from;
+
+    /**
+    * Optional upper bound for the campaign time, unix timestamp in seconds (UTC).
+    */
+    // @ApiMember(Description="Optional upper bound for the campaign time, unix timestamp in seconds (UTC).")
+    int? to;
+
+    GetEmailCampaigns({this.databaseIntegrationId,this.campaignId,this.emailAddress,this.templateId,this.from,this.to});
+    GetEmailCampaigns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        campaignId = json['campaignId'];
+        emailAddress = json['emailAddress'];
+        templateId = json['templateId'];
+        from = json['from'];
+        to = json['to'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'databaseIntegrationId': databaseIntegrationId,
+        'campaignId': campaignId,
+        'emailAddress': emailAddress,
+        'templateId': templateId,
+        'from': from,
+        'to': to
+    });
+
+    createResponse() => GetEmailCampaignsResponse();
+    getResponseTypeName() => "GetEmailCampaignsResponse";
+    getTypeName() => "GetEmailCampaigns";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get email campaign batches
+*/
+// @Route("/{version}/notifications/email/campaigns/{id}/batches", "GET")
+// @Api(Description="Get email campaign batches")
+class GetEmailCampaignBatches extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchesResponse>, IConvertible, IGet
+{
+    /**
+    * The email campaign id to list batches for. Get it from get_email_campaigns.
+    */
+    // @ApiMember(Description="The email campaign id to list batches for. Get it from get_email_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Optional batch id to filter to a single batch. Get it from a prior call to this tool.
+    */
+    // @ApiMember(Description="Optional batch id to filter to a single batch. Get it from a prior call to this tool.")
+    String? batchId;
+
+    /**
+    * Optional recipient email address to filter batches by.
+    */
+    // @ApiMember(Description="Optional recipient email address to filter batches by.")
+    String? emailAddress;
+
+    GetEmailCampaignBatches({this.id="",this.databaseIntegrationId,this.batchId,this.emailAddress});
+    GetEmailCampaignBatches.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        batchId = json['batchId'];
+        emailAddress = json['emailAddress'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'batchId': batchId,
+        'emailAddress': emailAddress
+    });
+
+    createResponse() => GetEmailCampaignBatchesResponse();
+    getResponseTypeName() => "GetEmailCampaignBatchesResponse";
+    getTypeName() => "GetEmailCampaignBatches";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get an email campaign batch notification
+*/
+// @Route("/{version}/notifications/email/campaigns/{id}/batches/{batchId}/{notificationId}", "GET")
+// @Api(Description="Get an email campaign batch notification")
+class GetEmailCampaignBatchNotification extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchNotificationResponse>, IConvertible, IGet
+{
+    /**
+    * The email campaign id. Get it from get_email_campaigns.
+    */
+    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * The campaign batch id. Get it from get_email_campaign_batches.
+    */
+    // @ApiMember(Description="The campaign batch id. Get it from get_email_campaign_batches.", IsRequired=true)
+    String batchId = "";
+
+    /**
+    * The notification id within the batch. Get it from get_email_campaign_batch_notifications.
+    */
+    // @ApiMember(Description="The notification id within the batch. Get it from get_email_campaign_batch_notifications.", IsRequired=true)
+    String notificationId = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetEmailCampaignBatchNotification({this.id="",this.batchId="",this.notificationId="",this.databaseIntegrationId});
+    GetEmailCampaignBatchNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        batchId = json['batchId'] ?? "";
+        notificationId = json['notificationId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'batchId': batchId,
+        'notificationId': notificationId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetEmailCampaignBatchNotificationResponse();
+    getResponseTypeName() => "GetEmailCampaignBatchNotificationResponse";
+    getTypeName() => "GetEmailCampaignBatchNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get email campaign batch notifications
+*/
+// @Route("/{version}/notifications/email/campaigns/{id}/batches/{batchId}", "GET")
+// @Api(Description="Get email campaign batch notifications")
+class GetEmailCampaignBatchNotifications extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignBatchNotificationsResponse>, IConvertible, IGet
+{
+    /**
+    * The email campaign id. Get it from get_email_campaigns.
+    */
+    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * The campaign batch id to list notifications for. Get it from get_email_campaign_batches.
+    */
+    // @ApiMember(Description="The campaign batch id to list notifications for. Get it from get_email_campaign_batches.", IsRequired=true)
+    String batchId = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetEmailCampaignBatchNotifications({this.id="",this.batchId="",this.databaseIntegrationId});
+    GetEmailCampaignBatchNotifications.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        batchId = json['batchId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'batchId': batchId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetEmailCampaignBatchNotificationsResponse();
+    getResponseTypeName() => "GetEmailCampaignBatchNotificationsResponse";
+    getTypeName() => "GetEmailCampaignBatchNotifications";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get email campaign statistics
+*/
+// @Route("/{version}/notifications/email/campaigns/{id}/stats", "GET")
+// @Api(Description="Get email campaign statistics")
+class GetEmailCampaignStatistics extends CodeMashRequestBase implements IReturn<GetEmailCampaignStatisticsResponse>, IConvertible, IGet
+{
+    /**
+    * The email campaign id to get statistics for. Get it from get_email_campaigns.
+    */
+    // @ApiMember(Description="The email campaign id to get statistics for. Get it from get_email_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetEmailCampaignStatistics({this.id="",this.databaseIntegrationId});
+    GetEmailCampaignStatistics.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetEmailCampaignStatisticsResponse();
+    getResponseTypeName() => "GetEmailCampaignStatisticsResponse";
+    getTypeName() => "GetEmailCampaignStatistics";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Preview an email notification
+*/
+// @Route("/{version}/notifications/email/preview", "GET")
+// @Api(Description="Preview an email notification")
+class PreviewEmailNotification extends RequestBase implements IReturn<PreviewEmailNotificationResponse>, IConvertible, IGet
+{
+    /**
+    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
+    */
+    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
+    String hash = "";
+
+    /**
+    * Signed-in preview by id: the project id. With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
+    String? projectId;
+
+    /**
+    * Signed-in preview by id: the notification id (needs email:read). With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the notification id (needs email:read). With a hash it must match the hash.")
+    String? notificationId;
+
+    PreviewEmailNotification({this.hash="",this.projectId,this.notificationId});
+    PreviewEmailNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        hash = json['hash'] ?? "";
+        projectId = json['projectId'];
+        notificationId = json['notificationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'hash': hash,
+        'projectId': projectId,
+        'notificationId': notificationId
+    });
+
+    createResponse() => PreviewEmailNotificationResponse();
+    getResponseTypeName() => "PreviewEmailNotificationResponse";
+    getTypeName() => "PreviewEmailNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Retries the failed recipients of an email campaign
+*/
+// @Route("/{version}/notifications/email/campaigns/{Id}/retry-failed", "POST")
+// @Api(Description="Retries the failed recipients of an email campaign")
+// @DataContract
+class RetryFailedEmailNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedEmailNotificationsResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id. Get it from get_email_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id. Get it from get_email_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
+    */
+    // @DataMember
+    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
+    String idempotencyKey = "";
+
+    /**
+    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
+    List<String>? notificationIds;
+
+    /**
+    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
+    bool? includeAmbiguous;
+
+    /**
+    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
+    List<String>? categories;
+
+    RetryFailedEmailNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
+    RetryFailedEmailNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        idempotencyKey = json['idempotencyKey'] ?? "";
+        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
+        includeAmbiguous = json['includeAmbiguous'];
+        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'idempotencyKey': idempotencyKey,
+        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
+        'includeAmbiguous': includeAmbiguous,
+        'categories': JsonConverters.toJson(categories,'List<String>',context!)
+    });
+
+    createResponse() => RetryFailedEmailNotificationsResponse();
+    getResponseTypeName() => "RetryFailedEmailNotificationsResponse";
+    getTypeName() => "RetryFailedEmailNotificationsRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Stops a running email campaign
+*/
+// @Route("/{version}/notifications/email/campaigns/{Id}/stop", "POST")
+// @Api(Description="Stops a running email campaign")
+// @DataContract
+class StopEmailCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id to stop.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id to stop.")
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    StopEmailCampaignRequest({this.id="",this.databaseIntegrationId});
+    StopEmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "StopEmailCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get email campaign messages
+*/
+// @Route("/{version}/notifications/emails/campaigns/{campaignId}/messages", "GET")
+// @Api(Description="Get email campaign messages")
+class GetEmailCampaignMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetEmailCampaignMessagesResponse>, IConvertible, IGet
+{
+    /**
+    * The email campaign id. Get it from get_email_campaigns.
+    */
+    // @ApiMember(Description="The email campaign id. Get it from get_email_campaigns.", IsRequired=true)
+    String campaignId = "";
+
+    /**
+    * The campaign batch id to list messages for. Get it from get_email_campaign_batches.
+    */
+    // @ApiMember(Description="The campaign batch id to list messages for. Get it from get_email_campaign_batches.", IsRequired=true)
+    String campaignBatchId = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetEmailCampaignMessagesRequest({this.campaignId="",this.campaignBatchId="",this.databaseIntegrationId});
+    GetEmailCampaignMessagesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaignId = json['campaignId'] ?? "";
+        campaignBatchId = json['campaignBatchId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaignId': campaignId,
+        'campaignBatchId': campaignBatchId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetEmailCampaignMessagesResponse();
+    getResponseTypeName() => "GetEmailCampaignMessagesResponse";
+    getTypeName() => "GetEmailCampaignMessagesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Deletes sms campaign from queue
+*/
+// @Route("/{version}/notifications/sms/campaigns/{id}", "DELETE")
+// @Api(Description="Deletes sms campaign from queue")
+class DeleteSmsCampaign extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * The campaign id to delete. Get it from get_sms_campaigns.
+    */
+    // @ApiMember(Description="The campaign id to delete. Get it from get_sms_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    DeleteSmsCampaign({this.id="",this.databaseIntegrationId});
+    DeleteSmsCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeleteSmsCampaign";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get sms campaign by id
+*/
+// @Route("/{version}/notifications/sms/campaigns/{id}", "GET")
+// @Api(Description="Get sms campaign by id")
+class GetSmsCampaign extends CodeMashRequestBase implements IReturn<GetSmsCampaignResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id.
+    */
+    // @ApiMember(Description="The campaign id.")
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetSmsCampaign({this.id="",this.databaseIntegrationId});
+    GetSmsCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetSmsCampaignResponse();
+    getResponseTypeName() => "GetSmsCampaignResponse";
+    getTypeName() => "GetSmsCampaign";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets sms campaigns
+*/
+// @Route("/{version}/notifications/sms/campaigns", "GET")
+// @Api(Description="Gets sms campaigns")
+class GetSmsCampaigns extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignsResponse>, IConvertible, IGet
+{
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Optional: return only the campaign with this id.
+    */
+    // @ApiMember(Description="Optional: return only the campaign with this id.")
+    String? campaignId;
+
+    /**
+    * Optional: only campaigns built on this SMS template id.
+    */
+    // @ApiMember(Description="Optional: only campaigns built on this SMS template id.")
+    String? templateId;
+
+    /**
+    * Optional lower bound for the campaign time, unix timestamp in seconds (UTC).
+    */
+    // @ApiMember(Description="Optional lower bound for the campaign time, unix timestamp in seconds (UTC).")
+    int? from;
+
+    /**
+    * Optional upper bound for the campaign time, unix timestamp in seconds (UTC).
+    */
+    // @ApiMember(Description="Optional upper bound for the campaign time, unix timestamp in seconds (UTC).")
+    int? to;
+
+    GetSmsCampaigns({this.databaseIntegrationId,this.campaignId,this.templateId,this.from,this.to});
+    GetSmsCampaigns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        campaignId = json['campaignId'];
+        templateId = json['templateId'];
+        from = json['from'];
+        to = json['to'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'databaseIntegrationId': databaseIntegrationId,
+        'campaignId': campaignId,
+        'templateId': templateId,
+        'from': from,
+        'to': to
+    });
+
+    createResponse() => GetSmsCampaignsResponse();
+    getResponseTypeName() => "GetSmsCampaignsResponse";
+    getTypeName() => "GetSmsCampaigns";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets sms campaign batches
+*/
+// @Route("/{version}/notifications/sms/campaigns/{id}/batches", "GET")
+// @Api(Description="Gets sms campaign batches")
+class GetSmsCampaignBatches extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignBatchesResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id. Get it from get_sms_campaigns.
+    */
+    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.")
+    String? id;
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetSmsCampaignBatches({this.id,this.databaseIntegrationId});
+    GetSmsCampaignBatches.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'];
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetSmsCampaignBatchesResponse();
+    getResponseTypeName() => "GetSmsCampaignBatchesResponse";
+    getTypeName() => "GetSmsCampaignBatches";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets sms campaign batch notification
+*/
+// @Route("/{version}/notifications/sms/campaigns/{id}/batches/{batchId}/{notificationId}", "GET")
+// @Api(Description="Gets sms campaign batch notification")
+class GetSmsCampaignBatchNotification extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignBatchNotificationResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id. Get it from get_sms_campaigns.
+    */
+    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * The campaign batch id. Get it from get_sms_campaign_batches.
+    */
+    // @ApiMember(Description="The campaign batch id. Get it from get_sms_campaign_batches.", IsRequired=true)
+    String batchId = "";
+
+    /**
+    * The notification id. Get it from get_sms_campaign_batch_notifications.
+    */
+    // @ApiMember(Description="The notification id. Get it from get_sms_campaign_batch_notifications.", IsRequired=true)
+    String notificationId = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetSmsCampaignBatchNotification({this.id="",this.batchId="",this.notificationId="",this.databaseIntegrationId});
+    GetSmsCampaignBatchNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        batchId = json['batchId'] ?? "";
+        notificationId = json['notificationId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'batchId': batchId,
+        'notificationId': notificationId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetSmsCampaignBatchNotificationResponse();
+    getResponseTypeName() => "GetSmsCampaignBatchNotificationResponse";
+    getTypeName() => "GetSmsCampaignBatchNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets sms campaign batch notifications
+*/
+// @Route("/{version}/notifications/sms/campaigns/{id}/batches/{batchId}", "GET")
+// @Api(Description="Gets sms campaign batch notifications")
+class GetSmsCampaignBatchNotifications extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignBatchNotificationsResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id. Get it from get_sms_campaigns.
+    */
+    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * The campaign batch id. Get it from get_sms_campaign_batches.
+    */
+    // @ApiMember(Description="The campaign batch id. Get it from get_sms_campaign_batches.", IsRequired=true)
+    String batchId = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetSmsCampaignBatchNotifications({this.id="",this.batchId="",this.databaseIntegrationId});
+    GetSmsCampaignBatchNotifications.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        batchId = json['batchId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'batchId': batchId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetSmsCampaignBatchNotificationsResponse();
+    getResponseTypeName() => "GetSmsCampaignBatchNotificationsResponse";
+    getTypeName() => "GetSmsCampaignBatchNotifications";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get sms campaign statistics
+*/
+// @Route("/{version}/notifications/sms/campaigns/{id}/stats", "GET")
+// @Api(Description="Get sms campaign statistics")
+class GetSmsCampaignStatistics extends CodeMashRequestBase implements IReturn<GetSmsCampaignStatisticsResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id. Get it from get_sms_campaigns.
+    */
+    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetSmsCampaignStatistics({this.id="",this.databaseIntegrationId});
+    GetSmsCampaignStatistics.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetSmsCampaignStatisticsResponse();
+    getResponseTypeName() => "GetSmsCampaignStatisticsResponse";
+    getTypeName() => "GetSmsCampaignStatistics";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Returns SMS preview notification body
+*/
+// @Route("/{version}/notifications/sms/preview", "GET")
+// @Api(Description="Returns SMS preview notification body")
+class PreviewSmsNotification extends RequestBase implements IReturn<PreviewSmsNotificationResponse>, IConvertible, IGet
+{
+    /**
+    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
+    */
+    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
+    String hash = "";
+
+    /**
+    * Signed-in preview by id: the project id. With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
+    String? projectId;
+
+    /**
+    * Signed-in preview by id: the notification id (needs sms:read). With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the notification id (needs sms:read). With a hash it must match the hash.")
+    String? notificationId;
+
+    PreviewSmsNotification({this.hash="",this.projectId,this.notificationId});
+    PreviewSmsNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        hash = json['hash'] ?? "";
+        projectId = json['projectId'];
+        notificationId = json['notificationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'hash': hash,
+        'projectId': projectId,
+        'notificationId': notificationId
+    });
+
+    createResponse() => PreviewSmsNotificationResponse();
+    getResponseTypeName() => "PreviewSmsNotificationResponse";
+    getTypeName() => "PreviewSmsNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Retries the failed recipients of an SMS campaign
+*/
+// @Route("/{version}/notifications/sms/campaigns/{Id}/retry-failed", "POST")
+// @Api(Description="Retries the failed recipients of an SMS campaign")
+// @DataContract
+class RetryFailedSmsNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedSmsNotificationsResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id. Get it from get_sms_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
+    */
+    // @DataMember
+    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
+    String idempotencyKey = "";
+
+    /**
+    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
+    List<String>? notificationIds;
+
+    /**
+    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
+    bool? includeAmbiguous;
+
+    /**
+    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
+    List<String>? categories;
+
+    RetryFailedSmsNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
+    RetryFailedSmsNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        idempotencyKey = json['idempotencyKey'] ?? "";
+        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
+        includeAmbiguous = json['includeAmbiguous'];
+        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'idempotencyKey': idempotencyKey,
+        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
+        'includeAmbiguous': includeAmbiguous,
+        'categories': JsonConverters.toJson(categories,'List<String>',context!)
+    });
+
+    createResponse() => RetryFailedSmsNotificationsResponse();
+    getResponseTypeName() => "RetryFailedSmsNotificationsResponse";
+    getTypeName() => "RetryFailedSmsNotificationsRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Stops a running SMS campaign
+*/
+// @Route("/{version}/notifications/sms/campaigns/{Id}/stop", "POST")
+// @Api(Description="Stops a running SMS campaign")
+class StopSmsCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id to stop.
+    */
+    // @ApiMember(Description="The campaign id to stop.")
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    StopSmsCampaignRequest({this.id="",this.databaseIntegrationId});
+    StopSmsCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "StopSmsCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets the sms notifications
+*/
+// @Route("/{version}/notifications/sms/campaigns/{campaignId}/messages", "GET")
+// @Api(Description="Gets the sms notifications")
+class GetSmsCampaignMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetSmsCampaignMessagesResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id. Get it from get_sms_campaigns.
+    */
+    // @ApiMember(Description="The campaign id. Get it from get_sms_campaigns.", IsRequired=true)
+    String campaignId = "";
+
+    /**
+    * The campaign batch id. Get it from get_sms_campaign_batches.
+    */
+    // @ApiMember(Description="The campaign batch id. Get it from get_sms_campaign_batches.", IsRequired=true)
+    String campaignBatchId = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    GetSmsCampaignMessagesRequest({this.campaignId="",this.campaignBatchId="",this.databaseIntegrationId});
+    GetSmsCampaignMessagesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaignId = json['campaignId'] ?? "";
+        campaignBatchId = json['campaignBatchId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaignId': campaignId,
+        'campaignBatchId': campaignBatchId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetSmsCampaignMessagesResponse();
+    getResponseTypeName() => "GetSmsCampaignMessagesResponse";
+    getTypeName() => "GetSmsCampaignMessagesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Count the devices a push campaign audience would reach
+*/
+// @Route("/{version}/notifications/push/campaigns/audience-count", "POST")
+// @Api(Description="Count the devices a push campaign audience would reach")
+// @DataContract
+class GetPushCampaignAudienceCountRequest extends CodeMashRequestBase implements IReturn<GetPushCampaignAudienceCountResponse>, IConvertible, IPost
+{
+    /**
+    * The audience, in the same shape as CreatePushCampaignRequest.campaign. Template and send options are ignored.
+    */
+    // @DataMember
+    // @ApiMember(Description="The audience, in the same shape as CreatePushCampaignRequest.campaign. Template and send options are ignored.")
+    PushCampaignRequest? campaign;
+
+    /**
+    * Optional. When omitted, the default database integration for the request's environment is used.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. When omitted, the default database integration for the request's environment is used.")
+    String? databaseIntegrationId;
+
+    GetPushCampaignAudienceCountRequest({this.campaign,this.databaseIntegrationId});
+    GetPushCampaignAudienceCountRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaign = JsonConverters.fromJson(json['campaign'],'PushCampaignRequest',context!);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaign': JsonConverters.toJson(campaign,'PushCampaignRequest',context!),
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushCampaignAudienceCountResponse();
+    getResponseTypeName() => "GetPushCampaignAudienceCountResponse";
+    getTypeName() => "GetPushCampaignAudienceCountRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Create push campaign
+*/
+// @Route("/{version}/notifications/push/campaigns", "POST")
+// @Api(Description="Create push campaign")
+// @DataContract
+class CreatePushCampaignRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    // @DataMember
+    PushCampaignRequest? campaign;
+
+    // @DataMember
+    String? databaseIntegrationId;
+
+    /**
+    * Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. true sends the campaign now (or at a campaignTime sooner than the review window). Without it, a campaign created by an AI tool must be scheduled at least 24 hours ahead for role-based / all-users / collection audiences and at least 1 hour ahead for direct recipient lists, or it is rejected with CM-ERRORS-CAMPAIGNS-017. Set it only when the user explicitly asked to send now.")
+    bool? sendNow;
+
+    CreatePushCampaignRequest({this.campaign,this.databaseIntegrationId,this.sendNow});
+    CreatePushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaign = JsonConverters.fromJson(json['campaign'],'PushCampaignRequest',context!);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        sendNow = json['sendNow'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaign': JsonConverters.toJson(campaign,'PushCampaignRequest',context!),
+        'databaseIntegrationId': databaseIntegrationId,
+        'sendNow': sendNow
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "CreatePushCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Deletes push campaign from queue
+*/
+// @Route("/{version}/notifications/push/campaigns/{Id}", "DELETE")
+// @Api(Description="Deletes push campaign from queue")
+// @DataContract
+class DeletePushCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
+{
+    /**
+    * The push campaign id to delete. Get it from get_push_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The push campaign id to delete. Get it from get_push_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    DeletePushCampaignRequest({this.id="",this.databaseIntegrationId});
+    DeletePushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "DeletePushCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets push campaign by id
+*/
+// @Route("/{version}/notifications/push/campaigns/{id}", "GET")
+// @Api(Description="Gets push campaign by id")
+class GetPushCampaign extends CodeMashRequestBase implements IReturn<GetPushCampaignResponse>, IConvertible, IGet
+{
+    /**
+    * The campaign id.
+    */
+    // @ApiMember(Description="The campaign id.")
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    GetPushCampaign({this.id="",this.databaseIntegrationId});
+    GetPushCampaign.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushCampaignResponse();
+    getResponseTypeName() => "GetPushCampaignResponse";
+    getTypeName() => "GetPushCampaign";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets push campaigns
+*/
+// @Route("/{version}/notifications/push/campaigns", "GET")
+// @Api(Description="Gets push campaigns")
+class GetPushCampaigns extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignsResponse>, IConvertible, IGet
+{
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    /**
+    * Optional: only campaigns built on this push template id.
+    */
+    // @ApiMember(Description="Optional: only campaigns built on this push template id.")
+    String? templateId;
+
+    /**
+    * Optional lower bound for the campaign time, unix timestamp in seconds (UTC).
+    */
+    // @ApiMember(Description="Optional lower bound for the campaign time, unix timestamp in seconds (UTC).")
+    int? from;
+
+    /**
+    * Optional upper bound for the campaign time, unix timestamp in seconds (UTC).
+    */
+    // @ApiMember(Description="Optional upper bound for the campaign time, unix timestamp in seconds (UTC).")
+    int? to;
+
+    GetPushCampaigns({this.databaseIntegrationId,this.templateId,this.from,this.to});
+    GetPushCampaigns.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        databaseIntegrationId = json['databaseIntegrationId'];
+        templateId = json['templateId'];
+        from = json['from'];
+        to = json['to'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'databaseIntegrationId': databaseIntegrationId,
+        'templateId': templateId,
+        'from': from,
+        'to': to
+    });
+
+    createResponse() => GetPushCampaignsResponse();
+    getResponseTypeName() => "GetPushCampaignsResponse";
+    getTypeName() => "GetPushCampaigns";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets push campaign batches
+*/
+// @Route("/{version}/notifications/push/campaigns/{id}/batches", "GET")
+// @Api(Description="Gets push campaign batches")
+class GetPushCampaignBatches extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignBatchesResponse>, IConvertible, IGet
+{
+    /**
+    * The push campaign id to list batches for. Get it from get_push_campaigns.
+    */
+    // @ApiMember(Description="The push campaign id to list batches for. Get it from get_push_campaigns.")
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    /**
+    * Optional: only return the batch with this id.
+    */
+    // @ApiMember(Description="Optional: only return the batch with this id.")
+    String? batchId;
+
+    GetPushCampaignBatches({this.id="",this.databaseIntegrationId,this.batchId});
+    GetPushCampaignBatches.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        batchId = json['batchId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'batchId': batchId
+    });
+
+    createResponse() => GetPushCampaignBatchesResponse();
+    getResponseTypeName() => "GetPushCampaignBatchesResponse";
+    getTypeName() => "GetPushCampaignBatches";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets a push campaign batch notification
+*/
+// @Route("/{version}/notifications/push/campaigns/{id}/batches/{batchId}/{notificationId}", "GET")
+// @Api(Description="Gets a push campaign batch notification")
+class GetPushCampaignBatchNotification extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignBatchNotificationResponse>, IConvertible, IGet
+{
+    /**
+    * The push campaign id. Get it from get_push_campaigns.
+    */
+    // @ApiMember(Description="The push campaign id. Get it from get_push_campaigns.")
+    String id = "";
+
+    /**
+    * The batch id. Get it from get_push_campaign_batches.
+    */
+    // @ApiMember(Description="The batch id. Get it from get_push_campaign_batches.")
+    String batchId = "";
+
+    /**
+    * The notification id within the batch.
+    */
+    // @ApiMember(Description="The notification id within the batch.")
+    String notificationId = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    GetPushCampaignBatchNotification({this.id="",this.batchId="",this.notificationId="",this.databaseIntegrationId});
+    GetPushCampaignBatchNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        batchId = json['batchId'] ?? "";
+        notificationId = json['notificationId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'batchId': batchId,
+        'notificationId': notificationId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushCampaignBatchNotificationResponse();
+    getResponseTypeName() => "GetPushCampaignBatchNotificationResponse";
+    getTypeName() => "GetPushCampaignBatchNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets push campaign batch notifications
+*/
+// @Route("/{version}/notifications/push/campaigns/{id}/batches/{batchId}", "GET")
+// @Api(Description="Gets push campaign batch notifications")
+class GetPushCampaignBatchNotifications extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignBatchNotificationsResponse>, IConvertible, IGet
+{
+    /**
+    * The push campaign id. Get it from get_push_campaigns.
+    */
+    // @ApiMember(Description="The push campaign id. Get it from get_push_campaigns.")
+    String id = "";
+
+    /**
+    * The batch id to list notifications for. Get it from get_push_campaign_batches.
+    */
+    // @ApiMember(Description="The batch id to list notifications for. Get it from get_push_campaign_batches.")
+    String batchId = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    GetPushCampaignBatchNotifications({this.id="",this.batchId="",this.databaseIntegrationId});
+    GetPushCampaignBatchNotifications.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        batchId = json['batchId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'batchId': batchId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushCampaignBatchNotificationsResponse();
+    getResponseTypeName() => "GetPushCampaignBatchNotificationsResponse";
+    getTypeName() => "GetPushCampaignBatchNotifications";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Get push campaign statistics
+*/
+// @Route("/{version}/notifications/push/campaigns/{id}/stats", "GET")
+// @Api(Description="Get push campaign statistics")
+class GetPushCampaignStatistics extends CodeMashRequestBase implements IReturn<GetPushCampaignStatisticsResponse>, IConvertible, IGet
+{
+    /**
+    * The push campaign id to get statistics for. Get it from get_push_campaigns.
+    */
+    // @ApiMember(Description="The push campaign id to get statistics for. Get it from get_push_campaigns.")
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    GetPushCampaignStatistics({this.id="",this.databaseIntegrationId});
+    GetPushCampaignStatistics.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushCampaignStatisticsResponse();
+    getResponseTypeName() => "GetPushCampaignStatisticsResponse";
+    getTypeName() => "GetPushCampaignStatistics";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Returns push preview notification
+*/
+// @Route("/{version}/notifications/push/preview", "GET")
+// @Api(Description="Returns push preview notification")
+class PreviewPushNotification extends RequestBase implements IReturn<PreviewPushNotificationResponse>, IConvertible, IGet
+{
+    /**
+    * The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).
+    */
+    // @ApiMember(Description="The signed preview link hash. With it the preview opens without sign-in: exactly one notification, until the link expires (30 days after sending).")
+    String hash = "";
+
+    /**
+    * Signed-in preview by id: the project id. With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the project id. With a hash it must match the hash.")
+    String? projectId;
+
+    /**
+    * Signed-in preview by id: the notification id (needs push:read). With a hash it must match the hash.
+    */
+    // @ApiMember(Description="Signed-in preview by id: the notification id (needs push:read). With a hash it must match the hash.")
+    String? notificationId;
+
+    PreviewPushNotification({this.hash="",this.projectId,this.notificationId});
+    PreviewPushNotification.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        hash = json['hash'] ?? "";
+        projectId = json['projectId'];
+        notificationId = json['notificationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'hash': hash,
+        'projectId': projectId,
+        'notificationId': notificationId
+    });
+
+    createResponse() => PreviewPushNotificationResponse();
+    getResponseTypeName() => "PreviewPushNotificationResponse";
+    getTypeName() => "PreviewPushNotification";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Retries the failed recipients of a push campaign
+*/
+// @Route("/{version}/notifications/push/campaigns/{Id}/retry-failed", "POST")
+// @Api(Description="Retries the failed recipients of a push campaign")
+// @DataContract
+class RetryFailedPushNotificationsRequest extends CodeMashRequestBase implements IReturn<RetryFailedPushNotificationsResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id. Get it from get_push_campaigns.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id. Get it from get_push_campaigns.", IsRequired=true)
+    String id = "";
+
+    /**
+    * Optional. Omit to use the project default database integration (resolved per environment).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Omit to use the project default database integration (resolved per environment).")
+    String? databaseIntegrationId;
+
+    /**
+    * Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).
+    */
+    // @DataMember
+    // @ApiMember(Description="Your key for this request, at most 64 characters. The same key again returns the first answer and sends nothing; the same key with another body is refused (409).", IsRequired=true)
+    String idempotencyKey = "";
+
+    /**
+    * Optional. Only these notification ids. Default: every failed recipient of the campaign.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these notification ids. Default: every failed recipient of the campaign.")
+    List<String>? notificationIds;
+
+    /**
+    * Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional, default false. Also retry recipients whose failure is Ambiguous (a timeout after the request was sent) — this MAY SEND A DUPLICATE.")
+    bool? includeAmbiguous;
+
+    /**
+    * Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Only these failure classes: Transient, Permanent, Unknown. Default: all three (Ambiguous only through includeAmbiguous).")
+    List<String>? categories;
+
+    RetryFailedPushNotificationsRequest({this.id="",this.databaseIntegrationId,this.idempotencyKey="",this.notificationIds,this.includeAmbiguous,this.categories});
+    RetryFailedPushNotificationsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        idempotencyKey = json['idempotencyKey'] ?? "";
+        notificationIds = JsonConverters.fromJson(json['notificationIds'],'List<String>',context!);
+        includeAmbiguous = json['includeAmbiguous'];
+        categories = JsonConverters.fromJson(json['categories'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId,
+        'idempotencyKey': idempotencyKey,
+        'notificationIds': JsonConverters.toJson(notificationIds,'List<String>',context!),
+        'includeAmbiguous': includeAmbiguous,
+        'categories': JsonConverters.toJson(categories,'List<String>',context!)
+    });
+
+    createResponse() => RetryFailedPushNotificationsResponse();
+    getResponseTypeName() => "RetryFailedPushNotificationsResponse";
+    getTypeName() => "RetryFailedPushNotificationsRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Stops a running push campaign
+*/
+// @Route("/{version}/notifications/push/campaigns/{Id}/stop", "POST")
+// @Api(Description="Stops a running push campaign")
+// @DataContract
+class StopPushCampaignRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The campaign id to stop.
+    */
+    // @DataMember
+    // @ApiMember(Description="The campaign id to stop.")
+    String id = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    StopPushCampaignRequest({this.id="",this.databaseIntegrationId});
+    StopPushCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "StopPushCampaignRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Gets push campaign messages
+*/
+// @Route("/{version}/notifications/push/campaigns/{campaignId}/messages", "GET")
+// @Api(Description="Gets push campaign messages")
+class GetPushCampaignMessagesRequest extends CodeMashListPaginationRequestBase implements IReturn<GetPushCampaignMessagesResponse>, IConvertible, IGet
+{
+    /**
+    * The push campaign id. Get it from get_push_campaigns.
+    */
+    // @ApiMember(Description="The push campaign id. Get it from get_push_campaigns.")
+    String campaignId = "";
+
+    /**
+    * Optional: restrict results to this batch id. Get it from get_push_campaign_batches.
+    */
+    // @ApiMember(Description="Optional: restrict results to this batch id. Get it from get_push_campaign_batches.")
+    String campaignBatchId = "";
+
+    /**
+    * Optional database integration id; omit to use the project's default.
+    */
+    // @ApiMember(Description="Optional database integration id; omit to use the project's default.")
+    String? databaseIntegrationId;
+
+    GetPushCampaignMessagesRequest({this.campaignId="",this.campaignBatchId="",this.databaseIntegrationId});
+    GetPushCampaignMessagesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        campaignId = json['campaignId'] ?? "";
+        campaignBatchId = json['campaignBatchId'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'campaignId': campaignId,
+        'campaignBatchId': campaignBatchId,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => GetPushCampaignMessagesResponse();
+    getResponseTypeName() => "GetPushCampaignMessagesResponse";
+    getTypeName() => "GetPushCampaignMessagesRequest";
     TypeContext? context = _ctx;
 }
 
@@ -58040,7 +59176,7 @@ class RunDiagnosticHealthCheckRequest extends CodeMashRequestBase implements IRe
     TypeContext? context = _ctx;
 }
 
-TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
+TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmailProvider': TypeInfo(TypeOf.Enum, enumValues:EmailProvider.values),
     'EmailIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SmtpPorts': TypeInfo(TypeOf.Enum, enumValues:SmtpPorts.values),
@@ -58255,6 +59391,9 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'SmsToAccountUsersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => SmsToAccountUsersDeliverySettingsDto()),
     'SmsToCollectionRecordsDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => SmsToCollectionRecordsDeliverySettingsDto()),
     'SmsToPhoneNumbersDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => SmsToPhoneNumbersDeliverySettingsDto()),
+    'EmailToTriggerSubjectDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => EmailToTriggerSubjectDeliverySettingsDto()),
+    'PushToTriggerSubjectDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => PushToTriggerSubjectDeliverySettingsDto()),
+    'SmsToTriggerSubjectDeliverySettingsDto': TypeInfo(TypeOf.Class, create:() => SmsToTriggerSubjectDeliverySettingsDto()),
     'IntegrationDto': TypeInfo(TypeOf.Class, create:() => IntegrationDto()),
     'IReadOnlyList<String>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<String>()),
     'LlmModelOptionDto': TypeInfo(TypeOf.Class, create:() => LlmModelOptionDto()),
@@ -58276,6 +59415,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'ObsidianMcpIntegrationDto': TypeInfo(TypeOf.Class, create:() => ObsidianMcpIntegrationDto()),
     'CodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => CodeIntegrationDto()),
     'AwsLambdaKeylessCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsLambdaKeylessCodeIntegrationDto()),
+    'AwsLambdaCrossAccountRoleCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsLambdaCrossAccountRoleCodeIntegrationDto()),
     'AwsLambdaIamCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsLambdaIamCodeIntegrationDto()),
     'AzureFunctionsCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => AzureFunctionsCodeIntegrationDto()),
     'GoogleCloudFunctionsCodeIntegrationDto': TypeInfo(TypeOf.Class, create:() => GoogleCloudFunctionsCodeIntegrationDto()),
@@ -58332,6 +59472,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'FilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => FilesIntegrationDto()),
     'AppleICloudFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AppleICloudFilesIntegrationDto()),
     'AwsS3KeylessFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsS3KeylessFilesIntegrationDto()),
+    'AwsS3CrossAccountRoleFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsS3CrossAccountRoleFilesIntegrationDto()),
     'AwsS3IamFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsS3IamFilesIntegrationDto()),
     'AzureBlobFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => AzureBlobFilesIntegrationDto()),
     'DropBoxFilesIntegrationDto': TypeInfo(TypeOf.Class, create:() => DropBoxFilesIntegrationDto()),
@@ -58364,6 +59505,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'EmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => EmailIntegrationDto()),
     'AwsSesEmailIntegrationDto': TypeInfo(TypeOf.AbstractClass),
     'AwsKeylessEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsKeylessEmailIntegrationDto()),
+    'AwsCrossAccountRoleEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsCrossAccountRoleEmailIntegrationDto()),
     'AwsIamEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => AwsIamEmailIntegrationDto()),
     'MailGunEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => MailGunEmailIntegrationDto()),
     'SendGridEmailIntegrationDto': TypeInfo(TypeOf.Class, create:() => SendGridEmailIntegrationDto()),
@@ -58375,6 +59517,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'WebhookIntegrationDto': TypeInfo(TypeOf.Class, create:() => WebhookIntegrationDto()),
     'IReadOnlyList<WebhookDestinationDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<WebhookDestinationDto>()),
     'SchedulerTaskType': TypeInfo(TypeOf.Enum, enumValues:SchedulerTaskType.values),
+    'ExecutionIdentitySummaryDto': TypeInfo(TypeOf.Class, create:() => ExecutionIdentitySummaryDto()),
     'SchedulerTaskDto': TypeInfo(TypeOf.Class, create:() => SchedulerTaskDto()),
     'SchedulerTaskRequest': TypeInfo(TypeOf.AbstractClass),
     'EmailCampaignSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => EmailCampaignSchedulerTaskRequest()),
@@ -58536,7 +59679,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'SchemaListSortDto': TypeInfo(TypeOf.Class, create:() => SchemaListSortDto()),
     'SchemaListSettingsDto': TypeInfo(TypeOf.Class, create:() => SchemaListSettingsDto()),
     'List<SchemaListColumnDto>': TypeInfo(TypeOf.Class, create:() => <SchemaListColumnDto>[]),
-    'ImportColumnMappingDto': TypeInfo(TypeOf.Class, create:() => ImportColumnMappingDto()),
     'EmailValidationProvider': TypeInfo(TypeOf.Enum, enumValues:EmailValidationProvider.values),
     'EmailValidationIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SaveEmailTemplate': TypeInfo(TypeOf.Class, create:() => SaveEmailTemplate()),
@@ -58556,6 +59698,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'INoSessionCookies': TypeInfo(TypeOf.Interface),
     'EmbeddingProvider': TypeInfo(TypeOf.Enum, enumValues:EmbeddingProvider.values),
     'EmbeddingIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
+    'ImportColumnMappingDto': TypeInfo(TypeOf.Class, create:() => ImportColumnMappingDto()),
     'CaseResolutionFixKind': TypeInfo(TypeOf.Enum, enumValues:CaseResolutionFixKind.values),
     'CaseResolutionDto': TypeInfo(TypeOf.Class, create:() => CaseResolutionDto()),
     'CodeMashRelease': TypeInfo(TypeOf.Enum, enumValues:CodeMashRelease.values),
@@ -58574,7 +59717,14 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'PublicAiAssistantDto': TypeInfo(TypeOf.Class, create:() => PublicAiAssistantDto()),
     'PublicAiChatDto': TypeInfo(TypeOf.Class, create:() => PublicAiChatDto()),
     'List<PublicAiAssistantDto>': TypeInfo(TypeOf.Class, create:() => <PublicAiAssistantDto>[]),
+    'ExecutionIdentityRefusalDto': TypeInfo(TypeOf.Class, create:() => ExecutionIdentityRefusalDto()),
     'TriggerAttentionDto': TypeInfo(TypeOf.Class, create:() => TriggerAttentionDto()),
+    'PaginatedResponse<TViewModelProjection>': TypeInfo(TypeOf.GenericDef,create:() => PaginatedResponse()),
+    'WorkflowRunActorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunActorDto()),
+    'WorkflowRunErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunErrorDto()),
+    'TriggerRunProducedDto': TypeInfo(TypeOf.Class, create:() => TriggerRunProducedDto()),
+    'TriggerRunListProjection': TypeInfo(TypeOf.Class, create:() => TriggerRunListProjection()),
+    'TriggerRunDto': TypeInfo(TypeOf.Class, create:() => TriggerRunDto()),
     'TriggerActivationTestProblem': TypeInfo(TypeOf.Class, create:() => TriggerActivationTestProblem()),
     'AccountOwnerDto': TypeInfo(TypeOf.Class, create:() => AccountOwnerDto()),
     'AccountStatus': TypeInfo(TypeOf.Enum, enumValues:AccountStatus.values),
@@ -58618,6 +59768,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'List<GroupDefinitionDto>': TypeInfo(TypeOf.Class, create:() => <GroupDefinitionDto>[]),
     'List<TagDefinitionDto>': TypeInfo(TypeOf.Class, create:() => <TagDefinitionDto>[]),
     'ProjectEnvironmentAdminUrlDto': TypeInfo(TypeOf.Class, create:() => ProjectEnvironmentAdminUrlDto()),
+    'ProjectEnvironmentExecutionIdentityDto': TypeInfo(TypeOf.Class, create:() => ProjectEnvironmentExecutionIdentityDto()),
     'AuthenticationFlowPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => AuthenticationFlowPasswordPolicyDto()),
     'AuthenticationFlowSummaryDto': TypeInfo(TypeOf.Class, create:() => AuthenticationFlowSummaryDto()),
     'AiAssistantDto': TypeInfo(TypeOf.Class, create:() => AiAssistantDto()),
@@ -58657,6 +59808,7 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'ProjectDto': TypeInfo(TypeOf.Class, create:() => ProjectDto()),
     'List<ProjectRegionDto>': TypeInfo(TypeOf.Class, create:() => <ProjectRegionDto>[]),
     'List<ProjectEnvironmentAdminUrlDto>': TypeInfo(TypeOf.Class, create:() => <ProjectEnvironmentAdminUrlDto>[]),
+    'List<ProjectEnvironmentExecutionIdentityDto>': TypeInfo(TypeOf.Class, create:() => <ProjectEnvironmentExecutionIdentityDto>[]),
     'List<AuthenticationFlowSummaryDto>': TypeInfo(TypeOf.Class, create:() => <AuthenticationFlowSummaryDto>[]),
     'Map<String,int?>': TypeInfo(TypeOf.Class, create:() => Map<String,int?>()),
     'ProjectListItemDto': TypeInfo(TypeOf.Class, create:() => ProjectListItemDto()),
@@ -58674,7 +59826,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'ApplicationModule': TypeInfo(TypeOf.Enum, enumValues:ApplicationModule.values),
     'LanguageGapKind': TypeInfo(TypeOf.Enum, enumValues:LanguageGapKind.values),
     'TemplateLanguageGapDto': TypeInfo(TypeOf.Class, create:() => TemplateLanguageGapDto()),
-    'PaginatedResponse<TViewModelProjection>': TypeInfo(TypeOf.GenericDef,create:() => PaginatedResponse()),
     'AuthType': TypeInfo(TypeOf.Enum, enumValues:AuthType.values),
     'AccessInformationDto': TypeInfo(TypeOf.Class, create:() => AccessInformationDto()),
     'RegistrationDto': TypeInfo(TypeOf.Class, create:() => RegistrationDto()),
@@ -58716,6 +59867,8 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'PasskeySettingsDto': TypeInfo(TypeOf.Class, create:() => PasskeySettingsDto()),
     'IntegrationListProjection': TypeInfo(TypeOf.Class, create:() => IntegrationListProjection()),
     'MembershipIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => MembershipIntegrationListProjection()),
+    'ExecutionIdentityUsageDto': TypeInfo(TypeOf.Class, create:() => ExecutionIdentityUsageDto()),
+    'ExecutionIdentityDto': TypeInfo(TypeOf.Class, create:() => ExecutionIdentityDto()),
     'MembershipMessageTemplateDto': TypeInfo(TypeOf.Class, create:() => MembershipMessageTemplateDto()),
     'MembershipEmailActionSettingsDto': TypeInfo(TypeOf.Class, create:() => MembershipEmailActionSettingsDto()),
     'MembershipEmailPreferencesDto': TypeInfo(TypeOf.Class, create:() => MembershipEmailPreferencesDto()),
@@ -58765,18 +59918,10 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'DatabaseIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationListProjection()),
     'FlexTierDto': TypeInfo(TypeOf.Class, create:() => FlexTierDto()),
     'IntegrationTestResultItemDto': TypeInfo(TypeOf.Class, create:() => IntegrationTestResultItemDto()),
-    'SchemaRefDto': TypeInfo(TypeOf.Class, create:() => SchemaRefDto()),
-    'CollectionImportDto': TypeInfo(TypeOf.Class, create:() => CollectionImportDto()),
-    'List<ImportColumnMappingDto>': TypeInfo(TypeOf.Class, create:() => <ImportColumnMappingDto>[]),
-    'ImportUploadTargetDto': TypeInfo(TypeOf.Class, create:() => ImportUploadTargetDto()),
-    'ImportFileColumnDto': TypeInfo(TypeOf.Class, create:() => ImportFileColumnDto()),
-    'ImportFileAnalysisDto': TypeInfo(TypeOf.Class, create:() => ImportFileAnalysisDto()),
-    'List<ImportFileColumnDto>': TypeInfo(TypeOf.Class, create:() => <ImportFileColumnDto>[]),
     'MongoDbAggregateListProjection': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateListProjection()),
     'FilesTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => FilesTriggerProjectionList()),
     'FilesIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => FilesIntegrationListProjection()),
     'KeylessIntegrationSetupTemplate': TypeInfo(TypeOf.Class, create:() => KeylessIntegrationSetupTemplate()),
-    'PublicFolderDto': TypeInfo(TypeOf.Class, create:() => PublicFolderDto()),
     'NotificationModuleDependencyItemDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDependencyItemDto()),
     'NotificationModuleDisableDependenciesDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDisableDependenciesDto()),
     'List<NotificationModuleDependencyItemDto>': TypeInfo(TypeOf.Class, create:() => <NotificationModuleDependencyItemDto>[]),
@@ -58798,44 +59943,9 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'DomainHealthRecordItemDto': TypeInfo(TypeOf.Class, create:() => DomainHealthRecordItemDto()),
     'EmailIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => EmailIntegrationListProjection()),
     'EmailLinkPreferencesDto': TypeInfo(TypeOf.Class, create:() => EmailLinkPreferencesDto()),
-    'CampaignStatus': TypeInfo(TypeOf.Enum, enumValues:CampaignStatus.values),
-    'CampaignStatusChangeEntryDto': TypeInfo(TypeOf.Class, create:() => CampaignStatusChangeEntryDto()),
-    'CampaignDto': TypeInfo(TypeOf.Class, create:() => CampaignDto()),
-    'List<CampaignStatusChangeEntryDto>': TypeInfo(TypeOf.Class, create:() => <CampaignStatusChangeEntryDto>[]),
-    'EmailCampaignDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignDto()),
-    'EmailCampaignListProjection': TypeInfo(TypeOf.Class, create:() => EmailCampaignListProjection()),
-    'CampaignBatchStatus': TypeInfo(TypeOf.Enum, enumValues:CampaignBatchStatus.values),
-    'BatchStatusChangeEntryDto': TypeInfo(TypeOf.Class, create:() => BatchStatusChangeEntryDto()),
-    'CampaignBatchDto': TypeInfo(TypeOf.Class, create:() => CampaignBatchDto()),
-    'List<BatchStatusChangeEntryDto>': TypeInfo(TypeOf.Class, create:() => <BatchStatusChangeEntryDto>[]),
-    'EmailRecipientDto': TypeInfo(TypeOf.Class, create:() => EmailRecipientDto()),
-    'EmailRecipientsDto': TypeInfo(TypeOf.Class, create:() => EmailRecipientsDto()),
-    'List<EmailRecipientDto>': TypeInfo(TypeOf.Class, create:() => <EmailRecipientDto>[]),
-    'EmailCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchDto()),
-    'CampaignNotificationStatus': TypeInfo(TypeOf.Enum, enumValues:CampaignNotificationStatus.values),
-    'NotificationStatusChangeEntryDto': TypeInfo(TypeOf.Class, create:() => NotificationStatusChangeEntryDto()),
-    'NotificationDeliveryState': TypeInfo(TypeOf.Enum, enumValues:NotificationDeliveryState.values),
-    'NotificationAttemptOutcome': TypeInfo(TypeOf.Enum, enumValues:NotificationAttemptOutcome.values),
-    'SendErrorCategory': TypeInfo(TypeOf.Enum, enumValues:SendErrorCategory.values),
-    'NotificationAttemptTrigger': TypeInfo(TypeOf.Enum, enumValues:NotificationAttemptTrigger.values),
-    'NotificationAttemptDto': TypeInfo(TypeOf.Class, create:() => NotificationAttemptDto()),
-    'DeliveryEventOutcome': TypeInfo(TypeOf.Enum, enumValues:DeliveryEventOutcome.values),
-    'NotificationDeliveryEventDto': TypeInfo(TypeOf.Class, create:() => NotificationDeliveryEventDto()),
-    'CampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => CampaignBatchNotificationDto()),
-    'List<NotificationStatusChangeEntryDto>': TypeInfo(TypeOf.Class, create:() => <NotificationStatusChangeEntryDto>[]),
-    'List<NotificationAttemptDto>': TypeInfo(TypeOf.Class, create:() => <NotificationAttemptDto>[]),
-    'List<NotificationDeliveryEventDto>': TypeInfo(TypeOf.Class, create:() => <NotificationDeliveryEventDto>[]),
-    'EmailCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchNotificationDto()),
-    'CampaignStatsDto': TypeInfo(TypeOf.Class, create:() => CampaignStatsDto()),
     'SmsTemplateListProjection': TypeInfo(TypeOf.Class, create:() => SmsTemplateListProjection()),
     'SmsSettings': TypeInfo(TypeOf.Class, create:() => SmsSettings()),
     'SmsIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => SmsIntegrationListProjection()),
-    'SmsCampaignDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignDto()),
-    'SmsRecipientDto': TypeInfo(TypeOf.Class, create:() => SmsRecipientDto()),
-    'SmsRecipientsDto': TypeInfo(TypeOf.Class, create:() => SmsRecipientsDto()),
-    'List<SmsRecipientDto>': TypeInfo(TypeOf.Class, create:() => <SmsRecipientDto>[]),
-    'SmsCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchDto()),
-    'SmsCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchNotificationDto()),
     'WorkflowVersionSummaryDto': TypeInfo(TypeOf.Class, create:() => WorkflowVersionSummaryDto()),
     'WorkflowValidationIssueDto': TypeInfo(TypeOf.Class, create:() => WorkflowValidationIssueDto()),
     'WorkflowDto': TypeInfo(TypeOf.Class, create:() => WorkflowDto()),
@@ -58851,15 +59961,11 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'WorkflowSchemaDto': TypeInfo(TypeOf.Class, create:() => WorkflowSchemaDto()),
     'List<WorkflowStepKindSchemaDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStepKindSchemaDto>[]),
     'List<WorkflowBindingFamilyDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowBindingFamilyDto>[]),
-    'WorkflowRunErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunErrorDto()),
-    'WorkflowRunActorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunActorDto()),
     'WorkflowWaitingOnDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitingOnDto()),
     'WorkflowRunStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunStepDto()),
     'WorkflowRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunDto()),
     'List<WorkflowWaitingOnDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitingOnDto>[]),
     'List<WorkflowRunStepDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowRunStepDto>[]),
-    'WorkflowRunListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowRunListProjection()),
-    'TenantLogEntryDto': TypeInfo(TypeOf.Class, create:() => TenantLogEntryDto()),
     'MarketplaceListingProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceListingProjection()),
     'MarketplaceAccessCustomPolicyDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessCustomPolicyDto()),
     'MarketplaceAccessRoleDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessRoleDto()),
@@ -58877,20 +59983,13 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'CodeFunctionQualifierKindDto': TypeInfo(TypeOf.Enum, enumValues:CodeFunctionQualifierKindDto.values),
     'CodeFunctionQualifierDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionQualifierDto()),
     'CodeFunctionRunDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionRunDto()),
+    'WorkflowRunListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowRunListProjection()),
+    'TenantLogEntryDto': TypeInfo(TypeOf.Class, create:() => TenantLogEntryDto()),
     'PushTemplateListProjection': TypeInfo(TypeOf.Class, create:() => PushTemplateListProjection()),
     'PushSettings': TypeInfo(TypeOf.Class, create:() => PushSettings()),
     'PushIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => PushIntegrationListProjection()),
     'PushDeviceListProjection': TypeInfo(TypeOf.Class, create:() => PushDeviceListProjection()),
     'TeamPushDeviceListProjection': TypeInfo(TypeOf.Class, create:() => TeamPushDeviceListProjection()),
-    'PushAudienceCountDto': TypeInfo(TypeOf.Class, create:() => PushAudienceCountDto()),
-    'PushCampaignDto': TypeInfo(TypeOf.Class, create:() => PushCampaignDto()),
-    'PushRecipientDto': TypeInfo(TypeOf.Class, create:() => PushRecipientDto()),
-    'PushRecipientsDto': TypeInfo(TypeOf.Class, create:() => PushRecipientsDto()),
-    'List<PushRecipientDto>': TypeInfo(TypeOf.Class, create:() => <PushRecipientDto>[]),
-    'PushCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => PushCampaignBatchDto()),
-    'NotificationReadMarkDto': TypeInfo(TypeOf.Class, create:() => NotificationReadMarkDto()),
-    'PushCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => PushCampaignBatchNotificationDto()),
-    'List<NotificationReadMarkDto>': TypeInfo(TypeOf.Class, create:() => <NotificationReadMarkDto>[]),
     'InAppNotificationDto': TypeInfo(TypeOf.Class, create:() => InAppNotificationDto()),
     'PaymentsWebhookLogEntry': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookLogEntry()),
     'PaymentsWebhookRunOrderDto': TypeInfo(TypeOf.Class, create:() => PaymentsWebhookRunOrderDto()),
@@ -58981,6 +60080,63 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'List<AuthDto>': TypeInfo(TypeOf.Class, create:() => <AuthDto>[]),
     'Map<String,ChannelSubscriptionStateDto?>': TypeInfo(TypeOf.Class, create:() => Map<String,ChannelSubscriptionStateDto?>()),
     'ContactRolesRepairDto': TypeInfo(TypeOf.Class, create:() => ContactRolesRepairDto()),
+    'PublicFolderDto': TypeInfo(TypeOf.Class, create:() => PublicFolderDto()),
+    'SchemaRefDto': TypeInfo(TypeOf.Class, create:() => SchemaRefDto()),
+    'CollectionImportDto': TypeInfo(TypeOf.Class, create:() => CollectionImportDto()),
+    'List<ImportColumnMappingDto>': TypeInfo(TypeOf.Class, create:() => <ImportColumnMappingDto>[]),
+    'ImportUploadTargetDto': TypeInfo(TypeOf.Class, create:() => ImportUploadTargetDto()),
+    'ImportFileColumnDto': TypeInfo(TypeOf.Class, create:() => ImportFileColumnDto()),
+    'ImportFileAnalysisDto': TypeInfo(TypeOf.Class, create:() => ImportFileAnalysisDto()),
+    'List<ImportFileColumnDto>': TypeInfo(TypeOf.Class, create:() => <ImportFileColumnDto>[]),
+    'CampaignStatus': TypeInfo(TypeOf.Enum, enumValues:CampaignStatus.values),
+    'CampaignStatusChangeEntryDto': TypeInfo(TypeOf.Class, create:() => CampaignStatusChangeEntryDto()),
+    'CampaignOutcomeDto': TypeInfo(TypeOf.Class, create:() => CampaignOutcomeDto()),
+    'CampaignDto': TypeInfo(TypeOf.Class, create:() => CampaignDto()),
+    'List<CampaignStatusChangeEntryDto>': TypeInfo(TypeOf.Class, create:() => <CampaignStatusChangeEntryDto>[]),
+    'EmailCampaignDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignDto()),
+    'EmailCampaignListProjection': TypeInfo(TypeOf.Class, create:() => EmailCampaignListProjection()),
+    'CampaignBatchStatus': TypeInfo(TypeOf.Enum, enumValues:CampaignBatchStatus.values),
+    'BatchStatusChangeEntryDto': TypeInfo(TypeOf.Class, create:() => BatchStatusChangeEntryDto()),
+    'CampaignBatchDto': TypeInfo(TypeOf.Class, create:() => CampaignBatchDto()),
+    'List<BatchStatusChangeEntryDto>': TypeInfo(TypeOf.Class, create:() => <BatchStatusChangeEntryDto>[]),
+    'EmailRecipientDto': TypeInfo(TypeOf.Class, create:() => EmailRecipientDto()),
+    'EmailRecipientsDto': TypeInfo(TypeOf.Class, create:() => EmailRecipientsDto()),
+    'List<EmailRecipientDto>': TypeInfo(TypeOf.Class, create:() => <EmailRecipientDto>[]),
+    'EmailCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchDto()),
+    'CampaignNotificationStatus': TypeInfo(TypeOf.Enum, enumValues:CampaignNotificationStatus.values),
+    'NotificationStatusChangeEntryDto': TypeInfo(TypeOf.Class, create:() => NotificationStatusChangeEntryDto()),
+    'NotificationDeliveryState': TypeInfo(TypeOf.Enum, enumValues:NotificationDeliveryState.values),
+    'NotificationAttemptOutcome': TypeInfo(TypeOf.Enum, enumValues:NotificationAttemptOutcome.values),
+    'SendErrorCategory': TypeInfo(TypeOf.Enum, enumValues:SendErrorCategory.values),
+    'NotificationAttemptTrigger': TypeInfo(TypeOf.Enum, enumValues:NotificationAttemptTrigger.values),
+    'NotificationAttemptDto': TypeInfo(TypeOf.Class, create:() => NotificationAttemptDto()),
+    'DeliveryEventOutcome': TypeInfo(TypeOf.Enum, enumValues:DeliveryEventOutcome.values),
+    'NotificationDeliveryEventDto': TypeInfo(TypeOf.Class, create:() => NotificationDeliveryEventDto()),
+    'CampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => CampaignBatchNotificationDto()),
+    'List<NotificationStatusChangeEntryDto>': TypeInfo(TypeOf.Class, create:() => <NotificationStatusChangeEntryDto>[]),
+    'List<NotificationAttemptDto>': TypeInfo(TypeOf.Class, create:() => <NotificationAttemptDto>[]),
+    'List<NotificationDeliveryEventDto>': TypeInfo(TypeOf.Class, create:() => <NotificationDeliveryEventDto>[]),
+    'EmailRecipientField': TypeInfo(TypeOf.Enum, enumValues:EmailRecipientField.values),
+    'RecipientRemovalReason': TypeInfo(TypeOf.Enum, enumValues:RecipientRemovalReason.values),
+    'RemovedRecipientDto': TypeInfo(TypeOf.Class, create:() => RemovedRecipientDto()),
+    'EmailCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchNotificationDto()),
+    'List<RemovedRecipientDto>': TypeInfo(TypeOf.Class, create:() => <RemovedRecipientDto>[]),
+    'CampaignStatsDto': TypeInfo(TypeOf.Class, create:() => CampaignStatsDto()),
+    'SmsCampaignDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignDto()),
+    'SmsRecipientDto': TypeInfo(TypeOf.Class, create:() => SmsRecipientDto()),
+    'SmsRecipientsDto': TypeInfo(TypeOf.Class, create:() => SmsRecipientsDto()),
+    'List<SmsRecipientDto>': TypeInfo(TypeOf.Class, create:() => <SmsRecipientDto>[]),
+    'SmsCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchDto()),
+    'SmsCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignBatchNotificationDto()),
+    'PushAudienceCountDto': TypeInfo(TypeOf.Class, create:() => PushAudienceCountDto()),
+    'PushCampaignDto': TypeInfo(TypeOf.Class, create:() => PushCampaignDto()),
+    'PushRecipientDto': TypeInfo(TypeOf.Class, create:() => PushRecipientDto()),
+    'PushRecipientsDto': TypeInfo(TypeOf.Class, create:() => PushRecipientsDto()),
+    'List<PushRecipientDto>': TypeInfo(TypeOf.Class, create:() => <PushRecipientDto>[]),
+    'PushCampaignBatchDto': TypeInfo(TypeOf.Class, create:() => PushCampaignBatchDto()),
+    'NotificationReadMarkDto': TypeInfo(TypeOf.Class, create:() => NotificationReadMarkDto()),
+    'PushCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => PushCampaignBatchNotificationDto()),
+    'List<NotificationReadMarkDto>': TypeInfo(TypeOf.Class, create:() => <NotificationReadMarkDto>[]),
     'ConsentPurposeDto': TypeInfo(TypeOf.Class, create:() => ConsentPurposeDto()),
     'RetentionWindowDto': TypeInfo(TypeOf.Class, create:() => RetentionWindowDto()),
     'ProjectComplianceDto': TypeInfo(TypeOf.Class, create:() => ProjectComplianceDto()),
@@ -59031,9 +60187,14 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'List<EchoRegionDto>': TypeInfo(TypeOf.Class, create:() => <EchoRegionDto>[]),
     'PublicProjectConfigDto': TypeInfo(TypeOf.Class, create:() => PublicProjectConfigDto()),
     'PublicLegalDocumentDto': TypeInfo(TypeOf.Class, create:() => PublicLegalDocumentDto()),
+    'CheckTriggerExecutionIdentityResponse': TypeInfo(TypeOf.Class, create:() => CheckTriggerExecutionIdentityResponse()),
+    'List<ExecutionIdentityRefusalDto>': TypeInfo(TypeOf.Class, create:() => <ExecutionIdentityRefusalDto>[]),
     'GetTriggerDefinitionResponse': TypeInfo(TypeOf.Class, create:() => GetTriggerDefinitionResponse()),
     'GetTriggersNeedingAttentionResponse': TypeInfo(TypeOf.Class, create:() => GetTriggersNeedingAttentionResponse()),
     'List<TriggerAttentionDto>': TypeInfo(TypeOf.Class, create:() => <TriggerAttentionDto>[]),
+    'GetTriggerRunsResponse': TypeInfo(TypeOf.Class, create:() => GetTriggerRunsResponse()),
+    'PaginatedResponse<TriggerRunListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<TriggerRunListProjection>()),
+    'GetTriggerRunResponse': TypeInfo(TypeOf.Class, create:() => GetTriggerRunResponse()),
     'TestTriggerPreExecuteCodeResponse': TypeInfo(TypeOf.Class, create:() => TestTriggerPreExecuteCodeResponse()),
     'List<TriggerActivationTestProblem>': TypeInfo(TypeOf.Class, create:() => <TriggerActivationTestProblem>[]),
     'GetAccountProfileResponse': TypeInfo(TypeOf.Class, create:() => GetAccountProfileResponse()),
@@ -59109,6 +60270,8 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetMembershipIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetMembershipIntegrationResponse()),
     'GetMembershipIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetMembershipIntegrationsResponse()),
     'PaginatedResponse<MembershipIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MembershipIntegrationListProjection>()),
+    'GetExecutionIdentitiesResponse': TypeInfo(TypeOf.Class, create:() => GetExecutionIdentitiesResponse()),
+    'List<ExecutionIdentityDto>': TypeInfo(TypeOf.Class, create:() => <ExecutionIdentityDto>[]),
     'GetAuthorizationSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetAuthorizationSettingsResponse()),
     'UpdatePasswordComplexityResponse': TypeInfo(TypeOf.Class, create:() => UpdatePasswordComplexityResponse()),
     'GetAuthenticationSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetAuthenticationSettingsResponse()),
@@ -59154,11 +60317,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'RevealManagedFlexConnectionStringResponse': TypeInfo(TypeOf.Class, create:() => RevealManagedFlexConnectionStringResponse()),
     'TestDatabaseIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestDatabaseIntegrationResponse()),
     'IReadOnlyList<IntegrationTestResultItemDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<IntegrationTestResultItemDto>()),
-    'GetCollectionImportResponse': TypeInfo(TypeOf.Class, create:() => GetCollectionImportResponse()),
-    'GetCollectionImportsResponse': TypeInfo(TypeOf.Class, create:() => GetCollectionImportsResponse()),
-    'PaginatedResponse<CollectionImportDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<CollectionImportDto>()),
-    'RequestImportUploadUrlResponse': TypeInfo(TypeOf.Class, create:() => RequestImportUploadUrlResponse()),
-    'AnalyzeImportFileResponse': TypeInfo(TypeOf.Class, create:() => AnalyzeImportFileResponse()),
     'GetDatabaseAggregateResponse': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregateResponse()),
     'GetDatabaseAggregatesResponse': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregatesResponse()),
     'PaginatedResponse<MongoDbAggregateListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MongoDbAggregateListProjection>()),
@@ -59174,9 +60332,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'List<KeylessIntegrationSetupTemplate>': TypeInfo(TypeOf.Class, create:() => <KeylessIntegrationSetupTemplate>[]),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
     'GetFileByIdResponse': TypeInfo(TypeOf.Class, create:() => GetFileByIdResponse()),
-    'GetFolderFilesResponse': TypeInfo(TypeOf.Class, create:() => GetFolderFilesResponse()),
-    'PaginatedResponse<FileResourceRefDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FileResourceRefDto>()),
-    'List<PublicFolderDto>': TypeInfo(TypeOf.Class, create:() => <PublicFolderDto>[]),
     'GetNotificationModuleDisableDependenciesResponse': TypeInfo(TypeOf.Class, create:() => GetNotificationModuleDisableDependenciesResponse()),
     'TestEmailValidationIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestEmailValidationIntegrationResponse()),
     'List<TestEmailValidationItemDto>': TypeInfo(TypeOf.Class, create:() => <TestEmailValidationItemDto>[]),
@@ -59201,18 +60356,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetEmailFooterResponse': TypeInfo(TypeOf.Class, create:() => GetEmailFooterResponse()),
     'GetEmailFootersResponse': TypeInfo(TypeOf.Class, create:() => GetEmailFootersResponse()),
     'GetEmailPreferencesByLinkResponse': TypeInfo(TypeOf.Class, create:() => GetEmailPreferencesByLinkResponse()),
-    'GetEmailCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignResponse()),
-    'GetEmailCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignsResponse()),
-    'PaginatedResponse<EmailCampaignListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmailCampaignListProjection>()),
-    'GetEmailCampaignBatchesResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchesResponse()),
-    'PaginatedResponse<EmailCampaignBatchDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmailCampaignBatchDto>()),
-    'GetEmailCampaignBatchNotificationResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotificationResponse()),
-    'GetEmailCampaignBatchNotificationsResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotificationsResponse()),
-    'PaginatedResponse<EmailCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmailCampaignBatchNotificationDto>()),
-    'GetEmailCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignStatisticsResponse()),
-    'PreviewEmailNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewEmailNotificationResponse()),
-    'RetryFailedEmailNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedEmailNotificationsResponse()),
-    'GetEmailCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessagesResponse()),
     'GetSmsTemplateResponse': TypeInfo(TypeOf.Class, create:() => GetSmsTemplateResponse()),
     'GetSmsTemplatesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsTemplatesResponse()),
     'PaginatedResponse<SmsTemplateListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsTemplateListProjection>()),
@@ -59223,18 +60366,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetSmsIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsIntegrationsResponse()),
     'PaginatedResponse<SmsIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsIntegrationListProjection>()),
     'TestSmsIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestSmsIntegrationResponse()),
-    'GetSmsCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignResponse()),
-    'GetSmsCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignsResponse()),
-    'PaginatedResponse<SmsCampaignDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsCampaignDto>()),
-    'GetSmsCampaignBatchesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchesResponse()),
-    'PaginatedResponse<SmsCampaignBatchDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsCampaignBatchDto>()),
-    'GetSmsCampaignBatchNotificationResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotificationResponse()),
-    'GetSmsCampaignBatchNotificationsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotificationsResponse()),
-    'PaginatedResponse<SmsCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsCampaignBatchNotificationDto>()),
-    'GetSmsCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignStatisticsResponse()),
-    'PreviewSmsNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotificationResponse()),
-    'RetryFailedSmsNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsResponse()),
-    'GetSmsCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesResponse()),
     'WorkflowResponse': TypeInfo(TypeOf.Class, create:() => WorkflowResponse()),
     'WorkflowVersionsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowVersionsResponse()),
     'WorkflowVersionDiffResponse': TypeInfo(TypeOf.Class, create:() => WorkflowVersionDiffResponse()),
@@ -59243,10 +60374,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'PaginatedResponse<WorkflowListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowListProjection>()),
     'WorkflowSchemaResponse': TypeInfo(TypeOf.Class, create:() => WorkflowSchemaResponse()),
     'InvokeCodeWorkflowResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflowResponse()),
-    'WorkflowRunsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunsResponse()),
-    'PaginatedResponse<WorkflowRunListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowRunListProjection>()),
-    'WorkflowRunResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunResponse()),
-    'WorkflowRunLogsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunLogsResponse()),
     'GetMarketplaceListingResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceListingResponse()),
     'GetMarketplaceTokensResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceTokensResponse()),
     'GetMarketplaceListingsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceListingsResponse()),
@@ -59288,7 +60415,11 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetCodeFunctionRunsResponse': TypeInfo(TypeOf.Class, create:() => GetCodeFunctionRunsResponse()),
     'List<CodeFunctionRunDto>': TypeInfo(TypeOf.Class, create:() => <CodeFunctionRunDto>[]),
     'InvokeCodeFunctionResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeFunctionResponse()),
+    'WorkflowRunsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunsResponse()),
+    'PaginatedResponse<WorkflowRunListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowRunListProjection>()),
+    'WorkflowRunResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunResponse()),
     'CodeWorkflowResumeLinkResponse': TypeInfo(TypeOf.Class, create:() => CodeWorkflowResumeLinkResponse()),
+    'WorkflowRunLogsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunLogsResponse()),
     'GetPushTemplateResponse': TypeInfo(TypeOf.Class, create:() => GetPushTemplateResponse()),
     'GetPushTemplatesResponse': TypeInfo(TypeOf.Class, create:() => GetPushTemplatesResponse()),
     'PaginatedResponse<PushTemplateListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushTemplateListProjection>()),
@@ -59302,19 +60433,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetPushDevicesResponse': TypeInfo(TypeOf.Class, create:() => GetPushDevicesResponse()),
     'PaginatedResponse<PushDeviceListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushDeviceListProjection>()),
     'List<TeamPushDeviceListProjection>': TypeInfo(TypeOf.Class, create:() => <TeamPushDeviceListProjection>[]),
-    'GetPushCampaignAudienceCountResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignAudienceCountResponse()),
-    'GetPushCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignResponse()),
-    'GetPushCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignsResponse()),
-    'PaginatedResponse<PushCampaignDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignDto>()),
-    'GetPushCampaignBatchesResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchesResponse()),
-    'PaginatedResponse<PushCampaignBatchDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignBatchDto>()),
-    'GetPushCampaignBatchNotificationResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotificationResponse()),
-    'GetPushCampaignBatchNotificationsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotificationsResponse()),
-    'PaginatedResponse<PushCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignBatchNotificationDto>()),
-    'GetPushCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignStatisticsResponse()),
-    'PreviewPushNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewPushNotificationResponse()),
-    'RetryFailedPushNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedPushNotificationsResponse()),
-    'GetPushCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessagesResponse()),
     'GetNotificationInboxResponse': TypeInfo(TypeOf.Class, create:() => GetNotificationInboxResponse()),
     'PaginatedResponse<InAppNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<InAppNotificationDto>()),
     'GetUnreadCountResponse': TypeInfo(TypeOf.Class, create:() => GetUnreadCountResponse()),
@@ -59419,6 +60537,51 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetAllContactsResponse': TypeInfo(TypeOf.Class, create:() => GetAllContactsResponse()),
     'IReadOnlyList<UserDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<UserDto>()),
     'RepairContactRolesResponse': TypeInfo(TypeOf.Class, create:() => RepairContactRolesResponse()),
+    'GetFolderFilesResponse': TypeInfo(TypeOf.Class, create:() => GetFolderFilesResponse()),
+    'PaginatedResponse<FileResourceRefDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FileResourceRefDto>()),
+    'List<PublicFolderDto>': TypeInfo(TypeOf.Class, create:() => <PublicFolderDto>[]),
+    'GetCollectionImportResponse': TypeInfo(TypeOf.Class, create:() => GetCollectionImportResponse()),
+    'GetCollectionImportsResponse': TypeInfo(TypeOf.Class, create:() => GetCollectionImportsResponse()),
+    'PaginatedResponse<CollectionImportDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<CollectionImportDto>()),
+    'RequestImportUploadUrlResponse': TypeInfo(TypeOf.Class, create:() => RequestImportUploadUrlResponse()),
+    'AnalyzeImportFileResponse': TypeInfo(TypeOf.Class, create:() => AnalyzeImportFileResponse()),
+    'GetEmailCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignResponse()),
+    'GetEmailCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignsResponse()),
+    'PaginatedResponse<EmailCampaignListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmailCampaignListProjection>()),
+    'GetEmailCampaignBatchesResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchesResponse()),
+    'PaginatedResponse<EmailCampaignBatchDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmailCampaignBatchDto>()),
+    'GetEmailCampaignBatchNotificationResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotificationResponse()),
+    'GetEmailCampaignBatchNotificationsResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotificationsResponse()),
+    'PaginatedResponse<EmailCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<EmailCampaignBatchNotificationDto>()),
+    'GetEmailCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignStatisticsResponse()),
+    'PreviewEmailNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewEmailNotificationResponse()),
+    'RetryFailedEmailNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedEmailNotificationsResponse()),
+    'GetEmailCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessagesResponse()),
+    'GetSmsCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignResponse()),
+    'GetSmsCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignsResponse()),
+    'PaginatedResponse<SmsCampaignDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsCampaignDto>()),
+    'GetSmsCampaignBatchesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchesResponse()),
+    'PaginatedResponse<SmsCampaignBatchDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsCampaignBatchDto>()),
+    'GetSmsCampaignBatchNotificationResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotificationResponse()),
+    'GetSmsCampaignBatchNotificationsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotificationsResponse()),
+    'PaginatedResponse<SmsCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsCampaignBatchNotificationDto>()),
+    'GetSmsCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignStatisticsResponse()),
+    'PreviewSmsNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotificationResponse()),
+    'RetryFailedSmsNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsResponse()),
+    'GetSmsCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesResponse()),
+    'GetPushCampaignAudienceCountResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignAudienceCountResponse()),
+    'GetPushCampaignResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignResponse()),
+    'GetPushCampaignsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignsResponse()),
+    'PaginatedResponse<PushCampaignDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignDto>()),
+    'GetPushCampaignBatchesResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchesResponse()),
+    'PaginatedResponse<PushCampaignBatchDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignBatchDto>()),
+    'GetPushCampaignBatchNotificationResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotificationResponse()),
+    'GetPushCampaignBatchNotificationsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotificationsResponse()),
+    'PaginatedResponse<PushCampaignBatchNotificationDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PushCampaignBatchNotificationDto>()),
+    'GetPushCampaignStatisticsResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignStatisticsResponse()),
+    'PreviewPushNotificationResponse': TypeInfo(TypeOf.Class, create:() => PreviewPushNotificationResponse()),
+    'RetryFailedPushNotificationsResponse': TypeInfo(TypeOf.Class, create:() => RetryFailedPushNotificationsResponse()),
+    'GetPushCampaignMessagesResponse': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessagesResponse()),
     'GetComplianceSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetComplianceSettingsResponse()),
     'GetLegalHoldsResponse': TypeInfo(TypeOf.Class, create:() => GetLegalHoldsResponse()),
     'List<LegalHoldDto>': TypeInfo(TypeOf.Class, create:() => <LegalHoldDto>[]),
@@ -59479,8 +60642,11 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetPublicProjectBrandAsset': TypeInfo(TypeOf.Class, create:() => GetPublicProjectBrandAsset()),
     'GetPublicProjectConfig': TypeInfo(TypeOf.Class, create:() => GetPublicProjectConfig()),
     'GetPublicProjectLegal': TypeInfo(TypeOf.Class, create:() => GetPublicProjectLegal()),
+    'CheckTriggerExecutionIdentityRequest': TypeInfo(TypeOf.Class, create:() => CheckTriggerExecutionIdentityRequest()),
     'GetTriggerDefinition': TypeInfo(TypeOf.Class, create:() => GetTriggerDefinition()),
     'GetTriggersNeedingAttention': TypeInfo(TypeOf.Class, create:() => GetTriggersNeedingAttention()),
+    'GetTriggerRuns': TypeInfo(TypeOf.Class, create:() => GetTriggerRuns()),
+    'GetTriggerRun': TypeInfo(TypeOf.Class, create:() => GetTriggerRun()),
     'TestTriggerPreExecuteCode': TypeInfo(TypeOf.Class, create:() => TestTriggerPreExecuteCode()),
     'GetAccountProfile': TypeInfo(TypeOf.Class, create:() => GetAccountProfile()),
     'UpdateAccountProfile': TypeInfo(TypeOf.Class, create:() => UpdateAccountProfile()),
@@ -59629,6 +60795,8 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetMembershipIntegrations': TypeInfo(TypeOf.Class, create:() => GetMembershipIntegrations()),
     'SaveMembershipIntegration': TypeInfo(TypeOf.Class, create:() => SaveMembershipIntegration()),
     'SetMembershipIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetMembershipIntegrationAsDefaultRequest()),
+    'GetExecutionIdentitiesRequest': TypeInfo(TypeOf.Class, create:() => GetExecutionIdentitiesRequest()),
+    'CreateExecutionIdentityRequest': TypeInfo(TypeOf.Class, create:() => CreateExecutionIdentityRequest()),
     'GetAuthorizationSettings': TypeInfo(TypeOf.Class, create:() => GetAuthorizationSettings()),
     'UpdateAuthorizationSettings': TypeInfo(TypeOf.Class, create:() => UpdateAuthorizationSettings()),
     'UpdatePasswordComplexity': TypeInfo(TypeOf.Class, create:() => UpdatePasswordComplexity()),
@@ -59699,12 +60867,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'SaveDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => SaveDatabaseIntegration()),
     'SetDatabaseIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetDatabaseIntegrationAsDefaultRequest()),
     'TestDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => TestDatabaseIntegration()),
-    'CreateCollectionImport': TypeInfo(TypeOf.Class, create:() => CreateCollectionImport()),
-    'DeleteCollectionImportRequest': TypeInfo(TypeOf.Class, create:() => DeleteCollectionImportRequest()),
-    'GetCollectionImport': TypeInfo(TypeOf.Class, create:() => GetCollectionImport()),
-    'GetCollectionImports': TypeInfo(TypeOf.Class, create:() => GetCollectionImports()),
-    'RequestImportUploadUrlRequest': TypeInfo(TypeOf.Class, create:() => RequestImportUploadUrlRequest()),
-    'AnalyzeImportFileRequest': TypeInfo(TypeOf.Class, create:() => AnalyzeImportFileRequest()),
     'DeleteDatabaseAggregateRequest': TypeInfo(TypeOf.Class, create:() => DeleteDatabaseAggregateRequest()),
     'GetDatabaseAggregate': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregate()),
     'GetDatabaseAggregates': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregates()),
@@ -59718,10 +60880,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'GetFilesTrigger': TypeInfo(TypeOf.Class, create:() => GetFilesTrigger()),
     'GetFilesTriggers': TypeInfo(TypeOf.Class, create:() => GetFilesTriggers()),
     'SaveFilesTrigger': TypeInfo(TypeOf.Class, create:() => SaveFilesTrigger()),
-    'MakeFilePrivateRequest': TypeInfo(TypeOf.Class, create:() => MakeFilePrivateRequest()),
-    'MakeFilePublicRequest': TypeInfo(TypeOf.Class, create:() => MakeFilePublicRequest()),
-    'MakeFolderPrivateRequest': TypeInfo(TypeOf.Class, create:() => MakeFolderPrivateRequest()),
-    'MakeFolderPublicRequest': TypeInfo(TypeOf.Class, create:() => MakeFolderPublicRequest()),
     'DeleteFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DeleteFilesIntegrationRequest()),
     'DisableFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DisableFilesIntegrationRequest()),
     'EnableFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => EnableFilesIntegrationRequest()),
@@ -59732,7 +60890,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'SetFilesIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetFilesIntegrationAsDefaultRequest()),
     'TestFilesIntegration': TypeInfo(TypeOf.Class, create:() => TestFilesIntegration()),
     'GetFileById': TypeInfo(TypeOf.Class, create:() => GetFileById()),
-    'GetFolderFiles': TypeInfo(TypeOf.Class, create:() => GetFolderFiles()),
     'UseFileRequest': TypeInfo(TypeOf.Class, create:() => UseFileRequest()),
     'DisableEmail': TypeInfo(TypeOf.Class, create:() => DisableEmail()),
     'GetEmailDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetEmailDisableDependencies()),
@@ -59773,18 +60930,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'SaveEmailFooterRequest': TypeInfo(TypeOf.Class, create:() => SaveEmailFooterRequest()),
     'OneClickUnsubscribeRequest': TypeInfo(TypeOf.Class, create:() => OneClickUnsubscribeRequest()),
     'GetEmailPreferencesByLinkRequest': TypeInfo(TypeOf.Class, create:() => GetEmailPreferencesByLinkRequest()),
-    'CreateEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreateEmailCampaignRequest()),
-    'DeleteEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => DeleteEmailCampaignRequest()),
-    'GetEmailCampaign': TypeInfo(TypeOf.Class, create:() => GetEmailCampaign()),
-    'GetEmailCampaigns': TypeInfo(TypeOf.Class, create:() => GetEmailCampaigns()),
-    'GetEmailCampaignBatches': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatches()),
-    'GetEmailCampaignBatchNotification': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotification()),
-    'GetEmailCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotifications()),
-    'GetEmailCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignStatistics()),
-    'PreviewEmailNotification': TypeInfo(TypeOf.Class, create:() => PreviewEmailNotification()),
-    'RetryFailedEmailNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedEmailNotificationsRequest()),
-    'StopEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopEmailCampaignRequest()),
-    'GetEmailCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessagesRequest()),
     'DisableSms': TypeInfo(TypeOf.Class, create:() => DisableSms()),
     'GetSmsDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetSmsDisableDependencies()),
     'EnableSms': TypeInfo(TypeOf.Class, create:() => EnableSms()),
@@ -59808,17 +60953,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'SaveSmsIntegration': TypeInfo(TypeOf.Class, create:() => SaveSmsIntegration()),
     'SetSmsIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetSmsIntegrationAsDefaultRequest()),
     'TestSmsIntegration': TypeInfo(TypeOf.Class, create:() => TestSmsIntegration()),
-    'DeleteSmsCampaign': TypeInfo(TypeOf.Class, create:() => DeleteSmsCampaign()),
-    'GetSmsCampaign': TypeInfo(TypeOf.Class, create:() => GetSmsCampaign()),
-    'GetSmsCampaigns': TypeInfo(TypeOf.Class, create:() => GetSmsCampaigns()),
-    'GetSmsCampaignBatches': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatches()),
-    'GetSmsCampaignBatchNotification': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotification()),
-    'GetSmsCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotifications()),
-    'GetSmsCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignStatistics()),
-    'PreviewSmsNotification': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotification()),
-    'RetryFailedSmsNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsRequest()),
-    'StopSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopSmsCampaignRequest()),
-    'GetSmsCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesRequest()),
     'SaveCodeWorkflow': TypeInfo(TypeOf.Class, create:() => SaveCodeWorkflow()),
     'PublishCodeWorkflow': TypeInfo(TypeOf.Class, create:() => PublishCodeWorkflow()),
     'GetCodeWorkflowDraft': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowDraft()),
@@ -59835,12 +60969,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'EnableCodeWorkflows': TypeInfo(TypeOf.Class, create:() => EnableCodeWorkflows()),
     'DisableCodeWorkflows': TypeInfo(TypeOf.Class, create:() => DisableCodeWorkflows()),
     'InvokeCodeWorkflow': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflow()),
-    'GetCodeWorkflowRuns': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRuns()),
-    'GetCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRun()),
-    'GetCodeWorkflowRunLogs': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRunLogs()),
-    'ResumeCodeWorkflowRunByKey': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRunByKey()),
-    'RetryCodeWorkflowRunStep': TypeInfo(TypeOf.Class, create:() => RetryCodeWorkflowRunStep()),
-    'CancelCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => CancelCodeWorkflowRun()),
     'GetMarketplaceIntegrationAccess': TypeInfo(TypeOf.Class, create:() => GetMarketplaceIntegrationAccess()),
     'SetMarketplaceIntegrationRoleAccess': TypeInfo(TypeOf.Class, create:() => SetMarketplaceIntegrationRoleAccess()),
     'SaveMarketplaceIntegrationCustomAccess': TypeInfo(TypeOf.Class, create:() => SaveMarketplaceIntegrationCustomAccess()),
@@ -59861,6 +60989,12 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'ResumeCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRun()),
     'OpenCodeWorkflowResumeLink': TypeInfo(TypeOf.Class, create:() => OpenCodeWorkflowResumeLink()),
     'UseCodeWorkflowResumeLink': TypeInfo(TypeOf.Class, create:() => UseCodeWorkflowResumeLink()),
+    'GetCodeWorkflowRuns': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRuns()),
+    'GetCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRun()),
+    'GetCodeWorkflowRunLogs': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowRunLogs()),
+    'ResumeCodeWorkflowRunByKey': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRunByKey()),
+    'RetryCodeWorkflowRunStep': TypeInfo(TypeOf.Class, create:() => RetryCodeWorkflowRunStep()),
+    'CancelCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => CancelCodeWorkflowRun()),
     'DisablePush': TypeInfo(TypeOf.Class, create:() => DisablePush()),
     'GetPushDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetPushDisableDependencies()),
     'EnablePush': TypeInfo(TypeOf.Class, create:() => EnablePush()),
@@ -59888,19 +61022,6 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'DeletePushDevice': TypeInfo(TypeOf.Class, create:() => DeletePushDevice()),
     'GetPushDevice': TypeInfo(TypeOf.Class, create:() => GetPushDevice()),
     'GetPushDevices': TypeInfo(TypeOf.Class, create:() => GetPushDevices()),
-    'GetPushCampaignAudienceCountRequest': TypeInfo(TypeOf.Class, create:() => GetPushCampaignAudienceCountRequest()),
-    'CreatePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreatePushCampaignRequest()),
-    'DeletePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => DeletePushCampaignRequest()),
-    'GetPushCampaign': TypeInfo(TypeOf.Class, create:() => GetPushCampaign()),
-    'GetPushCampaigns': TypeInfo(TypeOf.Class, create:() => GetPushCampaigns()),
-    'GetPushCampaignBatches': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatches()),
-    'GetPushCampaignBatchNotification': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotification()),
-    'GetPushCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotifications()),
-    'GetPushCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetPushCampaignStatistics()),
-    'PreviewPushNotification': TypeInfo(TypeOf.Class, create:() => PreviewPushNotification()),
-    'RetryFailedPushNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedPushNotificationsRequest()),
-    'StopPushCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopPushCampaignRequest()),
-    'GetPushCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessagesRequest()),
     'GetNotificationInboxRequest': TypeInfo(TypeOf.Class, create:() => GetNotificationInboxRequest()),
     'GetUnreadCountRequest': TypeInfo(TypeOf.Class, create:() => GetUnreadCountRequest()),
     'MarkNotificationReadRequest': TypeInfo(TypeOf.Class, create:() => MarkNotificationReadRequest()),
@@ -60036,6 +61157,53 @@ TypeContext _ctx = TypeContext(library: '127.0.0.1', types: <String, TypeInfo> {
     'AddContactIdentityRequest': TypeInfo(TypeOf.Class, create:() => AddContactIdentityRequest()),
     'PromoteContactIdentityRequest': TypeInfo(TypeOf.Class, create:() => PromoteContactIdentityRequest()),
     'RemoveContactIdentityRequest': TypeInfo(TypeOf.Class, create:() => RemoveContactIdentityRequest()),
+    'MakeFilePrivateRequest': TypeInfo(TypeOf.Class, create:() => MakeFilePrivateRequest()),
+    'MakeFilePublicRequest': TypeInfo(TypeOf.Class, create:() => MakeFilePublicRequest()),
+    'MakeFolderPrivateRequest': TypeInfo(TypeOf.Class, create:() => MakeFolderPrivateRequest()),
+    'MakeFolderPublicRequest': TypeInfo(TypeOf.Class, create:() => MakeFolderPublicRequest()),
+    'GetFolderFiles': TypeInfo(TypeOf.Class, create:() => GetFolderFiles()),
+    'CreateCollectionImport': TypeInfo(TypeOf.Class, create:() => CreateCollectionImport()),
+    'DeleteCollectionImportRequest': TypeInfo(TypeOf.Class, create:() => DeleteCollectionImportRequest()),
+    'GetCollectionImport': TypeInfo(TypeOf.Class, create:() => GetCollectionImport()),
+    'GetCollectionImports': TypeInfo(TypeOf.Class, create:() => GetCollectionImports()),
+    'RequestImportUploadUrlRequest': TypeInfo(TypeOf.Class, create:() => RequestImportUploadUrlRequest()),
+    'AnalyzeImportFileRequest': TypeInfo(TypeOf.Class, create:() => AnalyzeImportFileRequest()),
+    'CreateEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreateEmailCampaignRequest()),
+    'DeleteEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => DeleteEmailCampaignRequest()),
+    'GetEmailCampaign': TypeInfo(TypeOf.Class, create:() => GetEmailCampaign()),
+    'GetEmailCampaigns': TypeInfo(TypeOf.Class, create:() => GetEmailCampaigns()),
+    'GetEmailCampaignBatches': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatches()),
+    'GetEmailCampaignBatchNotification': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotification()),
+    'GetEmailCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignBatchNotifications()),
+    'GetEmailCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignStatistics()),
+    'PreviewEmailNotification': TypeInfo(TypeOf.Class, create:() => PreviewEmailNotification()),
+    'RetryFailedEmailNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedEmailNotificationsRequest()),
+    'StopEmailCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopEmailCampaignRequest()),
+    'GetEmailCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetEmailCampaignMessagesRequest()),
+    'DeleteSmsCampaign': TypeInfo(TypeOf.Class, create:() => DeleteSmsCampaign()),
+    'GetSmsCampaign': TypeInfo(TypeOf.Class, create:() => GetSmsCampaign()),
+    'GetSmsCampaigns': TypeInfo(TypeOf.Class, create:() => GetSmsCampaigns()),
+    'GetSmsCampaignBatches': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatches()),
+    'GetSmsCampaignBatchNotification': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotification()),
+    'GetSmsCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignBatchNotifications()),
+    'GetSmsCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignStatistics()),
+    'PreviewSmsNotification': TypeInfo(TypeOf.Class, create:() => PreviewSmsNotification()),
+    'RetryFailedSmsNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedSmsNotificationsRequest()),
+    'StopSmsCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopSmsCampaignRequest()),
+    'GetSmsCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetSmsCampaignMessagesRequest()),
+    'GetPushCampaignAudienceCountRequest': TypeInfo(TypeOf.Class, create:() => GetPushCampaignAudienceCountRequest()),
+    'CreatePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => CreatePushCampaignRequest()),
+    'DeletePushCampaignRequest': TypeInfo(TypeOf.Class, create:() => DeletePushCampaignRequest()),
+    'GetPushCampaign': TypeInfo(TypeOf.Class, create:() => GetPushCampaign()),
+    'GetPushCampaigns': TypeInfo(TypeOf.Class, create:() => GetPushCampaigns()),
+    'GetPushCampaignBatches': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatches()),
+    'GetPushCampaignBatchNotification': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotification()),
+    'GetPushCampaignBatchNotifications': TypeInfo(TypeOf.Class, create:() => GetPushCampaignBatchNotifications()),
+    'GetPushCampaignStatistics': TypeInfo(TypeOf.Class, create:() => GetPushCampaignStatistics()),
+    'PreviewPushNotification': TypeInfo(TypeOf.Class, create:() => PreviewPushNotification()),
+    'RetryFailedPushNotificationsRequest': TypeInfo(TypeOf.Class, create:() => RetryFailedPushNotificationsRequest()),
+    'StopPushCampaignRequest': TypeInfo(TypeOf.Class, create:() => StopPushCampaignRequest()),
+    'GetPushCampaignMessagesRequest': TypeInfo(TypeOf.Class, create:() => GetPushCampaignMessagesRequest()),
     'GetComplianceSettings': TypeInfo(TypeOf.Class, create:() => GetComplianceSettings()),
     'RemoveRetentionWindowRequest': TypeInfo(TypeOf.Class, create:() => RemoveRetentionWindowRequest()),
     'SaveRetentionWindowRequest': TypeInfo(TypeOf.Class, create:() => SaveRetentionWindowRequest()),
