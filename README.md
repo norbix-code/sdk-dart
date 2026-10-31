@@ -1062,7 +1062,9 @@ The SDK sends the map as it is — nothing is filled in for you, so an unset
 optional is simply not sent. The answer is
 `{retryRequestId, selected, skipped, replayed, warning?}`: `skipped` counts
 the rows left out per reason (`AlreadyAccepted`, `InFlight`, `Ambiguous`,
-`NotFound`, `Blocked`, `Category`).
+`NotFound`, `Blocked`, `Category`). It can also carry `optedOut`, `compliance`, `undeliverable`:
+the people the send gates stopped during the retry. Those keys are added to the
+stored answer later and are part of `selected`.
 
 ```dart
 final answer = await hub.emailNotifications.retryFailedEmailNotifications(
