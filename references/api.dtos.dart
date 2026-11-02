@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-10-31 10:59:26
+Date: 2026-11-02 18:03:40
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -4083,6 +4083,12 @@ class WorkflowRunStepDto implements IConvertible
     String? name;
 
     // @DataMember
+    String? foreachStepId;
+
+    // @DataMember
+    int? itemIndex;
+
+    // @DataMember
     String status = "";
 
     // @DataMember
@@ -4121,13 +4127,15 @@ class WorkflowRunStepDto implements IConvertible
     // @DataMember
     String? decision;
 
-    WorkflowRunStepDto({this.stepId="",this.kind="",this.name,this.status="",this.attempt=0,this.pass=0,this.startedAt,this.finishedAt,this.durationMs,this.input,this.inputTruncated,this.output,this.outputTruncated,this.error,this.resumedBy,this.decision});
+    WorkflowRunStepDto({this.stepId="",this.kind="",this.name,this.foreachStepId,this.itemIndex,this.status="",this.attempt=0,this.pass=0,this.startedAt,this.finishedAt,this.durationMs,this.input,this.inputTruncated,this.output,this.outputTruncated,this.error,this.resumedBy,this.decision});
     WorkflowRunStepDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         stepId = json['stepId'] ?? "";
         kind = json['kind'] ?? "";
         name = json['name'];
+        foreachStepId = json['foreachStepId'];
+        itemIndex = json['itemIndex'];
         status = json['status'] ?? "";
         attempt = json['attempt'] ?? 0;
         pass = json['pass'] ?? 0;
@@ -4148,6 +4156,8 @@ class WorkflowRunStepDto implements IConvertible
         'stepId': stepId,
         'kind': kind,
         'name': name,
+        'foreachStepId': foreachStepId,
+        'itemIndex': itemIndex,
         'status': status,
         'attempt': attempt,
         'pass': pass,
@@ -4452,18 +4462,33 @@ class ChannelSubscriptionStateDto implements IConvertible
     // @DataMember
     Map<String,List<String>?> blockedTags = {};
 
-    ChannelSubscriptionStateDto({this.unsubscribed,this.blockedTags=const {}});
+    // @DataMember
+    String bounceState = "";
+
+    // @DataMember
+    DateTime? lastBounceAt;
+
+    // @DataMember
+    bool? spamComplaint;
+
+    ChannelSubscriptionStateDto({this.unsubscribed,this.blockedTags=const {},this.bounceState="",this.lastBounceAt,this.spamComplaint});
     ChannelSubscriptionStateDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         unsubscribed = json['unsubscribed'];
         blockedTags = JsonConverters.fromJson(json['blockedTags'],'Map<String,List<String>?>',context!) ?? {};
+        bounceState = json['bounceState'] ?? "";
+        lastBounceAt = JsonConverters.fromJson(json['lastBounceAt'],'DateTime',context!);
+        spamComplaint = json['spamComplaint'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'unsubscribed': unsubscribed,
-        'blockedTags': JsonConverters.toJson(blockedTags,'Map<String,List<String>?>',context!)
+        'blockedTags': JsonConverters.toJson(blockedTags,'Map<String,List<String>?>',context!),
+        'bounceState': bounceState,
+        'lastBounceAt': JsonConverters.toJson(lastBounceAt,'DateTime',context!),
+        'spamComplaint': spamComplaint
     };
 
     getTypeName() => "ChannelSubscriptionStateDto";
@@ -14380,6 +14405,46 @@ class SetUserAiPlan extends CodeMashRequestBase implements IReturn<EmptyResponse
 }
 
 /**
+* Clear a contact's hard bounce
+*/
+// @Route("/{version}/membership/users/{contactId}/marketing-state/{channel}/clear-bounce", "POST")
+// @Api(Description="Clear a contact's hard bounce")
+class ClearContactBounceRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    /**
+    * The contact id (ct_…) whose hard bounce is cleared.
+    */
+    // @ApiMember(Description="The contact id (ct_…) whose hard bounce is cleared.", IsRequired=true)
+    String contactId = "";
+
+    /**
+    * Delivery channel: Email, Sms, or Push.
+    */
+    // @ApiMember(Description="Delivery channel: Email, Sms, or Push.", IsRequired=true)
+    String channel = "";
+
+    ClearContactBounceRequest({this.contactId="",this.channel=""});
+    ClearContactBounceRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        contactId = json['contactId'] ?? "";
+        channel = json['channel'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'contactId': contactId,
+        'channel': channel
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "ClearContactBounceRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Create a contact
 */
 // @Route("/{version}/membership/users", "POST")
@@ -17801,6 +17866,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MarkNotificationReadRequest': TypeInfo(TypeOf.Class, create:() => MarkNotificationReadRequest()),
     'MarkAllNotificationsReadRequest': TypeInfo(TypeOf.Class, create:() => MarkAllNotificationsReadRequest()),
     'SetUserAiPlan': TypeInfo(TypeOf.Class, create:() => SetUserAiPlan()),
+    'ClearContactBounceRequest': TypeInfo(TypeOf.Class, create:() => ClearContactBounceRequest()),
     'CreateContactRequest': TypeInfo(TypeOf.Class, create:() => CreateContactRequest()),
     'DeleteContact': TypeInfo(TypeOf.Class, create:() => DeleteContact()),
     'GetContact': TypeInfo(TypeOf.Class, create:() => GetContact()),
