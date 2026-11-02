@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-02 18:03:40
+Date: 2026-11-02 19:04:11
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -14635,10 +14635,10 @@ class WorkflowStepDto implements IConvertible
     Map<String,dynamic?>? action;
 
     /**
-    * Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload | items, body, concurrency.
+    * Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload, wait, timeoutSeconds | items, body, concurrency.
     */
     // @DataMember
-    // @ApiMember(Description="Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload | items, body, concurrency.")
+    // @ApiMember(Description="Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload, wait, timeoutSeconds | items, body, concurrency.")
     Map<String,dynamic?>? config;
 
     WorkflowStepDto({this.id="",this.kind="",this.name,this.next,this.then,this.Else,this.rejected,this.onTimeout,this.retry,this.timeoutSeconds,this.onError,this.action,this.config});
@@ -22934,7 +22934,10 @@ class WorkflowWaitingOnDto implements IConvertible
     // @DataMember
     List<String>? assignees;
 
-    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees});
+    // @DataMember
+    String? childRunId;
+
+    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.childRunId});
     WorkflowWaitingOnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -22943,6 +22946,7 @@ class WorkflowWaitingOnDto implements IConvertible
         until = JsonConverters.fromJson(json['until'],'DateTime',context!);
         key = json['key'];
         assignees = JsonConverters.fromJson(json['assignees'],'List<String>',context!);
+        childRunId = json['childRunId'];
         return this;
     }
 
@@ -22951,7 +22955,8 @@ class WorkflowWaitingOnDto implements IConvertible
         'kind': kind,
         'until': JsonConverters.toJson(until,'DateTime',context!),
         'key': key,
-        'assignees': JsonConverters.toJson(assignees,'List<String>',context!)
+        'assignees': JsonConverters.toJson(assignees,'List<String>',context!),
+        'childRunId': childRunId
     };
 
     getTypeName() => "WorkflowWaitingOnDto";
