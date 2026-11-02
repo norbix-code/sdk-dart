@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-02 19:04:11
+Date: 2026-11-02 19:49:01
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -13842,10 +13842,10 @@ class GetCodeWorkflowWaitingRuns extends CodeMashListPaginationRequestBase imple
     String? status;
 
     /**
-    * approval | event | delay
+    * approval | event | delay | child
     */
     // @DataMember
-    // @ApiMember(Description="approval | event | delay")
+    // @ApiMember(Description="approval | event | delay | child")
     String? waitingKind;
 
     /**

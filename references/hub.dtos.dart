@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-02 19:04:11
+Date: 2026-11-02 19:49:01
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -16153,6 +16153,80 @@ class UsageBillingIngestionFailureDto implements IConvertible
 }
 
 // @DataContract
+class UsageWorkflowProjectDto implements IConvertible
+{
+    // @DataMember
+    String projectId = "";
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    int runs = 0;
+
+    // @DataMember
+    int stepRuns = 0;
+
+    UsageWorkflowProjectDto({this.projectId="",this.env="",this.runs=0,this.stepRuns=0});
+    UsageWorkflowProjectDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        projectId = json['projectId'] ?? "";
+        env = json['env'] ?? "";
+        runs = json['runs'] ?? 0;
+        stepRuns = json['stepRuns'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'projectId': projectId,
+        'env': env,
+        'runs': runs,
+        'stepRuns': stepRuns
+    };
+
+    getTypeName() => "UsageWorkflowProjectDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class UsageWorkflowPeriodDto implements IConvertible
+{
+    // @DataMember
+    String period = "";
+
+    // @DataMember
+    int runs = 0;
+
+    // @DataMember
+    int stepRuns = 0;
+
+    // @DataMember
+    List<UsageWorkflowProjectDto> perProject = [];
+
+    UsageWorkflowPeriodDto({this.period="",this.runs=0,this.stepRuns=0,this.perProject=const []});
+    UsageWorkflowPeriodDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        period = json['period'] ?? "";
+        runs = json['runs'] ?? 0;
+        stepRuns = json['stepRuns'] ?? 0;
+        perProject = JsonConverters.fromJson(json['perProject'],'List<UsageWorkflowProjectDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'period': period,
+        'runs': runs,
+        'stepRuns': stepRuns,
+        'perProject': JsonConverters.toJson(perProject,'List<UsageWorkflowProjectDto>',context!)
+    };
+
+    getTypeName() => "UsageWorkflowPeriodDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class UsageBillingDto implements IConvertible
 {
     // @DataMember
@@ -16164,20 +16238,25 @@ class UsageBillingDto implements IConvertible
     // @DataMember
     List<UsageBillingIngestionFailureDto> ingestionFailures = [];
 
-    UsageBillingDto({this.accountId="",this.atlas=const {},this.ingestionFailures=const []});
+    // @DataMember
+    Map<String,UsageWorkflowPeriodDto?> workflows = {};
+
+    UsageBillingDto({this.accountId="",this.atlas=const {},this.ingestionFailures=const [],this.workflows=const {}});
     UsageBillingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         accountId = json['accountId'] ?? "";
         atlas = JsonConverters.fromJson(json['atlas'],'Map<String,UsageBillingPeriodDto?>',context!) ?? {};
         ingestionFailures = JsonConverters.fromJson(json['ingestionFailures'],'List<UsageBillingIngestionFailureDto>',context!) ?? [];
+        workflows = JsonConverters.fromJson(json['workflows'],'Map<String,UsageWorkflowPeriodDto?>',context!) ?? {};
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'accountId': accountId,
         'atlas': JsonConverters.toJson(atlas,'Map<String,UsageBillingPeriodDto?>',context!),
-        'ingestionFailures': JsonConverters.toJson(ingestionFailures,'List<UsageBillingIngestionFailureDto>',context!)
+        'ingestionFailures': JsonConverters.toJson(ingestionFailures,'List<UsageBillingIngestionFailureDto>',context!),
+        'workflows': JsonConverters.toJson(workflows,'Map<String,UsageWorkflowPeriodDto?>',context!)
     };
 
     getTypeName() => "UsageBillingDto";
@@ -50577,10 +50656,10 @@ class GetCodeWorkflowWaitingRuns extends CodeMashListPaginationRequestBase imple
     String? status;
 
     /**
-    * approval | event | delay
+    * approval | event | delay | child
     */
     // @DataMember
-    // @ApiMember(Description="approval | event | delay")
+    // @ApiMember(Description="approval | event | delay | child")
     String? waitingKind;
 
     /**
@@ -60117,9 +60196,13 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UsageBillingPeriodDto': TypeInfo(TypeOf.Class, create:() => UsageBillingPeriodDto()),
     'List<UsageBillingClusterChargeDto>': TypeInfo(TypeOf.Class, create:() => <UsageBillingClusterChargeDto>[]),
     'UsageBillingIngestionFailureDto': TypeInfo(TypeOf.Class, create:() => UsageBillingIngestionFailureDto()),
+    'UsageWorkflowProjectDto': TypeInfo(TypeOf.Class, create:() => UsageWorkflowProjectDto()),
+    'UsageWorkflowPeriodDto': TypeInfo(TypeOf.Class, create:() => UsageWorkflowPeriodDto()),
+    'List<UsageWorkflowProjectDto>': TypeInfo(TypeOf.Class, create:() => <UsageWorkflowProjectDto>[]),
     'UsageBillingDto': TypeInfo(TypeOf.Class, create:() => UsageBillingDto()),
     'Map<String,UsageBillingPeriodDto?>': TypeInfo(TypeOf.Class, create:() => Map<String,UsageBillingPeriodDto?>()),
     'List<UsageBillingIngestionFailureDto>': TypeInfo(TypeOf.Class, create:() => <UsageBillingIngestionFailureDto>[]),
+    'Map<String,UsageWorkflowPeriodDto?>': TypeInfo(TypeOf.Class, create:() => Map<String,UsageWorkflowPeriodDto?>()),
     'PromotionSummaryDto': TypeInfo(TypeOf.Class, create:() => PromotionSummaryDto()),
     'PromotionItemChangeDto': TypeInfo(TypeOf.Class, create:() => PromotionItemChangeDto()),
     'PromotionIntegrationTargetDto': TypeInfo(TypeOf.Class, create:() => PromotionIntegrationTargetDto()),
