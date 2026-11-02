@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-02 19:49:01
+Date: 2026-11-02 20:39:41
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -3868,6 +3868,43 @@ class PaymentOrderDto implements IConvertible
 }
 
 // @DataContract
+class WorkflowRunErrorDto implements IConvertible
+{
+    // @DataMember
+    String? code;
+
+    // @DataMember
+    String? stepId;
+
+    // @DataMember
+    String? reason;
+
+    // @DataMember
+    String? message;
+
+    WorkflowRunErrorDto({this.code,this.stepId,this.reason,this.message});
+    WorkflowRunErrorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        code = json['code'];
+        stepId = json['stepId'];
+        reason = json['reason'];
+        message = json['message'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'code': code,
+        'stepId': stepId,
+        'reason': reason,
+        'message': message
+    };
+
+    getTypeName() => "WorkflowRunErrorDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class WorkflowRunActorDto implements IConvertible
 {
     // @DataMember
@@ -3938,140 +3975,6 @@ class WorkflowWaitingOnDto implements IConvertible
     };
 
     getTypeName() => "WorkflowWaitingOnDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class WorkflowRunErrorDto implements IConvertible
-{
-    // @DataMember
-    String? code;
-
-    // @DataMember
-    String? stepId;
-
-    // @DataMember
-    String? reason;
-
-    // @DataMember
-    String? message;
-
-    WorkflowRunErrorDto({this.code,this.stepId,this.reason,this.message});
-    WorkflowRunErrorDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        code = json['code'];
-        stepId = json['stepId'];
-        reason = json['reason'];
-        message = json['message'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'code': code,
-        'stepId': stepId,
-        'reason': reason,
-        'message': message
-    };
-
-    getTypeName() => "WorkflowRunErrorDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class WorkflowRunListProjection implements IConvertible
-{
-    // @DataMember
-    String runId = "";
-
-    // @DataMember
-    String workflowId = "";
-
-    // @DataMember
-    int? version;
-
-    // @DataMember
-    bool? isDraft;
-
-    // @DataMember
-    String status = "";
-
-    // @DataMember
-    String source = "";
-
-    // @DataMember
-    DateTime? startedAt;
-
-    // @DataMember
-    DateTime? finishedAt;
-
-    // @DataMember
-    int? durationMs;
-
-    // @DataMember
-    WorkflowRunActorDto? startedBy;
-
-    // @DataMember
-    String? executionIdentityId;
-
-    // @DataMember
-    String? executionIdentityName;
-
-    // @DataMember
-    bool? executionIdentityIsDefault;
-
-    // @DataMember
-    List<String> currentStepIds = [];
-
-    // @DataMember
-    List<WorkflowWaitingOnDto> waitingOn = [];
-
-    // @DataMember
-    WorkflowRunErrorDto? error;
-
-    WorkflowRunListProjection({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedAt,this.finishedAt,this.durationMs,this.startedBy,this.executionIdentityId,this.executionIdentityName,this.executionIdentityIsDefault,this.currentStepIds=const [],this.waitingOn=const [],this.error});
-    WorkflowRunListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        runId = json['runId'] ?? "";
-        workflowId = json['workflowId'] ?? "";
-        version = json['version'];
-        isDraft = json['isDraft'];
-        status = json['status'] ?? "";
-        source = json['source'] ?? "";
-        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
-        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
-        durationMs = json['durationMs'];
-        startedBy = JsonConverters.fromJson(json['startedBy'],'WorkflowRunActorDto',context!);
-        executionIdentityId = json['executionIdentityId'];
-        executionIdentityName = json['executionIdentityName'];
-        executionIdentityIsDefault = json['executionIdentityIsDefault'];
-        currentStepIds = JsonConverters.fromJson(json['currentStepIds'],'List<String>',context!) ?? [];
-        waitingOn = JsonConverters.fromJson(json['waitingOn'],'List<WorkflowWaitingOnDto>',context!) ?? [];
-        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'runId': runId,
-        'workflowId': workflowId,
-        'version': version,
-        'isDraft': isDraft,
-        'status': status,
-        'source': source,
-        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
-        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
-        'durationMs': durationMs,
-        'startedBy': JsonConverters.toJson(startedBy,'WorkflowRunActorDto',context!),
-        'executionIdentityId': executionIdentityId,
-        'executionIdentityName': executionIdentityName,
-        'executionIdentityIsDefault': executionIdentityIsDefault,
-        'currentStepIds': JsonConverters.toJson(currentStepIds,'List<String>',context!),
-        'waitingOn': JsonConverters.toJson(waitingOn,'List<WorkflowWaitingOnDto>',context!),
-        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!)
-    };
-
-    getTypeName() => "WorkflowRunListProjection";
     TypeContext? context = _ctx;
 }
 
@@ -4326,6 +4229,103 @@ class WorkflowRunDto implements IConvertible
     };
 
     getTypeName() => "WorkflowRunDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowRunListProjection implements IConvertible
+{
+    // @DataMember
+    String runId = "";
+
+    // @DataMember
+    String workflowId = "";
+
+    // @DataMember
+    int? version;
+
+    // @DataMember
+    bool? isDraft;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    String source = "";
+
+    // @DataMember
+    DateTime? startedAt;
+
+    // @DataMember
+    DateTime? finishedAt;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    WorkflowRunActorDto? startedBy;
+
+    // @DataMember
+    String? executionIdentityId;
+
+    // @DataMember
+    String? executionIdentityName;
+
+    // @DataMember
+    bool? executionIdentityIsDefault;
+
+    // @DataMember
+    List<String> currentStepIds = [];
+
+    // @DataMember
+    List<WorkflowWaitingOnDto> waitingOn = [];
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    WorkflowRunListProjection({this.runId="",this.workflowId="",this.version,this.isDraft,this.status="",this.source="",this.startedAt,this.finishedAt,this.durationMs,this.startedBy,this.executionIdentityId,this.executionIdentityName,this.executionIdentityIsDefault,this.currentStepIds=const [],this.waitingOn=const [],this.error});
+    WorkflowRunListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        runId = json['runId'] ?? "";
+        workflowId = json['workflowId'] ?? "";
+        version = json['version'];
+        isDraft = json['isDraft'];
+        status = json['status'] ?? "";
+        source = json['source'] ?? "";
+        startedAt = JsonConverters.fromJson(json['startedAt'],'DateTime',context!) ?? DateTime(0);
+        finishedAt = JsonConverters.fromJson(json['finishedAt'],'DateTime',context!);
+        durationMs = json['durationMs'];
+        startedBy = JsonConverters.fromJson(json['startedBy'],'WorkflowRunActorDto',context!);
+        executionIdentityId = json['executionIdentityId'];
+        executionIdentityName = json['executionIdentityName'];
+        executionIdentityIsDefault = json['executionIdentityIsDefault'];
+        currentStepIds = JsonConverters.fromJson(json['currentStepIds'],'List<String>',context!) ?? [];
+        waitingOn = JsonConverters.fromJson(json['waitingOn'],'List<WorkflowWaitingOnDto>',context!) ?? [];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'runId': runId,
+        'workflowId': workflowId,
+        'version': version,
+        'isDraft': isDraft,
+        'status': status,
+        'source': source,
+        'startedAt': JsonConverters.toJson(startedAt,'DateTime',context!),
+        'finishedAt': JsonConverters.toJson(finishedAt,'DateTime',context!),
+        'durationMs': durationMs,
+        'startedBy': JsonConverters.toJson(startedBy,'WorkflowRunActorDto',context!),
+        'executionIdentityId': executionIdentityId,
+        'executionIdentityName': executionIdentityName,
+        'executionIdentityIsDefault': executionIdentityIsDefault,
+        'currentStepIds': JsonConverters.toJson(currentStepIds,'List<String>',context!),
+        'waitingOn': JsonConverters.toJson(waitingOn,'List<WorkflowWaitingOnDto>',context!),
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!)
+    };
+
+    getTypeName() => "WorkflowRunListProjection";
     TypeContext? context = _ctx;
 }
 
@@ -8017,6 +8017,54 @@ class StartPaymentCheckoutResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "StartPaymentCheckoutResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class InvokeCodeWorkflowResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? runId;
+
+    // @DataMember
+    String? status;
+
+    // @DataMember
+    dynamic? output;
+
+    // @DataMember
+    int? durationMs;
+
+    // @DataMember
+    WorkflowRunErrorDto? error;
+
+    // @DataMember
+    WorkflowRunDto? run;
+
+    InvokeCodeWorkflowResponse({this.runId,this.status,this.output,this.durationMs,this.error,this.run});
+    InvokeCodeWorkflowResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        runId = json['runId'];
+        status = json['status'];
+        output = JsonConverters.fromJson(json['output'],'dynamic',context!);
+        durationMs = json['durationMs'];
+        error = JsonConverters.fromJson(json['error'],'WorkflowRunErrorDto',context!);
+        run = JsonConverters.fromJson(json['run'],'WorkflowRunDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'runId': runId,
+        'status': status,
+        'output': JsonConverters.toJson(output,'dynamic',context!),
+        'durationMs': durationMs,
+        'error': JsonConverters.toJson(error,'WorkflowRunErrorDto',context!),
+        'run': JsonConverters.toJson(run,'WorkflowRunDto',context!)
+    });
+
+    getTypeName() => "InvokeCodeWorkflowResponse";
     TypeContext? context = _ctx;
 }
 
@@ -13830,6 +13878,63 @@ class StartPaymentCheckoutRequest extends CodeMashRequestBase implements IReturn
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/workflows/{Id}/invoke", "POST")
+// @DataContract
+class InvokeCodeWorkflow extends CodeMashRequestBase implements IReturn<InvokeCodeWorkflowResponse>, IConvertible, IPost
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * The @Model.Request object; checked against the definition's inputs when it has one.
+    */
+    // @DataMember
+    // @ApiMember(Description="The @Model.Request object; checked against the definition's inputs when it has one.")
+    Map<String,dynamic?>? payload;
+
+    /**
+    * 0–30 seconds to wait for the run; default 10; 0 answers 202 at once.
+    */
+    // @DataMember
+    // @ApiMember(DataType="integer", Description="0–30 seconds to wait for the run; default 10; 0 answers 202 at once.")
+    int? waitSeconds;
+
+    /**
+    * "draft" to test the draft, a version number to pin one; absent = the latest published.
+    */
+    // @DataMember
+    // @ApiMember(Description="\"draft\" to test the draft, a version number to pin one; absent = the latest published.")
+    String? runVersion;
+
+    InvokeCodeWorkflow({this.id="",this.payload,this.waitSeconds,this.runVersion});
+    InvokeCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        waitSeconds = json['waitSeconds'];
+        runVersion = json['runVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'waitSeconds': waitSeconds,
+        'runVersion': runVersion
+    });
+
+    createResponse() => InvokeCodeWorkflowResponse();
+    getResponseTypeName() => "InvokeCodeWorkflowResponse";
+    getTypeName() => "InvokeCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/workflows/runs", "GET")
 // @DataContract
 class GetCodeWorkflowWaitingRuns extends CodeMashListPaginationRequestBase implements IReturn<WorkflowRunsResponse>, IConvertible, IGet
@@ -17508,15 +17613,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PaymentOrderDto': TypeInfo(TypeOf.Class, create:() => PaymentOrderDto()),
     'List<PaymentOrderLineDto>': TypeInfo(TypeOf.Class, create:() => <PaymentOrderLineDto>[]),
     'List<PaymentOrderCheckoutDto>': TypeInfo(TypeOf.Class, create:() => <PaymentOrderCheckoutDto>[]),
+    'WorkflowRunErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunErrorDto()),
     'WorkflowRunActorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunActorDto()),
     'WorkflowWaitingOnDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitingOnDto()),
-    'WorkflowRunErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunErrorDto()),
-    'WorkflowRunListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowRunListProjection()),
-    'List<WorkflowWaitingOnDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitingOnDto>[]),
     'WorkflowRunStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunStepDto()),
     'WorkflowRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunDto()),
+    'List<WorkflowWaitingOnDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitingOnDto>[]),
     'List<WorkflowRunStepDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowRunStepDto>[]),
     'Map<String,dynamic?>': TypeInfo(TypeOf.Class, create:() => Map<String,dynamic?>()),
+    'WorkflowRunListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowRunListProjection()),
     'TenantLogEntryDto': TypeInfo(TypeOf.Class, create:() => TenantLogEntryDto()),
     'InAppNotificationDto': TypeInfo(TypeOf.Class, create:() => InAppNotificationDto()),
     'ChannelSubscriptionStateDto': TypeInfo(TypeOf.Class, create:() => ChannelSubscriptionStateDto()),
@@ -17679,6 +17784,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentOrdersResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentOrdersResponse()),
     'PaginatedResponse<PaymentOrderDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PaymentOrderDto>()),
     'StartPaymentCheckoutResponse': TypeInfo(TypeOf.Class, create:() => StartPaymentCheckoutResponse()),
+    'InvokeCodeWorkflowResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflowResponse()),
     'WorkflowRunsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunsResponse()),
     'PaginatedResponse<WorkflowRunListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowRunListProjection>()),
     'WorkflowRunResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunResponse()),
@@ -17856,6 +17962,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentOrderRequest': TypeInfo(TypeOf.Class, create:() => GetPaymentOrderRequest()),
     'GetPaymentOrdersRequest': TypeInfo(TypeOf.Class, create:() => GetPaymentOrdersRequest()),
     'StartPaymentCheckoutRequest': TypeInfo(TypeOf.Class, create:() => StartPaymentCheckoutRequest()),
+    'InvokeCodeWorkflow': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflow()),
     'GetCodeWorkflowWaitingRuns': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowWaitingRuns()),
     'ResumeCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRun()),
     'OpenCodeWorkflowResumeLink': TypeInfo(TypeOf.Class, create:() => OpenCodeWorkflowResumeLink()),

@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 import '../_fake_driver.dart';
 
-/// `hub.code` — every Code Hub endpoint (70: the module switch, the
+/// `hub.code` — every Code Hub endpoint (71: the module switch, the
 /// integrations, the marketplace, the five cloud-function routes of
 /// `Code.Functions.md` and the 26 workflow routes of `Code.Workflows.md`),
 /// against the fake driver (never a real server): the verb and the full path
@@ -592,9 +592,8 @@ void main() {
         '/v3/code/marketplace/integrations/{id}/tools, id in the path',
         () async {
       final driver = FakeHttpDriver();
-      await _client(driver)
-          .code
-          .getMarketplaceIntegrationTools(integrationViewId: 'int_7Hq2mcpServer');
+      await _client(driver).code.getMarketplaceIntegrationTools(
+          integrationViewId: 'int_7Hq2mcpServer');
 
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
@@ -610,14 +609,15 @@ void main() {
         '/v3/code/marketplace/integrations/{id}/access, id in the path',
         () async {
       final driver = FakeHttpDriver();
-      await _client(driver)
-          .code
-          .getMarketplaceIntegrationAccess(integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
+      await _client(driver).code.getMarketplaceIntegrationAccess(
+          integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
 
       final req = driver.lastRequest!;
       expect(req.method, equals('GET'));
-      expect(req.url.path,
-          equals('/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/access'));
+      expect(
+          req.url.path,
+          equals(
+              '/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/access'));
       expect(req.url.queryParameters, isEmpty);
       expect(req.body, isNull);
     });
@@ -638,8 +638,10 @@ void main() {
 
       final req = driver.lastRequest!;
       expect(req.method, equals('PUT'));
-      expect(req.url.path,
-          equals('/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/access/roles'));
+      expect(
+          req.url.path,
+          equals(
+              '/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/access/roles'));
       expect(req.url.queryParameters, isEmpty);
       expect(
           jsonDecode(req.body!),
@@ -692,14 +694,15 @@ void main() {
         '/v3/code/marketplace/integrations/{id}/oauth/start, id in the path',
         () async {
       final driver = FakeHttpDriver();
-      await _client(driver)
-          .code
-          .startMarketplaceIntegrationSignIn(integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
+      await _client(driver).code.startMarketplaceIntegrationSignIn(
+          integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
 
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
-      expect(req.url.path,
-          equals('/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/oauth/start'));
+      expect(
+          req.url.path,
+          equals(
+              '/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/oauth/start'));
       expect(req.url.queryParameters, isEmpty);
       expect(req.body, isNull);
     });
@@ -710,14 +713,15 @@ void main() {
         '/v3/code/marketplace/integrations/{id}/oauth/sign-out, id in the path',
         () async {
       final driver = FakeHttpDriver();
-      await _client(driver)
-          .code
-          .signOutMarketplaceIntegration(integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
+      await _client(driver).code.signOutMarketplaceIntegration(
+          integrationViewId: 'int_6Qp1dW2kRm8NsT4vYc0Hb');
 
       final req = driver.lastRequest!;
       expect(req.method, equals('POST'));
-      expect(req.url.path,
-          equals('/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/oauth/sign-out'));
+      expect(
+          req.url.path,
+          equals(
+              '/v3/code/marketplace/integrations/int_6Qp1dW2kRm8NsT4vYc0Hb/oauth/sign-out'));
       expect(req.url.queryParameters, isEmpty);
       expect(req.body, isNull);
     });
@@ -740,6 +744,38 @@ void main() {
         }
       });
     }
+
+    test('getMarketplaceListings sends kind in the query', () async {
+      final driver = FakeHttpDriver();
+      await _client(driver)
+          .code
+          .getMarketplaceListings(query: {'kind': 'Workflow'});
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('GET'));
+      expect(req.url.path, equals('/v3/code/marketplace/listings'));
+      expect(req.url.queryParameters, equals({'kind': 'Workflow'}));
+    });
+
+    test(
+        'installMarketplaceWorkflow: the listing in the path, the rest in the body',
+        () async {
+      final driver = FakeHttpDriver();
+      final body = {
+        'name': 'Thanks',
+        'references': {'orders': 'orders', 'emailIntegration': 'int_1'},
+      };
+      await _client(driver).code.installMarketplaceWorkflow(
+          listingViewId: 'ml_workflow_order_thanks_v1', body: body);
+
+      final req = driver.lastRequest!;
+      expect(req.method, equals('POST'));
+      expect(
+          req.url.path,
+          equals(
+              '/v3/code/marketplace/listings/ml_workflow_order_thanks_v1/install-workflow'));
+      expect(jsonDecode(req.body!), equals(body));
+    });
 
     // The signed resume link is its own key: a client with no credentials
     // still sends it, with no credential header and no error.
