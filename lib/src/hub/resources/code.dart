@@ -430,6 +430,30 @@ class CodeResource extends Resource {
     );
   }
 
+  /// Beta: `POST /{version}/code/marketplace/listings/{ListingViewId}/install-workflow`
+  ///
+  /// Fill a workflow listing's references and save a new workflow's draft:
+  /// nothing runs and nothing is published. Body: `references` (a value for
+  /// every key the listing declares), `name?`, `executionIdentityId?`. Answers
+  /// `WorkflowResponse`. A connector listing is `CM-ERRORS-MARKETPLACE-035`; a
+  /// reference missing or undeclared is `CM-ERRORS-MARKETPLACE-036`, one error
+  /// per key.
+  Future<Object?> installMarketplaceWorkflow(
+      {required Object listingViewId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route:
+          '/{version}/code/marketplace/listings/{ListingViewId}/install-workflow',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'ListingViewId': listingViewId},
+    );
+  }
+
   /// `GET /{version}/code/marketplace/listings/{ListingViewId}/functions/{FunctionKey}/tokens`
   Future<Object?> getMarketplaceListingFunctionTokens(
       {required Object listingViewId,

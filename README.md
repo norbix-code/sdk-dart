@@ -1222,6 +1222,29 @@ for the run-as user) and `data` with one slot per source (`database`,
 in `test/hub/code_test.dart`.
 
 
+### Workflow listings (beta)
+
+`code.getMarketplaceListings` takes `kind` in `query`: `Connector` (the default, so a call that
+sends nothing sees what it always saw) or `Workflow`. A workflow listing's `workflow.references`
+names what to fill. `code.installMarketplaceWorkflow` fills them and saves a new workflow's
+**draft**: nothing runs and nothing is published. The env is the client's.
+
+```dart
+final workflow = await hub.code.installMarketplaceWorkflow(
+  listingViewId: 'ml_workflow_order_thanks_v1',
+  body: {
+    'references': {
+      'orders': 'orders',
+      'thanks': 'tmpl_3TKDGIwDEpWXROwKr2PBut',
+      'emailIntegration': 'int_1R5izfi0g6MuSGs4VnUMnp',
+    },
+  },
+);
+```
+
+A connector listing is `CM-ERRORS-MARKETPLACE-035`; a reference missing or undeclared is
+`CM-ERRORS-MARKETPLACE-036`, one error per key.
+
 ### Marketplace function runs
 
 Each call of a marketplace function is one run row: an invoke (user, API key,
