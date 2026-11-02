@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-02 18:03:40
+Date: 2026-11-02 19:04:11
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -3912,7 +3912,10 @@ class WorkflowWaitingOnDto implements IConvertible
     // @DataMember
     List<String>? assignees;
 
-    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees});
+    // @DataMember
+    String? childRunId;
+
+    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.childRunId});
     WorkflowWaitingOnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -3921,6 +3924,7 @@ class WorkflowWaitingOnDto implements IConvertible
         until = JsonConverters.fromJson(json['until'],'DateTime',context!);
         key = json['key'];
         assignees = JsonConverters.fromJson(json['assignees'],'List<String>',context!);
+        childRunId = json['childRunId'];
         return this;
     }
 
@@ -3929,7 +3933,8 @@ class WorkflowWaitingOnDto implements IConvertible
         'kind': kind,
         'until': JsonConverters.toJson(until,'DateTime',context!),
         'key': key,
-        'assignees': JsonConverters.toJson(assignees,'List<String>',context!)
+        'assignees': JsonConverters.toJson(assignees,'List<String>',context!),
+        'childRunId': childRunId
     };
 
     getTypeName() => "WorkflowWaitingOnDto";
