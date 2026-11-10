@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-02 20:39:41
+Date: 2026-11-10 14:40:13
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -1832,13 +1832,14 @@ class EchoAgentDto implements IConvertible
     String installationType = "";
     String onboardingDocsUrl = "";
     String toolsUrl = "";
+    String? openApiUrl;
     String cliPackage = "";
     String cliInstallCommand = "";
     String deviceAuthorizationUrl = "";
     String deviceTokenUrl = "";
     List<EchoAgentSnippetDto> snippets = [];
 
-    EchoAgentDto({this.mcpUrl="",this.oAuthMetadataUrl,this.installationType="",this.onboardingDocsUrl="",this.toolsUrl="",this.cliPackage="",this.cliInstallCommand="",this.deviceAuthorizationUrl="",this.deviceTokenUrl="",this.snippets=const []});
+    EchoAgentDto({this.mcpUrl="",this.oAuthMetadataUrl,this.installationType="",this.onboardingDocsUrl="",this.toolsUrl="",this.openApiUrl,this.cliPackage="",this.cliInstallCommand="",this.deviceAuthorizationUrl="",this.deviceTokenUrl="",this.snippets=const []});
     EchoAgentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1847,6 +1848,7 @@ class EchoAgentDto implements IConvertible
         installationType = json['installationType'] ?? "";
         onboardingDocsUrl = json['onboardingDocsUrl'] ?? "";
         toolsUrl = json['toolsUrl'] ?? "";
+        openApiUrl = json['openApiUrl'];
         cliPackage = json['cliPackage'] ?? "";
         cliInstallCommand = json['cliInstallCommand'] ?? "";
         deviceAuthorizationUrl = json['deviceAuthorizationUrl'] ?? "";
@@ -1861,6 +1863,7 @@ class EchoAgentDto implements IConvertible
         'installationType': installationType,
         'onboardingDocsUrl': onboardingDocsUrl,
         'toolsUrl': toolsUrl,
+        'openApiUrl': openApiUrl,
         'cliPackage': cliPackage,
         'cliInstallCommand': cliInstallCommand,
         'deviceAuthorizationUrl': deviceAuthorizationUrl,
@@ -3254,12 +3257,6 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
     String? activationCode;
 
     // @DataMember
-    int? order;
-
-    // @DataMember
-    bool? breakOnError;
-
-    // @DataMember
     String? savedByAuthId;
 
     // @DataMember
@@ -3268,7 +3265,7 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
     // @DataMember
     ExecutionIdentitySummaryDto? executionIdentity;
 
-    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.order,this.breakOnError,this.savedByAuthId,this.executionIdentityId,this.executionIdentity});
+    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId,this.executionIdentityId,this.executionIdentity});
     TriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -3279,8 +3276,6 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         description = json['description'];
         isEnabled = json['isEnabled'];
         activationCode = json['activationCode'];
-        order = json['order'];
-        breakOnError = json['breakOnError'];
         savedByAuthId = json['savedByAuthId'];
         executionIdentityId = json['executionIdentityId'];
         executionIdentity = JsonConverters.fromJson(json['executionIdentity'],'ExecutionIdentitySummaryDto',context!);
@@ -3295,8 +3290,6 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         'description': description,
         'isEnabled': isEnabled,
         'activationCode': activationCode,
-        'order': order,
-        'breakOnError': breakOnError,
         'savedByAuthId': savedByAuthId,
         'executionIdentityId': executionIdentityId,
         'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!)
@@ -5949,6 +5942,7 @@ class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
 
 enum EmailRecipientField
 {
+    NotSet,
     To,
     Cc,
     Bcc,
@@ -5956,6 +5950,7 @@ enum EmailRecipientField
 
 enum RecipientRemovalReason
 {
+    NotSet,
     OptedOut,
     Compliance,
     Undeliverable,
@@ -6069,9 +6064,21 @@ class CampaignStatsDto implements IConvertible
     int removedRecipients = 0;
 
     // @DataMember
+    int delivered = 0;
+
+    // @DataMember
+    int bounced = 0;
+
+    // @DataMember
+    int complained = 0;
+
+    // @DataMember
+    int rejected = 0;
+
+    // @DataMember
     double successRate = 0;
 
-    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.failedRetryable=0,this.cancelled=0,this.blocked=0,this.inProgress=0,this.removedRecipients=0,this.successRate=0});
+    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.failedRetryable=0,this.cancelled=0,this.blocked=0,this.inProgress=0,this.removedRecipients=0,this.delivered=0,this.bounced=0,this.complained=0,this.rejected=0,this.successRate=0});
     CampaignStatsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -6083,6 +6090,10 @@ class CampaignStatsDto implements IConvertible
         blocked = json['blocked'] ?? 0;
         inProgress = json['inProgress'] ?? 0;
         removedRecipients = json['removedRecipients'] ?? 0;
+        delivered = json['delivered'] ?? 0;
+        bounced = json['bounced'] ?? 0;
+        complained = json['complained'] ?? 0;
+        rejected = json['rejected'] ?? 0;
         successRate = JsonConverters.toDouble(json['successRate']) ?? 0;
         return this;
     }
@@ -6096,6 +6107,10 @@ class CampaignStatsDto implements IConvertible
         'blocked': blocked,
         'inProgress': inProgress,
         'removedRecipients': removedRecipients,
+        'delivered': delivered,
+        'bounced': bounced,
+        'complained': complained,
+        'rejected': rejected,
         'successRate': successRate
     };
 
@@ -6744,8 +6759,6 @@ abstract class IQueuedTrigger
 {
     String viewId = "";
     String name = "";
-    int? order;
-    bool? breakOnError;
 }
 
 abstract class IHasRazorTemplateCode
@@ -14710,9 +14723,9 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
     int? pageSize;
 
     /**
-    * Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email.
+    * Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email; an exact contact id (ct_…) or login id (usr_…) finds that contact.
     */
-    // @ApiMember(Description="Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email.")
+    // @ApiMember(Description="Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email; an exact contact id (ct_…) or login id (usr_…) finds that contact.")
     String? search;
 
     /**
@@ -14745,7 +14758,13 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
     // @ApiMember(Description="Composite project-role ids (pr_{project}_nr_{role}); the contact holds any of them.")
     List<String>? roleNames;
 
-    GetAllContacts({this.startingAfter,this.pageSize,this.search,this.email,this.userName,this.statuses,this.types,this.roleNames});
+    /**
+    * Contact tags; the contact carries any of them.
+    */
+    // @ApiMember(Description="Contact tags; the contact carries any of them.")
+    List<String>? tags;
+
+    GetAllContacts({this.startingAfter,this.pageSize,this.search,this.email,this.userName,this.statuses,this.types,this.roleNames,this.tags});
     GetAllContacts.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14758,6 +14777,7 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
         statuses = JsonConverters.fromJson(json['statuses'],'List<String>',context!);
         types = JsonConverters.fromJson(json['types'],'List<String>',context!);
         roleNames = JsonConverters.fromJson(json['roleNames'],'List<String>',context!);
+        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
         return this;
     }
 
@@ -14769,7 +14789,8 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
         'userName': userName,
         'statuses': JsonConverters.toJson(statuses,'List<String>',context!),
         'types': JsonConverters.toJson(types,'List<String>',context!),
-        'roleNames': JsonConverters.toJson(roleNames,'List<String>',context!)
+        'roleNames': JsonConverters.toJson(roleNames,'List<String>',context!),
+        'tags': JsonConverters.toJson(tags,'List<String>',context!)
     });
 
     createResponse() => GetAllContactsResponse();
