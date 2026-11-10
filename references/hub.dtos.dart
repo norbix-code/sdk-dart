@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-02 20:39:40
+Date: 2026-11-10 14:40:13
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -155,8 +155,13 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
 
     bool? deliveryEventsEnabled;
     String? snsTopicArn;
+    /**
+    * The SQS queue URL (https://sqs.<region>.amazonaws.com/<account>/<name>) the configuration set's SNS topic delivers to. Norbix polls it with this integration's credentials. Requires ConfigurationSet.
+    */
+    // @ApiMember(Description="The SQS queue URL (https://sqs.<region>.amazonaws.com/<account>/<name>) the configuration set's SNS topic delivers to. Norbix polls it with this integration's credentials. Requires ConfigurationSet.")
+    String? deliveryEventsQueueUrl;
 
-    AwsSesEmailIntegrationRequest({this.provider,this.authMode,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.externalId,this.accessKey,this.secretKey,this.acceptKeyRisk,this.deliveryEventsEnabled,this.snsTopicArn});
+    AwsSesEmailIntegrationRequest({this.provider,this.authMode,this.awsRegion="",this.emailIdentityArn="",this.configurationSet,this.roleArn,this.externalId,this.accessKey,this.secretKey,this.acceptKeyRisk,this.deliveryEventsEnabled,this.snsTopicArn,this.deliveryEventsQueueUrl});
     AwsSesEmailIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -173,6 +178,7 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
         acceptKeyRisk = json['acceptKeyRisk'];
         deliveryEventsEnabled = json['deliveryEventsEnabled'];
         snsTopicArn = json['snsTopicArn'];
+        deliveryEventsQueueUrl = json['deliveryEventsQueueUrl'];
         return this;
     }
 
@@ -188,7 +194,8 @@ class AwsSesEmailIntegrationRequest extends EmailIntegrationRequest implements I
         'secretKey': secretKey,
         'acceptKeyRisk': acceptKeyRisk,
         'deliveryEventsEnabled': deliveryEventsEnabled,
-        'snsTopicArn': snsTopicArn
+        'snsTopicArn': snsTopicArn,
+        'deliveryEventsQueueUrl': deliveryEventsQueueUrl
     });
 
     getTypeName() => "AwsSesEmailIntegrationRequest";
@@ -684,12 +691,10 @@ abstract class SaveTriggerRequest
     String? description;
     bool? isEnabled;
     String? preExecuteCode;
-    int? order;
-    bool? breakOnError;
     TriggerActionDto? action;
     String? executionIdentityId;
 
-    SaveTriggerRequest({this.type,this.triggerId,this.name="",this.description,this.isEnabled,this.preExecuteCode,this.order,this.breakOnError,this.action,this.executionIdentityId});
+    SaveTriggerRequest({this.type,this.triggerId,this.name="",this.description,this.isEnabled,this.preExecuteCode,this.action,this.executionIdentityId});
     SaveTriggerRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -699,8 +704,6 @@ abstract class SaveTriggerRequest
         description = json['description'];
         isEnabled = json['isEnabled'];
         preExecuteCode = json['preExecuteCode'];
-        order = json['order'];
-        breakOnError = json['breakOnError'];
         action = JsonConverters.fromJson(json['action'],'TriggerActionDto',context!);
         executionIdentityId = json['executionIdentityId'];
         return this;
@@ -713,8 +716,6 @@ abstract class SaveTriggerRequest
         'description': description,
         'isEnabled': isEnabled,
         'preExecuteCode': preExecuteCode,
-        'order': order,
-        'breakOnError': breakOnError,
         'action': JsonConverters.toJson(action,'TriggerActionDto',context!),
         'executionIdentityId': executionIdentityId
     };
@@ -909,15 +910,19 @@ class MongoDbConnectionStringDatabaseIntegrationRequest extends DatabaseIntegrat
 {
     DatabaseProvider? provider;
     String? databaseName;
+    CloudAuthMode? authMode;
+    String? audience;
     String connectionString = "";
 
-    MongoDbConnectionStringDatabaseIntegrationRequest({this.provider,this.databaseName,this.connectionString=""});
+    MongoDbConnectionStringDatabaseIntegrationRequest({this.provider,this.databaseName,this.authMode,this.audience,this.connectionString=""});
     MongoDbConnectionStringDatabaseIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'DatabaseProvider',context!);
         databaseName = json['databaseName'];
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        audience = json['audience'];
         connectionString = json['connectionString'] ?? "";
         return this;
     }
@@ -925,6 +930,8 @@ class MongoDbConnectionStringDatabaseIntegrationRequest extends DatabaseIntegrat
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'DatabaseProvider',context!),
         'databaseName': databaseName,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
+        'audience': audience,
         'connectionString': connectionString
     });
 
@@ -1700,19 +1707,22 @@ class DataDogLoggingIntegrationRequest extends LoggingIntegrationRequest impleme
     // @ApiMember(Description="The Datadog site of your account, one of: datadoghq.com, us3.datadoghq.com, us5.datadoghq.com, datadoghq.eu, ap1.datadoghq.com, ap2.datadoghq.com, ddog-gov.com (DataDogSites.All).", IsRequired=true)
     String site = "";
 
-    String serviceName = "";
-    String environment = "";
+    /**
+    * The Datadog service tag of the forwarded logs. Optional: empty = the project id (pr_…). The env tag is not asked: it is the Norbix environment of the entry, lower-cased (prod, test, …).
+    */
+    // @ApiMember(Description="The Datadog service tag of the forwarded logs. Optional: empty = the project id (pr_…). The env tag is not asked: it is the Norbix environment of the entry, lower-cased (prod, test, …).")
+    String? serviceName;
+
     String apiKey = "";
 
-    DataDogLoggingIntegrationRequest({this.provider,this.site="",this.serviceName="",this.environment="",this.apiKey=""});
+    DataDogLoggingIntegrationRequest({this.provider,this.site="",this.serviceName,this.apiKey=""});
     DataDogLoggingIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'LoggingProvider',context!);
         site = json['site'] ?? "";
-        serviceName = json['serviceName'] ?? "";
-        environment = json['environment'] ?? "";
+        serviceName = json['serviceName'];
         apiKey = json['apiKey'] ?? "";
         return this;
     }
@@ -1721,7 +1731,6 @@ class DataDogLoggingIntegrationRequest extends LoggingIntegrationRequest impleme
         'provider': JsonConverters.toJson(provider,'LoggingProvider',context!),
         'site': site,
         'serviceName': serviceName,
-        'environment': environment,
         'apiKey': apiKey
     });
 
@@ -5220,6 +5229,9 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     FunctionRefDto? functionRef;
 
     // @DataMember
+    String? runAsUserId;
+
+    // @DataMember
     CodeInvocationType? invocationType;
 
     // @DataMember
@@ -5237,12 +5249,13 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? meta;
 
-    TriggerActionCodeDto({this.functionRef,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
+    TriggerActionCodeDto({this.functionRef,this.runAsUserId,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
     TriggerActionCodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionRef = JsonConverters.fromJson(json['functionRef'],'FunctionRefDto',context!);
+        runAsUserId = json['runAsUserId'];
         invocationType = JsonConverters.fromJson(json['invocationType'],'CodeInvocationType',context!);
         config = json['config'];
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'CodeDeliverySettingsDto',context!);
@@ -5254,6 +5267,7 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionRef': JsonConverters.toJson(functionRef,'FunctionRefDto',context!),
+        'runAsUserId': runAsUserId,
         'invocationType': JsonConverters.toJson(invocationType,'CodeInvocationType',context!),
         'config': config,
         'deliverySettings': JsonConverters.toJson(deliverySettings,'CodeDeliverySettingsDto',context!),
@@ -5500,19 +5514,24 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    TriggerActionMarketplaceDto({this.functionId="",this.payload});
+    // @DataMember
+    String? runAsUserId;
+
+    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
+        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
         'payload': payload,
+        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -8077,23 +8096,20 @@ class DataDogLoggingIntegrationDto extends LoggingIntegrationDto implements ICon
 {
     String site = "";
     String serviceName = "";
-    String environment = "";
 
-    DataDogLoggingIntegrationDto({this.site="",this.serviceName="",this.environment=""});
+    DataDogLoggingIntegrationDto({this.site="",this.serviceName=""});
     DataDogLoggingIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         site = json['site'] ?? "";
         serviceName = json['serviceName'] ?? "";
-        environment = json['environment'] ?? "";
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'site': site,
-        'serviceName': serviceName,
-        'environment': environment
+        'serviceName': serviceName
     });
 
     getTypeName() => "DataDogLoggingIntegrationDto";
@@ -8643,18 +8659,27 @@ class DatabaseIntegrationDto extends IntegrationDto implements IConvertible
 class MongoDbConnectionStringIntegrationDto extends DatabaseIntegrationDto implements IConvertible
 {
     String? databaseName;
+    CloudAuthMode? authMode;
+    String? audience;
+    String? projectViewId;
 
-    MongoDbConnectionStringIntegrationDto({this.databaseName});
+    MongoDbConnectionStringIntegrationDto({this.databaseName,this.authMode,this.audience,this.projectViewId});
     MongoDbConnectionStringIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         databaseName = json['databaseName'];
+        authMode = JsonConverters.fromJson(json['authMode'],'CloudAuthMode',context!);
+        audience = json['audience'];
+        projectViewId = json['projectViewId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'databaseName': databaseName
+        'databaseName': databaseName,
+        'authMode': JsonConverters.toJson(authMode,'CloudAuthMode',context!),
+        'audience': audience,
+        'projectViewId': projectViewId
     });
 
     getTypeName() => "MongoDbConnectionStringIntegrationDto";
@@ -9180,8 +9205,9 @@ abstract class AwsSesEmailIntegrationDto extends EmailIntegrationDto
     String? configurationSetName;
     bool? deliveryEventsEnabled;
     String? snsTopicArn;
+    String? deliveryEventsQueueUrl;
 
-    AwsSesEmailIntegrationDto({this.region="",this.identityArn="",this.configurationSetName,this.deliveryEventsEnabled,this.snsTopicArn});
+    AwsSesEmailIntegrationDto({this.region="",this.identityArn="",this.configurationSetName,this.deliveryEventsEnabled,this.snsTopicArn,this.deliveryEventsQueueUrl});
     AwsSesEmailIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -9191,6 +9217,7 @@ abstract class AwsSesEmailIntegrationDto extends EmailIntegrationDto
         configurationSetName = json['configurationSetName'];
         deliveryEventsEnabled = json['deliveryEventsEnabled'];
         snsTopicArn = json['snsTopicArn'];
+        deliveryEventsQueueUrl = json['deliveryEventsQueueUrl'];
         return this;
     }
 
@@ -9199,7 +9226,8 @@ abstract class AwsSesEmailIntegrationDto extends EmailIntegrationDto
         'identityArn': identityArn,
         'configurationSetName': configurationSetName,
         'deliveryEventsEnabled': deliveryEventsEnabled,
-        'snsTopicArn': snsTopicArn
+        'snsTopicArn': snsTopicArn,
+        'deliveryEventsQueueUrl': deliveryEventsQueueUrl
     });
 
     getTypeName() => "AwsSesEmailIntegrationDto";
@@ -13745,18 +13773,26 @@ class TeamMemberRoleInput implements IConvertible
     // @ApiMember(Description="Environment names the role applies in, e.g. [\"TEST\"]. Empty or omitted = every environment.")
     List<String>? environments;
 
-    TeamMemberRoleInput({this.roleId="",this.environments});
+    /**
+    * Project ids (pr_…) the role applies to. Empty or omitted = every project. Not allowed on the Account Administrator role.
+    */
+    // @ApiMember(Description="Project ids (pr_…) the role applies to. Empty or omitted = every project. Not allowed on the Account Administrator role.")
+    List<String>? projects;
+
+    TeamMemberRoleInput({this.roleId="",this.environments,this.projects});
     TeamMemberRoleInput.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         roleId = json['roleId'] ?? "";
         environments = JsonConverters.fromJson(json['environments'],'List<String>',context!);
+        projects = JsonConverters.fromJson(json['projects'],'List<String>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'roleId': roleId,
-        'environments': JsonConverters.toJson(environments,'List<String>',context!)
+        'environments': JsonConverters.toJson(environments,'List<String>',context!),
+        'projects': JsonConverters.toJson(projects,'List<String>',context!)
     };
 
     getTypeName() => "TeamMemberRoleInput";
@@ -15353,13 +15389,14 @@ class EchoAgentDto implements IConvertible
     String installationType = "";
     String onboardingDocsUrl = "";
     String toolsUrl = "";
+    String? openApiUrl;
     String cliPackage = "";
     String cliInstallCommand = "";
     String deviceAuthorizationUrl = "";
     String deviceTokenUrl = "";
     List<EchoAgentSnippetDto> snippets = [];
 
-    EchoAgentDto({this.mcpUrl="",this.oAuthMetadataUrl,this.installationType="",this.onboardingDocsUrl="",this.toolsUrl="",this.cliPackage="",this.cliInstallCommand="",this.deviceAuthorizationUrl="",this.deviceTokenUrl="",this.snippets=const []});
+    EchoAgentDto({this.mcpUrl="",this.oAuthMetadataUrl,this.installationType="",this.onboardingDocsUrl="",this.toolsUrl="",this.openApiUrl,this.cliPackage="",this.cliInstallCommand="",this.deviceAuthorizationUrl="",this.deviceTokenUrl="",this.snippets=const []});
     EchoAgentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -15368,6 +15405,7 @@ class EchoAgentDto implements IConvertible
         installationType = json['installationType'] ?? "";
         onboardingDocsUrl = json['onboardingDocsUrl'] ?? "";
         toolsUrl = json['toolsUrl'] ?? "";
+        openApiUrl = json['openApiUrl'];
         cliPackage = json['cliPackage'] ?? "";
         cliInstallCommand = json['cliInstallCommand'] ?? "";
         deviceAuthorizationUrl = json['deviceAuthorizationUrl'] ?? "";
@@ -15382,6 +15420,7 @@ class EchoAgentDto implements IConvertible
         'installationType': installationType,
         'onboardingDocsUrl': onboardingDocsUrl,
         'toolsUrl': toolsUrl,
+        'openApiUrl': openApiUrl,
         'cliPackage': cliPackage,
         'cliInstallCommand': cliInstallCommand,
         'deviceAuthorizationUrl': deviceAuthorizationUrl,
@@ -17411,12 +17450,6 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
     String? activationCode;
 
     // @DataMember
-    int? order;
-
-    // @DataMember
-    bool? breakOnError;
-
-    // @DataMember
     String? savedByAuthId;
 
     // @DataMember
@@ -17425,7 +17458,7 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
     // @DataMember
     ExecutionIdentitySummaryDto? executionIdentity;
 
-    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.order,this.breakOnError,this.savedByAuthId,this.executionIdentityId,this.executionIdentity});
+    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId,this.executionIdentityId,this.executionIdentity});
     TriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -17436,8 +17469,6 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         description = json['description'];
         isEnabled = json['isEnabled'];
         activationCode = json['activationCode'];
-        order = json['order'];
-        breakOnError = json['breakOnError'];
         savedByAuthId = json['savedByAuthId'];
         executionIdentityId = json['executionIdentityId'];
         executionIdentity = JsonConverters.fromJson(json['executionIdentity'],'ExecutionIdentitySummaryDto',context!);
@@ -17452,8 +17483,6 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         'description': description,
         'isEnabled': isEnabled,
         'activationCode': activationCode,
-        'order': order,
-        'breakOnError': breakOnError,
         'savedByAuthId': savedByAuthId,
         'executionIdentityId': executionIdentityId,
         'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!)
@@ -17805,6 +17834,38 @@ class MembershipDto implements IConvertible
 }
 
 // @DataContract
+class LogSettingsDto implements IConvertible
+{
+    // @DataMember
+    bool? skipCloudDashboardLogs;
+
+    // @DataMember
+    bool? skipHttpBodyMeta;
+
+    // @DataMember
+    bool? aiChatLoggingEnabled;
+
+    LogSettingsDto({this.skipCloudDashboardLogs,this.skipHttpBodyMeta,this.aiChatLoggingEnabled});
+    LogSettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        skipCloudDashboardLogs = json['skipCloudDashboardLogs'];
+        skipHttpBodyMeta = json['skipHttpBodyMeta'];
+        aiChatLoggingEnabled = json['aiChatLoggingEnabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'skipCloudDashboardLogs': skipCloudDashboardLogs,
+        'skipHttpBodyMeta': skipHttpBodyMeta,
+        'aiChatLoggingEnabled': aiChatLoggingEnabled
+    };
+
+    getTypeName() => "LogSettingsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class LoggingDto implements IConvertible
 {
     // @DataMember
@@ -17813,18 +17874,23 @@ class LoggingDto implements IConvertible
     // @DataMember
     bool? isEstablished;
 
-    LoggingDto({this.isEnabled,this.isEstablished});
+    // @DataMember
+    LogSettingsDto? settings;
+
+    LoggingDto({this.isEnabled,this.isEstablished,this.settings});
     LoggingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         isEnabled = json['isEnabled'];
         isEstablished = json['isEstablished'];
+        settings = JsonConverters.fromJson(json['settings'],'LogSettingsDto',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'isEnabled': isEnabled,
-        'isEstablished': isEstablished
+        'isEstablished': isEstablished,
+        'settings': JsonConverters.toJson(settings,'LogSettingsDto',context!)
     };
 
     getTypeName() => "LoggingDto";
@@ -18460,6 +18526,223 @@ class ProjectListItemDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+enum ProjectHealthSeverity
+{
+    Warning,
+    Error,
+}
+
+// @flags()
+class ApplicationModule
+{
+    static const ApplicationModule Account = const ApplicationModule._(0);
+    static const ApplicationModule Membership = const ApplicationModule._(1);
+    static const ApplicationModule Database = const ApplicationModule._(2);
+    static const ApplicationModule Files = const ApplicationModule._(4);
+    static const ApplicationModule Code = const ApplicationModule._(8);
+    static const ApplicationModule Email = const ApplicationModule._(16);
+    static const ApplicationModule Push = const ApplicationModule._(32);
+    static const ApplicationModule Payment = const ApplicationModule._(64);
+    static const ApplicationModule Scheduler = const ApplicationModule._(128);
+    static const ApplicationModule Logging = const ApplicationModule._(256);
+    static const ApplicationModule ServerEvents = const ApplicationModule._(512);
+    static const ApplicationModule Ai = const ApplicationModule._(1024);
+    static const ApplicationModule Sms = const ApplicationModule._(2048);
+    static const ApplicationModule Project = const ApplicationModule._(4096);
+    static const ApplicationModule Compliance = const ApplicationModule._(8192);
+    static const ApplicationModule Contacts = const ApplicationModule._(16384);
+    static const ApplicationModule Marketplace = const ApplicationModule._(32768);
+    static const ApplicationModule Diagnostics = const ApplicationModule._(65536);
+
+    final int _value;
+    const ApplicationModule._(this._value);
+    int get value => _value;
+    static List<ApplicationModule> get values => const [Account,Membership,Database,Files,Code,Email,Push,Payment,Scheduler,Logging,ServerEvents,Ai,Sms,Project,Compliance,Contacts,Marketplace,Diagnostics];
+}
+
+// @DataContract
+class ProjectHealthWarningDto implements IConvertible
+{
+    // @DataMember
+    String code = "";
+
+    // @DataMember
+    ProjectHealthSeverity? severity;
+
+    // @DataMember
+    ApplicationModule? module;
+
+    // @DataMember
+    String title = "";
+
+    // @DataMember
+    String detail = "";
+
+    // @DataMember
+    String fixPath = "";
+
+    // @DataMember
+    String? itemId;
+
+    ProjectHealthWarningDto({this.code="",this.severity,this.module,this.title="",this.detail="",this.fixPath="",this.itemId});
+    ProjectHealthWarningDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        code = json['code'] ?? "";
+        severity = JsonConverters.fromJson(json['severity'],'ProjectHealthSeverity',context!);
+        module = JsonConverters.fromJson(json['module'],'ApplicationModule',context!);
+        title = json['title'] ?? "";
+        detail = json['detail'] ?? "";
+        fixPath = json['fixPath'] ?? "";
+        itemId = json['itemId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'code': code,
+        'severity': JsonConverters.toJson(severity,'ProjectHealthSeverity',context!),
+        'module': JsonConverters.toJson(module,'ApplicationModule',context!),
+        'title': title,
+        'detail': detail,
+        'fixPath': fixPath,
+        'itemId': itemId
+    };
+
+    getTypeName() => "ProjectHealthWarningDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ProjectHealthStatsDto implements IConvertible
+{
+    // @DataMember
+    int? usersTotal;
+
+    // @DataMember
+    int? usersNew30d;
+
+    // @DataMember
+    int? usersNewPrev30d;
+
+    // @DataMember
+    int? emailsSent30d;
+
+    // @DataMember
+    int? emailsSentPrev30d;
+
+    // @DataMember
+    int? emailsFailed30d;
+
+    // @DataMember
+    int? emailsFailedPrev30d;
+
+    // @DataMember
+    int? apiCallsThisMonth;
+
+    // @DataMember
+    int? apiCallsPrevMonth;
+
+    ProjectHealthStatsDto({this.usersTotal,this.usersNew30d,this.usersNewPrev30d,this.emailsSent30d,this.emailsSentPrev30d,this.emailsFailed30d,this.emailsFailedPrev30d,this.apiCallsThisMonth,this.apiCallsPrevMonth});
+    ProjectHealthStatsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        usersTotal = json['usersTotal'];
+        usersNew30d = json['usersNew30d'];
+        usersNewPrev30d = json['usersNewPrev30d'];
+        emailsSent30d = json['emailsSent30d'];
+        emailsSentPrev30d = json['emailsSentPrev30d'];
+        emailsFailed30d = json['emailsFailed30d'];
+        emailsFailedPrev30d = json['emailsFailedPrev30d'];
+        apiCallsThisMonth = json['apiCallsThisMonth'];
+        apiCallsPrevMonth = json['apiCallsPrevMonth'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'usersTotal': usersTotal,
+        'usersNew30d': usersNew30d,
+        'usersNewPrev30d': usersNewPrev30d,
+        'emailsSent30d': emailsSent30d,
+        'emailsSentPrev30d': emailsSentPrev30d,
+        'emailsFailed30d': emailsFailed30d,
+        'emailsFailedPrev30d': emailsFailedPrev30d,
+        'apiCallsThisMonth': apiCallsThisMonth,
+        'apiCallsPrevMonth': apiCallsPrevMonth
+    };
+
+    getTypeName() => "ProjectHealthStatsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ProjectHealthSkippedCheckDto implements IConvertible
+{
+    // @DataMember
+    String check = "";
+
+    // @DataMember
+    String reason = "";
+
+    ProjectHealthSkippedCheckDto({this.check="",this.reason=""});
+    ProjectHealthSkippedCheckDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        check = json['check'] ?? "";
+        reason = json['reason'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'check': check,
+        'reason': reason
+    };
+
+    getTypeName() => "ProjectHealthSkippedCheckDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ProjectHealthDto implements IConvertible
+{
+    // @DataMember
+    DateTime? checkedAtUtc;
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    List<ProjectHealthWarningDto> warnings = [];
+
+    // @DataMember
+    ProjectHealthStatsDto? stats;
+
+    // @DataMember
+    List<ProjectHealthSkippedCheckDto> skippedChecks = [];
+
+    ProjectHealthDto({this.checkedAtUtc,this.env="",this.warnings=const [],this.stats,this.skippedChecks=const []});
+    ProjectHealthDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        checkedAtUtc = JsonConverters.fromJson(json['checkedAtUtc'],'DateTime',context!) ?? DateTime(0);
+        env = json['env'] ?? "";
+        warnings = JsonConverters.fromJson(json['warnings'],'List<ProjectHealthWarningDto>',context!) ?? [];
+        stats = JsonConverters.fromJson(json['stats'],'ProjectHealthStatsDto',context!);
+        skippedChecks = JsonConverters.fromJson(json['skippedChecks'],'List<ProjectHealthSkippedCheckDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'checkedAtUtc': JsonConverters.toJson(checkedAtUtc,'DateTime',context!),
+        'env': env,
+        'warnings': JsonConverters.toJson(warnings,'List<ProjectHealthWarningDto>',context!),
+        'stats': JsonConverters.toJson(stats,'ProjectHealthStatsDto',context!),
+        'skippedChecks': JsonConverters.toJson(skippedChecks,'List<ProjectHealthSkippedCheckDto>',context!)
+    };
+
+    getTypeName() => "ProjectHealthDto";
+    TypeContext? context = _ctx;
+}
+
 // @DataContract
 class AiCreditPackCheckoutDto implements IConvertible
 {
@@ -18801,34 +19084,6 @@ class ProjectAiUsageDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-// @flags()
-class ApplicationModule
-{
-    static const ApplicationModule Account = const ApplicationModule._(0);
-    static const ApplicationModule Membership = const ApplicationModule._(1);
-    static const ApplicationModule Database = const ApplicationModule._(2);
-    static const ApplicationModule Files = const ApplicationModule._(4);
-    static const ApplicationModule Code = const ApplicationModule._(8);
-    static const ApplicationModule Email = const ApplicationModule._(16);
-    static const ApplicationModule Push = const ApplicationModule._(32);
-    static const ApplicationModule Payment = const ApplicationModule._(64);
-    static const ApplicationModule Scheduler = const ApplicationModule._(128);
-    static const ApplicationModule Logging = const ApplicationModule._(256);
-    static const ApplicationModule ServerEvents = const ApplicationModule._(512);
-    static const ApplicationModule Ai = const ApplicationModule._(1024);
-    static const ApplicationModule Sms = const ApplicationModule._(2048);
-    static const ApplicationModule Project = const ApplicationModule._(4096);
-    static const ApplicationModule Compliance = const ApplicationModule._(8192);
-    static const ApplicationModule Contacts = const ApplicationModule._(16384);
-    static const ApplicationModule Marketplace = const ApplicationModule._(32768);
-    static const ApplicationModule Diagnostics = const ApplicationModule._(65536);
-
-    final int _value;
-    const ApplicationModule._(this._value);
-    int get value => _value;
-    static List<ApplicationModule> get values => const [Account,Membership,Database,Files,Code,Email,Push,Payment,Scheduler,Logging,ServerEvents,Ai,Sms,Project,Compliance,Contacts,Marketplace,Diagnostics];
-}
-
 enum LanguageGapKind
 {
     Template,
@@ -19115,16 +19370,18 @@ class TeamInvitationDto implements IConvertible
     String id = "";
     String email = "";
     List<String> roles = [];
+    Map<String,List<String>?> roleProjects = {};
     DateTime? sentOn;
     DateTime? expiresOn;
 
-    TeamInvitationDto({this.id="",this.email="",this.roles=const [],this.sentOn,this.expiresOn});
+    TeamInvitationDto({this.id="",this.email="",this.roles=const [],this.roleProjects=const {},this.sentOn,this.expiresOn});
     TeamInvitationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         id = json['id'] ?? "";
         email = json['email'] ?? "";
         roles = JsonConverters.fromJson(json['roles'],'List<String>',context!) ?? [];
+        roleProjects = JsonConverters.fromJson(json['roleProjects'],'Map<String,List<String>?>',context!) ?? {};
         sentOn = JsonConverters.fromJson(json['sentOn'],'DateTime',context!) ?? DateTime(0);
         expiresOn = JsonConverters.fromJson(json['expiresOn'],'DateTime',context!) ?? DateTime(0);
         return this;
@@ -19134,6 +19391,7 @@ class TeamInvitationDto implements IConvertible
         'id': id,
         'email': email,
         'roles': JsonConverters.toJson(roles,'List<String>',context!),
+        'roleProjects': JsonConverters.toJson(roleProjects,'Map<String,List<String>?>',context!),
         'sentOn': JsonConverters.toJson(sentOn,'DateTime',context!),
         'expiresOn': JsonConverters.toJson(expiresOn,'DateTime',context!)
     };
@@ -20045,15 +20303,9 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
     bool? isEnabled;
 
     // @DataMember
-    int? order;
-
-    // @DataMember
-    bool? breakOnError;
-
-    // @DataMember
     String? executionIdentityId;
 
-    TriggerProjectionList({this.viewId="",this.name="",this.actionType,this.hasPreExecuteCode,this.isEnabled,this.order,this.breakOnError,this.executionIdentityId});
+    TriggerProjectionList({this.viewId="",this.name="",this.actionType,this.hasPreExecuteCode,this.isEnabled,this.executionIdentityId});
     TriggerProjectionList.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20062,8 +20314,6 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
         actionType = JsonConverters.fromJson(json['actionType'],'TriggerActionType',context!);
         hasPreExecuteCode = json['hasPreExecuteCode'];
         isEnabled = json['isEnabled'];
-        order = json['order'];
-        breakOnError = json['breakOnError'];
         executionIdentityId = json['executionIdentityId'];
         return this;
     }
@@ -20074,8 +20324,6 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
         'actionType': JsonConverters.toJson(actionType,'TriggerActionType',context!),
         'hasPreExecuteCode': hasPreExecuteCode,
         'isEnabled': isEnabled,
-        'order': order,
-        'breakOnError': breakOnError,
         'executionIdentityId': executionIdentityId
     };
 
@@ -24459,6 +24707,12 @@ class PushDeviceListProjection implements IConvertible
     String userId = "";
 
     // @DataMember
+    String? userDisplayName;
+
+    // @DataMember
+    String? userEmail;
+
+    // @DataMember
     String deviceOs = "";
 
     // @DataMember
@@ -24506,12 +24760,14 @@ class PushDeviceListProjection implements IConvertible
     // @DataMember
     DateTime? updatedAtUtc;
 
-    PushDeviceListProjection({this.id="",this.userId="",this.deviceOs="",this.token="",this.brand,this.manufacturer,this.modelName,this.deviceName,this.deviceType,this.osName,this.osVersion,this.platformApiLevel,this.platform,this.appVersion,this.installationId,this.locale,this.timeZone,this.updatedAtUtc});
+    PushDeviceListProjection({this.id="",this.userId="",this.userDisplayName,this.userEmail,this.deviceOs="",this.token="",this.brand,this.manufacturer,this.modelName,this.deviceName,this.deviceType,this.osName,this.osVersion,this.platformApiLevel,this.platform,this.appVersion,this.installationId,this.locale,this.timeZone,this.updatedAtUtc});
     PushDeviceListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         id = json['id'] ?? "";
         userId = json['userId'] ?? "";
+        userDisplayName = json['userDisplayName'];
+        userEmail = json['userEmail'];
         deviceOs = json['deviceOs'] ?? "";
         token = json['token'] ?? "";
         brand = json['brand'];
@@ -24534,6 +24790,8 @@ class PushDeviceListProjection implements IConvertible
     Map<String, dynamic> toJson() => {
         'id': id,
         'userId': userId,
+        'userDisplayName': userDisplayName,
+        'userEmail': userEmail,
         'deviceOs': deviceOs,
         'token': token,
         'brand': brand,
@@ -24960,17 +25218,22 @@ class LoggingIntegrationListProjection extends IntegrationListProjection impleme
     // @DataMember
     LoggingProvider? provider;
 
-    LoggingIntegrationListProjection({this.provider});
+    // @DataMember
+    String? env;
+
+    LoggingIntegrationListProjection({this.provider,this.env});
     LoggingIntegrationListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'LoggingProvider',context!);
+        env = json['env'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'provider': JsonConverters.toJson(provider,'LoggingProvider',context!)
+        'provider': JsonConverters.toJson(provider,'LoggingProvider',context!),
+        'env': env
     });
 
     getTypeName() => "LoggingIntegrationListProjection";
@@ -27934,6 +28197,7 @@ class CampaignBatchNotificationDto implements IHasDatabaseId, IConvertible
 
 enum EmailRecipientField
 {
+    NotSet,
     To,
     Cc,
     Bcc,
@@ -27941,6 +28205,7 @@ enum EmailRecipientField
 
 enum RecipientRemovalReason
 {
+    NotSet,
     OptedOut,
     Compliance,
     Undeliverable,
@@ -28054,9 +28319,21 @@ class CampaignStatsDto implements IConvertible
     int removedRecipients = 0;
 
     // @DataMember
+    int delivered = 0;
+
+    // @DataMember
+    int bounced = 0;
+
+    // @DataMember
+    int complained = 0;
+
+    // @DataMember
+    int rejected = 0;
+
+    // @DataMember
     double successRate = 0;
 
-    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.failedRetryable=0,this.cancelled=0,this.blocked=0,this.inProgress=0,this.removedRecipients=0,this.successRate=0});
+    CampaignStatsDto({this.batches=0,this.sent=0,this.failed=0,this.failedRetryable=0,this.cancelled=0,this.blocked=0,this.inProgress=0,this.removedRecipients=0,this.delivered=0,this.bounced=0,this.complained=0,this.rejected=0,this.successRate=0});
     CampaignStatsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -28068,6 +28345,10 @@ class CampaignStatsDto implements IConvertible
         blocked = json['blocked'] ?? 0;
         inProgress = json['inProgress'] ?? 0;
         removedRecipients = json['removedRecipients'] ?? 0;
+        delivered = json['delivered'] ?? 0;
+        bounced = json['bounced'] ?? 0;
+        complained = json['complained'] ?? 0;
+        rejected = json['rejected'] ?? 0;
         successRate = JsonConverters.toDouble(json['successRate']) ?? 0;
         return this;
     }
@@ -28081,6 +28362,10 @@ class CampaignStatsDto implements IConvertible
         'blocked': blocked,
         'inProgress': inProgress,
         'removedRecipients': removedRecipients,
+        'delivered': delivered,
+        'bounced': bounced,
+        'complained': complained,
+        'rejected': rejected,
         'successRate': successRate
     };
 
@@ -29525,8 +29810,6 @@ abstract class IQueuedTrigger
 {
     String viewId = "";
     String name = "";
-    int? order;
-    bool? breakOnError;
 }
 
 abstract class IHasResponsibleUserId
@@ -30108,6 +30391,29 @@ class GetAccountRegionsResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetAccountRegionsResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class GetProjectHealthResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    ProjectHealthDto? item;
+
+    GetProjectHealthResponse({this.item});
+    GetProjectHealthResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'ProjectHealthDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'ProjectHealthDto',context!)
+    });
+
+    getTypeName() => "GetProjectHealthResponse";
     TypeContext? context = _ctx;
 }
 
@@ -31835,27 +32141,6 @@ class GetAllowedFlexTiersResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetAllowedFlexTiersResponse";
-    TypeContext? context = _ctx;
-}
-
-class RevealManagedFlexConnectionStringResponse extends ResponseBase implements IConvertible
-{
-    String? connectionString;
-
-    RevealManagedFlexConnectionStringResponse({this.connectionString});
-    RevealManagedFlexConnectionStringResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        connectionString = json['connectionString'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'connectionString': connectionString
-    });
-
-    getTypeName() => "RevealManagedFlexConnectionStringResponse";
     TypeContext? context = _ctx;
 }
 
@@ -40131,6 +40416,40 @@ class GetAccountRegions extends RequestBase implements IReturn<GetAccountRegions
 }
 
 /**
+* Gets the project health: problems with fix links, and home screen stats.
+*/
+// @Route("/{version}/account/projects/{projectId}/health", "GET")
+// @Api(Description="Gets the project health: problems with fix links, and home screen stats.")
+// @DataContract
+class GetProjectHealth extends CodeMashRequestBase implements IReturn<GetProjectHealthResponse>, IConvertible, IGet
+{
+    /**
+    * Compute the health now instead of reading the last result (at most every 6 hours old).
+    */
+    // @DataMember
+    // @ApiMember(Description="Compute the health now instead of reading the last result (at most every 6 hours old).")
+    bool? refresh;
+
+    GetProjectHealth({this.refresh});
+    GetProjectHealth.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        refresh = json['refresh'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'refresh': refresh
+    });
+
+    createResponse() => GetProjectHealthResponse();
+    getResponseTypeName() => "GetProjectHealthResponse";
+    getTypeName() => "GetProjectHealth";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Waits (bounded, server-side) for a project to finish provisioning and become active.
 */
 // @Route("/{version}/account/projects/{projectId}/wait-active", "GET")
@@ -41357,9 +41676,10 @@ class CreateTeamMember extends RequestBase implements IReturn<IdResponse>, IConv
     String? displayName;
     String? password;
     List<String>? roles;
+    Map<String,List<String>?>? roleProjects;
     bool? sendInvitation;
 
-    CreateTeamMember({this.email="",this.displayName,this.password,this.roles,this.sendInvitation});
+    CreateTeamMember({this.email="",this.displayName,this.password,this.roles,this.roleProjects,this.sendInvitation});
     CreateTeamMember.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -41368,6 +41688,7 @@ class CreateTeamMember extends RequestBase implements IReturn<IdResponse>, IConv
         displayName = json['displayName'];
         password = json['password'];
         roles = JsonConverters.fromJson(json['roles'],'List<String>',context!);
+        roleProjects = JsonConverters.fromJson(json['roleProjects'],'Map<String,List<String>?>',context!);
         sendInvitation = json['sendInvitation'];
         return this;
     }
@@ -41377,6 +41698,7 @@ class CreateTeamMember extends RequestBase implements IReturn<IdResponse>, IConv
         'displayName': displayName,
         'password': password,
         'roles': JsonConverters.toJson(roles,'List<String>',context!),
+        'roleProjects': JsonConverters.toJson(roleProjects,'Map<String,List<String>?>',context!),
         'sendInvitation': sendInvitation
     });
 
@@ -41728,6 +42050,50 @@ class SetTeamMemberRoleEnvironmentsRequest extends RequestBase implements IRetur
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/account/team/member/role-projects", "PUT")
+class SetTeamMemberRoleProjectsRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPut
+{
+    /**
+    * The team member's id (usr_…), as GET /account/collaborators lists it.
+    */
+    // @ApiMember(Description="The team member's id (usr_…), as GET /account/collaborators lists it.", IsRequired=true)
+    String memberId = "";
+
+    /**
+    * The account role the member holds: its id (acc_…_nr_…) or its template id (GUID, as GetAccountTeamRoles lists it).
+    */
+    // @ApiMember(Description="The account role the member holds: its id (acc_…_nr_…) or its template id (GUID, as GetAccountTeamRoles lists it).", IsRequired=true)
+    String roleId = "";
+
+    /**
+    * Project ids (pr_…) of this account. Empty = every project.
+    */
+    // @ApiMember(Description="Project ids (pr_…) of this account. Empty = every project.")
+    List<String>? projects;
+
+    SetTeamMemberRoleProjectsRequest({this.memberId="",this.roleId="",this.projects});
+    SetTeamMemberRoleProjectsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        memberId = json['memberId'] ?? "";
+        roleId = json['roleId'] ?? "";
+        projects = JsonConverters.fromJson(json['projects'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'memberId': memberId,
+        'roleId': roleId,
+        'projects': JsonConverters.toJson(projects,'List<String>',context!)
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "SetTeamMemberRoleProjectsRequest";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/account/team/roles", "GET")
 class GetAccountTeamRoles extends RequestBase implements IReturn<GetAccountTeamRolesResponse>, IConvertible, IGet
 {
@@ -41764,19 +42130,27 @@ class SendInviteToTeamMember extends RequestBase implements IReturn<EmptyRespons
     // @ApiMember(Description="Account role ids (GUIDs from get_account_team_roles) the member gets on accepting. Omit for the default member role.")
     List<String>? roles;
 
-    SendInviteToTeamMember({this.email="",this.roles});
+    /**
+    * Optional, per role: the projects (pr_… ids) the role applies to, keyed by the role id (GUID from get_account_team_roles, or acc_…_nr_…). Each key must also be in `roles`. A role with no entry (or an empty list) applies to every project. The Account Administrator role can not be limited.
+    */
+    // @ApiMember(Description="Optional, per role: the projects (pr_… ids) the role applies to, keyed by the role id (GUID from get_account_team_roles, or acc_…_nr_…). Each key must also be in `roles`. A role with no entry (or an empty list) applies to every project. The Account Administrator role can not be limited.")
+    Map<String,List<String>?>? roleProjects;
+
+    SendInviteToTeamMember({this.email="",this.roles,this.roleProjects});
     SendInviteToTeamMember.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         email = json['email'] ?? "";
         roles = JsonConverters.fromJson(json['roles'],'List<String>',context!);
+        roleProjects = JsonConverters.fromJson(json['roleProjects'],'Map<String,List<String>?>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'email': email,
-        'roles': JsonConverters.toJson(roles,'List<String>',context!)
+        'roles': JsonConverters.toJson(roles,'List<String>',context!),
+        'roleProjects': JsonConverters.toJson(roleProjects,'Map<String,List<String>?>',context!)
     });
 
     createResponse() => EmptyResponse();
@@ -46748,30 +47122,6 @@ class GetAllowedFlexTiers extends CodeMashRequestBase implements IReturn<GetAllo
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/database/integrations/{Id}/connection-string", "GET")
-class RevealManagedFlexConnectionString extends CodeMashRequestBase implements IReturn<RevealManagedFlexConnectionStringResponse>, IConvertible, IGet
-{
-    String id = "";
-
-    RevealManagedFlexConnectionString({this.id=""});
-    RevealManagedFlexConnectionString.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id
-    });
-
-    createResponse() => RevealManagedFlexConnectionStringResponse();
-    getResponseTypeName() => "RevealManagedFlexConnectionStringResponse";
-    getTypeName() => "RevealManagedFlexConnectionString";
-    TypeContext? context = _ctx;
-}
-
 /**
 * Saves database integration
 */
@@ -47405,15 +47755,15 @@ class GetFilesIntegrations extends CodeMashListPaginationRequestBase implements 
 class GetKeylessIntegrationSetup extends CodeMashRequestBase implements IReturn<GetKeylessIntegrationSetupResponse>, IConvertible, IGet
 {
     /**
-    * files, email, code, logs, push or payments (logs: aws or azure; push and payments: google).
+    * files, email, code, logs, push, payments or database (logs: aws or azure; push and payments: google; database: atlas).
     */
-    // @ApiMember(Description="files, email, code, logs, push or payments (logs: aws or azure; push and payments: google).", IsRequired=true)
+    // @ApiMember(Description="files, email, code, logs, push, payments or database (logs: aws or azure; push and payments: google; database: atlas).", IsRequired=true)
     String module = "";
 
     /**
-    * azure, aws or google.
+    * azure, aws, google or atlas (MongoDB Atlas M10+, module database).
     */
-    // @ApiMember(Description="azure, aws or google.", IsRequired=true)
+    // @ApiMember(Description="azure, aws, google or atlas (MongoDB Atlas M10+, module database).", IsRequired=true)
     String cloud = "";
 
     /**
@@ -53329,14 +53679,21 @@ class SaveLogSettings extends CodeMashRequestBase implements IReturn<SaveLogSett
 // @Api(Description="Paste-ready prompt and client snippets to connect an AI tool to this installation.")
 class GetAgentOnboardingRequest extends RequestBase implements IReturn<GetAgentOnboardingResponse>, IConvertible, IGet
 {
-    GetAgentOnboardingRequest();
-    GetAgentOnboardingRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    String? projectId;
+
+    GetAgentOnboardingRequest({this.projectId});
+    GetAgentOnboardingRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
+        projectId = json['projectId'];
         return this;
     }
 
-    Map<String, dynamic> toJson() => super.toJson();
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'projectId': projectId
+    });
+
     createResponse() => GetAgentOnboardingResponse();
     getResponseTypeName() => "GetAgentOnboardingResponse";
     getTypeName() => "GetAgentOnboardingRequest";
@@ -56299,9 +56656,9 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
     int? pageSize;
 
     /**
-    * Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email.
+    * Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email; an exact contact id (ct_…) or login id (usr_…) finds that contact.
     */
-    // @ApiMember(Description="Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email.")
+    // @ApiMember(Description="Free text, case-insensitive: matches the email, phone, display / first / last / full name, or any login's user name or email; an exact contact id (ct_…) or login id (usr_…) finds that contact.")
     String? search;
 
     /**
@@ -56334,7 +56691,13 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
     // @ApiMember(Description="Composite project-role ids (pr_{project}_nr_{role}); the contact holds any of them.")
     List<String>? roleNames;
 
-    GetAllContacts({this.startingAfter,this.pageSize,this.search,this.email,this.userName,this.statuses,this.types,this.roleNames});
+    /**
+    * Contact tags; the contact carries any of them.
+    */
+    // @ApiMember(Description="Contact tags; the contact carries any of them.")
+    List<String>? tags;
+
+    GetAllContacts({this.startingAfter,this.pageSize,this.search,this.email,this.userName,this.statuses,this.types,this.roleNames,this.tags});
     GetAllContacts.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -56347,6 +56710,7 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
         statuses = JsonConverters.fromJson(json['statuses'],'List<String>',context!);
         types = JsonConverters.fromJson(json['types'],'List<String>',context!);
         roleNames = JsonConverters.fromJson(json['roleNames'],'List<String>',context!);
+        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
         return this;
     }
 
@@ -56358,7 +56722,8 @@ class GetAllContacts extends CodeMashRequestBase implements IReturn<GetAllContac
         'userName': userName,
         'statuses': JsonConverters.toJson(statuses,'List<String>',context!),
         'types': JsonConverters.toJson(types,'List<String>',context!),
-        'roleNames': JsonConverters.toJson(roleNames,'List<String>',context!)
+        'roleNames': JsonConverters.toJson(roleNames,'List<String>',context!),
+        'tags': JsonConverters.toJson(tags,'List<String>',context!)
     });
 
     createResponse() => GetAllContactsResponse();
@@ -60414,6 +60779,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<MembershipTriggerDto>': TypeInfo(TypeOf.Class, create:() => <MembershipTriggerDto>[]),
     'List<RoleItemDto>': TypeInfo(TypeOf.Class, create:() => <RoleItemDto>[]),
     'List<PolicyItemDto>': TypeInfo(TypeOf.Class, create:() => <PolicyItemDto>[]),
+    'LogSettingsDto': TypeInfo(TypeOf.Class, create:() => LogSettingsDto()),
     'LoggingDto': TypeInfo(TypeOf.Class, create:() => LoggingDto()),
     'ServerEventsDto': TypeInfo(TypeOf.Class, create:() => ServerEventsDto()),
     'PushDto': TypeInfo(TypeOf.Class, create:() => PushDto()),
@@ -60433,6 +60799,14 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AuthenticationFlowSummaryDto>': TypeInfo(TypeOf.Class, create:() => <AuthenticationFlowSummaryDto>[]),
     'Map<String,int?>': TypeInfo(TypeOf.Class, create:() => Map<String,int?>()),
     'ProjectListItemDto': TypeInfo(TypeOf.Class, create:() => ProjectListItemDto()),
+    'ProjectHealthSeverity': TypeInfo(TypeOf.Enum, enumValues:ProjectHealthSeverity.values),
+    'ApplicationModule': TypeInfo(TypeOf.Enum, enumValues:ApplicationModule.values),
+    'ProjectHealthWarningDto': TypeInfo(TypeOf.Class, create:() => ProjectHealthWarningDto()),
+    'ProjectHealthStatsDto': TypeInfo(TypeOf.Class, create:() => ProjectHealthStatsDto()),
+    'ProjectHealthSkippedCheckDto': TypeInfo(TypeOf.Class, create:() => ProjectHealthSkippedCheckDto()),
+    'ProjectHealthDto': TypeInfo(TypeOf.Class, create:() => ProjectHealthDto()),
+    'List<ProjectHealthWarningDto>': TypeInfo(TypeOf.Class, create:() => <ProjectHealthWarningDto>[]),
+    'List<ProjectHealthSkippedCheckDto>': TypeInfo(TypeOf.Class, create:() => <ProjectHealthSkippedCheckDto>[]),
     'AiCreditPackCheckoutDto': TypeInfo(TypeOf.Class, create:() => AiCreditPackCheckoutDto()),
     'ProjectAiPlansDto': TypeInfo(TypeOf.Class, create:() => ProjectAiPlansDto()),
     'AiUserPlanAssignmentDto': TypeInfo(TypeOf.Class, create:() => AiUserPlanAssignmentDto()),
@@ -60444,7 +60818,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AiWalletLineDto>': TypeInfo(TypeOf.Class, create:() => <AiWalletLineDto>[]),
     'ProjectAiUsageDto': TypeInfo(TypeOf.Class, create:() => ProjectAiUsageDto()),
     'List<AiUsageGroupDto>': TypeInfo(TypeOf.Class, create:() => <AiUsageGroupDto>[]),
-    'ApplicationModule': TypeInfo(TypeOf.Enum, enumValues:ApplicationModule.values),
     'LanguageGapKind': TypeInfo(TypeOf.Enum, enumValues:LanguageGapKind.values),
     'TemplateLanguageGapDto': TypeInfo(TypeOf.Class, create:() => TemplateLanguageGapDto()),
     'AuthType': TypeInfo(TypeOf.Enum, enumValues:AuthType.values),
@@ -60456,6 +60829,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AccountPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => AccountPasswordPolicyDto()),
     'AccountTeamRoleDto': TypeInfo(TypeOf.Class, create:() => AccountTeamRoleDto()),
     'TeamInvitationDto': TypeInfo(TypeOf.Class, create:() => TeamInvitationDto()),
+    'Map<String,List<String>?>': TypeInfo(TypeOf.Class, create:() => Map<String,List<String>?>()),
     'AccountPasskeyListItemDto': TypeInfo(TypeOf.Class, create:() => AccountPasskeyListItemDto()),
     'LicenseDomainDnsRecordDto': TypeInfo(TypeOf.Class, create:() => LicenseDomainDnsRecordDto()),
     'LicenseDomainDnsStatusDto': TypeInfo(TypeOf.Class, create:() => LicenseDomainDnsStatusDto()),
@@ -60696,7 +61070,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ResolvedRefStatus': TypeInfo(TypeOf.Enum, enumValues:ResolvedRefStatus.values),
     'ResolvedResourceEntry': TypeInfo(TypeOf.Class, create:() => ResolvedResourceEntry()),
     'ChannelSubscriptionStateDto': TypeInfo(TypeOf.Class, create:() => ChannelSubscriptionStateDto()),
-    'Map<String,List<String>?>': TypeInfo(TypeOf.Class, create:() => Map<String,List<String>?>()),
     'UserDto': TypeInfo(TypeOf.Class, create:() => UserDto()),
     'List<AuthDto>': TypeInfo(TypeOf.Class, create:() => <AuthDto>[]),
     'Map<String,ChannelSubscriptionStateDto?>': TypeInfo(TypeOf.Class, create:() => Map<String,ChannelSubscriptionStateDto?>()),
@@ -60833,6 +61206,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetProjectsResponse': TypeInfo(TypeOf.Class, create:() => GetProjectsResponse()),
     'List<ProjectListItemDto>': TypeInfo(TypeOf.Class, create:() => <ProjectListItemDto>[]),
     'GetAccountRegionsResponse': TypeInfo(TypeOf.Class, create:() => GetAccountRegionsResponse()),
+    'GetProjectHealthResponse': TypeInfo(TypeOf.Class, create:() => GetProjectHealthResponse()),
     'WaitForProjectActiveResponse': TypeInfo(TypeOf.Class, create:() => WaitForProjectActiveResponse()),
     'GetProjectTokensResponse': TypeInfo(TypeOf.Class, create:() => GetProjectTokensResponse()),
     'AdminPortalStructureDto': TypeInfo(TypeOf.Class, create:() => AdminPortalStructureDto()),
@@ -60935,7 +61309,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PaginatedResponse<DatabaseIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<DatabaseIntegrationListProjection>()),
     'GetAllowedFlexTiersResponse': TypeInfo(TypeOf.Class, create:() => GetAllowedFlexTiersResponse()),
     'List<FlexTierDto>': TypeInfo(TypeOf.Class, create:() => <FlexTierDto>[]),
-    'RevealManagedFlexConnectionStringResponse': TypeInfo(TypeOf.Class, create:() => RevealManagedFlexConnectionStringResponse()),
     'TestDatabaseIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestDatabaseIntegrationResponse()),
     'IReadOnlyList<IntegrationTestResultItemDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<IntegrationTestResultItemDto>()),
     'GetDatabaseAggregateResponse': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregateResponse()),
@@ -61298,6 +61671,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetProject': TypeInfo(TypeOf.Class, create:() => GetProject()),
     'GetProjects': TypeInfo(TypeOf.Class, create:() => GetProjects()),
     'GetAccountRegions': TypeInfo(TypeOf.Class, create:() => GetAccountRegions()),
+    'GetProjectHealth': TypeInfo(TypeOf.Class, create:() => GetProjectHealth()),
     'WaitForProjectActiveRequest': TypeInfo(TypeOf.Class, create:() => WaitForProjectActiveRequest()),
     'GetProjectTokens': TypeInfo(TypeOf.Class, create:() => GetProjectTokens()),
     'SetAdminPortalEnabledRequest': TypeInfo(TypeOf.Class, create:() => SetAdminPortalEnabledRequest()),
@@ -61346,6 +61720,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetAccountTeamPolicies': TypeInfo(TypeOf.Class, create:() => GetAccountTeamPolicies()),
     'RemoveTeamMember': TypeInfo(TypeOf.Class, create:() => RemoveTeamMember()),
     'SetTeamMemberRoleEnvironmentsRequest': TypeInfo(TypeOf.Class, create:() => SetTeamMemberRoleEnvironmentsRequest()),
+    'SetTeamMemberRoleProjectsRequest': TypeInfo(TypeOf.Class, create:() => SetTeamMemberRoleProjectsRequest()),
     'GetAccountTeamRoles': TypeInfo(TypeOf.Class, create:() => GetAccountTeamRoles()),
     'SendInviteToTeamMember': TypeInfo(TypeOf.Class, create:() => SendInviteToTeamMember()),
     'GetAccountTeamInvitations': TypeInfo(TypeOf.Class, create:() => GetAccountTeamInvitations()),
@@ -61484,7 +61859,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => GetDatabaseIntegration()),
     'GetDatabaseIntegrations': TypeInfo(TypeOf.Class, create:() => GetDatabaseIntegrations()),
     'GetAllowedFlexTiers': TypeInfo(TypeOf.Class, create:() => GetAllowedFlexTiers()),
-    'RevealManagedFlexConnectionString': TypeInfo(TypeOf.Class, create:() => RevealManagedFlexConnectionString()),
     'SaveDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => SaveDatabaseIntegration()),
     'SetDatabaseIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetDatabaseIntegrationAsDefaultRequest()),
     'TestDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => TestDatabaseIntegration()),
