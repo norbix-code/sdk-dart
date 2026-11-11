@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-11 14:09:43
+Date: 2026-11-11 14:52:37
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -14585,6 +14585,59 @@ class TranslationDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class EmailClickDto implements IConvertible
+{
+    /**
+    * The nblid value from the clicked link's query string.
+    */
+    // @DataMember
+    // @ApiMember(Description="The nblid value from the clicked link's query string.", IsRequired=true)
+    String nblid = "";
+
+    /**
+    * Optional. The page that was opened (kept on the click, at most 2048 characters).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. The page that was opened (kept on the click, at most 2048 characters).")
+    String? url;
+
+    /**
+    * Optional. When the link was opened (UTC; a time with no zone is taken as UTC). Default: now. The same nblid, url and time sent again is recorded once.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. When the link was opened (UTC; a time with no zone is taken as UTC). Default: now. The same nblid, url and time sent again is recorded once.")
+    DateTime? clickedAt;
+
+    /**
+    * Optional. The browser's user agent. A known mail scanner or bot is flagged suspected-scanner.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. The browser's user agent. A known mail scanner or bot is flagged suspected-scanner.")
+    String? userAgent;
+
+    EmailClickDto({this.nblid="",this.url,this.clickedAt,this.userAgent});
+    EmailClickDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        nblid = json['nblid'] ?? "";
+        url = json['url'];
+        clickedAt = JsonConverters.fromJson(json['clickedAt'],'DateTime',context!);
+        userAgent = json['userAgent'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'nblid': nblid,
+        'url': url,
+        'clickedAt': JsonConverters.toJson(clickedAt,'DateTime',context!),
+        'userAgent': userAgent
+    };
+
+    getTypeName() => "EmailClickDto";
+    TypeContext? context = _ctx;
+}
+
 class SaveSmsTemplate extends CodeMashRequestBase implements IConvertible
 {
     /**
@@ -18491,6 +18544,9 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     List<String>? allowedOrigins;
 
     // @DataMember
+    bool? emailClickTracking;
+
+    // @DataMember
     List<ProjectEnvironmentAdminUrlDto>? environmentAdminUrls;
 
     // @DataMember
@@ -18604,7 +18660,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     // @DataMember
     int connections = 0;
 
-    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.canonicalAdminUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.environmentAdminUrls,this.defaultExecutionIdentities,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalEnabled,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
+    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.canonicalAdminUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.emailClickTracking,this.environmentAdminUrls,this.defaultExecutionIdentities,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalEnabled,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
     ProjectDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -18629,6 +18685,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         brand = JsonConverters.fromJson(json['brand'],'ProjectBrandDto',context!);
         notificationSettings = JsonConverters.fromJson(json['notificationSettings'],'NotificationSettingsDto',context!);
         allowedOrigins = JsonConverters.fromJson(json['allowedOrigins'],'List<String>',context!);
+        emailClickTracking = json['emailClickTracking'];
         environmentAdminUrls = JsonConverters.fromJson(json['environmentAdminUrls'],'List<ProjectEnvironmentAdminUrlDto>',context!);
         defaultExecutionIdentities = JsonConverters.fromJson(json['defaultExecutionIdentities'],'List<ProjectEnvironmentExecutionIdentityDto>',context!);
         exposeBrandToAdminPortal = json['exposeBrandToAdminPortal'];
@@ -18692,6 +18749,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         'brand': JsonConverters.toJson(brand,'ProjectBrandDto',context!),
         'notificationSettings': JsonConverters.toJson(notificationSettings,'NotificationSettingsDto',context!),
         'allowedOrigins': JsonConverters.toJson(allowedOrigins,'List<String>',context!),
+        'emailClickTracking': emailClickTracking,
         'environmentAdminUrls': JsonConverters.toJson(environmentAdminUrls,'List<ProjectEnvironmentAdminUrlDto>',context!),
         'defaultExecutionIdentities': JsonConverters.toJson(defaultExecutionIdentities,'List<ProjectEnvironmentExecutionIdentityDto>',context!),
         'exposeBrandToAdminPortal': exposeBrandToAdminPortal,
@@ -23059,6 +23117,68 @@ class EmailLinkPreferencesDto implements IConvertible
     };
 
     getTypeName() => "EmailLinkPreferencesDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class EmailClickResultDto implements IConvertible
+{
+    // @DataMember
+    int index = 0;
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    String? reason;
+
+    // @DataMember
+    String? flag;
+
+    // @DataMember
+    String? flagReason;
+
+    // @DataMember
+    String? campaignId;
+
+    // @DataMember
+    String? notificationId;
+
+    // @DataMember
+    int? linkIndex;
+
+    // @DataMember
+    List<String>? to;
+
+    EmailClickResultDto({this.index=0,this.status="",this.reason,this.flag,this.flagReason,this.campaignId,this.notificationId,this.linkIndex,this.to});
+    EmailClickResultDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        index = json['index'] ?? 0;
+        status = json['status'] ?? "";
+        reason = json['reason'];
+        flag = json['flag'];
+        flagReason = json['flagReason'];
+        campaignId = json['campaignId'];
+        notificationId = json['notificationId'];
+        linkIndex = json['linkIndex'];
+        to = JsonConverters.fromJson(json['to'],'List<String>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'index': index,
+        'status': status,
+        'reason': reason,
+        'flag': flag,
+        'flagReason': flagReason,
+        'campaignId': campaignId,
+        'notificationId': notificationId,
+        'linkIndex': linkIndex,
+        'to': JsonConverters.toJson(to,'List<String>',context!)
+    };
+
+    getTypeName() => "EmailClickResultDto";
     TypeContext? context = _ctx;
 }
 
@@ -28169,8 +28289,10 @@ class NotificationStatusChangeEntryDto implements IConvertible
     String? sourceId;
     List<ErrorDto>? errors;
     List<String>? tags;
+    String? flag;
+    String? flagReason;
 
-    NotificationStatusChangeEntryDto({this.time,this.status,this.sourceId,this.errors,this.tags});
+    NotificationStatusChangeEntryDto({this.time,this.status,this.sourceId,this.errors,this.tags,this.flag,this.flagReason});
     NotificationStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -28179,6 +28301,8 @@ class NotificationStatusChangeEntryDto implements IConvertible
         sourceId = json['sourceId'];
         errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
         tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
+        flag = json['flag'];
+        flagReason = json['flagReason'];
         return this;
     }
 
@@ -28187,7 +28311,9 @@ class NotificationStatusChangeEntryDto implements IConvertible
         'status': JsonConverters.toJson(status,'CampaignNotificationStatus',context!),
         'sourceId': sourceId,
         'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!),
-        'tags': JsonConverters.toJson(tags,'List<String>',context!)
+        'tags': JsonConverters.toJson(tags,'List<String>',context!),
+        'flag': flag,
+        'flagReason': flagReason
     };
 
     getTypeName() => "NotificationStatusChangeEntryDto";
@@ -33144,6 +33270,49 @@ class GetEmailPreferencesByLinkResponse extends ResponseBase implements IConvert
     });
 
     getTypeName() => "GetEmailPreferencesByLinkResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class RecordEmailClicksResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    int recorded = 0;
+
+    // @DataMember
+    int duplicates = 0;
+
+    // @DataMember
+    int flagged = 0;
+
+    // @DataMember
+    int rejected = 0;
+
+    // @DataMember
+    List<EmailClickResultDto>? clicks;
+
+    RecordEmailClicksResponse({this.recorded=0,this.duplicates=0,this.flagged=0,this.rejected=0,this.clicks});
+    RecordEmailClicksResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        recorded = json['recorded'] ?? 0;
+        duplicates = json['duplicates'] ?? 0;
+        flagged = json['flagged'] ?? 0;
+        rejected = json['rejected'] ?? 0;
+        clicks = JsonConverters.fromJson(json['clicks'],'List<EmailClickResultDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'recorded': recorded,
+        'duplicates': duplicates,
+        'flagged': flagged,
+        'rejected': rejected,
+        'clicks': JsonConverters.toJson(clicks,'List<EmailClickResultDto>',context!)
+    });
+
+    getTypeName() => "RecordEmailClicksResponse";
     TypeContext? context = _ctx;
 }
 
@@ -49032,6 +49201,38 @@ class SaveEmailSignatureRequest extends CodeMashRequestBase implements IReturn<I
 }
 
 /**
+* Switches email click ids on or off. When on, every web link in the project's marketing emails gets ?nblid=<click id>. Clicks come back only from sites you own: your pages, server logs or analytics hand the nblid back with POST /notifications/email/clicks.
+*/
+// @Route("/{version}/notifications/email/settings/click-tracking", "PATCH")
+// @Api(Description="Switches email click ids on or off. When on, every web link in the project's marketing emails gets ?nblid=<click id>. Clicks come back only from sites you own: your pages, server logs or analytics hand the nblid back with POST /notifications/email/clicks.")
+class UpdateEmailClickTracking extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
+{
+    /**
+    * true: links of marketing emails get ?nblid=<click id>. false: links are sent as written.
+    */
+    // @ApiMember(Description="true: links of marketing emails get ?nblid=<click id>. false: links are sent as written.", IsRequired=true)
+    bool? enabled;
+
+    UpdateEmailClickTracking({this.enabled});
+    UpdateEmailClickTracking.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        enabled = json['enabled'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'enabled': enabled
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "UpdateEmailClickTracking";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Get email settings
 */
 // @Route("/{version}/notifications/email/settings", "GET")
@@ -49672,6 +49873,40 @@ class GetEmailPreferencesByLinkRequest extends RequestBase implements IReturn<Ge
     createResponse() => GetEmailPreferencesByLinkResponse();
     getResponseTypeName() => "GetEmailPreferencesByLinkResponse";
     getTypeName() => "GetEmailPreferencesByLinkRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Records email clicks handed back with their click ids (nblid).
+*/
+// @Route("/{version}/notifications/email/clicks", "POST")
+// @Api(Description="Records email clicks handed back with their click ids (nblid).")
+// @DataContract
+class RecordEmailClicksRequest extends CodeMashRequestBase implements IReturn<RecordEmailClicksResponse>, IConvertible, IPost
+{
+    /**
+    * 1 to 500 clicks.
+    */
+    // @DataMember
+    // @ApiMember(Description="1 to 500 clicks.", IsRequired=true)
+    List<EmailClickDto> clicks = [];
+
+    RecordEmailClicksRequest({this.clicks=const []});
+    RecordEmailClicksRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        clicks = JsonConverters.fromJson(json['clicks'],'List<EmailClickDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'clicks': JsonConverters.toJson(clicks,'List<EmailClickDto>',context!)
+    });
+
+    createResponse() => RecordEmailClicksResponse();
+    getResponseTypeName() => "RecordEmailClicksResponse";
+    getTypeName() => "RecordEmailClicksRequest";
     TypeContext? context = _ctx;
 }
 
@@ -61146,6 +61381,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmailValidationIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
     'SaveEmailTemplate': TypeInfo(TypeOf.Class, create:() => SaveEmailTemplate()),
     'TranslationDto': TypeInfo(TypeOf.Class, create:() => TranslationDto()),
+    'EmailClickDto': TypeInfo(TypeOf.Class, create:() => EmailClickDto()),
     'SaveSmsTemplate': TypeInfo(TypeOf.Class, create:() => SaveSmsTemplate()),
     'WorkflowStepRetryDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepRetryDto()),
     'WorkflowOnErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowOnErrorDto()),
@@ -61425,6 +61661,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DomainHealthRecordItemDto': TypeInfo(TypeOf.Class, create:() => DomainHealthRecordItemDto()),
     'EmailIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => EmailIntegrationListProjection()),
     'EmailLinkPreferencesDto': TypeInfo(TypeOf.Class, create:() => EmailLinkPreferencesDto()),
+    'EmailClickResultDto': TypeInfo(TypeOf.Class, create:() => EmailClickResultDto()),
     'SmsTemplateListProjection': TypeInfo(TypeOf.Class, create:() => SmsTemplateListProjection()),
     'SmsSettings': TypeInfo(TypeOf.Class, create:() => SmsSettings()),
     'SmsIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => SmsIntegrationListProjection()),
@@ -61841,6 +62078,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetEmailFooterResponse': TypeInfo(TypeOf.Class, create:() => GetEmailFooterResponse()),
     'GetEmailFootersResponse': TypeInfo(TypeOf.Class, create:() => GetEmailFootersResponse()),
     'GetEmailPreferencesByLinkResponse': TypeInfo(TypeOf.Class, create:() => GetEmailPreferencesByLinkResponse()),
+    'RecordEmailClicksResponse': TypeInfo(TypeOf.Class, create:() => RecordEmailClicksResponse()),
+    'List<EmailClickResultDto>': TypeInfo(TypeOf.Class, create:() => <EmailClickResultDto>[]),
     'GetSmsTemplateResponse': TypeInfo(TypeOf.Class, create:() => GetSmsTemplateResponse()),
     'GetSmsTemplatesResponse': TypeInfo(TypeOf.Class, create:() => GetSmsTemplatesResponse()),
     'PaginatedResponse<SmsTemplateListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SmsTemplateListProjection>()),
@@ -62400,6 +62639,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetEmailSignature': TypeInfo(TypeOf.Class, create:() => GetEmailSignature()),
     'GetEmailSignatures': TypeInfo(TypeOf.Class, create:() => GetEmailSignatures()),
     'SaveEmailSignatureRequest': TypeInfo(TypeOf.Class, create:() => SaveEmailSignatureRequest()),
+    'UpdateEmailClickTracking': TypeInfo(TypeOf.Class, create:() => UpdateEmailClickTracking()),
     'GetEmailSettings': TypeInfo(TypeOf.Class, create:() => GetEmailSettings()),
     'ConfirmEmailIntegrationHumanDeliveryRequest': TypeInfo(TypeOf.Class, create:() => ConfirmEmailIntegrationHumanDeliveryRequest()),
     'DeleteEmailIntegration': TypeInfo(TypeOf.Class, create:() => DeleteEmailIntegration()),
@@ -62420,6 +62660,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveEmailFooterRequest': TypeInfo(TypeOf.Class, create:() => SaveEmailFooterRequest()),
     'OneClickUnsubscribeRequest': TypeInfo(TypeOf.Class, create:() => OneClickUnsubscribeRequest()),
     'GetEmailPreferencesByLinkRequest': TypeInfo(TypeOf.Class, create:() => GetEmailPreferencesByLinkRequest()),
+    'RecordEmailClicksRequest': TypeInfo(TypeOf.Class, create:() => RecordEmailClicksRequest()),
+    'List<EmailClickDto>': TypeInfo(TypeOf.Class, create:() => <EmailClickDto>[]),
     'DisableSms': TypeInfo(TypeOf.Class, create:() => DisableSms()),
     'GetSmsDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetSmsDisableDependencies()),
     'EnableSms': TypeInfo(TypeOf.Class, create:() => EnableSms()),

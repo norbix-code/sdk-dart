@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-11 14:09:42
+Date: 2026-11-11 14:52:38
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -5642,8 +5642,10 @@ class NotificationStatusChangeEntryDto implements IConvertible
     String? sourceId;
     List<ErrorDto>? errors;
     List<String>? tags;
+    String? flag;
+    String? flagReason;
 
-    NotificationStatusChangeEntryDto({this.time,this.status,this.sourceId,this.errors,this.tags});
+    NotificationStatusChangeEntryDto({this.time,this.status,this.sourceId,this.errors,this.tags,this.flag,this.flagReason});
     NotificationStatusChangeEntryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -5652,6 +5654,8 @@ class NotificationStatusChangeEntryDto implements IConvertible
         sourceId = json['sourceId'];
         errors = JsonConverters.fromJson(json['errors'],'List<ErrorDto>',context!);
         tags = JsonConverters.fromJson(json['tags'],'List<String>',context!);
+        flag = json['flag'];
+        flagReason = json['flagReason'];
         return this;
     }
 
@@ -5660,7 +5664,9 @@ class NotificationStatusChangeEntryDto implements IConvertible
         'status': JsonConverters.toJson(status,'CampaignNotificationStatus',context!),
         'sourceId': sourceId,
         'errors': JsonConverters.toJson(errors,'List<ErrorDto>',context!),
-        'tags': JsonConverters.toJson(tags,'List<String>',context!)
+        'tags': JsonConverters.toJson(tags,'List<String>',context!),
+        'flag': flag,
+        'flagReason': flagReason
     };
 
     getTypeName() => "NotificationStatusChangeEntryDto";
