@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-11 05:59:03
+Date: 2026-11-11 09:06:20
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -10604,7 +10604,10 @@ class MarketplaceValidationStepDto implements IConvertible
     // @DataMember
     MarketplaceHttpRequestSpecDto? probe;
 
-    MarketplaceValidationStepDto({this.key="",this.label="",this.description,this.requiredForFunctions,this.probe});
+    // @DataMember
+    List<String>? authKinds;
+
+    MarketplaceValidationStepDto({this.key="",this.label="",this.description,this.requiredForFunctions,this.probe,this.authKinds});
     MarketplaceValidationStepDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -10613,6 +10616,7 @@ class MarketplaceValidationStepDto implements IConvertible
         description = json['description'];
         requiredForFunctions = json['requiredForFunctions'];
         probe = JsonConverters.fromJson(json['probe'],'MarketplaceHttpRequestSpecDto',context!);
+        authKinds = JsonConverters.fromJson(json['authKinds'],'List<String>',context!);
         return this;
     }
 
@@ -10621,7 +10625,8 @@ class MarketplaceValidationStepDto implements IConvertible
         'label': label,
         'description': description,
         'requiredForFunctions': requiredForFunctions,
-        'probe': JsonConverters.toJson(probe,'MarketplaceHttpRequestSpecDto',context!)
+        'probe': JsonConverters.toJson(probe,'MarketplaceHttpRequestSpecDto',context!),
+        'authKinds': JsonConverters.toJson(authKinds,'List<String>',context!)
     };
 
     getTypeName() => "MarketplaceValidationStepDto";
@@ -10759,6 +10764,12 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
     String? oAuthRedirectUrl;
 
     // @DataMember
+    bool? oAuthSignIn;
+
+    // @DataMember
+    bool? oAuthInstallAppReady;
+
+    // @DataMember
     MarketplaceListingKind? kind;
 
     // @DataMember
@@ -10788,7 +10799,7 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
     // @DataMember
     IReadOnlyList<MarketplaceFunctionDefinitionDto>? functions;
 
-    MarketplaceListingDto({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.description,this.iconUrl,this.documentationUrl,this.videoUrl,this.availability,this.connectSteps,this.oAuthRedirectUrl,this.kind,this.workflow,this.isOfficial,this.tags,this.specVersion=0,this.configFields,this.secretFields,this.installForm,this.validationSteps,this.functions});
+    MarketplaceListingDto({this.viewId="",this.slug="",this.displayName="",this.vendor="",this.category,this.transport,this.description,this.iconUrl,this.documentationUrl,this.videoUrl,this.availability,this.connectSteps,this.oAuthRedirectUrl,this.oAuthSignIn,this.oAuthInstallAppReady,this.kind,this.workflow,this.isOfficial,this.tags,this.specVersion=0,this.configFields,this.secretFields,this.installForm,this.validationSteps,this.functions});
     MarketplaceListingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -10805,6 +10816,8 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
         availability = JsonConverters.fromJson(json['availability'],'MarketplaceAvailability',context!);
         connectSteps = JsonConverters.fromJson(json['connectSteps'],'IReadOnlyList<String>',context!);
         oAuthRedirectUrl = json['oAuthRedirectUrl'];
+        oAuthSignIn = json['oAuthSignIn'];
+        oAuthInstallAppReady = json['oAuthInstallAppReady'];
         kind = JsonConverters.fromJson(json['kind'],'MarketplaceListingKind',context!);
         workflow = JsonConverters.fromJson(json['workflow'],'MarketplaceWorkflowTemplateDto',context!);
         isOfficial = json['isOfficial'];
@@ -10832,6 +10845,8 @@ class MarketplaceListingDto implements IHasViewId, IConvertible
         'availability': JsonConverters.toJson(availability,'MarketplaceAvailability',context!),
         'connectSteps': JsonConverters.toJson(connectSteps,'IReadOnlyList<String>',context!),
         'oAuthRedirectUrl': oAuthRedirectUrl,
+        'oAuthSignIn': oAuthSignIn,
+        'oAuthInstallAppReady': oAuthInstallAppReady,
         'kind': JsonConverters.toJson(kind,'MarketplaceListingKind',context!),
         'workflow': JsonConverters.toJson(workflow,'MarketplaceWorkflowTemplateDto',context!),
         'isOfficial': isOfficial,
@@ -33884,33 +33899,6 @@ class GetMarketplaceFunctionRunsResponse extends ResponseBase implements IConver
     TypeContext? context = _ctx;
 }
 
-class InvokeMarketplaceFunctionResponse extends ResponseBase implements IConvertible
-{
-    bool? isSuccess;
-    dynamic? output;
-    String? vendorRequestId;
-
-    InvokeMarketplaceFunctionResponse({this.isSuccess,this.output,this.vendorRequestId});
-    InvokeMarketplaceFunctionResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        isSuccess = json['isSuccess'];
-        output = JsonConverters.fromJson(json['output'],'dynamic',context!);
-        vendorRequestId = json['vendorRequestId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'isSuccess': isSuccess,
-        'output': JsonConverters.toJson(output,'dynamic',context!),
-        'vendorRequestId': vendorRequestId
-    });
-
-    getTypeName() => "InvokeMarketplaceFunctionResponse";
-    TypeContext? context = _ctx;
-}
-
 class GetCodeIntegrationResponse extends ResponseBase implements IConvertible
 {
     CodeIntegrationDto? item;
@@ -34090,6 +34078,33 @@ class InvokeCodeFunctionResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "InvokeCodeFunctionResponse";
+    TypeContext? context = _ctx;
+}
+
+class InvokeMarketplaceFunctionResponse extends ResponseBase implements IConvertible
+{
+    bool? isSuccess;
+    dynamic? output;
+    String? vendorRequestId;
+
+    InvokeMarketplaceFunctionResponse({this.isSuccess,this.output,this.vendorRequestId});
+    InvokeMarketplaceFunctionResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        isSuccess = json['isSuccess'];
+        output = JsonConverters.fromJson(json['output'],'dynamic',context!);
+        vendorRequestId = json['vendorRequestId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'isSuccess': isSuccess,
+        'output': JsonConverters.toJson(output,'dynamic',context!),
+        'vendorRequestId': vendorRequestId
+    });
+
+    getTypeName() => "InvokeMarketplaceFunctionResponse";
     TypeContext? context = _ctx;
 }
 
@@ -61839,7 +61854,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMarketplaceFunctionCatalogResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionCatalogResponse()),
     'GetMarketplaceFunctionRunsResponse': TypeInfo(TypeOf.Class, create:() => GetMarketplaceFunctionRunsResponse()),
     'List<MarketplaceFunctionRunDto>': TypeInfo(TypeOf.Class, create:() => <MarketplaceFunctionRunDto>[]),
-    'InvokeMarketplaceFunctionResponse': TypeInfo(TypeOf.Class, create:() => InvokeMarketplaceFunctionResponse()),
     'GetCodeIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetCodeIntegrationResponse()),
     'GetCodeIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetCodeIntegrationsResponse()),
     'PaginatedResponse<CodeIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<CodeIntegrationListProjection>()),
@@ -61852,6 +61866,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetCodeFunctionRunsResponse': TypeInfo(TypeOf.Class, create:() => GetCodeFunctionRunsResponse()),
     'List<CodeFunctionRunDto>': TypeInfo(TypeOf.Class, create:() => <CodeFunctionRunDto>[]),
     'InvokeCodeFunctionResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeFunctionResponse()),
+    'InvokeMarketplaceFunctionResponse': TypeInfo(TypeOf.Class, create:() => InvokeMarketplaceFunctionResponse()),
     'InvokeCodeWorkflowResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflowResponse()),
     'WorkflowRunsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunsResponse()),
     'PaginatedResponse<WorkflowRunListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowRunListProjection>()),
