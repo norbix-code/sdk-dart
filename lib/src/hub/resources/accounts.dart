@@ -24,6 +24,10 @@ class AccountsResource extends Resource {
   }
 
   /// `POST /{version}/account/stripe/create-checkout-session`
+  ///
+  /// Opens a Stripe checkout for a subscription. A Managed Service checkout
+  /// needs both `bundle` (`Starter`, `Growth` or `Scale`) and
+  /// `billingPeriod` (`Monthly` or `Annual`) in the body.
   Future<Object?> createStripeCheckoutSession(
       {Map<String, Object?>? query,
       Object? body,
@@ -35,6 +39,81 @@ class AccountsResource extends Resource {
       body: body,
       headers: headers,
       pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/account/stripe/bundles`
+  ///
+  /// Lists the three Managed Service bundles (`Starter`, `Growth`, `Scale`).
+  /// The response carries `bundles`, each with `bundle`, `projectCap` (how
+  /// many enabled projects the bundle allows) and the `monthly` and `annual`
+  /// prices: `amount` in minor units (cents) and a lower-case `currency`.
+  Future<Object?> getManagedServiceBundles(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/stripe/bundles',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/stripe/change-bundle`
+  ///
+  /// Moves the account to another bundle or billing period. Body:
+  /// `{'bundle': 'Growth', 'billingPeriod': 'Annual'}` (`bundle` is
+  /// `Starter`, `Growth` or `Scale`; `billingPeriod` is `Monthly` or
+  /// `Annual`). Refused with `CM-ERRORS-ACCOUNT-023` when the account has
+  /// more enabled projects than the new bundle allows.
+  Future<Object?> changeManagedServiceBundle(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/stripe/change-bundle',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/account/flex-clusters`
+  ///
+  /// Lists the account's Norbix-managed Atlas clusters. The response carries
+  /// `clusters` (each with `id`, `displayName`, `tierCode` `FLEX` or `M10`,
+  /// `status`, its `databases`, `usage` and `nearLimits`), `canCreateNew`
+  /// and, when that is false, `cannotCreateReason` (`TrialOneCluster` or
+  /// `ClusterLimitReached`).
+  Future<Object?> getFlexClusters(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/flex-clusters',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/flex-clusters/{flexClusterId}/upgrade`
+  ///
+  /// Queues the upgrade of a cluster to a bigger tier. Body:
+  /// `{'tierCode': 'M10'}`.
+  Future<Object?> upgradeFlexCluster(
+      {required Object flexClusterId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/flex-clusters/{flexClusterId}/upgrade',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'flexClusterId': flexClusterId},
     );
   }
 
