@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-11 09:06:19
+Date: 2026-11-11 14:09:42
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -10526,13 +10526,20 @@ class InviteUserRequest extends CodeMashRequestBase implements IReturn<EmptyResp
     String? salutation;
 
     /**
+    * Optional. Roles the invited user gets, by name ("Editor") or role id. Empty = the project's default registration role. The same rules as creating a user: an administrator may give any role, anyone else only the allowed registration roles.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional. Roles the invited user gets, by name (\"Editor\") or role id. Empty = the project's default registration role. The same rules as creating a user: an administrator may give any role, anyone else only the allowed registration roles.")
+    List<String>? roles;
+
+    /**
     * Database integration id. Optional — defaults to the request environment's default integration.
     */
     // @DataMember
     // @ApiMember(Description="Database integration id. Optional — defaults to the request environment's default integration.")
     String? databaseIntegrationId;
 
-    InviteUserRequest({this.email="",this.fullName,this.salutation,this.databaseIntegrationId});
+    InviteUserRequest({this.email="",this.fullName,this.salutation,this.roles,this.databaseIntegrationId});
     InviteUserRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -10540,6 +10547,7 @@ class InviteUserRequest extends CodeMashRequestBase implements IReturn<EmptyResp
         email = json['email'] ?? "";
         fullName = json['fullName'];
         salutation = json['salutation'];
+        roles = JsonConverters.fromJson(json['roles'],'List<String>',context!);
         databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
@@ -10548,6 +10556,7 @@ class InviteUserRequest extends CodeMashRequestBase implements IReturn<EmptyResp
         'email': email,
         'fullName': fullName,
         'salutation': salutation,
+        'roles': JsonConverters.toJson(roles,'List<String>',context!),
         'databaseIntegrationId': databaseIntegrationId
     });
 
