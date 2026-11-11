@@ -1082,6 +1082,41 @@ A campaign's messages now carry the delivery state too
 `deliveryEvents`, `deliveryOutcome`), and `get*CampaignStatistics` adds
 `failedRetryable` and `cancelled`.
 
+### Email click ids (`nblid`)
+
+`emailNotifications.updateEmailClickTracking` switches the project's click ids
+on or off (`PATCH /{version}/notifications/email/settings/click-tracking`, body
+`{'enabled': true}`; off by default, the current value is `emailClickTracking`
+on the project). When on, every web link in the project's **marketing** emails
+gets `?nblid=<click id>`. Transactional emails, unsubscribe and preference
+links, and links marked `data-nblid="off"` are never changed.
+
+Norbix does not see the click itself: your own site, server logs or analytics
+hand the `nblid` back with `emailNotifications.recordEmailClicks`
+(`POST /{version}/notifications/email/clicks`), so it only helps for links to
+sites you own. The body is `clicks`, 1 to 500 of
+`{nblid, url?, clickedAt?, userAgent?}` (`clickedAt` defaults to now). The same
+`nblid` + `url` + `clickedAt` sent again answers `duplicate`, so a retry is
+safe. The answer is `{recorded, duplicates, flagged, rejected, clicks}`, one
+result per click: `index`, `status` (`recorded` / `duplicate` / `rejected`),
+`reason?` (`not-valid` / `not-found` / `in-future`), `flag?`
+(`suspected-scanner`) with `flagReason?` (`user-agent` / `too-soon` / `burst`),
+`campaignId?`, `notificationId?`, `linkIndex?` and `to?` (who the email went
+to). A click id that is not valid is a rejected click, not an error; 0 or more
+than 500 clicks is `CM-ERRORS-EMAILS-030` (400). A flagged click also shows
+`flag` / `flagReason` on the notification's status history.
+
+```dart
+await hub.emailNotifications.updateEmailClickTracking(body: {'enabled': true});
+
+final answer = await hub.emailNotifications.recordEmailClicks(body: {
+  'clicks': [
+    {'nblid': nblidFromTheQueryString, 'url': 'https://shop.example.com/sale'},
+  ],
+}) as Map<String, dynamic>;
+print('${answer['recorded']} recorded, ${answer['rejected']} rejected');
+```
+
 ### Cloning a template
 
 `emailNotifications.cloneEmailTemplate`, `smsNotifications.cloneSmsTemplate`

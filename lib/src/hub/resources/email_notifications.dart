@@ -569,6 +569,33 @@ class EmailNotificationsResource extends Resource {
     );
   }
 
+  /// `POST /{version}/notifications/email/clicks`
+  ///
+  /// Records email clicks handed back with their click ids (`nblid`). Body:
+  /// `clicks`, 1 to 500 of `{nblid, url?, clickedAt?, userAgent?}` (`nblid` is
+  /// the value from the clicked link's query string; `clickedAt` defaults to
+  /// now). The same `nblid` + `url` + `clickedAt` sent again answers
+  /// `duplicate`. Answers `{recorded, duplicates, flagged, rejected, clicks}`,
+  /// one result per click: `index`, `status` (`recorded` | `duplicate` |
+  /// `rejected`), `reason?` (`not-valid` | `not-found` | `in-future`), `flag?`
+  /// (`suspected-scanner`) with `flagReason?` (`user-agent` | `too-soon` |
+  /// `burst`), `campaignId?`, `notificationId?`, `linkIndex?` and `to?` (who
+  /// the email went to). A click id that is not valid is a rejected click,
+  /// not an error; 0 or more than 500 clicks is `CM-ERRORS-EMAILS-030` (400).
+  Future<Object?> recordEmailClicks(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/email/clicks',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `POST /{version}/notifications/email/campaigns/{Id}/retry-failed`
   ///
   /// Sends the failed recipients of an email campaign again — only the rows
@@ -714,6 +741,30 @@ class EmailNotificationsResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'id': id},
+    );
+  }
+
+  /// `PATCH /{version}/notifications/email/settings/click-tracking`
+  ///
+  /// Switches the project's email click ids on or off (off by default). Body:
+  /// `enabled` (required). When on, every web link in the project's MARKETING
+  /// emails gets `?nblid=<click id>`; transactional emails, unsubscribe and
+  /// preference links, and links marked `data-nblid="off"` are never changed.
+  /// Norbix does not see the click itself: your own site, server logs or
+  /// analytics hand the `nblid` back with [recordEmailClicks], so it only
+  /// helps for links to sites you own. The current value is
+  /// `emailClickTracking` on the project. Answers an empty response.
+  Future<Object?> updateEmailClickTracking(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/notifications/email/settings/click-tracking',
+      method: 'PATCH',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
     );
   }
 
