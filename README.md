@@ -1114,6 +1114,41 @@ final me = await hub.accounts.getMyAccountUserProfile();
 await hub.accounts.updateMyAccountUserPhone(body: {'phone': '+37060000000'});
 ```
 
+### Bundles and Flex clusters
+
+A Managed Service subscription is one of three bundles (`Starter`, `Growth`,
+`Scale`), paid monthly or annually. Each bundle allows a number of enabled
+projects. The account's Norbix-managed Atlas clusters are listed and
+upgraded on `hub.accounts` too:
+
+| Method | Call |
+|--------|------|
+| `getManagedServiceBundles()` | `GET /{version}/account/stripe/bundles` — `bundles`, each with `bundle`, `projectCap` and the `monthly` and `annual` prices (`amount` in minor units, lower-case `currency`) |
+| `changeManagedServiceBundle(body:)` | `POST /{version}/account/stripe/change-bundle` — `bundle`, `billingPeriod`; refused with `CM-ERRORS-ACCOUNT-023` when the account has more enabled projects than the new bundle allows |
+| `getFlexClusters()` | `GET /{version}/account/flex-clusters` — `clusters` (with `databases`, `usage`, `nearLimits`), `canCreateNew`, `cannotCreateReason?` (`TrialOneCluster` or `ClusterLimitReached`) |
+| `upgradeFlexCluster(flexClusterId:, body:)` | `POST /{version}/account/flex-clusters/{flexClusterId}/upgrade` — `tierCode` (`M10`); the upgrade is queued |
+| `createStripeCheckoutSession(body:)` | `POST /{version}/account/stripe/create-checkout-session` — a Managed Service checkout needs `bundle` and `billingPeriod`. `projectCap` is no longer accepted. |
+
+`getAccountStatus()` now also answers `bundle`, `billingPeriod`, `isTrial`,
+`renewsOn` and `enabledProjects`.
+
+```dart
+final bundles = await hub.accounts.getManagedServiceBundles();
+await hub.accounts.changeManagedServiceBundle(
+  body: {'bundle': 'Growth', 'billingPeriod': 'Annual'},
+);
+
+final flex = await hub.accounts.getFlexClusters();
+await hub.accounts.upgradeFlexCluster(
+  flexClusterId: 'fc_1',
+  body: {'tierCode': 'M10'},
+);
+```
+
+To put a new managed database on a cluster the account already has, send
+`flexClusterId` in the `MongoDbAtlasFlexManaged` database integration
+request; to name a new cluster, send `clusterDisplayName`.
+
 ## Scheduler
 
 `hub.scheduler` runs a task on a cron schedule. **Only `EmailCampaign`

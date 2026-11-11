@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-10 14:40:13
+Date: 2026-11-11 05:59:03
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -943,20 +943,26 @@ class MongoDbAtlasFlexManagedDatabaseIntegrationRequest extends DatabaseIntegrat
 {
     DatabaseProvider? provider;
     String norbixRegionCode = "";
+    String? flexClusterId;
+    String? clusterDisplayName;
 
-    MongoDbAtlasFlexManagedDatabaseIntegrationRequest({this.provider,this.norbixRegionCode=""});
+    MongoDbAtlasFlexManagedDatabaseIntegrationRequest({this.provider,this.norbixRegionCode="",this.flexClusterId,this.clusterDisplayName});
     MongoDbAtlasFlexManagedDatabaseIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = JsonConverters.fromJson(json['provider'],'DatabaseProvider',context!);
         norbixRegionCode = json['norbixRegionCode'] ?? "";
+        flexClusterId = json['flexClusterId'];
+        clusterDisplayName = json['clusterDisplayName'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': JsonConverters.toJson(provider,'DatabaseProvider',context!),
-        'norbixRegionCode': norbixRegionCode
+        'norbixRegionCode': norbixRegionCode,
+        'flexClusterId': flexClusterId,
+        'clusterDisplayName': clusterDisplayName
     });
 
     getTypeName() => "MongoDbAtlasFlexManagedDatabaseIntegrationRequest";
@@ -8704,9 +8710,10 @@ class MongoDbAtlasFlexManagedIntegrationDto extends DatabaseIntegrationDto imple
     IntegrationStatus? status;
     String? atlasProjectId;
     String? atlasClusterName;
+    String? flexClusterId;
     String? failureReason;
 
-    MongoDbAtlasFlexManagedIntegrationDto({this.databaseName,this.norbixRegionCode="",this.flexTierCode="",this.status,this.atlasProjectId,this.atlasClusterName,this.failureReason});
+    MongoDbAtlasFlexManagedIntegrationDto({this.databaseName,this.norbixRegionCode="",this.flexTierCode="",this.status,this.atlasProjectId,this.atlasClusterName,this.flexClusterId,this.failureReason});
     MongoDbAtlasFlexManagedIntegrationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -8717,6 +8724,7 @@ class MongoDbAtlasFlexManagedIntegrationDto extends DatabaseIntegrationDto imple
         status = JsonConverters.fromJson(json['status'],'IntegrationStatus',context!);
         atlasProjectId = json['atlasProjectId'];
         atlasClusterName = json['atlasClusterName'];
+        flexClusterId = json['flexClusterId'];
         failureReason = json['failureReason'];
         return this;
     }
@@ -8728,6 +8736,7 @@ class MongoDbAtlasFlexManagedIntegrationDto extends DatabaseIntegrationDto imple
         'status': JsonConverters.toJson(status,'IntegrationStatus',context!),
         'atlasProjectId': atlasProjectId,
         'atlasClusterName': atlasClusterName,
+        'flexClusterId': flexClusterId,
         'failureReason': failureReason
     });
 
@@ -13319,6 +13328,19 @@ abstract class IHasEnv
     String? env;
 }
 
+enum ManagedServiceBundle
+{
+    Starter,
+    Growth,
+    Scale,
+}
+
+enum SubscriptionBillingPeriod
+{
+    Monthly,
+    Annual,
+}
+
 enum SubscriptionType
 {
     ManagedService,
@@ -16021,6 +16043,152 @@ class TriggerActivationTestProblem implements IConvertible
 }
 
 // @DataContract
+class FlexClusterDatabaseDto implements IConvertible
+{
+    // @DataMember
+    String projectId = "";
+
+    // @DataMember
+    String projectName = "";
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String integrationId = "";
+
+    // @DataMember
+    String integrationName = "";
+
+    // @DataMember
+    String? databaseName;
+
+    FlexClusterDatabaseDto({this.projectId="",this.projectName="",this.env="",this.integrationId="",this.integrationName="",this.databaseName});
+    FlexClusterDatabaseDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        projectId = json['projectId'] ?? "";
+        projectName = json['projectName'] ?? "";
+        env = json['env'] ?? "";
+        integrationId = json['integrationId'] ?? "";
+        integrationName = json['integrationName'] ?? "";
+        databaseName = json['databaseName'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'projectId': projectId,
+        'projectName': projectName,
+        'env': env,
+        'integrationId': integrationId,
+        'integrationName': integrationName,
+        'databaseName': databaseName
+    };
+
+    getTypeName() => "FlexClusterDatabaseDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class FlexClusterUsageDto implements IConvertible
+{
+    // @DataMember
+    int databaseCount = 0;
+
+    // @DataMember
+    int? storageBytes;
+
+    // @DataMember
+    int? connections;
+
+    // @DataMember
+    double? operationsPerSecond;
+
+    FlexClusterUsageDto({this.databaseCount=0,this.storageBytes,this.connections,this.operationsPerSecond});
+    FlexClusterUsageDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        databaseCount = json['databaseCount'] ?? 0;
+        storageBytes = json['storageBytes'];
+        connections = json['connections'];
+        operationsPerSecond = JsonConverters.toDouble(json['operationsPerSecond']);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'databaseCount': databaseCount,
+        'storageBytes': storageBytes,
+        'connections': connections,
+        'operationsPerSecond': operationsPerSecond
+    };
+
+    getTypeName() => "FlexClusterUsageDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class FlexClusterDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String displayName = "";
+
+    // @DataMember
+    String atlasClusterName = "";
+
+    // @DataMember
+    String norbixRegionCode = "";
+
+    // @DataMember
+    String tierCode = "";
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    List<FlexClusterDatabaseDto> databases = [];
+
+    // @DataMember
+    FlexClusterUsageDto? usage;
+
+    // @DataMember
+    List<String> nearLimits = [];
+
+    FlexClusterDto({this.id="",this.displayName="",this.atlasClusterName="",this.norbixRegionCode="",this.tierCode="",this.status="",this.databases=const [],this.usage,this.nearLimits=const []});
+    FlexClusterDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        displayName = json['displayName'] ?? "";
+        atlasClusterName = json['atlasClusterName'] ?? "";
+        norbixRegionCode = json['norbixRegionCode'] ?? "";
+        tierCode = json['tierCode'] ?? "";
+        status = json['status'] ?? "";
+        databases = JsonConverters.fromJson(json['databases'],'List<FlexClusterDatabaseDto>',context!) ?? [];
+        usage = JsonConverters.fromJson(json['usage'],'FlexClusterUsageDto',context!);
+        nearLimits = JsonConverters.fromJson(json['nearLimits'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'displayName': displayName,
+        'atlasClusterName': atlasClusterName,
+        'norbixRegionCode': norbixRegionCode,
+        'tierCode': tierCode,
+        'status': status,
+        'databases': JsonConverters.toJson(databases,'List<FlexClusterDatabaseDto>',context!),
+        'usage': JsonConverters.toJson(usage,'FlexClusterUsageDto',context!),
+        'nearLimits': JsonConverters.toJson(nearLimits,'List<String>',context!)
+    };
+
+    getTypeName() => "FlexClusterDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class AccountOwnerDto implements IConvertible
 {
     // @DataMember
@@ -16115,12 +16283,27 @@ class AccountStatusDto implements IConvertible
     bool? trialWasIssued;
 
     // @DataMember
+    ManagedServiceBundle? bundle;
+
+    // @DataMember
+    SubscriptionBillingPeriod? billingPeriod;
+
+    // @DataMember
+    bool? isTrial;
+
+    // @DataMember
+    DateTime? renewsOn;
+
+    // @DataMember
+    int enabledProjects = 0;
+
+    // @DataMember
     bool? emailVerified;
 
     // @DataMember
     bool? joinedByInvitation;
 
-    AccountStatusDto({this.accountId="",this.accountIdAsGuid="",this.userId="",this.loggedInUserId="",this.loggedInUserEmail,this.status,this.projectCap=0,this.permissions=const [],this.roles=const [],this.allowedProjects,this.trialWasIssued,this.emailVerified,this.joinedByInvitation});
+    AccountStatusDto({this.accountId="",this.accountIdAsGuid="",this.userId="",this.loggedInUserId="",this.loggedInUserEmail,this.status,this.projectCap=0,this.permissions=const [],this.roles=const [],this.allowedProjects,this.trialWasIssued,this.bundle,this.billingPeriod,this.isTrial,this.renewsOn,this.enabledProjects=0,this.emailVerified,this.joinedByInvitation});
     AccountStatusDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16135,6 +16318,11 @@ class AccountStatusDto implements IConvertible
         roles = JsonConverters.fromJson(json['roles'],'List<String>',context!) ?? [];
         allowedProjects = JsonConverters.fromJson(json['allowedProjects'],'List<String>',context!);
         trialWasIssued = json['trialWasIssued'];
+        bundle = JsonConverters.fromJson(json['bundle'],'ManagedServiceBundle',context!);
+        billingPeriod = JsonConverters.fromJson(json['billingPeriod'],'SubscriptionBillingPeriod',context!);
+        isTrial = json['isTrial'];
+        renewsOn = JsonConverters.fromJson(json['renewsOn'],'DateTime',context!);
+        enabledProjects = json['enabledProjects'] ?? 0;
         emailVerified = json['emailVerified'];
         joinedByInvitation = json['joinedByInvitation'];
         return this;
@@ -16152,11 +16340,80 @@ class AccountStatusDto implements IConvertible
         'roles': JsonConverters.toJson(roles,'List<String>',context!),
         'allowedProjects': JsonConverters.toJson(allowedProjects,'List<String>',context!),
         'trialWasIssued': trialWasIssued,
+        'bundle': JsonConverters.toJson(bundle,'ManagedServiceBundle',context!),
+        'billingPeriod': JsonConverters.toJson(billingPeriod,'SubscriptionBillingPeriod',context!),
+        'isTrial': isTrial,
+        'renewsOn': JsonConverters.toJson(renewsOn,'DateTime',context!),
+        'enabledProjects': enabledProjects,
         'emailVerified': emailVerified,
         'joinedByInvitation': joinedByInvitation
     };
 
     getTypeName() => "AccountStatusDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class BundlePriceDto implements IConvertible
+{
+    // @DataMember
+    int amount = 0;
+
+    // @DataMember
+    String currency = "";
+
+    BundlePriceDto({this.amount=0,this.currency=""});
+    BundlePriceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        amount = json['amount'] ?? 0;
+        currency = json['currency'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'amount': amount,
+        'currency': currency
+    };
+
+    getTypeName() => "BundlePriceDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class ManagedServiceBundleDto implements IConvertible
+{
+    // @DataMember
+    ManagedServiceBundle? bundle;
+
+    // @DataMember
+    int projectCap = 0;
+
+    // @DataMember
+    BundlePriceDto? monthly;
+
+    // @DataMember
+    BundlePriceDto? annual;
+
+    ManagedServiceBundleDto({this.bundle,this.projectCap=0,this.monthly,this.annual});
+    ManagedServiceBundleDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        bundle = JsonConverters.fromJson(json['bundle'],'ManagedServiceBundle',context!);
+        projectCap = json['projectCap'] ?? 0;
+        monthly = JsonConverters.fromJson(json['monthly'],'BundlePriceDto',context!);
+        annual = JsonConverters.fromJson(json['annual'],'BundlePriceDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'bundle': JsonConverters.toJson(bundle,'ManagedServiceBundle',context!),
+        'projectCap': projectCap,
+        'monthly': JsonConverters.toJson(monthly,'BundlePriceDto',context!),
+        'annual': JsonConverters.toJson(annual,'BundlePriceDto',context!)
+    };
+
+    getTypeName() => "ManagedServiceBundleDto";
     TypeContext? context = _ctx;
 }
 
@@ -19653,15 +19910,15 @@ class CodeMashSubscriptionDto implements IConvertible
 class LicenseDto extends CodeMashSubscriptionDto implements IConvertible
 {
     bool? isEnterprise;
-    int projectCap = 0;
+    int? projectCap;
 
-    LicenseDto({this.isEnterprise,this.projectCap=0});
+    LicenseDto({this.isEnterprise,this.projectCap});
     LicenseDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         isEnterprise = json['isEnterprise'];
-        projectCap = json['projectCap'] ?? 0;
+        projectCap = json['projectCap'];
         return this;
     }
 
@@ -19758,9 +20015,9 @@ class InstallationLicenseDetailsDto implements IConvertible
     bool? isTrial;
 
     // @DataMember(Name="cap")
-    int cap = 0;
+    int? cap;
 
-    InstallationLicenseDetailsDto({this.domain,this.accountId,this.email,this.release,this.expire=0,this.isTrial,this.cap=0});
+    InstallationLicenseDetailsDto({this.domain,this.accountId,this.email,this.release,this.expire=0,this.isTrial,this.cap});
     InstallationLicenseDetailsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19770,7 +20027,7 @@ class InstallationLicenseDetailsDto implements IConvertible
         release = json['release'];
         expire = json['expire'] ?? 0;
         isTrial = json['isTrial'];
-        cap = json['projectsCap'] ?? 0;
+        cap = json['projectsCap'];
         return this;
     }
 
@@ -30118,6 +30375,39 @@ class TestTriggerPreExecuteCodeResponse extends ResponseBase implements IConvert
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class GetFlexClustersResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    IReadOnlyList<FlexClusterDto>? clusters;
+
+    // @DataMember
+    bool? canCreateNew;
+
+    // @DataMember
+    String? cannotCreateReason;
+
+    GetFlexClustersResponse({this.clusters,this.canCreateNew,this.cannotCreateReason});
+    GetFlexClustersResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        clusters = JsonConverters.fromJson(json['clusters'],'IReadOnlyList<FlexClusterDto>',context!);
+        canCreateNew = json['canCreateNew'];
+        cannotCreateReason = json['cannotCreateReason'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'clusters': JsonConverters.toJson(clusters,'IReadOnlyList<FlexClusterDto>',context!),
+        'canCreateNew': canCreateNew,
+        'cannotCreateReason': cannotCreateReason
+    });
+
+    getTypeName() => "GetFlexClustersResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetAccountProfileResponse extends ResponseBase implements IConvertible
 {
     AccountOwnerDto? item;
@@ -30200,6 +30490,29 @@ class GetStripeBillingPortalUrlResponse extends IdResponse implements IConvertib
 
     Map<String, dynamic> toJson() => super.toJson();
     getTypeName() => "GetStripeBillingPortalUrlResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class GetManagedServiceBundlesResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    IReadOnlyList<ManagedServiceBundleDto>? bundles;
+
+    GetManagedServiceBundlesResponse({this.bundles});
+    GetManagedServiceBundlesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        bundles = JsonConverters.fromJson(json['bundles'],'IReadOnlyList<ManagedServiceBundleDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'bundles': JsonConverters.toJson(bundles,'IReadOnlyList<ManagedServiceBundleDto>',context!)
+    });
+
+    getTypeName() => "GetManagedServiceBundlesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -39451,6 +39764,55 @@ class TestTriggerPreExecuteCode extends CodeMashRequestBase implements IReturn<T
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/account/flex-clusters", "GET")
+// @DataContract
+class GetFlexClusters extends RequestBase implements IReturn<GetFlexClustersResponse>, IConvertible, IGet
+{
+    GetFlexClusters();
+    GetFlexClusters.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetFlexClustersResponse();
+    getResponseTypeName() => "GetFlexClustersResponse";
+    getTypeName() => "GetFlexClusters";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/flex-clusters/{flexClusterId}/upgrade", "POST")
+// @DataContract
+class UpgradeFlexCluster extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String? flexClusterId;
+
+    // @DataMember
+    String? tierCode;
+
+    UpgradeFlexCluster({this.flexClusterId,this.tierCode});
+    UpgradeFlexCluster.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        flexClusterId = json['flexClusterId'];
+        tierCode = json['tierCode'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'flexClusterId': flexClusterId,
+        'tierCode': tierCode
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "UpgradeFlexCluster";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/account/profile", "GET")
 class GetAccountProfile extends RequestBase implements IReturn<GetAccountProfileResponse>, IConvertible, IGet
 {
@@ -39563,6 +39925,37 @@ class GetAccountStatus extends RequestBase implements IReturn<GetAccountStatusRe
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/account/stripe/change-bundle", "POST")
+// @DataContract
+class ChangeManagedServiceBundle extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    // @DataMember
+    ManagedServiceBundle? bundle;
+
+    // @DataMember
+    SubscriptionBillingPeriod? billingPeriod;
+
+    ChangeManagedServiceBundle({this.bundle,this.billingPeriod});
+    ChangeManagedServiceBundle.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        bundle = JsonConverters.fromJson(json['bundle'],'ManagedServiceBundle',context!);
+        billingPeriod = JsonConverters.fromJson(json['billingPeriod'],'SubscriptionBillingPeriod',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'bundle': JsonConverters.toJson(bundle,'ManagedServiceBundle',context!),
+        'billingPeriod': JsonConverters.toJson(billingPeriod,'SubscriptionBillingPeriod',context!)
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "ChangeManagedServiceBundle";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/account/stripe/create-checkout-session", "POST")
 // @DataContract
 class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateStripeCheckoutSessionResponse>, IConvertible, IPost
@@ -39571,10 +39964,13 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
     SubscriptionType? subscriptionType;
 
     // @DataMember
-    String? domain;
+    ManagedServiceBundle? bundle;
 
     // @DataMember
-    int projectCap = 0;
+    SubscriptionBillingPeriod? billingPeriod;
+
+    // @DataMember
+    String? domain;
 
     // @DataMember
     String? newProjectSessionId;
@@ -39582,14 +39978,15 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
     // @DataMember
     String? returnUrl;
 
-    CreateStripeCheckoutSession({this.subscriptionType,this.domain,this.projectCap=0,this.newProjectSessionId,this.returnUrl});
+    CreateStripeCheckoutSession({this.subscriptionType,this.bundle,this.billingPeriod,this.domain,this.newProjectSessionId,this.returnUrl});
     CreateStripeCheckoutSession.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         subscriptionType = JsonConverters.fromJson(json['subscriptionType'],'SubscriptionType',context!);
+        bundle = JsonConverters.fromJson(json['bundle'],'ManagedServiceBundle',context!);
+        billingPeriod = JsonConverters.fromJson(json['billingPeriod'],'SubscriptionBillingPeriod',context!);
         domain = json['domain'];
-        projectCap = json['projectCap'] ?? 0;
         newProjectSessionId = json['newProjectSessionId'];
         returnUrl = json['returnUrl'];
         return this;
@@ -39597,8 +39994,9 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'subscriptionType': JsonConverters.toJson(subscriptionType,'SubscriptionType',context!),
+        'bundle': JsonConverters.toJson(bundle,'ManagedServiceBundle',context!),
+        'billingPeriod': JsonConverters.toJson(billingPeriod,'SubscriptionBillingPeriod',context!),
         'domain': domain,
-        'projectCap': projectCap,
         'newProjectSessionId': newProjectSessionId,
         'returnUrl': returnUrl
     });
@@ -39645,6 +40043,24 @@ class GetStripeBillingPortalUrl extends RequestBase implements IReturn<GetStripe
     createResponse() => GetStripeBillingPortalUrlResponse();
     getResponseTypeName() => "GetStripeBillingPortalUrlResponse";
     getTypeName() => "GetStripeBillingPortalUrl";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/stripe/bundles", "GET")
+// @DataContract
+class GetManagedServiceBundles extends RequestBase implements IReturn<GetManagedServiceBundlesResponse>, IConvertible, IGet
+{
+    GetManagedServiceBundles();
+    GetManagedServiceBundles.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetManagedServiceBundlesResponse();
+    getResponseTypeName() => "GetManagedServiceBundlesResponse";
+    getTypeName() => "GetManagedServiceBundles";
     TypeContext? context = _ctx;
 }
 
@@ -50997,18 +51413,32 @@ class GetCodeFunctionRuns extends CodeMashRequestBase implements IReturn<GetCode
     String? taskId;
 
     /**
+    * The Code integration of the function (int_…). With functionId: every call of that function.
+    */
+    // @ApiMember(Description="The Code integration of the function (int_…). With functionId: every call of that function.")
+    String? integrationId;
+
+    /**
+    * The provider's function id (name or ARN), as GET /code/functions lists it. Needs integrationId.
+    */
+    // @ApiMember(Description="The provider's function id (name or ARN), as GET /code/functions lists it. Needs integrationId.")
+    String? functionId;
+
+    /**
     * How many runs, newest first: 1-50. Default 20.
     */
     // @ApiMember(DataType="integer", Description="How many runs, newest first: 1-50. Default 20.")
     int? limit;
 
-    GetCodeFunctionRuns({this.triggerId,this.taskId,this.limit});
+    GetCodeFunctionRuns({this.triggerId,this.taskId,this.integrationId,this.functionId,this.limit});
     GetCodeFunctionRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         triggerId = json['triggerId'];
         taskId = json['taskId'];
+        integrationId = json['integrationId'];
+        functionId = json['functionId'];
         limit = json['limit'];
         return this;
     }
@@ -51016,6 +51446,8 @@ class GetCodeFunctionRuns extends CodeMashRequestBase implements IReturn<GetCode
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'triggerId': triggerId,
         'taskId': taskId,
+        'integrationId': integrationId,
+        'functionId': functionId,
         'limit': limit
     });
 
@@ -60617,6 +61049,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'IHasCorrelationIdRequest': TypeInfo(TypeOf.Interface),
     'IHasProjectId': TypeInfo(TypeOf.Interface),
     'IHasEnv': TypeInfo(TypeOf.Interface),
+    'ManagedServiceBundle': TypeInfo(TypeOf.Enum, enumValues:ManagedServiceBundle.values),
+    'SubscriptionBillingPeriod': TypeInfo(TypeOf.Enum, enumValues:SubscriptionBillingPeriod.values),
     'SubscriptionType': TypeInfo(TypeOf.Enum, enumValues:SubscriptionType.values),
     'IHasAccountId': TypeInfo(TypeOf.Interface),
     'TagDescriptionDto': TypeInfo(TypeOf.Class, create:() => TagDescriptionDto()),
@@ -60708,9 +61142,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TriggerRunListProjection': TypeInfo(TypeOf.Class, create:() => TriggerRunListProjection()),
     'TriggerRunDto': TypeInfo(TypeOf.Class, create:() => TriggerRunDto()),
     'TriggerActivationTestProblem': TypeInfo(TypeOf.Class, create:() => TriggerActivationTestProblem()),
+    'FlexClusterDatabaseDto': TypeInfo(TypeOf.Class, create:() => FlexClusterDatabaseDto()),
+    'FlexClusterUsageDto': TypeInfo(TypeOf.Class, create:() => FlexClusterUsageDto()),
+    'FlexClusterDto': TypeInfo(TypeOf.Class, create:() => FlexClusterDto()),
+    'List<FlexClusterDatabaseDto>': TypeInfo(TypeOf.Class, create:() => <FlexClusterDatabaseDto>[]),
     'AccountOwnerDto': TypeInfo(TypeOf.Class, create:() => AccountOwnerDto()),
     'AccountStatus': TypeInfo(TypeOf.Enum, enumValues:AccountStatus.values),
     'AccountStatusDto': TypeInfo(TypeOf.Class, create:() => AccountStatusDto()),
+    'BundlePriceDto': TypeInfo(TypeOf.Class, create:() => BundlePriceDto()),
+    'ManagedServiceBundleDto': TypeInfo(TypeOf.Class, create:() => ManagedServiceBundleDto()),
     'UsageBillingClusterChargeDto': TypeInfo(TypeOf.Class, create:() => UsageBillingClusterChargeDto()),
     'UsageBillingPeriodDto': TypeInfo(TypeOf.Class, create:() => UsageBillingPeriodDto()),
     'List<UsageBillingClusterChargeDto>': TypeInfo(TypeOf.Class, create:() => <UsageBillingClusterChargeDto>[]),
@@ -61191,10 +61631,14 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetTriggerRunResponse': TypeInfo(TypeOf.Class, create:() => GetTriggerRunResponse()),
     'TestTriggerPreExecuteCodeResponse': TypeInfo(TypeOf.Class, create:() => TestTriggerPreExecuteCodeResponse()),
     'List<TriggerActivationTestProblem>': TypeInfo(TypeOf.Class, create:() => <TriggerActivationTestProblem>[]),
+    'GetFlexClustersResponse': TypeInfo(TypeOf.Class, create:() => GetFlexClustersResponse()),
+    'IReadOnlyList<FlexClusterDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<FlexClusterDto>()),
     'GetAccountProfileResponse': TypeInfo(TypeOf.Class, create:() => GetAccountProfileResponse()),
     'GetAccountStatusResponse': TypeInfo(TypeOf.Class, create:() => GetAccountStatusResponse()),
     'CreateStripeCheckoutSessionResponse': TypeInfo(TypeOf.Class, create:() => CreateStripeCheckoutSessionResponse()),
     'GetStripeBillingPortalUrlResponse': TypeInfo(TypeOf.Class, create:() => GetStripeBillingPortalUrlResponse()),
+    'GetManagedServiceBundlesResponse': TypeInfo(TypeOf.Class, create:() => GetManagedServiceBundlesResponse()),
+    'IReadOnlyList<ManagedServiceBundleDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<ManagedServiceBundleDto>()),
     'CreateTeamMemberFromInvitationResponse': TypeInfo(TypeOf.Class, create:() => CreateTeamMemberFromInvitationResponse()),
     'GetAccountUsageBillingResponse': TypeInfo(TypeOf.Class, create:() => GetAccountUsageBillingResponse()),
     'PromoteEnvironmentResponse': TypeInfo(TypeOf.Class, create:() => PromoteEnvironmentResponse()),
@@ -61642,12 +62086,16 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetTriggerRuns': TypeInfo(TypeOf.Class, create:() => GetTriggerRuns()),
     'GetTriggerRun': TypeInfo(TypeOf.Class, create:() => GetTriggerRun()),
     'TestTriggerPreExecuteCode': TypeInfo(TypeOf.Class, create:() => TestTriggerPreExecuteCode()),
+    'GetFlexClusters': TypeInfo(TypeOf.Class, create:() => GetFlexClusters()),
+    'UpgradeFlexCluster': TypeInfo(TypeOf.Class, create:() => UpgradeFlexCluster()),
     'GetAccountProfile': TypeInfo(TypeOf.Class, create:() => GetAccountProfile()),
     'UpdateAccountProfile': TypeInfo(TypeOf.Class, create:() => UpdateAccountProfile()),
     'ResendAccountVerificationToken': TypeInfo(TypeOf.Class, create:() => ResendAccountVerificationToken()),
     'GetAccountStatus': TypeInfo(TypeOf.Class, create:() => GetAccountStatus()),
+    'ChangeManagedServiceBundle': TypeInfo(TypeOf.Class, create:() => ChangeManagedServiceBundle()),
     'CreateStripeCheckoutSession': TypeInfo(TypeOf.Class, create:() => CreateStripeCheckoutSession()),
     'GetStripeBillingPortalUrl': TypeInfo(TypeOf.Class, create:() => GetStripeBillingPortalUrl()),
+    'GetManagedServiceBundles': TypeInfo(TypeOf.Class, create:() => GetManagedServiceBundles()),
     'CreateTeamMemberFromInvitation': TypeInfo(TypeOf.Class, create:() => CreateTeamMemberFromInvitation()),
     'GetAccountUsageBilling': TypeInfo(TypeOf.Class, create:() => GetAccountUsageBilling()),
     'VerifyAccount': TypeInfo(TypeOf.Class, create:() => VerifyAccount()),
