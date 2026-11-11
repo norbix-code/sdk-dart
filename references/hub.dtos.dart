@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-11 09:06:20
+Date: 2026-11-11 14:09:43
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -44733,6 +44733,30 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
     // @ApiMember(Description="\"Allow anyone to sign up\": grants (true) / revokes (false) membership:register on the project's Guest role. Omit = keep.")
     bool? allowAnyoneToSignUp;
 
+    /**
+    * Setting = 'AllowPasswordReset': true = a reset request sends the e-mail, false = it sends nothing (the answer stays the same).
+    */
+    // @ApiMember(Description="Setting = 'AllowPasswordReset': true = a reset request sends the e-mail, false = it sends nothing (the answer stays the same).")
+    bool? allowResetPassword;
+
+    /**
+    * Setting = 'PasswordResetTemplate': the project's e-mail template id (tmpl_…); empty = the built-in "Password reset" template.
+    */
+    // @ApiMember(Description="Setting = 'PasswordResetTemplate': the project's e-mail template id (tmpl_…); empty = the built-in \"Password reset\" template.")
+    String? resetPasswordEmailTemplate;
+
+    /**
+    * Setting = 'PasswordResetExpiration': how many minutes the reset link works (5–1440); empty = 30.
+    */
+    // @ApiMember(Description="Setting = 'PasswordResetExpiration': how many minutes the reset link works (5–1440); empty = 30.")
+    int? resetPasswordTokenExpiration;
+
+    /**
+    * Setting = 'PasswordResetCallback': your own "choose a new password" page (https://…, http only for localhost); the link is it + #token=…. Empty = the portal page.
+    */
+    // @ApiMember(Description="Setting = 'PasswordResetCallback': your own \"choose a new password\" page (https://…, http only for localhost); the link is it + #token=…. Empty = the portal page.")
+    String? resetPasswordCallback;
+
     int minLength = 0;
     int? maxLength;
     int? minNumbers;
@@ -44745,7 +44769,7 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
     int? maxSpecial;
     String? allowedSpecial;
 
-    UpdateAuthorizationSettings({this.setting,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.needVerification,this.verificationEmailTemplate,this.deactivationEmailTemplate,this.allowInviteUsers,this.allowDeactivateUsers,this.inviteUserEmailTemplate,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.allowEmailRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.minLength=0,this.maxLength,this.minNumbers,this.maxNumbers,this.minUpper,this.maxUpper,this.minLower,this.maxLower,this.minSpecial,this.maxSpecial,this.allowedSpecial});
+    UpdateAuthorizationSettings({this.setting,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.needVerification,this.verificationEmailTemplate,this.deactivationEmailTemplate,this.allowInviteUsers,this.allowDeactivateUsers,this.inviteUserEmailTemplate,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.allowEmailRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.allowResetPassword,this.resetPasswordEmailTemplate,this.resetPasswordTokenExpiration,this.resetPasswordCallback,this.minLength=0,this.maxLength,this.minNumbers,this.maxNumbers,this.minUpper,this.maxUpper,this.minLower,this.maxLower,this.minSpecial,this.maxSpecial,this.allowedSpecial});
     UpdateAuthorizationSettings.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -44771,6 +44795,10 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
         allowEmailRegistration = json['allowEmailRegistration'];
         inviteOnly = json['inviteOnly'];
         allowAnyoneToSignUp = json['allowAnyoneToSignUp'];
+        allowResetPassword = json['allowResetPassword'];
+        resetPasswordEmailTemplate = json['resetPasswordEmailTemplate'];
+        resetPasswordTokenExpiration = json['resetPasswordTokenExpiration'];
+        resetPasswordCallback = json['resetPasswordCallback'];
         minLength = json['minLength'] ?? 0;
         maxLength = json['maxLength'];
         minNumbers = json['minNumbers'];
@@ -44807,6 +44835,10 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
         'allowEmailRegistration': allowEmailRegistration,
         'inviteOnly': inviteOnly,
         'allowAnyoneToSignUp': allowAnyoneToSignUp,
+        'allowResetPassword': allowResetPassword,
+        'resetPasswordEmailTemplate': resetPasswordEmailTemplate,
+        'resetPasswordTokenExpiration': resetPasswordTokenExpiration,
+        'resetPasswordCallback': resetPasswordCallback,
         'minLength': minLength,
         'maxLength': maxLength,
         'minNumbers': minNumbers,
