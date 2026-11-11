@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-10 14:40:13
+Date: 2026-11-11 09:06:19
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -8033,6 +8033,33 @@ class StartPaymentCheckoutResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class InvokeMarketplaceFunctionResponse extends ResponseBase implements IConvertible
+{
+    bool? isSuccess;
+    dynamic? output;
+    String? vendorRequestId;
+
+    InvokeMarketplaceFunctionResponse({this.isSuccess,this.output,this.vendorRequestId});
+    InvokeMarketplaceFunctionResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        isSuccess = json['isSuccess'];
+        output = JsonConverters.fromJson(json['output'],'dynamic',context!);
+        vendorRequestId = json['vendorRequestId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'isSuccess': isSuccess,
+        'output': JsonConverters.toJson(output,'dynamic',context!),
+        'vendorRequestId': vendorRequestId
+    });
+
+    getTypeName() => "InvokeMarketplaceFunctionResponse";
+    TypeContext? context = _ctx;
+}
+
 // @DataContract
 class InvokeCodeWorkflowResponse extends ResponseBase implements IConvertible
 {
@@ -13891,6 +13918,41 @@ class StartPaymentCheckoutRequest extends CodeMashRequestBase implements IReturn
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/marketplace/functions/{FunctionViewId}/invoke", "POST")
+// @DataContract
+class InvokeMarketplaceFunction extends CodeMashRequestBase implements IReturn<InvokeMarketplaceFunctionResponse>, IConvertible, IPost
+{
+    /**
+    * Function view id (func_…), from get_marketplace_functions.
+    */
+    // @DataMember
+    // @ApiMember(Description="Function view id (func_…), from get_marketplace_functions.", IsRequired=true)
+    String functionViewId = "";
+
+    // @DataMember
+    Map<String,dynamic?> payload = {};
+
+    InvokeMarketplaceFunction({this.functionViewId="",this.payload=const {}});
+    InvokeMarketplaceFunction.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        functionViewId = json['functionViewId'] ?? "";
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!) ?? {};
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'functionViewId': functionViewId,
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+    });
+
+    createResponse() => InvokeMarketplaceFunctionResponse();
+    getResponseTypeName() => "InvokeMarketplaceFunctionResponse";
+    getTypeName() => "InvokeMarketplaceFunction";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/workflows/{Id}/invoke", "POST")
 // @DataContract
 class InvokeCodeWorkflow extends CodeMashRequestBase implements IReturn<InvokeCodeWorkflowResponse>, IConvertible, IPost
@@ -17805,6 +17867,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentOrdersResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentOrdersResponse()),
     'PaginatedResponse<PaymentOrderDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PaymentOrderDto>()),
     'StartPaymentCheckoutResponse': TypeInfo(TypeOf.Class, create:() => StartPaymentCheckoutResponse()),
+    'InvokeMarketplaceFunctionResponse': TypeInfo(TypeOf.Class, create:() => InvokeMarketplaceFunctionResponse()),
     'InvokeCodeWorkflowResponse': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflowResponse()),
     'WorkflowRunsResponse': TypeInfo(TypeOf.Class, create:() => WorkflowRunsResponse()),
     'PaginatedResponse<WorkflowRunListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<WorkflowRunListProjection>()),
@@ -17983,6 +18046,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentOrderRequest': TypeInfo(TypeOf.Class, create:() => GetPaymentOrderRequest()),
     'GetPaymentOrdersRequest': TypeInfo(TypeOf.Class, create:() => GetPaymentOrdersRequest()),
     'StartPaymentCheckoutRequest': TypeInfo(TypeOf.Class, create:() => StartPaymentCheckoutRequest()),
+    'InvokeMarketplaceFunction': TypeInfo(TypeOf.Class, create:() => InvokeMarketplaceFunction()),
     'InvokeCodeWorkflow': TypeInfo(TypeOf.Class, create:() => InvokeCodeWorkflow()),
     'GetCodeWorkflowWaitingRuns': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowWaitingRuns()),
     'ResumeCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRun()),
