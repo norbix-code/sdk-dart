@@ -80,6 +80,17 @@ class NorbixConfig {
   /// sent.
   final String? language;
 
+  /// Project every request is scoped to, sent as the `norbix-project-id`
+  /// header — the only place the gateway reads the caller's project from.
+  /// A signed-in user's bearer token carries no project, so a Flutter app
+  /// must set this (or call `setProjectId`) before project calls, or they
+  /// fail with "ProjectId is required". Null (the default) sends no header.
+  final String? projectId;
+
+  /// Account every request is scoped to, sent as the `norbix-account-id`
+  /// header. Null (the default) sends no header.
+  final String? accountId;
+
   NorbixConfig({
     required String baseUrl,
     this.apiVersion = 'v3',
@@ -91,9 +102,13 @@ class NorbixConfig {
     this.env = 'PROD',
     String? region,
     String? language,
+    String? projectId,
+    String? accountId,
   })  : baseUrl = _stripTrailingSlash(baseUrl),
         region = _blankToNull(region),
         language = _blankToNull(language),
+        projectId = _blankToNull(projectId),
+        accountId = _blankToNull(accountId),
         defaultHeaders = Map.unmodifiable(defaultHeaders ?? const {});
 
   /// Build a config from environment variables. Falls back to [defaultBaseUrl]
@@ -112,6 +127,8 @@ class NorbixConfig {
     String envVar = 'NORBIX_ENV',
     String regionVar = 'NORBIX_REGION',
     String languageVar = 'NORBIX_LANGUAGE',
+    String projectIdVar = 'NORBIX_PROJECT_ID',
+    String accountIdVar = 'NORBIX_ACCOUNT_ID',
     Map<String, String>? overrides,
   }) {
     final env = <String, String>{
@@ -137,14 +154,17 @@ class NorbixConfig {
       env: read(envVar) ?? 'PROD',
       region: read(regionVar),
       language: read(languageVar),
+      projectId: read(projectIdVar),
+      accountId: read(accountIdVar),
     );
   }
 
   /// Returns a copy with selected fields replaced. Useful for runtime token
   /// rotation without mutating shared state.
   ///
-  /// Pass an empty string for [region] or [language] to clear it (null keeps
-  /// the current value, like every other field).
+  /// Pass an empty string for [region], [language], [projectId] or
+  /// [accountId] to clear it (null keeps the current value, like every other
+  /// field).
   NorbixConfig copyWith({
     String? baseUrl,
     String? apiVersion,
@@ -156,6 +176,8 @@ class NorbixConfig {
     String? env,
     String? region,
     String? language,
+    String? projectId,
+    String? accountId,
   }) {
     return NorbixConfig(
       baseUrl: baseUrl ?? this.baseUrl,
@@ -168,6 +190,8 @@ class NorbixConfig {
       env: env ?? this.env,
       region: region ?? this.region,
       language: language ?? this.language,
+      projectId: projectId ?? this.projectId,
+      accountId: accountId ?? this.accountId,
     );
   }
 

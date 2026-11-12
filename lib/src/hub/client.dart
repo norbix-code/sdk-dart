@@ -54,6 +54,11 @@ class NorbixHub {
   ///   ),
   /// );
   /// ```
+  ///
+  /// [projectId] and [accountId] (or the same fields on [config]) fill the
+  /// `{projectId}` / `{accountId}` route segments AND are sent as the
+  /// `norbix-project-id` / `norbix-account-id` headers the gateway reads the
+  /// caller's scope from. An explicit argument wins over the config field.
   NorbixHub({
     NorbixConfig? config,
     HttpDriver? driver,
@@ -62,20 +67,51 @@ class NorbixHub {
     String? env,
     String? region,
     String? language,
-  }) : _transport = Transport(
-          config: _withLanguage(
-            _withRegion(
-              _withEnv(
-                config ?? NorbixConfig(baseUrl: kNorbixHubDefaultBaseUrl),
-                env,
+  }) : this._(
+          _withScope(
+            _withLanguage(
+              _withRegion(
+                _withEnv(
+                  config ?? NorbixConfig(baseUrl: kNorbixHubDefaultBaseUrl),
+                  env,
+                ),
+                region,
               ),
-              region,
+              language,
             ),
-            language,
+            projectId,
+            accountId,
           ),
-          driver: driver,
-          defaultPathParams: {'projectId': projectId, 'accountId': accountId},
+          driver,
+          projectId,
+          accountId,
         );
+
+  NorbixHub._(
+    NorbixConfig config,
+    HttpDriver? driver,
+    Object? projectId,
+    Object? accountId,
+  ) : _transport = Transport(
+          config: config,
+          driver: driver,
+          defaultPathParams: {
+            'projectId': projectId ?? config.projectId,
+            'accountId': accountId ?? config.accountId,
+          },
+        );
+
+  /// Apply optional `projectId` / `accountId` overrides on top of a config so
+  /// they are sent as headers too. A null argument keeps the config's value.
+  static NorbixConfig _withScope(
+    NorbixConfig config,
+    Object? projectId,
+    Object? accountId,
+  ) =>
+      config.copyWith(
+        projectId: projectId == null ? null : '$projectId',
+        accountId: accountId == null ? null : '$accountId',
+      );
 
   /// Apply an optional `env` override on top of a config without losing its
   /// other fields. When `env` is null the config's own value (default `PROD`)
@@ -106,8 +142,8 @@ class NorbixHub {
   ///   NORBIX_HUB_VERSION        (default v3)
   ///   NORBIX_HUB_TIMEOUT_MS
   ///   NORBIX_HUB_MAX_RETRIES
-  ///   NORBIX_HUB_PROJECT_ID
-  ///   NORBIX_HUB_ACCOUNT_ID
+  ///   NORBIX_HUB_PROJECT_ID      (route segment + norbix-project-id header)
+  ///   NORBIX_HUB_ACCOUNT_ID      (route segment + norbix-account-id header)
   ///   NORBIX_HUB_REGION
   ///   NORBIX_HUB_LANGUAGE        (sent as Accept-Language)
   factory NorbixHub.fromEnv({
@@ -131,6 +167,8 @@ class NorbixHub {
       envVar: 'NORBIX_HUB_ENV',
       regionVar: 'NORBIX_HUB_REGION',
       languageVar: 'NORBIX_HUB_LANGUAGE',
+      projectIdVar: 'NORBIX_HUB_PROJECT_ID',
+      accountIdVar: 'NORBIX_HUB_ACCOUNT_ID',
       overrides: overrides,
     );
     return NorbixHub(
@@ -156,8 +194,18 @@ class NorbixHub {
       _transport.config = _transport.config.copyWith(bearerToken: token);
 
   /// Replace the entire configuration. Useful for switching environments
-  /// (staging <-> production) at runtime.
-  void setConfig(NorbixConfig config) => _transport.config = config;
+  /// (staging <-> production) at runtime. A `projectId` / `accountId` on the
+  /// new config also becomes the route default; when the new config has none
+  /// the current project and account are kept.
+  void setConfig(NorbixConfig config) {
+    _transport.config = config;
+    if (config.projectId != null) {
+      _transport.defaultPathParams['projectId'] = config.projectId;
+    }
+    if (config.accountId != null) {
+      _transport.defaultPathParams['accountId'] = config.accountId;
+    }
+  }
 
   /// Project environment all requests target (sent as the `norbix-env`
   /// header). Defaults to `PROD`.
@@ -194,21 +242,31 @@ class NorbixHub {
   void setLanguage(String? language) =>
       _transport.config = _transport.config.copyWith(language: language ?? '');
 
-  /// Project context used for routes that include `{projectId}`.
-  /// Per-call parameters still override this default.
+  /// Project context: fills routes that include `{projectId}` and is sent as
+  /// the `norbix-project-id` header on every request. Per-call parameters
+  /// still override the route segment.
   Object? get projectId => _transport.defaultPathParams['projectId'];
 
-  /// Set or replace the default project context at runtime.
-  void setProjectId(Object? projectId) =>
-      _transport.defaultPathParams['projectId'] = projectId;
+  /// Set or replace the default project context at runtime (route segment
+  /// and header). Pass `null` to clear both.
+  void setProjectId(Object? projectId) {
+    _transport.defaultPathParams['projectId'] = projectId;
+    _transport.config = _transport.config
+        .copyWith(projectId: projectId == null ? '' : '$projectId');
+  }
 
-  /// Account context used for routes that include `{accountId}`.
-  /// Per-call parameters still override this default.
+  /// Account context: fills routes that include `{accountId}` and is sent as
+  /// the `norbix-account-id` header on every request. Per-call parameters
+  /// still override the route segment.
   Object? get accountId => _transport.defaultPathParams['accountId'];
 
-  /// Set or replace the default account context at runtime.
-  void setAccountId(Object? accountId) =>
-      _transport.defaultPathParams['accountId'] = accountId;
+  /// Set or replace the default account context at runtime (route segment
+  /// and header). Pass `null` to clear both.
+  void setAccountId(Object? accountId) {
+    _transport.defaultPathParams['accountId'] = accountId;
+    _transport.config = _transport.config
+        .copyWith(accountId: accountId == null ? '' : '$accountId');
+  }
 
   late final AccountsResource accounts = AccountsResource(_transport);
   late final AiIntegrationsResource aiIntegrations =

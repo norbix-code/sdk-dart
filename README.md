@@ -87,6 +87,43 @@ final api = NorbixApi.fromEnv();   // reads NORBIX_API_*
 final hub = NorbixHub.fromEnv();   // reads NORBIX_HUB_*
 ```
 
+### Project and account
+
+The gateway reads the caller's project **only** from the
+`norbix-project-id` header, and the account from `norbix-account-id`.
+A signed-in user's bearer token carries no project, so an app that signs
+users in (the Flutter case) must name the project — otherwise project
+calls fail with "ProjectId is required". When an id is set it is sent on
+every request; when it is not set, no header is sent.
+
+```dart
+// 1) At construction
+final api = NorbixApi(projectId: 'prj_...');           // accountId: too
+final hub = NorbixHub(projectId: 'prj_...', accountId: 'acc_...');
+// …or on the config, for either client
+final api = NorbixApi(
+  config: NorbixConfig(baseUrl: kNorbixApiDefaultBaseUrl, projectId: 'prj_...'),
+);
+
+// 2) From environment variables
+final api = NorbixApi.fromEnv();   // reads NORBIX_API_PROJECT_ID / NORBIX_API_ACCOUNT_ID
+final hub = NorbixHub.fromEnv();   // reads NORBIX_HUB_PROJECT_ID / NORBIX_HUB_ACCOUNT_ID
+
+// 3) At runtime — e.g. after sign-in, once the app knows the project
+api.setBearerToken(userToken);
+api.setProjectId('prj_...');       // next request carries norbix-project-id
+print(api.projectId);              // 'prj_...'
+api.setProjectId(null);            // clear — no header
+```
+
+On `NorbixHub` the same `projectId` / `accountId` also fill the
+`{projectId}` / `{accountId}` route segments, so
+`hub.projects.getProjectTokens()` needs no argument once the project is
+set; a per-call `projectId:` still overrides the route segment (the
+header keeps the client-level project, as in the TypeScript SDK).
+(`NorbixConfig.fromEnv` takes `projectIdVar:` / `accountIdVar:` names,
+default `NORBIX_PROJECT_ID` / `NORBIX_ACCOUNT_ID`.)
+
 ### Regions
 
 Pin a client to a Norbix region (a region code such as `nb-eu-germany`).
