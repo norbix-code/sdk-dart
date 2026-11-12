@@ -244,10 +244,13 @@ class Transport {
     Map<String, Object?>? pathParams,
   }) {
     var normalizedRoute = route;
-    final mergedPathParams = <String, Object?>{
-      ...defaultPathParams,
-      ...?pathParams,
-    };
+    // A per-call value wins over the client default, but only when it is
+    // given: resources always pass every path key (`{'projectId': null}` for
+    // an omitted argument), and a null must not wipe out the default.
+    final mergedPathParams = <String, Object?>{...defaultPathParams};
+    pathParams?.forEach((k, v) {
+      if (v != null) mergedPathParams[k] = v;
+    });
     if (mergedPathParams.isNotEmpty) {
       mergedPathParams.forEach((k, v) {
         if (v == null) return;
@@ -335,8 +338,24 @@ class Transport {
     if (resolvedLanguage != null && resolvedLanguage.isNotEmpty) {
       out['accept-language'] = resolvedLanguage;
     }
+    // Tenant scope: `norbix-project-id` is the only place the gateway reads
+    // the caller's project from (RequestProjectHeader), `norbix-account-id`
+    // the account. Sent whenever the client has one — on unauthenticated
+    // calls too, like the TypeScript SDK — and never when it has none.
+    final projectId = config.projectId ?? _pathDefault('projectId');
+    if (projectId != null) out['norbix-project-id'] = projectId;
+    final accountId = config.accountId ?? _pathDefault('accountId');
+    if (accountId != null) out['norbix-account-id'] = accountId;
     if (extra != null) out.addAll(extra);
     return out;
+  }
+
+  /// A client-level path default as a header value; null when unset or blank.
+  String? _pathDefault(String key) {
+    final v = defaultPathParams[key];
+    if (v == null) return null;
+    final s = '$v';
+    return s.isEmpty ? null : s;
   }
 
   Object? _parseResponse(HttpDriverResponse response) {

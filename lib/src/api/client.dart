@@ -38,6 +38,11 @@ class NorbixApi {
   ///     apiKey: 'nbx_dev_...',
   ///   ),
   /// );
+  ///
+  /// // A Flutter app signing users in: the bearer token carries no project,
+  /// // so name it — it is sent as the `norbix-project-id` header.
+  /// final client = NorbixApi(projectId: 'prj_...');
+  /// client.setBearerToken(userToken);
   /// ```
   NorbixApi({
     NorbixConfig? config,
@@ -45,12 +50,16 @@ class NorbixApi {
     String? env,
     String? region,
     String? language,
+    String? projectId,
+    String? accountId,
   }) : _transport = Transport(
           config: () {
             var cfg = config ?? NorbixConfig(baseUrl: kNorbixApiDefaultBaseUrl);
             if (env != null) cfg = cfg.copyWith(env: env);
             if (region != null) cfg = cfg.copyWith(region: region);
             if (language != null) cfg = cfg.copyWith(language: language);
+            if (projectId != null) cfg = cfg.copyWith(projectId: projectId);
+            if (accountId != null) cfg = cfg.copyWith(accountId: accountId);
             return cfg;
           }(),
           driver: driver,
@@ -69,6 +78,8 @@ class NorbixApi {
   ///   NORBIX_API_MAX_RETRIES
   ///   NORBIX_API_REGION
   ///   NORBIX_API_LANGUAGE        (sent as Accept-Language)
+  ///   NORBIX_API_PROJECT_ID      (sent as norbix-project-id)
+  ///   NORBIX_API_ACCOUNT_ID      (sent as norbix-account-id)
   factory NorbixApi.fromEnv({
     Map<String, String>? overrides,
     HttpDriver? driver,
@@ -84,6 +95,8 @@ class NorbixApi {
       envVar: 'NORBIX_API_ENV',
       regionVar: 'NORBIX_API_REGION',
       languageVar: 'NORBIX_API_LANGUAGE',
+      projectIdVar: 'NORBIX_API_PROJECT_ID',
+      accountIdVar: 'NORBIX_API_ACCOUNT_ID',
       overrides: overrides,
     );
     return NorbixApi(config: cfg, driver: driver);
@@ -136,6 +149,25 @@ class NorbixApi {
   /// still override this for individual requests.
   void setLanguage(String? language) =>
       _transport.config = _transport.config.copyWith(language: language ?? '');
+
+  /// Project every request is scoped to, sent as the `norbix-project-id`
+  /// header. Null (the default) means no header.
+  String? get projectId => _transport.config.projectId;
+
+  /// Set the project for subsequent requests — e.g. once a Flutter app knows
+  /// which project the signed-in user works in. Pass `null` to clear it (no
+  /// header).
+  void setProjectId(String? projectId) => _transport.config =
+      _transport.config.copyWith(projectId: projectId ?? '');
+
+  /// Account every request is scoped to, sent as the `norbix-account-id`
+  /// header. Null (the default) means no header.
+  String? get accountId => _transport.config.accountId;
+
+  /// Set the account for subsequent requests. Pass `null` to clear it (no
+  /// header).
+  void setAccountId(String? accountId) => _transport.config =
+      _transport.config.copyWith(accountId: accountId ?? '');
 
   /// Replace the entire configuration. Useful for switching environments
   /// (staging <-> production) at runtime.
