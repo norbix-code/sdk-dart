@@ -170,7 +170,7 @@ class UsersResource extends Resource {
   }
 
   /// The URL that starts a project social sign-in:
-  /// `GET {api}/{version}/membership/auth/social/{provider}?projectId=…[&env=…][&mode=…][&returnUrl=…]`.
+  /// `GET {api}/{version}/membership/auth/social/{provider}?projectId=…[&env=…][&mode=…][&returnUrl=…][&codeChallenge=…]`.
   ///
   /// Not a call: open it in the system browser (ASWebAuthenticationSession /
   /// Custom Tabs, not an embedded web view) and the gateway redirects to the
@@ -181,13 +181,20 @@ class UsersResource extends Resource {
   /// to come back to — absolute https (http only on localhost), origin in the
   /// project's allowed origins. It gets `?code=…&provider=…` (or `?error=…`);
   /// trade the code with [exchangeSocialSignInCode] within 2 minutes.
+  /// [codeChallenge]: PKCE S256 from `createPkcePair()`; the exchange then needs
+  /// `codeVerifier` in its body.
   ///
   /// Hand-written: the start route answers a 302, so it has no call method.
-  Uri socialSignInUrl(String provider, {String? mode, String? returnUrl}) {
+  Uri socialSignInUrl(String provider,
+      {String? mode, String? returnUrl, String? codeChallenge}) {
     return transport.navigationUrl(
       route: '/{version}/membership/auth/social/{provider}',
       pathParams: <String, Object?>{'provider': provider},
-      query: <String, Object?>{'mode': mode, 'returnUrl': returnUrl},
+      query: <String, Object?>{
+        'mode': mode,
+        'returnUrl': returnUrl,
+        'codeChallenge': codeChallenge,
+      },
     );
   }
 
