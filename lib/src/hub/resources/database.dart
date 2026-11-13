@@ -270,21 +270,6 @@ class DatabaseResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/database/disable`
-  Future<Object?> disableDatabase(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/database/disable',
-      method: 'PUT',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
   /// `PUT /{version}/database/integrations/{id}/disable`
   Future<Object?> disableDatabaseIntegration(
       {required Object id,
@@ -344,21 +329,6 @@ class DatabaseResource extends Resource {
       query: query,
       headers: headers,
       pathParams: <String, Object?>{'collectionName': collectionName},
-    );
-  }
-
-  /// `PUT /{version}/database/enable`
-  Future<Object?> enableDatabase(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/database/enable',
-      method: 'PUT',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
     );
   }
 

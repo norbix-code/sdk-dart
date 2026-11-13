@@ -99,21 +99,6 @@ class MembershipResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/membership/disable`
-  Future<Object?> disableMembership(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/membership/disable',
-      method: 'PUT',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
   /// `PUT /{version}/membership/integrations/{id}/disable`
   Future<Object?> disableMembershipIntegration(
       {required Object id,
@@ -143,21 +128,6 @@ class MembershipResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'triggerId': triggerId},
-    );
-  }
-
-  /// `PUT /{version}/membership/enable`
-  Future<Object?> enableMembership(
-      {Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/membership/enable',
-      method: 'PUT',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: null,
     );
   }
 
@@ -283,18 +253,6 @@ class MembershipResource extends Resource {
     );
   }
 
-  /// `GET /{version}/membership/policies/new/options`
-  Future<Object?> getPolicyOptions(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/membership/policies/new/options',
-      method: 'GET',
-      query: query,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
   /// `GET /{version}/membership/roles/{id}`
   Future<Object?> getRole(
       {required Object id,
@@ -363,22 +321,6 @@ class MembershipResource extends Resource {
       body: body,
       headers: headers,
       pathParams: null,
-    );
-  }
-
-  /// `PUT /{version}/membership/integrations/{id}/default`
-  Future<Object?> setMembershipIntegrationAsDefault(
-      {required Object id,
-      Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/membership/integrations/{id}/default',
-      method: 'PUT',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: <String, Object?>{'id': id},
     );
   }
 
