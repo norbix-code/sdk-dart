@@ -349,7 +349,6 @@ await hub.database.getCollectionImport(id: importId);
 | Integrations | `getDatabaseIntegrations`, `getDatabaseIntegration`, `saveDatabaseIntegration`, `testDatabaseIntegration`, `enableDatabaseIntegration`, `disableDatabaseIntegration`, `setDatabaseIntegrationAsDefault`, `deleteDatabaseIntegration`, `getAllowedFlexTiers`, `revealManagedFlexConnectionString` | — |
 | Saved aggregates | `getDatabaseAggregates`, `getDatabaseAggregate`, `saveDatabaseAggregate`, `testDatabaseAggregate`, `deleteDatabaseAggregate` | — |
 | Collection imports | `requestImportUploadUrl`, `analyzeImportFile`, `createCollectionImport`, `getCollectionImports`, `getCollectionImport`, `deleteCollectionImport` | — |
-| Module | `enableDatabase`, `disableDatabase` | — |
 
 Each taxonomy in `getDatabaseTaxonomies` also carries `description`,
 `dependencies`, `parentName` and `dependencyRefs`. `dependencyRefs` is a list

@@ -7,6 +7,7 @@ import '../_fake_driver.dart';
 /// is a PUT. The gateway moved them from GET to PUT; the old GET paths are
 /// a hidden, deprecated alias that is removed after 0.2. One test per
 /// method, against the fake driver (never a real server): verb and full URL.
+/// Membership and Database are always on and have no switch.
 NorbixHub _client(FakeHttpDriver driver) => NorbixHub(
       config: NorbixConfig(baseUrl: 'https://hub.norbix.ai', apiKey: 'k'),
       driver: driver,
@@ -16,14 +17,6 @@ typedef _Call = Future<Object?> Function(NorbixHub hub);
 
 void main() {
   final cases = <String, (String, _Call)>{
-    'database.enableDatabase': (
-      'database/enable',
-      (h) => h.database.enableDatabase()
-    ),
-    'database.disableDatabase': (
-      'database/disable',
-      (h) => h.database.disableDatabase()
-    ),
     'files.enableFiles': ('files/enable', (h) => h.files.enableFiles()),
     'files.disableFiles': ('files/disable', (h) => h.files.disableFiles()),
     'pushNotifications.enablePush': (
@@ -60,14 +53,6 @@ void main() {
     ),
     'logs.enableLogging': ('logs/enable', (h) => h.logs.enableLogging()),
     'logs.disableLogging': ('logs/disable', (h) => h.logs.disableLogging()),
-    'membership.enableMembership': (
-      'membership/enable',
-      (h) => h.membership.enableMembership()
-    ),
-    'membership.disableMembership': (
-      'membership/disable',
-      (h) => h.membership.disableMembership()
-    ),
     'scheduler.enableScheduler': (
       'scheduler/enable',
       (h) => h.scheduler.enableScheduler()
