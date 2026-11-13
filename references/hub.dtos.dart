@@ -15623,6 +15623,32 @@ class PublicBrandDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class PublicSocialSignInDto implements IConvertible
+{
+    String provider = "";
+    String displayName = "";
+    String startPath = "";
+
+    PublicSocialSignInDto({this.provider="",this.displayName="",this.startPath=""});
+    PublicSocialSignInDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        provider = json['provider'] ?? "";
+        displayName = json['displayName'] ?? "";
+        startPath = json['startPath'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'provider': provider,
+        'displayName': displayName,
+        'startPath': startPath
+    };
+
+    getTypeName() => "PublicSocialSignInDto";
+    TypeContext? context = _ctx;
+}
+
 class PublicPasswordPolicyDto implements IConvertible
 {
     int minLength = 0;
@@ -15664,15 +15690,17 @@ class PublicPasswordPolicyDto implements IConvertible
 class PublicAuthDto implements IConvertible
 {
     List<String> socialProviders = [];
+    List<PublicSocialSignInDto> socialSignIn = [];
     bool? passkey;
     List<String>? methods;
     PublicPasswordPolicyDto? passwordPolicy;
 
-    PublicAuthDto({this.socialProviders=const [],this.passkey,this.methods,this.passwordPolicy});
+    PublicAuthDto({this.socialProviders=const [],this.socialSignIn=const [],this.passkey,this.methods,this.passwordPolicy});
     PublicAuthDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         socialProviders = JsonConverters.fromJson(json['socialProviders'],'List<String>',context!) ?? [];
+        socialSignIn = JsonConverters.fromJson(json['socialSignIn'],'List<PublicSocialSignInDto>',context!) ?? [];
         passkey = json['passkey'];
         methods = JsonConverters.fromJson(json['methods'],'List<String>',context!);
         passwordPolicy = JsonConverters.fromJson(json['passwordPolicy'],'PublicPasswordPolicyDto',context!);
@@ -15681,6 +15709,7 @@ class PublicAuthDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'socialProviders': JsonConverters.toJson(socialProviders,'List<String>',context!),
+        'socialSignIn': JsonConverters.toJson(socialSignIn,'List<PublicSocialSignInDto>',context!),
         'passkey': passkey,
         'methods': JsonConverters.toJson(methods,'List<String>',context!),
         'passwordPolicy': JsonConverters.toJson(passwordPolicy,'PublicPasswordPolicyDto',context!)
@@ -39593,21 +39622,24 @@ class GetPublicProjectBrandAsset extends RequestBase implements IReturn<Uint8Lis
 }
 
 // @Route("/{version}/public/projects/{ProjectId}/config", "GET")
-class GetPublicProjectConfig extends RequestBase implements IReturn<PublicProjectConfigDto>, IConvertible, IGet
+class GetPublicProjectConfig extends RequestBase implements IReturn<PublicProjectConfigDto>, IHasEnv, IConvertible, IGet
 {
     String? projectId;
+    String? env;
 
-    GetPublicProjectConfig({this.projectId});
+    GetPublicProjectConfig({this.projectId,this.env});
     GetPublicProjectConfig.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         projectId = json['projectId'];
+        env = json['env'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'projectId': projectId
+        'projectId': projectId,
+        'env': env
     });
 
     createResponse() => PublicProjectConfigDto();
@@ -61411,8 +61443,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<QuickConnectProviderDto>': TypeInfo(TypeOf.Class, create:() => <QuickConnectProviderDto>[]),
     'EchoKeylessDto': TypeInfo(TypeOf.Class, create:() => EchoKeylessDto()),
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
+    'PublicSocialSignInDto': TypeInfo(TypeOf.Class, create:() => PublicSocialSignInDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
+    'List<PublicSocialSignInDto>': TypeInfo(TypeOf.Class, create:() => <PublicSocialSignInDto>[]),
     'PublicAiAssistantDto': TypeInfo(TypeOf.Class, create:() => PublicAiAssistantDto()),
     'PublicAiChatDto': TypeInfo(TypeOf.Class, create:() => PublicAiChatDto()),
     'List<PublicAiAssistantDto>': TypeInfo(TypeOf.Class, create:() => <PublicAiAssistantDto>[]),

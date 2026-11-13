@@ -259,6 +259,9 @@ await api.users.linkIdentity(userId: 'usr_…', body: {'code': linkCode});
 - `socialSignInUrl(provider, mode:, returnUrl:)` puts the project id and a
   non-PROD env in the query, because a navigation sends no headers. The start
   and the provider callback have no call method.
+- `exchangeSocialSignInCode` sends no credentials, even when the client has a
+  key or a JWT: the gateway refuses an old token on any route, and the
+  exchange is how a user signs in again.
 - `linkIdentity` now takes `{'code': …}` (the link code); `provider` /
   `providerToken` are gone.
 - Refusals: `CM-ERRORS-MEMBERSHIP-051` (code used, expired or unknown), `-055`

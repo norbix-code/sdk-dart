@@ -151,7 +151,8 @@ class UsersResource extends Resource {
   /// Trades the one-time code from the social sign-in return page (2
   /// minutes, once) for the project JWT. Body: `{'code': …}`. Answers
   /// `bearerToken`, `userId`, `displayName`, `expiresAt`,
-  /// `meta.credentialVersion`.
+  /// `meta.credentialVersion`. Sends no credentials: the gateway judges any
+  /// token it gets, even here, and refuses an old one.
   Future<Object?> exchangeSocialSignInCode(
       {required Object provider,
       Map<String, Object?>? query,
@@ -164,6 +165,7 @@ class UsersResource extends Resource {
       body: body,
       headers: headers,
       pathParams: <String, Object?>{'Provider': provider},
+      authenticated: false,
     );
   }
 
