@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-11 14:52:38
+Date: 2026-11-13 16:54:03
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -2033,6 +2033,32 @@ class PublicBrandDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class PublicSocialSignInDto implements IConvertible
+{
+    String provider = "";
+    String displayName = "";
+    String startPath = "";
+
+    PublicSocialSignInDto({this.provider="",this.displayName="",this.startPath=""});
+    PublicSocialSignInDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        provider = json['provider'] ?? "";
+        displayName = json['displayName'] ?? "";
+        startPath = json['startPath'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'provider': provider,
+        'displayName': displayName,
+        'startPath': startPath
+    };
+
+    getTypeName() => "PublicSocialSignInDto";
+    TypeContext? context = _ctx;
+}
+
 class PublicPasswordPolicyDto implements IConvertible
 {
     int minLength = 0;
@@ -2074,15 +2100,17 @@ class PublicPasswordPolicyDto implements IConvertible
 class PublicAuthDto implements IConvertible
 {
     List<String> socialProviders = [];
+    List<PublicSocialSignInDto> socialSignIn = [];
     bool? passkey;
     List<String>? methods;
     PublicPasswordPolicyDto? passwordPolicy;
 
-    PublicAuthDto({this.socialProviders=const [],this.passkey,this.methods,this.passwordPolicy});
+    PublicAuthDto({this.socialProviders=const [],this.socialSignIn=const [],this.passkey,this.methods,this.passwordPolicy});
     PublicAuthDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         socialProviders = JsonConverters.fromJson(json['socialProviders'],'List<String>',context!) ?? [];
+        socialSignIn = JsonConverters.fromJson(json['socialSignIn'],'List<PublicSocialSignInDto>',context!) ?? [];
         passkey = json['passkey'];
         methods = JsonConverters.fromJson(json['methods'],'List<String>',context!);
         passwordPolicy = JsonConverters.fromJson(json['passwordPolicy'],'PublicPasswordPolicyDto',context!);
@@ -2091,6 +2119,7 @@ class PublicAuthDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'socialProviders': JsonConverters.toJson(socialProviders,'List<String>',context!),
+        'socialSignIn': JsonConverters.toJson(socialSignIn,'List<PublicSocialSignInDto>',context!),
         'passkey': passkey,
         'methods': JsonConverters.toJson(methods,'List<String>',context!),
         'passwordPolicy': JsonConverters.toJson(passwordPolicy,'PublicPasswordPolicyDto',context!)
@@ -3925,6 +3954,38 @@ class WorkflowRunActorDto implements IConvertible
 }
 
 // @DataContract
+class WorkflowWaitAnswerDto implements IConvertible
+{
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String decision = "";
+
+    // @DataMember
+    DateTime? at;
+
+    WorkflowWaitAnswerDto({this.userId="",this.decision="",this.at});
+    WorkflowWaitAnswerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'] ?? "";
+        decision = json['decision'] ?? "";
+        at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'decision': decision,
+        'at': JsonConverters.toJson(at,'DateTime',context!)
+    };
+
+    getTypeName() => "WorkflowWaitAnswerDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class WorkflowWaitingOnDto implements IConvertible
 {
     // @DataMember
@@ -3943,9 +4004,15 @@ class WorkflowWaitingOnDto implements IConvertible
     List<String>? assignees;
 
     // @DataMember
+    int? require;
+
+    // @DataMember
+    List<WorkflowWaitAnswerDto>? answers;
+
+    // @DataMember
     String? childRunId;
 
-    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.childRunId});
+    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.require,this.answers,this.childRunId});
     WorkflowWaitingOnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -3954,6 +4021,8 @@ class WorkflowWaitingOnDto implements IConvertible
         until = JsonConverters.fromJson(json['until'],'DateTime',context!);
         key = json['key'];
         assignees = JsonConverters.fromJson(json['assignees'],'List<String>',context!);
+        require = json['require'];
+        answers = JsonConverters.fromJson(json['answers'],'List<WorkflowWaitAnswerDto>',context!);
         childRunId = json['childRunId'];
         return this;
     }
@@ -3964,6 +4033,8 @@ class WorkflowWaitingOnDto implements IConvertible
         'until': JsonConverters.toJson(until,'DateTime',context!),
         'key': key,
         'assignees': JsonConverters.toJson(assignees,'List<String>',context!),
+        'require': require,
+        'answers': JsonConverters.toJson(answers,'List<WorkflowWaitAnswerDto>',context!),
         'childRunId': childRunId
     };
 
@@ -7208,6 +7279,87 @@ class GetUserPreferencesResponse extends ResponseBase implements IConvertible
 }
 
 // @DataContract
+class StartLinkIdentityResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? authorizeUrl;
+
+    StartLinkIdentityResponse({this.authorizeUrl});
+    StartLinkIdentityResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        authorizeUrl = json['authorizeUrl'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'authorizeUrl': authorizeUrl
+    });
+
+    getTypeName() => "StartLinkIdentityResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SocialSignInStartResponse extends ResponseBase implements IConvertible
+{
+    SocialSignInStartResponse();
+    SocialSignInStartResponse.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "SocialSignInStartResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SocialSignInTokenResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? bearerToken;
+
+    // @DataMember
+    String? userId;
+
+    // @DataMember
+    String? displayName;
+
+    // @DataMember
+    DateTime? expiresAt;
+
+    // @DataMember
+    Map<String,String?>? meta;
+
+    SocialSignInTokenResponse({this.bearerToken,this.userId,this.displayName,this.expiresAt,this.meta});
+    SocialSignInTokenResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        bearerToken = json['bearerToken'];
+        userId = json['userId'];
+        displayName = json['displayName'];
+        expiresAt = JsonConverters.fromJson(json['expiresAt'],'DateTime',context!);
+        meta = JsonConverters.toStringMap(json['meta']);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'bearerToken': bearerToken,
+        'userId': userId,
+        'displayName': displayName,
+        'expiresAt': JsonConverters.toJson(expiresAt,'DateTime',context!),
+        'meta': meta
+    });
+
+    getTypeName() => "SocialSignInTokenResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class CredentialChangedResponse extends ResponseBase implements IConvertible
 {
     // @DataMember
@@ -9286,21 +9438,24 @@ class GetPublicProjectBrandAsset extends RequestBase implements IReturn<Uint8Lis
 }
 
 // @Route("/{version}/public/projects/{ProjectId}/config", "GET")
-class GetPublicProjectConfig extends RequestBase implements IReturn<PublicProjectConfigDto>, IConvertible, IGet
+class GetPublicProjectConfig extends RequestBase implements IReturn<PublicProjectConfigDto>, IHasEnv, IConvertible, IGet
 {
     String? projectId;
+    String? env;
 
-    GetPublicProjectConfig({this.projectId});
+    GetPublicProjectConfig({this.projectId,this.env});
     GetPublicProjectConfig.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         projectId = json['projectId'];
+        env = json['env'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'projectId': projectId
+        'projectId': projectId,
+        'env': env
     });
 
     createResponse() => PublicProjectConfigDto();
@@ -10663,7 +10818,56 @@ class FinishInvitationRequest extends CodeMashRequestBase implements IReturn<Emp
 /**
 * Membership
 */
-// @Route("/{version}/membership/auth/{userId}/link-identity", "POST")
+// @Route("/{version}/membership/auth/{UserId}/link-identity/start", "POST")
+// @Api(Description="Membership")
+// @DataContract
+class StartLinkIdentityRequest extends CodeMashRequestBase implements IReturn<StartLinkIdentityResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String userId = "";
+
+    /**
+    * google, apple, microsoft, github, facebook, x or okta.
+    */
+    // @DataMember
+    // @ApiMember(Description="google, apple, microsoft, github, facebook, x or okta.", IsRequired=true)
+    String provider = "";
+
+    // @DataMember
+    String? mode;
+
+    // @DataMember
+    String? returnUrl;
+
+    StartLinkIdentityRequest({this.userId="",this.provider="",this.mode,this.returnUrl});
+    StartLinkIdentityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        userId = json['userId'] ?? "";
+        provider = json['provider'] ?? "";
+        mode = json['mode'];
+        returnUrl = json['returnUrl'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'userId': userId,
+        'provider': provider,
+        'mode': mode,
+        'returnUrl': returnUrl
+    });
+
+    createResponse() => StartLinkIdentityResponse();
+    getResponseTypeName() => "StartLinkIdentityResponse";
+    getTypeName() => "StartLinkIdentityRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Membership
+*/
+// @Route("/{version}/membership/auth/{UserId}/link-identity", "POST")
 // @Api(Description="Membership")
 // @DataContract
 class LinkIdentityRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
@@ -10672,36 +10876,21 @@ class LinkIdentityRequest extends CodeMashRequestBase implements IReturn<EmptyRe
     String userId = "";
 
     // @DataMember
-    String provider = "";
+    String code = "";
 
-    // @DataMember
-    String providerToken = "";
-
-    // @DataMember
-    String? emailToVerify;
-
-    // @DataMember
-    String? databaseIntegrationId;
-
-    LinkIdentityRequest({this.userId="",this.provider="",this.providerToken="",this.emailToVerify,this.databaseIntegrationId});
+    LinkIdentityRequest({this.userId="",this.code=""});
     LinkIdentityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         userId = json['userId'] ?? "";
-        provider = json['provider'] ?? "";
-        providerToken = json['providerToken'] ?? "";
-        emailToVerify = json['emailToVerify'];
-        databaseIntegrationId = json['databaseIntegrationId'];
+        code = json['code'] ?? "";
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'userId': userId,
-        'provider': provider,
-        'providerToken': providerToken,
-        'emailToVerify': emailToVerify,
-        'databaseIntegrationId': databaseIntegrationId
+        'code': code
     });
 
     createResponse() => EmptyResponse();
@@ -10905,6 +11094,146 @@ class SetContactTagSubscriptionRequest extends CodeMashRequestBase implements IR
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "SetContactTagSubscriptionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Membership
+*/
+// @Route("/{version}/membership/auth/social/{Provider}", "GET")
+// @Api(Description="Membership")
+// @DataContract
+class StartSocialSignInRequest extends CodeMashRequestBase implements IReturn<SocialSignInStartResponse>, IConvertible, IGet
+{
+    /**
+    * google, apple, microsoft, github, facebook, x or okta.
+    */
+    // @DataMember
+    // @ApiMember(Description="google, apple, microsoft, github, facebook, x or okta.", IsRequired=true)
+    String provider = "";
+
+    /**
+    * Name of the integration's OAuth mode (which app page to come back to). Default: the only mode, else the first by name.
+    */
+    // @DataMember
+    // @ApiMember(Description="Name of the integration's OAuth mode (which app page to come back to). Default: the only mode, else the first by name.")
+    String? mode;
+
+    /**
+    * Optional app page to come back to (success and failure). Absolute https (http only on localhost), origin in the project's allowed origins. Wins over the mode's pages.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional app page to come back to (success and failure). Absolute https (http only on localhost), origin in the project's allowed origins. Wins over the mode's pages.")
+    String? returnUrl;
+
+    StartSocialSignInRequest({this.provider="",this.mode,this.returnUrl});
+    StartSocialSignInRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = json['provider'] ?? "";
+        mode = json['mode'];
+        returnUrl = json['returnUrl'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': provider,
+        'mode': mode,
+        'returnUrl': returnUrl
+    });
+
+    createResponse() => SocialSignInStartResponse();
+    getResponseTypeName() => "SocialSignInStartResponse";
+    getTypeName() => "StartSocialSignInRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Membership
+*/
+// @Route("/{version}/membership/auth/social/{Provider}/callback/{ProjectId}", "GET POST")
+// @Api(Description="Membership")
+// @DataContract
+class SocialSignInCallbackRequest extends CodeMashRequestBase implements IReturn<SocialSignInStartResponse>, IConvertible, IGet
+{
+    // @DataMember
+    String provider = "";
+
+    // @DataMember
+    String? code;
+
+    // @DataMember
+    String? state;
+
+    // @DataMember
+    String? error;
+
+    SocialSignInCallbackRequest({this.provider="",this.code,this.state,this.error});
+    SocialSignInCallbackRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = json['provider'] ?? "";
+        code = json['code'];
+        state = json['state'];
+        error = json['error'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': provider,
+        'code': code,
+        'state': state,
+        'error': error
+    });
+
+    createResponse() => SocialSignInStartResponse();
+    getResponseTypeName() => "SocialSignInStartResponse";
+    getTypeName() => "SocialSignInCallbackRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Membership
+*/
+// @Route("/{version}/membership/auth/social/{Provider}/exchange", "POST")
+// @Api(Description="Membership")
+// @DataContract
+class ExchangeSocialSignInCodeRequest extends CodeMashRequestBase implements IReturn<SocialSignInTokenResponse>, IConvertible, IPost
+{
+    /**
+    * google, apple, microsoft, github, facebook, x or okta.
+    */
+    // @DataMember
+    // @ApiMember(Description="google, apple, microsoft, github, facebook, x or okta.", IsRequired=true)
+    String provider = "";
+
+    /**
+    * The one-time code from the callback URL (valid 2 minutes, once).
+    */
+    // @DataMember
+    // @ApiMember(Description="The one-time code from the callback URL (valid 2 minutes, once).", IsRequired=true)
+    String code = "";
+
+    ExchangeSocialSignInCodeRequest({this.provider="",this.code=""});
+    ExchangeSocialSignInCodeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = json['provider'] ?? "";
+        code = json['code'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': provider,
+        'code': code
+    });
+
+    createResponse() => SocialSignInTokenResponse();
+    getResponseTypeName() => "SocialSignInTokenResponse";
+    getTypeName() => "ExchangeSocialSignInCodeRequest";
     TypeContext? context = _ctx;
 }
 
@@ -17653,8 +17982,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<QuickConnectProviderDto>': TypeInfo(TypeOf.Class, create:() => <QuickConnectProviderDto>[]),
     'EchoKeylessDto': TypeInfo(TypeOf.Class, create:() => EchoKeylessDto()),
     'PublicBrandDto': TypeInfo(TypeOf.Class, create:() => PublicBrandDto()),
+    'PublicSocialSignInDto': TypeInfo(TypeOf.Class, create:() => PublicSocialSignInDto()),
     'PublicPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => PublicPasswordPolicyDto()),
     'PublicAuthDto': TypeInfo(TypeOf.Class, create:() => PublicAuthDto()),
+    'List<PublicSocialSignInDto>': TypeInfo(TypeOf.Class, create:() => <PublicSocialSignInDto>[]),
     'PublicAiAssistantDto': TypeInfo(TypeOf.Class, create:() => PublicAiAssistantDto()),
     'PublicAiChatDto': TypeInfo(TypeOf.Class, create:() => PublicAiChatDto()),
     'List<PublicAiAssistantDto>': TypeInfo(TypeOf.Class, create:() => <PublicAiAssistantDto>[]),
@@ -17713,7 +18044,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<PaymentOrderCheckoutDto>': TypeInfo(TypeOf.Class, create:() => <PaymentOrderCheckoutDto>[]),
     'WorkflowRunErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunErrorDto()),
     'WorkflowRunActorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunActorDto()),
+    'WorkflowWaitAnswerDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitAnswerDto()),
     'WorkflowWaitingOnDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitingOnDto()),
+    'List<WorkflowWaitAnswerDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitAnswerDto>[]),
     'WorkflowRunStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunStepDto()),
     'WorkflowRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunDto()),
     'List<WorkflowWaitingOnDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitingOnDto>[]),
@@ -17838,6 +18171,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetUsersResponse': TypeInfo(TypeOf.Class, create:() => GetUsersResponse()),
     'PaginatedResponse<AuthDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AuthDto>()),
     'GetUserPreferencesResponse': TypeInfo(TypeOf.Class, create:() => GetUserPreferencesResponse()),
+    'StartLinkIdentityResponse': TypeInfo(TypeOf.Class, create:() => StartLinkIdentityResponse()),
+    'SocialSignInStartResponse': TypeInfo(TypeOf.Class, create:() => SocialSignInStartResponse()),
+    'SocialSignInTokenResponse': TypeInfo(TypeOf.Class, create:() => SocialSignInTokenResponse()),
     'CredentialChangedResponse': TypeInfo(TypeOf.Class, create:() => CredentialChangedResponse()),
     'PasskeyOkResponse': TypeInfo(TypeOf.Class, create:() => PasskeyOkResponse()),
     'SendTestPasswordResetResponse': TypeInfo(TypeOf.Class, create:() => SendTestPasswordResetResponse()),
@@ -17982,11 +18318,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GrantContactConsentRequest': TypeInfo(TypeOf.Class, create:() => GrantContactConsentRequest()),
     'InviteUserRequest': TypeInfo(TypeOf.Class, create:() => InviteUserRequest()),
     'FinishInvitationRequest': TypeInfo(TypeOf.Class, create:() => FinishInvitationRequest()),
+    'StartLinkIdentityRequest': TypeInfo(TypeOf.Class, create:() => StartLinkIdentityRequest()),
     'LinkIdentityRequest': TypeInfo(TypeOf.Class, create:() => LinkIdentityRequest()),
     'MapAuthToUserRequest': TypeInfo(TypeOf.Class, create:() => MapAuthToUserRequest()),
     'AssignRolePermissionsRequest': TypeInfo(TypeOf.Class, create:() => AssignRolePermissionsRequest()),
     'SetContactRolesRequest': TypeInfo(TypeOf.Class, create:() => SetContactRolesRequest()),
     'SetContactTagSubscriptionRequest': TypeInfo(TypeOf.Class, create:() => SetContactTagSubscriptionRequest()),
+    'StartSocialSignInRequest': TypeInfo(TypeOf.Class, create:() => StartSocialSignInRequest()),
+    'SocialSignInCallbackRequest': TypeInfo(TypeOf.Class, create:() => SocialSignInCallbackRequest()),
+    'ExchangeSocialSignInCodeRequest': TypeInfo(TypeOf.Class, create:() => ExchangeSocialSignInCodeRequest()),
     'UnblockUserRequest': TypeInfo(TypeOf.Class, create:() => UnblockUserRequest()),
     'UnsubscribeContactRequest': TypeInfo(TypeOf.Class, create:() => UnsubscribeContactRequest()),
     'UpdateUserRequest': TypeInfo(TypeOf.Class, create:() => UpdateUserRequest()),

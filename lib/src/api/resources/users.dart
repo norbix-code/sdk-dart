@@ -107,19 +107,85 @@ class UsersResource extends Resource {
     );
   }
 
-  /// `POST /{version}/membership/auth/{userId}/link-identity`
+  /// `POST /{version}/membership/auth/{UserId}/link-identity`
+  ///
+  /// Finishes a link as the same signed-in user who started it. Body:
+  /// `{'code': …}`, the one-time link code from the return page.
   Future<Object?> linkIdentity(
       {required Object userId,
       Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
-      route: '/{version}/membership/auth/{userId}/link-identity',
+      route: '/{version}/membership/auth/{UserId}/link-identity',
       method: 'POST',
       query: query,
       body: body,
       headers: headers,
-      pathParams: <String, Object?>{'userId': userId},
+      pathParams: <String, Object?>{'UserId': userId},
+    );
+  }
+
+  /// `POST /{version}/membership/auth/{UserId}/link-identity/start`
+  ///
+  /// Starts linking a social provider to the signed-in user (yourself only).
+  /// Body: `{'provider': …, 'mode'?: …, 'returnUrl'?: …}`. Answers
+  /// `{'authorizeUrl': …}`; send the browser there.
+  Future<Object?> startLinkIdentity(
+      {required Object userId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/auth/{UserId}/link-identity/start',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'UserId': userId},
+    );
+  }
+
+  /// `POST /{version}/membership/auth/social/{Provider}/exchange`
+  ///
+  /// Trades the one-time code from the social sign-in return page (2
+  /// minutes, once) for the project JWT. Body: `{'code': …}`. Answers
+  /// `bearerToken`, `userId`, `displayName`, `expiresAt`,
+  /// `meta.credentialVersion`.
+  Future<Object?> exchangeSocialSignInCode(
+      {required Object provider,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/auth/social/{Provider}/exchange',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Provider': provider},
+    );
+  }
+
+  /// The URL that starts a project social sign-in:
+  /// `GET {api}/{version}/membership/auth/social/{provider}?projectId=…[&env=…][&mode=…][&returnUrl=…]`.
+  ///
+  /// Not a call: open it in the system browser (ASWebAuthenticationSession /
+  /// Custom Tabs, not an embedded web view) and the gateway redirects to the
+  /// provider. A navigation carries no headers, so the project id and a
+  /// non-PROD env travel in the query. [provider]: google, apple, microsoft,
+  /// github, facebook, x or okta. [mode]: the integration's OAuth mode
+  /// (default: the only one, else the first by name). [returnUrl]: the page
+  /// to come back to — absolute https (http only on localhost), origin in the
+  /// project's allowed origins. It gets `?code=…&provider=…` (or `?error=…`);
+  /// trade the code with [exchangeSocialSignInCode] within 2 minutes.
+  ///
+  /// Hand-written: the start route answers a 302, so it has no call method.
+  Uri socialSignInUrl(String provider, {String? mode, String? returnUrl}) {
+    return transport.navigationUrl(
+      route: '/{version}/membership/auth/social/{provider}',
+      pathParams: <String, Object?>{'provider': provider},
+      query: <String, Object?>{'mode': mode, 'returnUrl': returnUrl},
     );
   }
 

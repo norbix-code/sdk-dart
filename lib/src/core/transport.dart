@@ -238,6 +238,28 @@ class Transport {
     return Duration(milliseconds: ms);
   }
 
+  /// The full URL of a `GET` route that a browser navigates to (a link or a
+  /// redirect, not a call). A navigation carries no headers, so the project id
+  /// and a non-PROD env go into the query (`?projectId=…&env=…`), followed by
+  /// [query] in order; null values are left out.
+  Uri navigationUrl({
+    required String route,
+    Map<String, Object?>? pathParams,
+    Map<String, Object?>? query,
+  }) {
+    final projectId = config.projectId ?? _pathDefault('projectId');
+    final env = config.env;
+    return _resolveUrl(
+      route: route,
+      pathParams: pathParams,
+      query: <String, Object?>{
+        'projectId': projectId,
+        if (env.isNotEmpty && env != 'PROD') 'env': env,
+        ...?query,
+      },
+    );
+  }
+
   Uri _resolveUrl({
     required String route,
     Map<String, Object?>? query,
