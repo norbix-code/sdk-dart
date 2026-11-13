@@ -228,6 +228,42 @@ await hub.projects.updateProjectRegions(
 `additionalRegions` keys in its `body` to place a new project in
 specific regions at creation time.
 
+## Social sign-in and link identity
+
+Project users can sign in with Google, Apple, Microsoft, GitHub, Facebook, X or
+Okta. The project's enabled providers are in the public config
+(`publicProjects.getPublicProjectConfig` → `auth.socialSignIn`: `provider`,
+`displayName`, `startPath`).
+
+```dart
+// 1. Open the start URL in the system browser (ASWebAuthenticationSession /
+//    Custom Tabs, not an embedded web view). It is not a call: it redirects.
+final start = api.users.socialSignInUrl('google',
+    returnUrl: 'https://app.example.com/oauth/callback');
+
+// 2. The return page gets ?code=…&provider=google (or ?error=…).
+//    Trade the code within 2 minutes for the project JWT (14 days, no refresh token):
+final token = await api.users.exchangeSocialSignInCode(
+    provider: 'google', body: {'code': code}) as Map<String, Object?>;
+api.setBearerToken(token['bearerToken'] as String);
+
+// Link another provider to the signed-in user (yourself only):
+final link = await api.users.startLinkIdentity(userId: 'usr_…', body: {
+  'provider': 'github',
+  'returnUrl': 'https://app.example.com/settings',
+}) as Map<String, Object?>;
+// open link['authorizeUrl']; it comes back with ?intent=link&code=…
+await api.users.linkIdentity(userId: 'usr_…', body: {'code': linkCode});
+```
+
+- `socialSignInUrl(provider, mode:, returnUrl:)` puts the project id and a
+  non-PROD env in the query, because a navigation sends no headers. The start
+  and the provider callback have no call method.
+- `linkIdentity` now takes `{'code': …}` (the link code); `provider` /
+  `providerToken` are gone.
+- Refusals: `CM-ERRORS-MEMBERSHIP-051` (code used, expired or unknown), `-055`
+  (409, the provider account belongs to another user), `-056` (403, not yourself).
+
 ## Errors
 
 ```dart
