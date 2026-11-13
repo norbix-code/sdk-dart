@@ -18,7 +18,51 @@ NorbixApi _client(FakeHttpDriver driver, {String env = 'PROD'}) => NorbixApi(
       driver: driver,
     );
 
+// PKCE: the RFC 7636 appendix B verifier and its S256 challenge.
+const _verifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';
+const _challenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM';
+
 void main() {
+  group('PKCE', () {
+    test('matches the RFC 7636 appendix B vector', () {
+      expect(pkceChallenge(_verifier), _challenge);
+    });
+
+    test('createPkcePair makes a verifier and its challenge', () {
+      final a = createPkcePair();
+      final b = createPkcePair();
+      expect(a.codeVerifier, matches(RegExp(r'^[A-Za-z0-9_-]{43}$')));
+      expect(a.codeChallenge, pkceChallenge(a.codeVerifier));
+      expect(b.codeVerifier, isNot(a.codeVerifier));
+      expect(() => pkceChallenge('short'), throwsArgumentError);
+    });
+
+    test('exchange, link start and link finish carry PKCE in the body',
+        () async {
+      final driver = FakeHttpDriver();
+      final api = _client(driver);
+      await api.users.exchangeSocialSignInCode(
+          provider: 'google', body: {'code': 'c', 'codeVerifier': _verifier});
+      expect(driver.lastRequest!.url.toString(),
+          'https://api.test/v3/membership/auth/social/google/exchange');
+      expect(jsonDecode(driver.lastRequest!.body!),
+          {'code': 'c', 'codeVerifier': _verifier});
+      await api.users.startLinkIdentity(
+          userId: 'usr_1',
+          body: {'provider': 'github', 'codeChallenge': _challenge});
+      expect(driver.lastRequest!.url.toString(),
+          'https://api.test/v3/membership/auth/usr_1/link-identity/start');
+      expect(jsonDecode(driver.lastRequest!.body!),
+          {'provider': 'github', 'codeChallenge': _challenge});
+      await api.users.linkIdentity(
+          userId: 'usr_1', body: {'code': 'l', 'codeVerifier': _verifier});
+      expect(driver.lastRequest!.url.toString(),
+          'https://api.test/v3/membership/auth/usr_1/link-identity');
+      expect(jsonDecode(driver.lastRequest!.body!),
+          {'code': 'l', 'codeVerifier': _verifier});
+    });
+  });
+
   group('users.socialSignInUrl', () {
     test('carries the project id and no env for PROD; sends nothing', () {
       final driver = FakeHttpDriver();
@@ -47,6 +91,17 @@ void main() {
           _client(FakeHttpDriver(), env: 'TEST').users.socialSignInUrl('okta');
       expect(url.toString(),
           'https://api.test/v3/membership/auth/social/okta?projectId=pr_1&env=TEST');
+    });
+
+    test('carries the PKCE codeChallenge last', () {
+      final url = _client(FakeHttpDriver()).users.socialSignInUrl('google',
+          mode: 'app',
+          returnUrl: 'https://app.test/cb',
+          codeChallenge: _challenge);
+      expect(
+          url.toString(),
+          'https://api.test/v3/membership/auth/social/google?projectId=pr_1'
+          '&mode=app&returnUrl=https%3A%2F%2Fapp.test%2Fcb&codeChallenge=$_challenge');
     });
 
     test('escapes the provider', () {

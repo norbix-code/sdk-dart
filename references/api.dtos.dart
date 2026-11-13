@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-13 16:54:03
+Date: 2026-11-13 18:37:21
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -10839,7 +10839,10 @@ class StartLinkIdentityRequest extends CodeMashRequestBase implements IReturn<St
     // @DataMember
     String? returnUrl;
 
-    StartLinkIdentityRequest({this.userId="",this.provider="",this.mode,this.returnUrl});
+    // @DataMember
+    String? codeChallenge;
+
+    StartLinkIdentityRequest({this.userId="",this.provider="",this.mode,this.returnUrl,this.codeChallenge});
     StartLinkIdentityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -10848,6 +10851,7 @@ class StartLinkIdentityRequest extends CodeMashRequestBase implements IReturn<St
         provider = json['provider'] ?? "";
         mode = json['mode'];
         returnUrl = json['returnUrl'];
+        codeChallenge = json['codeChallenge'];
         return this;
     }
 
@@ -10855,7 +10859,8 @@ class StartLinkIdentityRequest extends CodeMashRequestBase implements IReturn<St
         'userId': userId,
         'provider': provider,
         'mode': mode,
-        'returnUrl': returnUrl
+        'returnUrl': returnUrl,
+        'codeChallenge': codeChallenge
     });
 
     createResponse() => StartLinkIdentityResponse();
@@ -10878,19 +10883,24 @@ class LinkIdentityRequest extends CodeMashRequestBase implements IReturn<EmptyRe
     // @DataMember
     String code = "";
 
-    LinkIdentityRequest({this.userId="",this.code=""});
+    // @DataMember
+    String? codeVerifier;
+
+    LinkIdentityRequest({this.userId="",this.code="",this.codeVerifier});
     LinkIdentityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         userId = json['userId'] ?? "";
         code = json['code'] ?? "";
+        codeVerifier = json['codeVerifier'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'userId': userId,
-        'code': code
+        'code': code,
+        'codeVerifier': codeVerifier
     });
 
     createResponse() => EmptyResponse();
@@ -11120,13 +11130,20 @@ class StartSocialSignInRequest extends CodeMashRequestBase implements IReturn<So
     String? mode;
 
     /**
-    * Optional app page to come back to (success and failure). Absolute https (http only on localhost), origin in the project's allowed origins. Wins over the mode's pages.
+    * Optional app page to come back to (success and failure). Absolute https (http only on localhost), origin in the project's allowed origins or the project's own hosted Admin Portal. Wins over the mode's pages. Refused: the browser goes to the mode's failure page with error=return_url_not_allowed (JSON 052 when the mode has none).
     */
     // @DataMember
-    // @ApiMember(Description="Optional app page to come back to (success and failure). Absolute https (http only on localhost), origin in the project's allowed origins. Wins over the mode's pages.")
+    // @ApiMember(Description="Optional app page to come back to (success and failure). Absolute https (http only on localhost), origin in the project's allowed origins or the project's own hosted Admin Portal. Wins over the mode's pages. Refused: the browser goes to the mode's failure page with error=return_url_not_allowed (JSON 052 when the mode has none).")
     String? returnUrl;
 
-    StartSocialSignInRequest({this.provider="",this.mode,this.returnUrl});
+    /**
+    * Optional PKCE S256 challenge of the app: base64url (no padding) SHA-256 of a random code verifier the app keeps (43 characters). When set, the exchange needs the matching codeVerifier, so only the browser / app that started can use the one-time code. Strongly recommended for web apps.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional PKCE S256 challenge of the app: base64url (no padding) SHA-256 of a random code verifier the app keeps (43 characters). When set, the exchange needs the matching codeVerifier, so only the browser / app that started can use the one-time code. Strongly recommended for web apps.")
+    String? codeChallenge;
+
+    StartSocialSignInRequest({this.provider="",this.mode,this.returnUrl,this.codeChallenge});
     StartSocialSignInRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -11134,13 +11151,15 @@ class StartSocialSignInRequest extends CodeMashRequestBase implements IReturn<So
         provider = json['provider'] ?? "";
         mode = json['mode'];
         returnUrl = json['returnUrl'];
+        codeChallenge = json['codeChallenge'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': provider,
         'mode': mode,
-        'returnUrl': returnUrl
+        'returnUrl': returnUrl,
+        'codeChallenge': codeChallenge
     });
 
     createResponse() => SocialSignInStartResponse();
@@ -11216,19 +11235,28 @@ class ExchangeSocialSignInCodeRequest extends CodeMashRequestBase implements IRe
     // @ApiMember(Description="The one-time code from the callback URL (valid 2 minutes, once).", IsRequired=true)
     String code = "";
 
-    ExchangeSocialSignInCodeRequest({this.provider="",this.code=""});
+    /**
+    * The PKCE code verifier whose S256 was sent as codeChallenge at the start. Required when the start had a codeChallenge; must be left out when it had none (CM-ERRORS-MEMBERSHIP-058, the code is used up).
+    */
+    // @DataMember
+    // @ApiMember(Description="The PKCE code verifier whose S256 was sent as codeChallenge at the start. Required when the start had a codeChallenge; must be left out when it had none (CM-ERRORS-MEMBERSHIP-058, the code is used up).")
+    String? codeVerifier;
+
+    ExchangeSocialSignInCodeRequest({this.provider="",this.code="",this.codeVerifier});
     ExchangeSocialSignInCodeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         provider = json['provider'] ?? "";
         code = json['code'] ?? "";
+        codeVerifier = json['codeVerifier'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'provider': provider,
-        'code': code
+        'code': code,
+        'codeVerifier': codeVerifier
     });
 
     createResponse() => SocialSignInTokenResponse();

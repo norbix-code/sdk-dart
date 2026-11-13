@@ -14,6 +14,7 @@ export 'src/core/config.dart';
 export 'src/core/errors.dart';
 export 'src/core/expanded_reference.dart';
 export 'src/core/http_driver.dart';
+export 'src/core/pkce.dart';
 export 'src/core/resource.dart';
 export 'src/core/transport.dart';
 

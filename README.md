@@ -238,22 +238,29 @@ Okta. The project's enabled providers are in the public config
 ```dart
 // 1. Open the start URL in the system browser (ASWebAuthenticationSession /
 //    Custom Tabs, not an embedded web view). It is not a call: it redirects.
+//    PKCE: keep the verifier in memory; only the challenge travels.
+final pkce = createPkcePair();
 final start = api.users.socialSignInUrl('google',
-    returnUrl: 'https://app.example.com/oauth/callback');
+    returnUrl: 'https://app.example.com/oauth/callback',
+    codeChallenge: pkce.codeChallenge);
 
 // 2. The return page gets ?code=…&provider=google (or ?error=…).
 //    Trade the code within 2 minutes for the project JWT (14 days, no refresh token):
 final token = await api.users.exchangeSocialSignInCode(
-    provider: 'google', body: {'code': code}) as Map<String, Object?>;
+    provider: 'google',
+    body: {'code': code, 'codeVerifier': pkce.codeVerifier}) as Map<String, Object?>;
 api.setBearerToken(token['bearerToken'] as String);
 
 // Link another provider to the signed-in user (yourself only):
+final linkPkce = createPkcePair();
 final link = await api.users.startLinkIdentity(userId: 'usr_…', body: {
   'provider': 'github',
   'returnUrl': 'https://app.example.com/settings',
+  'codeChallenge': linkPkce.codeChallenge,
 }) as Map<String, Object?>;
 // open link['authorizeUrl']; it comes back with ?intent=link&code=…
-await api.users.linkIdentity(userId: 'usr_…', body: {'code': linkCode});
+await api.users.linkIdentity(userId: 'usr_…',
+    body: {'code': linkCode, 'codeVerifier': linkPkce.codeVerifier});
 ```
 
 - `socialSignInUrl(provider, mode:, returnUrl:)` puts the project id and a
@@ -264,8 +271,17 @@ await api.users.linkIdentity(userId: 'usr_…', body: {'code': linkCode});
   exchange is how a user signs in again.
 - `linkIdentity` now takes `{'code': …}` (the link code); `provider` /
   `providerToken` are gone.
+- PKCE (S256) is optional but strongly recommended: `createPkcePair()` gives
+  `codeVerifier` and `codeChallenge` (32 random bytes, base64url). A code
+  started with a challenge needs its verifier; a verifier for a code started
+  without one is refused too.
 - Refusals: `CM-ERRORS-MEMBERSHIP-051` (code used, expired or unknown), `-055`
-  (409, the provider account belongs to another user), `-056` (403, not yourself).
+  (409, the provider account belongs to another user), `-056` (403, not
+  yourself), `-058` (PKCE: `context.Reason` `verifier_missing`,
+  `verifier_wrong` or `challenge_missing`; the code is used up — start
+  again), `-059` (the challenge is not a 43-character S256). A refused
+  `returnUrl` sends the browser to the mode's failure page with
+  `error=return_url_not_allowed`.
 
 ## Errors
 
