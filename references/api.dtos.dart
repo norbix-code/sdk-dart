@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-13 18:37:21
+Date: 2026-11-13 20:18:44
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -677,6 +677,11 @@ abstract class IHasCorrelationIdRequest
     String? correlationId;
 }
 
+abstract class IHasEnv
+{
+    String? env;
+}
+
 // @DataContract(Namespace="http://codemash.io/types/")
 class CodeMashRequestBase extends RequestBase implements IHasProjectId, IHasEnv, IConvertible
 {
@@ -716,11 +721,6 @@ class CodeMashRequestBase extends RequestBase implements IHasProjectId, IHasEnv,
 abstract class IHasProjectId
 {
     String projectId = "";
-}
-
-abstract class IHasEnv
-{
-    String? env;
 }
 
 enum Gender
@@ -3954,30 +3954,123 @@ class WorkflowRunActorDto implements IConvertible
 }
 
 // @DataContract
+class WorkflowWaitSlotDto implements IConvertible
+{
+    /**
+    * As the author wrote it: a usr_ id, role:<name>, tag:<name>, role:<name>+tag:<name> or teamrole:<name>. Show this.
+    */
+    // @DataMember
+    // @ApiMember(Description="As the author wrote it: a usr_ id, role:<name>, tag:<name>, role:<name>+tag:<name> or teamrole:<name>. Show this.")
+    String label = "";
+
+    // @DataMember
+    String? userId;
+
+    // @DataMember
+    String? role;
+
+    // @DataMember
+    String? tag;
+
+    // @DataMember
+    bool? teamRole;
+
+    // @DataMember
+    String? answeredBy;
+
+    // @DataMember
+    String? decision;
+
+    // @DataMember
+    DateTime? at;
+
+    /**
+    * True = somebody who was not asked answered for this slot, using the override right.
+    */
+    // @DataMember
+    // @ApiMember(Description="True = somebody who was not asked answered for this slot, using the override right.")
+    bool? override;
+
+    WorkflowWaitSlotDto({this.label="",this.userId,this.role,this.tag,this.teamRole,this.answeredBy,this.decision,this.at,this.override});
+    WorkflowWaitSlotDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        label = json['label'] ?? "";
+        userId = json['userId'];
+        role = json['role'];
+        tag = json['tag'];
+        teamRole = json['teamRole'];
+        answeredBy = json['answeredBy'];
+        decision = json['decision'];
+        at = JsonConverters.fromJson(json['at'],'DateTime',context!);
+        override = json['override'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'label': label,
+        'userId': userId,
+        'role': role,
+        'tag': tag,
+        'teamRole': teamRole,
+        'answeredBy': answeredBy,
+        'decision': decision,
+        'at': JsonConverters.toJson(at,'DateTime',context!),
+        'override': override
+    };
+
+    getTypeName() => "WorkflowWaitSlotDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class WorkflowWaitAnswerDto implements IConvertible
 {
     // @DataMember
     String userId = "";
 
     // @DataMember
+    String? kind;
+
+    // @DataMember
     String decision = "";
+
+    /**
+    * Which slots this answer filled (places in `slots`, from 0). One person who matches two rules fills both with one answer.
+    */
+    // @DataMember
+    // @ApiMember(Description="Which slots this answer filled (places in `slots`, from 0). One person who matches two rules fills both with one answer.")
+    List<int>? slots;
+
+    /**
+    * True = this person was not asked and answered on the override right.
+    */
+    // @DataMember
+    // @ApiMember(Description="True = this person was not asked and answered on the override right.")
+    bool? override;
 
     // @DataMember
     DateTime? at;
 
-    WorkflowWaitAnswerDto({this.userId="",this.decision="",this.at});
+    WorkflowWaitAnswerDto({this.userId="",this.kind,this.decision="",this.slots,this.override,this.at});
     WorkflowWaitAnswerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         userId = json['userId'] ?? "";
+        kind = json['kind'];
         decision = json['decision'] ?? "";
+        slots = JsonConverters.fromJson(json['slots'],'List<int>',context!);
+        override = json['override'];
         at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'userId': userId,
+        'kind': kind,
         'decision': decision,
+        'slots': JsonConverters.toJson(slots,'List<int>',context!),
+        'override': override,
         'at': JsonConverters.toJson(at,'DateTime',context!)
     };
 
@@ -4000,19 +4093,41 @@ class WorkflowWaitingOnDto implements IConvertible
     // @DataMember
     String? key;
 
+    /**
+    * The people told when the wait parked. An approval addressed to a role tells everybody who held that role then, so this list can be longer or shorter than `slots` — count `slots`, never this.
+    */
     // @DataMember
+    // @ApiMember(Description="The people told when the wait parked. An approval addressed to a role tells everybody who held that role then, so this list can be longer or shorter than `slots` — count `slots`, never this.")
     List<String>? assignees;
 
+    /**
+    * A group approval: how many of `slots` must approve. Absent = the first answer decides.
+    */
     // @DataMember
+    // @ApiMember(Description="A group approval: how many of `slots` must approve. Absent = the first answer decides.")
     int? require;
+
+    /**
+    * One entry per thing the approval asks for: a person or a rule, and whether it is filled. The unit `require`, `approvals` and `rejections` count.
+    */
+    // @DataMember
+    // @ApiMember(Description="One entry per thing the approval asks for: a person or a rule, and whether it is filled. The unit `require`, `approvals` and `rejections` count.")
+    List<WorkflowWaitSlotDto>? slots;
 
     // @DataMember
     List<WorkflowWaitAnswerDto>? answers;
 
+    /**
+    * Inbox rows only: true = this approval is yours; false = none of it is yours, so answering it is an override, if you hold the right. Absent = nobody is asked for a slot here, or it was not worked out.
+    */
+    // @DataMember
+    // @ApiMember(Description="Inbox rows only: true = this approval is yours; false = none of it is yours, so answering it is an override, if you hold the right. Absent = nobody is asked for a slot here, or it was not worked out.")
+    bool? mine;
+
     // @DataMember
     String? childRunId;
 
-    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.require,this.answers,this.childRunId});
+    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.require,this.slots,this.answers,this.mine,this.childRunId});
     WorkflowWaitingOnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -4022,7 +4137,9 @@ class WorkflowWaitingOnDto implements IConvertible
         key = json['key'];
         assignees = JsonConverters.fromJson(json['assignees'],'List<String>',context!);
         require = json['require'];
+        slots = JsonConverters.fromJson(json['slots'],'List<WorkflowWaitSlotDto>',context!);
         answers = JsonConverters.fromJson(json['answers'],'List<WorkflowWaitAnswerDto>',context!);
+        mine = json['mine'];
         childRunId = json['childRunId'];
         return this;
     }
@@ -4034,7 +4151,9 @@ class WorkflowWaitingOnDto implements IConvertible
         'key': key,
         'assignees': JsonConverters.toJson(assignees,'List<String>',context!),
         'require': require,
+        'slots': JsonConverters.toJson(slots,'List<WorkflowWaitSlotDto>',context!),
         'answers': JsonConverters.toJson(answers,'List<WorkflowWaitAnswerDto>',context!),
+        'mine': mine,
         'childRunId': childRunId
     };
 
@@ -17957,9 +18076,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RequestBase': TypeInfo(TypeOf.Class, create:() => RequestBase()),
     'IVersionBasedRequest': TypeInfo(TypeOf.Interface),
     'IHasCorrelationIdRequest': TypeInfo(TypeOf.Interface),
+    'IHasEnv': TypeInfo(TypeOf.Interface),
     'CodeMashRequestBase': TypeInfo(TypeOf.Class, create:() => CodeMashRequestBase()),
     'IHasProjectId': TypeInfo(TypeOf.Interface),
-    'IHasEnv': TypeInfo(TypeOf.Interface),
     'Gender': TypeInfo(TypeOf.Enum, enumValues:Gender.values),
     'MarketingBlockReason': TypeInfo(TypeOf.Enum, enumValues:MarketingBlockReason.values),
     'UserGeneralInfoDto': TypeInfo(TypeOf.Class, create:() => UserGeneralInfoDto()),
@@ -18072,8 +18191,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<PaymentOrderCheckoutDto>': TypeInfo(TypeOf.Class, create:() => <PaymentOrderCheckoutDto>[]),
     'WorkflowRunErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunErrorDto()),
     'WorkflowRunActorDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunActorDto()),
+    'WorkflowWaitSlotDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitSlotDto()),
     'WorkflowWaitAnswerDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitAnswerDto()),
     'WorkflowWaitingOnDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitingOnDto()),
+    'List<WorkflowWaitSlotDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitSlotDto>[]),
     'List<WorkflowWaitAnswerDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitAnswerDto>[]),
     'WorkflowRunStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunStepDto()),
     'WorkflowRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunDto()),

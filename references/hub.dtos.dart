@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-11 14:52:37
+Date: 2026-11-13 20:18:43
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -2055,17 +2055,15 @@ class OAuthModeConfig implements IConvertible
 {
     DisplayName? name;
     Uri? callbackUrl;
-    Uri? logoutUrl;
     Uri? failureRedirectUrl;
     RoleName? roleName;
 
-    OAuthModeConfig({this.name,this.callbackUrl,this.logoutUrl,this.failureRedirectUrl,this.roleName});
+    OAuthModeConfig({this.name,this.callbackUrl,this.failureRedirectUrl,this.roleName});
     OAuthModeConfig.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         name = JsonConverters.fromJson(json['name'],'DisplayName',context!);
         callbackUrl = JsonConverters.fromJson(json['callbackUrl'],'Uri',context!);
-        logoutUrl = JsonConverters.fromJson(json['logoutUrl'],'Uri',context!);
         failureRedirectUrl = JsonConverters.fromJson(json['failureRedirectUrl'],'Uri',context!);
         roleName = JsonConverters.fromJson(json['roleName'],'RoleName',context!);
         return this;
@@ -2074,7 +2072,6 @@ class OAuthModeConfig implements IConvertible
     Map<String, dynamic> toJson() => {
         'name': JsonConverters.toJson(name,'DisplayName',context!),
         'callbackUrl': JsonConverters.toJson(callbackUrl,'Uri',context!),
-        'logoutUrl': JsonConverters.toJson(logoutUrl,'Uri',context!),
         'failureRedirectUrl': JsonConverters.toJson(failureRedirectUrl,'Uri',context!),
         'roleName': JsonConverters.toJson(roleName,'RoleName',context!)
     };
@@ -13333,14 +13330,14 @@ abstract class IHasCorrelationIdRequest
     String? correlationId;
 }
 
-abstract class IHasProjectId
-{
-    String projectId = "";
-}
-
 abstract class IHasEnv
 {
     String? env;
+}
+
+abstract class IHasProjectId
+{
+    String projectId = "";
 }
 
 enum ManagedServiceBundle
@@ -14193,29 +14190,6 @@ class SaveTrigger extends CodeMashRequestBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class CredentialsSettingsModeDto implements IConvertible
-{
-    String? name;
-    String? logoutUrl;
-
-    CredentialsSettingsModeDto({this.name,this.logoutUrl});
-    CredentialsSettingsModeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        name = json['name'];
-        logoutUrl = json['logoutUrl'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'name': name,
-        'logoutUrl': logoutUrl
-    };
-
-    getTypeName() => "CredentialsSettingsModeDto";
-    TypeContext? context = _ctx;
-}
-
 class CursorArgs implements ICursorArgs, IConvertible
 {
     String field = "";
@@ -14603,10 +14577,10 @@ class EmailClickDto implements IConvertible
     String? url;
 
     /**
-    * Optional. When the link was opened (UTC; a time with no zone is taken as UTC). Default: now. The same nblid, url and time sent again is recorded once.
+    * Optional. When the link was opened (UTC; a time with no zone is taken as UTC). Default: now. The same nblid, url and time sent again is recorded once; with no time, a link already clicked is not recorded again.
     */
     // @DataMember
-    // @ApiMember(Description="Optional. When the link was opened (UTC; a time with no zone is taken as UTC). Default: now. The same nblid, url and time sent again is recorded once.")
+    // @ApiMember(Description="Optional. When the link was opened (UTC; a time with no zone is taken as UTC). Default: now. The same nblid, url and time sent again is recorded once; with no time, a link already clicked is not recorded again.")
     DateTime? clickedAt;
 
     /**
@@ -14841,10 +14815,10 @@ class WorkflowStepDto implements IConvertible
     Map<String,dynamic?>? action;
 
     /**
-    * Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload, wait, timeoutSeconds | items, body, concurrency.
+    * Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds, notify | branches, join | mode | workflowRef, payload, wait, timeoutSeconds | items, body, concurrency. One assignees entry is a usr_ id, a @Model.* binding, or a rule: role:<name or id>, tag:<name>, the two joined with '+', or teamrole:<name>.
     */
     // @DataMember
-    // @ApiMember(Description="Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds | branches, join | mode | workflowRef, payload, wait, timeoutSeconds | items, body, concurrency.")
+    // @ApiMember(Description="Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds, notify | branches, join | mode | workflowRef, payload, wait, timeoutSeconds | items, body, concurrency. One assignees entry is a usr_ id, a @Model.* binding, or a rule: role:<name or id>, tag:<name>, the two joined with '+', or teamrole:<name>.")
     Map<String,dynamic?>? config;
 
     WorkflowStepDto({this.id="",this.kind="",this.name,this.next,this.then,this.Else,this.rejected,this.onTimeout,this.retry,this.timeoutSeconds,this.onError,this.action,this.config});
@@ -14898,17 +14872,17 @@ class WorkflowLimitsDto implements IConvertible
     int? maxStepRuns;
 
     /**
-    * Wall-clock from start, including parked time; default 604800 (7 days), cap 2592000.
+    * Wall-clock from start, including parked time; default 604800 (7 days), cap 31536000 (one year).
     */
     // @DataMember
-    // @ApiMember(Description="Wall-clock from start, including parked time; default 604800 (7 days), cap 2592000.")
+    // @ApiMember(Description="Wall-clock from start, including parked time; default 604800 (7 days), cap 31536000 (one year).")
     int? maxDurationSeconds;
 
     /**
-    * The longest one delay / wait may park; default 604800, cap 2592000.
+    * The longest one delay / wait may park; default 604800 (7 days), cap 31536000 (one year). A signed resume link still lives at most 7 days, so a longer wait is answered in the dashboard, the CLI or an SDK.
     */
     // @DataMember
-    // @ApiMember(Description="The longest one delay / wait may park; default 604800, cap 2592000.")
+    // @ApiMember(Description="The longest one delay / wait may park; default 604800 (7 days), cap 31536000 (one year). A signed resume link still lives at most 7 days, so a longer wait is answered in the dashboard, the CLI or an SDK.")
     int? maxWaitSeconds;
 
     /**
@@ -21222,58 +21196,21 @@ class MembershipAuthorizationViewDto implements IConvertible
 }
 
 // @DataContract
-class MembershipCredentialsSettingsModeDto implements IConvertible
-{
-    // @DataMember
-    String? name;
-
-    // @DataMember
-    String? logoutUrl;
-
-    MembershipCredentialsSettingsModeDto({this.name,this.logoutUrl});
-    MembershipCredentialsSettingsModeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        name = json['name'];
-        logoutUrl = json['logoutUrl'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'name': name,
-        'logoutUrl': logoutUrl
-    };
-
-    getTypeName() => "MembershipCredentialsSettingsModeDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
 class MembershipCredentialsSettingsDto implements IConvertible
 {
     // @DataMember
-    String? logoutUrl;
-
-    // @DataMember
     bool? allowUsernames;
 
-    // @DataMember
-    List<MembershipCredentialsSettingsModeDto>? modes;
-
-    MembershipCredentialsSettingsDto({this.logoutUrl,this.allowUsernames,this.modes});
+    MembershipCredentialsSettingsDto({this.allowUsernames});
     MembershipCredentialsSettingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        logoutUrl = json['logoutUrl'];
         allowUsernames = json['allowUsernames'];
-        modes = JsonConverters.fromJson(json['modes'],'List<MembershipCredentialsSettingsModeDto>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'logoutUrl': logoutUrl,
-        'allowUsernames': allowUsernames,
-        'modes': JsonConverters.toJson(modes,'List<MembershipCredentialsSettingsModeDto>',context!)
+        'allowUsernames': allowUsernames
     };
 
     getTypeName() => "MembershipCredentialsSettingsDto";
@@ -24571,6 +24508,131 @@ class CodeFunctionRunDto implements IConvertible
 }
 
 // @DataContract
+class WorkflowWaitSlotDto implements IConvertible
+{
+    /**
+    * As the author wrote it: a usr_ id, role:<name>, tag:<name>, role:<name>+tag:<name> or teamrole:<name>. Show this.
+    */
+    // @DataMember
+    // @ApiMember(Description="As the author wrote it: a usr_ id, role:<name>, tag:<name>, role:<name>+tag:<name> or teamrole:<name>. Show this.")
+    String label = "";
+
+    // @DataMember
+    String? userId;
+
+    // @DataMember
+    String? role;
+
+    // @DataMember
+    String? tag;
+
+    // @DataMember
+    bool? teamRole;
+
+    // @DataMember
+    String? answeredBy;
+
+    // @DataMember
+    String? decision;
+
+    // @DataMember
+    DateTime? at;
+
+    /**
+    * True = somebody who was not asked answered for this slot, using the override right.
+    */
+    // @DataMember
+    // @ApiMember(Description="True = somebody who was not asked answered for this slot, using the override right.")
+    bool? override;
+
+    WorkflowWaitSlotDto({this.label="",this.userId,this.role,this.tag,this.teamRole,this.answeredBy,this.decision,this.at,this.override});
+    WorkflowWaitSlotDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        label = json['label'] ?? "";
+        userId = json['userId'];
+        role = json['role'];
+        tag = json['tag'];
+        teamRole = json['teamRole'];
+        answeredBy = json['answeredBy'];
+        decision = json['decision'];
+        at = JsonConverters.fromJson(json['at'],'DateTime',context!);
+        override = json['override'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'label': label,
+        'userId': userId,
+        'role': role,
+        'tag': tag,
+        'teamRole': teamRole,
+        'answeredBy': answeredBy,
+        'decision': decision,
+        'at': JsonConverters.toJson(at,'DateTime',context!),
+        'override': override
+    };
+
+    getTypeName() => "WorkflowWaitSlotDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowWaitAnswerDto implements IConvertible
+{
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String? kind;
+
+    // @DataMember
+    String decision = "";
+
+    /**
+    * Which slots this answer filled (places in `slots`, from 0). One person who matches two rules fills both with one answer.
+    */
+    // @DataMember
+    // @ApiMember(Description="Which slots this answer filled (places in `slots`, from 0). One person who matches two rules fills both with one answer.")
+    List<int>? slots;
+
+    /**
+    * True = this person was not asked and answered on the override right.
+    */
+    // @DataMember
+    // @ApiMember(Description="True = this person was not asked and answered on the override right.")
+    bool? override;
+
+    // @DataMember
+    DateTime? at;
+
+    WorkflowWaitAnswerDto({this.userId="",this.kind,this.decision="",this.slots,this.override,this.at});
+    WorkflowWaitAnswerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'] ?? "";
+        kind = json['kind'];
+        decision = json['decision'] ?? "";
+        slots = JsonConverters.fromJson(json['slots'],'List<int>',context!);
+        override = json['override'];
+        at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'kind': kind,
+        'decision': decision,
+        'slots': JsonConverters.toJson(slots,'List<int>',context!),
+        'override': override,
+        'at': JsonConverters.toJson(at,'DateTime',context!)
+    };
+
+    getTypeName() => "WorkflowWaitAnswerDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class WorkflowWaitingOnDto implements IConvertible
 {
     // @DataMember
@@ -24585,13 +24647,41 @@ class WorkflowWaitingOnDto implements IConvertible
     // @DataMember
     String? key;
 
+    /**
+    * The people told when the wait parked. An approval addressed to a role tells everybody who held that role then, so this list can be longer or shorter than `slots` — count `slots`, never this.
+    */
     // @DataMember
+    // @ApiMember(Description="The people told when the wait parked. An approval addressed to a role tells everybody who held that role then, so this list can be longer or shorter than `slots` — count `slots`, never this.")
     List<String>? assignees;
+
+    /**
+    * A group approval: how many of `slots` must approve. Absent = the first answer decides.
+    */
+    // @DataMember
+    // @ApiMember(Description="A group approval: how many of `slots` must approve. Absent = the first answer decides.")
+    int? require;
+
+    /**
+    * One entry per thing the approval asks for: a person or a rule, and whether it is filled. The unit `require`, `approvals` and `rejections` count.
+    */
+    // @DataMember
+    // @ApiMember(Description="One entry per thing the approval asks for: a person or a rule, and whether it is filled. The unit `require`, `approvals` and `rejections` count.")
+    List<WorkflowWaitSlotDto>? slots;
+
+    // @DataMember
+    List<WorkflowWaitAnswerDto>? answers;
+
+    /**
+    * Inbox rows only: true = this approval is yours; false = none of it is yours, so answering it is an override, if you hold the right. Absent = nobody is asked for a slot here, or it was not worked out.
+    */
+    // @DataMember
+    // @ApiMember(Description="Inbox rows only: true = this approval is yours; false = none of it is yours, so answering it is an override, if you hold the right. Absent = nobody is asked for a slot here, or it was not worked out.")
+    bool? mine;
 
     // @DataMember
     String? childRunId;
 
-    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.childRunId});
+    WorkflowWaitingOnDto({this.stepId="",this.kind="",this.until,this.key,this.assignees,this.require,this.slots,this.answers,this.mine,this.childRunId});
     WorkflowWaitingOnDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -24600,6 +24690,10 @@ class WorkflowWaitingOnDto implements IConvertible
         until = JsonConverters.fromJson(json['until'],'DateTime',context!);
         key = json['key'];
         assignees = JsonConverters.fromJson(json['assignees'],'List<String>',context!);
+        require = json['require'];
+        slots = JsonConverters.fromJson(json['slots'],'List<WorkflowWaitSlotDto>',context!);
+        answers = JsonConverters.fromJson(json['answers'],'List<WorkflowWaitAnswerDto>',context!);
+        mine = json['mine'];
         childRunId = json['childRunId'];
         return this;
     }
@@ -24610,6 +24704,10 @@ class WorkflowWaitingOnDto implements IConvertible
         'until': JsonConverters.toJson(until,'DateTime',context!),
         'key': key,
         'assignees': JsonConverters.toJson(assignees,'List<String>',context!),
+        'require': require,
+        'slots': JsonConverters.toJson(slots,'List<WorkflowWaitSlotDto>',context!),
+        'answers': JsonConverters.toJson(answers,'List<WorkflowWaitAnswerDto>',context!),
+        'mine': mine,
         'childRunId': childRunId
     };
 
@@ -43756,40 +43854,6 @@ class DeleteAiServiceUserRequest extends RequestBase implements IReturn<EmptyRes
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/membership/disable", "PUT")
-class DisableMembership extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    DisableMembership();
-    DisableMembership.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DisableMembership";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/membership/enable", "PUT")
-class EnableMembership extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    EnableMembership();
-    EnableMembership.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "EnableMembership";
-    TypeContext? context = _ctx;
-}
-
 /**
 * Import users with their existing password hashes
 */
@@ -44756,34 +44820,6 @@ class SaveMembershipIntegration extends CodeMashRequestBase implements IReturn<I
     TypeContext? context = _ctx;
 }
 
-// @Route("/{version}/membership/integrations/{Id}/default", "PUT")
-class SetMembershipIntegrationAsDefaultRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    /**
-    * Integration id, from get_membership_integrations.
-    */
-    // @ApiMember(Description="Integration id, from get_membership_integrations.", IsRequired=true)
-    String id = "";
-
-    SetMembershipIntegrationAsDefaultRequest({this.id=""});
-    SetMembershipIntegrationAsDefaultRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "SetMembershipIntegrationAsDefaultRequest";
-    TypeContext? context = _ctx;
-}
-
 /**
 * Lists the execution identities (project service users) of an environment.
 */
@@ -45067,9 +45103,9 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
 class UpdatePasswordComplexity extends CodeMashRequestBase implements IReturn<UpdatePasswordComplexityResponse>, IConvertible, IPut
 {
     /**
-    * Minimum password length.
+    * Minimum password length. Default 6 — the rule a project uses when it stores none.
     */
-    // @ApiMember(Description="Minimum password length.")
+    // @ApiMember(Description="Minimum password length. Default 6 — the rule a project uses when it stores none.")
     int minLength = 0;
 
     /**
@@ -45200,81 +45236,27 @@ class GetAuthenticationSettings extends CodeMashRequestBase implements IReturn<G
 class UpdateAuthenticationSettings extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
 {
     /**
-    * Default URL to redirect end users to after logout.
-    */
-    // @ApiMember(Description="Default URL to redirect end users to after logout.")
-    String? logoutUrl;
-
-    /**
     * Whether end users may sign in with a username in addition to email.
     */
     // @ApiMember(Description="Whether end users may sign in with a username in addition to email.")
     bool? allowUsernames;
 
-    /**
-    * Per-authentication-mode logout URL overrides.
-    */
-    // @ApiMember(Description="Per-authentication-mode logout URL overrides.")
-    List<CredentialsSettingsModeDto>? modes;
-
-    UpdateAuthenticationSettings({this.logoutUrl,this.allowUsernames,this.modes});
+    UpdateAuthenticationSettings({this.allowUsernames});
     UpdateAuthenticationSettings.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
-        logoutUrl = json['logoutUrl'];
         allowUsernames = json['allowUsernames'];
-        modes = JsonConverters.fromJson(json['modes'],'List<CredentialsSettingsModeDto>',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'logoutUrl': logoutUrl,
-        'allowUsernames': allowUsernames,
-        'modes': JsonConverters.toJson(modes,'List<CredentialsSettingsModeDto>',context!)
+        'allowUsernames': allowUsernames
     });
 
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "UpdateAuthenticationSettings";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Disable database service
-*/
-// @Route("/{version}/database/disable", "PUT")
-// @Api(Description="Disable database service")
-class DisableDatabase extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    DisableDatabase();
-    DisableDatabase.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "DisableDatabase";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/database/enable", "PUT")
-class EnableDatabase extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    EnableDatabase();
-    EnableDatabase.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "EnableDatabase";
     TypeContext? context = _ctx;
 }
 
@@ -61361,8 +61343,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'JsonFieldDto': TypeInfo(TypeOf.Class, create:() => JsonFieldDto()),
     'IVersionBasedRequest': TypeInfo(TypeOf.Interface),
     'IHasCorrelationIdRequest': TypeInfo(TypeOf.Interface),
-    'IHasProjectId': TypeInfo(TypeOf.Interface),
     'IHasEnv': TypeInfo(TypeOf.Interface),
+    'IHasProjectId': TypeInfo(TypeOf.Interface),
     'ManagedServiceBundle': TypeInfo(TypeOf.Enum, enumValues:ManagedServiceBundle.values),
     'SubscriptionBillingPeriod': TypeInfo(TypeOf.Enum, enumValues:SubscriptionBillingPeriod.values),
     'SubscriptionType': TypeInfo(TypeOf.Enum, enumValues:SubscriptionType.values),
@@ -61398,7 +61380,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EnableTrigger': TypeInfo(TypeOf.Class, create:() => EnableTrigger()),
     'GetTrigger': TypeInfo(TypeOf.AbstractClass),
     'SaveTrigger': TypeInfo(TypeOf.Class, create:() => SaveTrigger()),
-    'CredentialsSettingsModeDto': TypeInfo(TypeOf.Class, create:() => CredentialsSettingsModeDto()),
     'CursorArgs': TypeInfo(TypeOf.Class, create:() => CursorArgs()),
     'PagingArgs': TypeInfo(TypeOf.Class, create:() => PagingArgs()),
     'SchemaUniqueIndexDto': TypeInfo(TypeOf.Class, create:() => SchemaUniqueIndexDto()),
@@ -61626,9 +61607,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MembershipEmailPreferencesDto': TypeInfo(TypeOf.Class, create:() => MembershipEmailPreferencesDto()),
     'PasswordComplexityDto': TypeInfo(TypeOf.Class, create:() => PasswordComplexityDto()),
     'MembershipAuthorizationViewDto': TypeInfo(TypeOf.Class, create:() => MembershipAuthorizationViewDto()),
-    'MembershipCredentialsSettingsModeDto': TypeInfo(TypeOf.Class, create:() => MembershipCredentialsSettingsModeDto()),
     'MembershipCredentialsSettingsDto': TypeInfo(TypeOf.Class, create:() => MembershipCredentialsSettingsDto()),
-    'List<MembershipCredentialsSettingsModeDto>': TypeInfo(TypeOf.Class, create:() => <MembershipCredentialsSettingsModeDto>[]),
     'MembershipAuthenticationViewDto': TypeInfo(TypeOf.Class, create:() => MembershipAuthenticationViewDto()),
     'SchemaTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => SchemaTriggerProjectionList()),
     'DataSchemaDto': TypeInfo(TypeOf.Class, create:() => DataSchemaDto()),
@@ -61731,7 +61710,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'CodeFunctionQualifierKindDto': TypeInfo(TypeOf.Enum, enumValues:CodeFunctionQualifierKindDto.values),
     'CodeFunctionQualifierDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionQualifierDto()),
     'CodeFunctionRunDto': TypeInfo(TypeOf.Class, create:() => CodeFunctionRunDto()),
+    'WorkflowWaitSlotDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitSlotDto()),
+    'WorkflowWaitAnswerDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitAnswerDto()),
     'WorkflowWaitingOnDto': TypeInfo(TypeOf.Class, create:() => WorkflowWaitingOnDto()),
+    'List<WorkflowWaitSlotDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitSlotDto>[]),
+    'List<WorkflowWaitAnswerDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitAnswerDto>[]),
     'WorkflowRunStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunStepDto()),
     'WorkflowRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowRunDto()),
     'List<WorkflowWaitingOnDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowWaitingOnDto>[]),
@@ -62526,8 +62509,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RevokeAiServiceUserKeyRequest': TypeInfo(TypeOf.Class, create:() => RevokeAiServiceUserKeyRequest()),
     'UpdateAiServiceUserRequest': TypeInfo(TypeOf.Class, create:() => UpdateAiServiceUserRequest()),
     'DeleteAiServiceUserRequest': TypeInfo(TypeOf.Class, create:() => DeleteAiServiceUserRequest()),
-    'DisableMembership': TypeInfo(TypeOf.Class, create:() => DisableMembership()),
-    'EnableMembership': TypeInfo(TypeOf.Class, create:() => EnableMembership()),
     'ImportUsersRequest': TypeInfo(TypeOf.Class, create:() => ImportUsersRequest()),
     'List<ImportUserRowDto>': TypeInfo(TypeOf.Class, create:() => <ImportUserRowDto>[]),
     'RepairLoginProjectIdsRequest': TypeInfo(TypeOf.Class, create:() => RepairLoginProjectIdsRequest()),
@@ -62558,7 +62539,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMembershipIntegration': TypeInfo(TypeOf.Class, create:() => GetMembershipIntegration()),
     'GetMembershipIntegrations': TypeInfo(TypeOf.Class, create:() => GetMembershipIntegrations()),
     'SaveMembershipIntegration': TypeInfo(TypeOf.Class, create:() => SaveMembershipIntegration()),
-    'SetMembershipIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetMembershipIntegrationAsDefaultRequest()),
     'GetExecutionIdentitiesRequest': TypeInfo(TypeOf.Class, create:() => GetExecutionIdentitiesRequest()),
     'CreateExecutionIdentityRequest': TypeInfo(TypeOf.Class, create:() => CreateExecutionIdentityRequest()),
     'GetAuthorizationSettings': TypeInfo(TypeOf.Class, create:() => GetAuthorizationSettings()),
@@ -62566,9 +62546,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UpdatePasswordComplexity': TypeInfo(TypeOf.Class, create:() => UpdatePasswordComplexity()),
     'GetAuthenticationSettings': TypeInfo(TypeOf.Class, create:() => GetAuthenticationSettings()),
     'UpdateAuthenticationSettings': TypeInfo(TypeOf.Class, create:() => UpdateAuthenticationSettings()),
-    'List<CredentialsSettingsModeDto>': TypeInfo(TypeOf.Class, create:() => <CredentialsSettingsModeDto>[]),
-    'DisableDatabase': TypeInfo(TypeOf.Class, create:() => DisableDatabase()),
-    'EnableDatabase': TypeInfo(TypeOf.Class, create:() => EnableDatabase()),
     'DeleteSchemaTrigger': TypeInfo(TypeOf.Class, create:() => DeleteSchemaTrigger()),
     'DisableSchemaTrigger': TypeInfo(TypeOf.Class, create:() => DisableSchemaTrigger()),
     'EnableSchemaTrigger': TypeInfo(TypeOf.Class, create:() => EnableSchemaTrigger()),
