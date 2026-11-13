@@ -68,6 +68,21 @@ void main() {
           'https://api.test/v3/membership/auth/social/google/exchange');
       expect(jsonDecode(driver.lastRequest!.body!), {'code': 'one-time'});
       expect(driver.lastRequest!.headers['norbix-project-id'], 'pr_1');
+      // An old JWT on the client must not be sent: the gateway refuses it on
+      // any route, and the exchange is how a user signs in again.
+      expect(driver.lastRequest!.headers['authorization'], isNull);
+      expect(driver.lastRequest!.headers['x-api-key'], isNull);
+    });
+
+    test('exchangeSocialSignInCode sends no API key either', () async {
+      final driver = FakeHttpDriver();
+      await NorbixApi(
+        config: NorbixConfig(
+            baseUrl: 'https://api.test', apiKey: 'ak-1', projectId: 'pr_1'),
+        driver: driver,
+      ).users.exchangeSocialSignInCode(provider: 'google', body: {'code': 'c'});
+      expect(driver.lastRequest!.headers['authorization'], isNull);
+      expect(driver.lastRequest!.headers['x-api-key'], isNull);
     });
 
     test(
