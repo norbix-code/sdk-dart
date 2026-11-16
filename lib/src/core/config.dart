@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 /// // 1) Defaults — points at the public norbix.ai endpoint.
 /// final cfg = NorbixConfig(baseUrl: 'https://api.norbix.ai');
 ///
-/// // 2) Explicit overrides for self-hosted deployments.
+/// // 2) Explicit overrides for a custom domain or local development.
 /// final cfg = NorbixConfig(
 ///   baseUrl: 'http://localhost:5000',
 ///   apiKey: 'nbx_dev_...',

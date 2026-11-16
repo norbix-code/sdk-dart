@@ -27,7 +27,7 @@ const String kNorbixApiDefaultBaseUrl = 'https://api.norbix.ai';
 /// a redundant `client.xxx.apiKeys` namespace.
 class NorbixApi {
   /// Build a client. Defaults to the public Norbix host. To point at a
-  /// self-hosted deployment (e.g. `https://api.norbix.isidos.lt` or
+  /// custom domain or a local instance (e.g. `https://api.norbix.isidos.lt` or
   /// `http://localhost:5000`), pass a [NorbixConfig] with the desired URL.
   ///
   /// ```dart

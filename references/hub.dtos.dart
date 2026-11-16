@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-13 20:18:43
+Date: 2026-11-16 09:07:07
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -5232,9 +5232,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     FunctionRefDto? functionRef;
 
     // @DataMember
-    String? runAsUserId;
-
-    // @DataMember
     CodeInvocationType? invocationType;
 
     // @DataMember
@@ -5252,13 +5249,12 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? meta;
 
-    TriggerActionCodeDto({this.functionRef,this.runAsUserId,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
+    TriggerActionCodeDto({this.functionRef,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
     TriggerActionCodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionRef = JsonConverters.fromJson(json['functionRef'],'FunctionRefDto',context!);
-        runAsUserId = json['runAsUserId'];
         invocationType = JsonConverters.fromJson(json['invocationType'],'CodeInvocationType',context!);
         config = json['config'];
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'CodeDeliverySettingsDto',context!);
@@ -5270,7 +5266,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionRef': JsonConverters.toJson(functionRef,'FunctionRefDto',context!),
-        'runAsUserId': runAsUserId,
         'invocationType': JsonConverters.toJson(invocationType,'CodeInvocationType',context!),
         'config': config,
         'deliverySettings': JsonConverters.toJson(deliverySettings,'CodeDeliverySettingsDto',context!),
@@ -5517,24 +5512,19 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    // @DataMember
-    String? runAsUserId;
-
-    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
+    TriggerActionMarketplaceDto({this.functionId="",this.payload});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
-        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
         'payload': payload,
-        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -5550,19 +5540,28 @@ class TriggerActionWorkflowDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? payload;
 
-    TriggerActionWorkflowDto({this.workflowRef,this.payload});
+    /**
+    * Resume the run of the workflow that waits on this key instead of starting one. May hold @Model.Trigger.* tokens of the event. No waiting run = the trigger run is skipped (no-waiting-run).
+    */
+    // @DataMember
+    // @ApiMember(Description="Resume the run of the workflow that waits on this key instead of starting one. May hold @Model.Trigger.* tokens of the event. No waiting run = the trigger run is skipped (no-waiting-run).")
+    String? resumeKey;
+
+    TriggerActionWorkflowDto({this.workflowRef,this.payload,this.resumeKey});
     TriggerActionWorkflowDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         workflowRef = json['workflowRef'];
         payload = JsonConverters.toStringMap(json['payload']);
+        resumeKey = json['resumeKey'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'workflowRef': workflowRef,
-        'payload': payload
+        'payload': payload,
+        'resumeKey': resumeKey
     });
 
     getTypeName() => "TriggerActionWorkflowDto";
@@ -19766,469 +19765,6 @@ class AccountPasskeyListItemDto implements IConvertible
 }
 
 // @DataContract
-class LicenseDomainDnsRecordDto implements IConvertible
-{
-    // @DataMember
-    String host = "";
-
-    // @DataMember
-    String recordType = "";
-
-    // @DataMember
-    bool? resolved;
-
-    // @DataMember
-    bool? Required;
-
-    LicenseDomainDnsRecordDto({this.host="",this.recordType="",this.resolved,this.Required});
-    LicenseDomainDnsRecordDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        host = json['host'] ?? "";
-        recordType = json['recordType'] ?? "";
-        resolved = json['resolved'];
-        Required = json['required'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'host': host,
-        'recordType': recordType,
-        'resolved': resolved,
-        'required': Required
-    };
-
-    getTypeName() => "LicenseDomainDnsRecordDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class LicenseDomainDnsStatusDto implements IConvertible
-{
-    // @DataMember
-    String domain = "";
-
-    // @DataMember
-    bool? allRequiredResolved;
-
-    // @DataMember
-    List<LicenseDomainDnsRecordDto> records = [];
-
-    LicenseDomainDnsStatusDto({this.domain="",this.allRequiredResolved,this.records=const []});
-    LicenseDomainDnsStatusDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        domain = json['domain'] ?? "";
-        allRequiredResolved = json['allRequiredResolved'];
-        records = JsonConverters.fromJson(json['records'],'List<LicenseDomainDnsRecordDto>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'domain': domain,
-        'allRequiredResolved': allRequiredResolved,
-        'records': JsonConverters.toJson(records,'List<LicenseDomainDnsRecordDto>',context!)
-    };
-
-    getTypeName() => "LicenseDomainDnsStatusDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class LicenseDomainVerificationChallengeDto implements IConvertible
-{
-    // @DataMember
-    String domain = "";
-
-    // @DataMember
-    String txtHost = "";
-
-    // @DataMember
-    String txtValue = "";
-
-    // @DataMember
-    DateTime? expiresAtUtc;
-
-    // @DataMember
-    bool? verified;
-
-    // @DataMember
-    DateTime? verifiedAtUtc;
-
-    // @DataMember
-    bool? skipped;
-
-    LicenseDomainVerificationChallengeDto({this.domain="",this.txtHost="",this.txtValue="",this.expiresAtUtc,this.verified,this.verifiedAtUtc,this.skipped});
-    LicenseDomainVerificationChallengeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        domain = json['domain'] ?? "";
-        txtHost = json['txtHost'] ?? "";
-        txtValue = json['txtValue'] ?? "";
-        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!) ?? DateTime(0);
-        verified = json['verified'];
-        verifiedAtUtc = JsonConverters.fromJson(json['verifiedAtUtc'],'DateTime',context!);
-        skipped = json['skipped'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'domain': domain,
-        'txtHost': txtHost,
-        'txtValue': txtValue,
-        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!),
-        'verified': verified,
-        'verifiedAtUtc': JsonConverters.toJson(verifiedAtUtc,'DateTime',context!),
-        'skipped': skipped
-    };
-
-    getTypeName() => "LicenseDomainVerificationChallengeDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class LicenseDomainVerificationStatusDto implements IConvertible
-{
-    // @DataMember
-    String domain = "";
-
-    // @DataMember
-    bool? verified;
-
-    // @DataMember
-    bool? skipped;
-
-    // @DataMember
-    String? txtHost;
-
-    // @DataMember
-    String? expectedTxtValue;
-
-    // @DataMember
-    String? observedTxtValue;
-
-    // @DataMember
-    DateTime? expiresAtUtc;
-
-    // @DataMember
-    DateTime? verifiedAtUtc;
-
-    // @DataMember
-    String? message;
-
-    LicenseDomainVerificationStatusDto({this.domain="",this.verified,this.skipped,this.txtHost,this.expectedTxtValue,this.observedTxtValue,this.expiresAtUtc,this.verifiedAtUtc,this.message});
-    LicenseDomainVerificationStatusDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        domain = json['domain'] ?? "";
-        verified = json['verified'];
-        skipped = json['skipped'];
-        txtHost = json['txtHost'];
-        expectedTxtValue = json['expectedTxtValue'];
-        observedTxtValue = json['observedTxtValue'];
-        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!);
-        verifiedAtUtc = JsonConverters.fromJson(json['verifiedAtUtc'],'DateTime',context!);
-        message = json['message'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'domain': domain,
-        'verified': verified,
-        'skipped': skipped,
-        'txtHost': txtHost,
-        'expectedTxtValue': expectedTxtValue,
-        'observedTxtValue': observedTxtValue,
-        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!),
-        'verifiedAtUtc': JsonConverters.toJson(verifiedAtUtc,'DateTime',context!),
-        'message': message
-    };
-
-    getTypeName() => "LicenseDomainVerificationStatusDto";
-    TypeContext? context = _ctx;
-}
-
-class CodeMashSubscriptionDto implements IConvertible
-{
-    String viewId = "";
-    String domain = "";
-    DateTime? willExpireOn;
-    DateTime? issuedOn;
-    bool? isTrial;
-    String subscriptionRefId = "";
-
-    CodeMashSubscriptionDto({this.viewId="",this.domain="",this.willExpireOn,this.issuedOn,this.isTrial,this.subscriptionRefId=""});
-    CodeMashSubscriptionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        viewId = json['viewId'] ?? "";
-        domain = json['domain'] ?? "";
-        willExpireOn = JsonConverters.fromJson(json['willExpireOn'],'DateTime',context!) ?? DateTime(0);
-        issuedOn = JsonConverters.fromJson(json['issuedOn'],'DateTime',context!) ?? DateTime(0);
-        isTrial = json['isTrial'];
-        subscriptionRefId = json['subscriptionRefId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'viewId': viewId,
-        'domain': domain,
-        'willExpireOn': JsonConverters.toJson(willExpireOn,'DateTime',context!),
-        'issuedOn': JsonConverters.toJson(issuedOn,'DateTime',context!),
-        'isTrial': isTrial,
-        'subscriptionRefId': subscriptionRefId
-    };
-
-    getTypeName() => "CodeMashSubscriptionDto";
-    TypeContext? context = _ctx;
-}
-
-class LicenseDto extends CodeMashSubscriptionDto implements IConvertible
-{
-    bool? isEnterprise;
-    int? projectCap;
-
-    LicenseDto({this.isEnterprise,this.projectCap});
-    LicenseDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        isEnterprise = json['isEnterprise'];
-        projectCap = json['projectCap'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'isEnterprise': isEnterprise,
-        'projectCap': projectCap
-    });
-
-    getTypeName() => "LicenseDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class LicenseHeartbeatVerdictDto implements IConvertible
-{
-    // @DataMember(Name="status")
-    String status = "";
-
-    // @DataMember(Name="proofToken")
-    String? proofToken;
-
-    // @DataMember(Name="serverTimeUtc")
-    DateTime? serverTimeUtc;
-
-    // @DataMember(Name="graceUntilUtc")
-    DateTime? graceUntilUtc;
-
-    // @DataMember(Name="installationId")
-    String installationId = "";
-
-    // @DataMember(Name="licenseAccountId")
-    String? licenseAccountId;
-
-    // @DataMember(Name="domain")
-    String? domain;
-
-    // @DataMember(Name="signature")
-    String? signature;
-
-    // @DataMember(Name="message")
-    String? message;
-
-    LicenseHeartbeatVerdictDto({this.status="",this.proofToken,this.serverTimeUtc,this.graceUntilUtc,this.installationId="",this.licenseAccountId,this.domain,this.signature,this.message});
-    LicenseHeartbeatVerdictDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        status = json['status'] ?? "";
-        proofToken = json['proofToken'];
-        serverTimeUtc = JsonConverters.fromJson(json['serverTimeUtc'],'DateTime',context!) ?? DateTime(0);
-        graceUntilUtc = JsonConverters.fromJson(json['graceUntilUtc'],'DateTime',context!);
-        installationId = json['installationId'] ?? "";
-        licenseAccountId = json['licenseAccountId'];
-        domain = json['domain'];
-        signature = json['signature'];
-        message = json['message'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'status': status,
-        'proofToken': proofToken,
-        'serverTimeUtc': JsonConverters.toJson(serverTimeUtc,'DateTime',context!),
-        'graceUntilUtc': JsonConverters.toJson(graceUntilUtc,'DateTime',context!),
-        'installationId': installationId,
-        'licenseAccountId': licenseAccountId,
-        'domain': domain,
-        'signature': signature,
-        'message': message
-    };
-
-    getTypeName() => "LicenseHeartbeatVerdictDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class InstallationLicenseDetailsDto implements IConvertible
-{
-    // @DataMember(Name="domain")
-    String? domain;
-
-    // @DataMember(Name="accountId")
-    String? accountId;
-
-    // @DataMember(Name="email")
-    String? email;
-
-    // @DataMember(Name="release")
-    String? release;
-
-    // @DataMember(Name="expire")
-    int expire = 0;
-
-    // @DataMember(Name="isTrial")
-    bool? isTrial;
-
-    // @DataMember(Name="cap")
-    int? cap;
-
-    InstallationLicenseDetailsDto({this.domain,this.accountId,this.email,this.release,this.expire=0,this.isTrial,this.cap});
-    InstallationLicenseDetailsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        domain = json['domain'];
-        accountId = json['accountId'];
-        email = json['email'];
-        release = json['release'];
-        expire = json['expire'] ?? 0;
-        isTrial = json['isTrial'];
-        cap = json['projectsCap'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'domain': domain,
-        'accountId': accountId,
-        'email': email,
-        'release': release,
-        'expire': expire,
-        'isTrial': isTrial,
-        'cap': cap
-    };
-
-    getTypeName() => "InstallationLicenseDetailsDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class InstallationLicenseStatusDto implements IConvertible
-{
-    // @DataMember(Name="storedMode")
-    String storedMode = "";
-
-    // @DataMember(Name="effectiveMode")
-    String effectiveMode = "";
-
-    // @DataMember(Name="isProduction")
-    bool? isProduction;
-
-    // @DataMember(Name="graceDaysLeft")
-    int? graceDaysLeft;
-
-    // @DataMember(Name="graceUntilUtc")
-    DateTime? graceUntilUtc;
-
-    // @DataMember(Name="lastProvenAtUtc")
-    DateTime? lastProvenAtUtc;
-
-    // @DataMember(Name="lastHeartbeatAtUtc")
-    DateTime? lastHeartbeatAtUtc;
-
-    // @DataMember(Name="installationDomain")
-    String? installationDomain;
-
-    // @DataMember(Name="licensedDomain")
-    String? licensedDomain;
-
-    // @DataMember(Name="hostKind")
-    String? hostKind;
-
-    // @DataMember(Name="isTrialLicense")
-    bool? isTrialLicense;
-
-    // @DataMember(Name="licenseExpireUtc")
-    DateTime? licenseExpireUtc;
-
-    // @DataMember(Name="lastHeartbeatOutcome")
-    String? lastHeartbeatOutcome;
-
-    // @DataMember(Name="lastHeartbeatError")
-    String? lastHeartbeatError;
-
-    // @DataMember(Name="message")
-    String? message;
-
-    // @DataMember(Name="license")
-    InstallationLicenseDetailsDto? license;
-
-    // @DataMember(Name="licensingDocsUrl")
-    String? licensingDocsUrl;
-
-    // @DataMember(Name="askForEnterpriseLicenseEmail")
-    String? askForEnterpriseLicenseEmail;
-
-    InstallationLicenseStatusDto({this.storedMode="",this.effectiveMode="",this.isProduction,this.graceDaysLeft,this.graceUntilUtc,this.lastProvenAtUtc,this.lastHeartbeatAtUtc,this.installationDomain,this.licensedDomain,this.hostKind,this.isTrialLicense,this.licenseExpireUtc,this.lastHeartbeatOutcome,this.lastHeartbeatError,this.message,this.license,this.licensingDocsUrl,this.askForEnterpriseLicenseEmail});
-    InstallationLicenseStatusDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        storedMode = json['storedMode'] ?? "";
-        effectiveMode = json['effectiveMode'] ?? "";
-        isProduction = json['isProduction'];
-        graceDaysLeft = json['graceDaysLeft'];
-        graceUntilUtc = JsonConverters.fromJson(json['graceUntilUtc'],'DateTime',context!);
-        lastProvenAtUtc = JsonConverters.fromJson(json['lastProvenAtUtc'],'DateTime',context!);
-        lastHeartbeatAtUtc = JsonConverters.fromJson(json['lastHeartbeatAtUtc'],'DateTime',context!);
-        installationDomain = json['installationDomain'];
-        licensedDomain = json['licensedDomain'];
-        hostKind = json['hostKind'];
-        isTrialLicense = json['isTrialLicense'];
-        licenseExpireUtc = JsonConverters.fromJson(json['licenseExpireUtc'],'DateTime',context!);
-        lastHeartbeatOutcome = json['lastHeartbeatOutcome'];
-        lastHeartbeatError = json['lastHeartbeatError'];
-        message = json['message'];
-        license = JsonConverters.fromJson(json['license'],'InstallationLicenseDetailsDto',context!);
-        licensingDocsUrl = json['licensingDocsUrl'];
-        askForEnterpriseLicenseEmail = json['askForEnterpriseLicenseEmail'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'storedMode': storedMode,
-        'effectiveMode': effectiveMode,
-        'isProduction': isProduction,
-        'graceDaysLeft': graceDaysLeft,
-        'graceUntilUtc': JsonConverters.toJson(graceUntilUtc,'DateTime',context!),
-        'lastProvenAtUtc': JsonConverters.toJson(lastProvenAtUtc,'DateTime',context!),
-        'lastHeartbeatAtUtc': JsonConverters.toJson(lastHeartbeatAtUtc,'DateTime',context!),
-        'installationDomain': installationDomain,
-        'licensedDomain': licensedDomain,
-        'hostKind': hostKind,
-        'isTrialLicense': isTrialLicense,
-        'licenseExpireUtc': JsonConverters.toJson(licenseExpireUtc,'DateTime',context!),
-        'lastHeartbeatOutcome': lastHeartbeatOutcome,
-        'lastHeartbeatError': lastHeartbeatError,
-        'message': message,
-        'license': JsonConverters.toJson(license,'InstallationLicenseDetailsDto',context!),
-        'licensingDocsUrl': licensingDocsUrl,
-        'askForEnterpriseLicenseEmail': askForEnterpriseLicenseEmail
-    };
-
-    getTypeName() => "InstallationLicenseStatusDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
 class AiRoleDto implements IConvertible
 {
     // @DataMember
@@ -29640,9 +29176,12 @@ class SupportCaseDto implements IHasViewId, IConvertible
     int messageCount = 0;
 
     // @DataMember
+    List<String>? countedMessageIds;
+
+    // @DataMember
     int? lastMessageOn;
 
-    SupportCaseDto({this.viewId="",this.accountId="",this.projectId,this.reporterId,this.kind,this.severity,this.status,this.customerStatus,this.subject="",this.affectedModule,this.deploymentMode,this.gatewayVersion,this.region,this.planTier,this.openedOn=0,this.firstResponseOn,this.resolvedOn,this.closedOn,this.resolution,this.messageCount=0,this.lastMessageOn});
+    SupportCaseDto({this.viewId="",this.accountId="",this.projectId,this.reporterId,this.kind,this.severity,this.status,this.customerStatus,this.subject="",this.affectedModule,this.deploymentMode,this.gatewayVersion,this.region,this.planTier,this.openedOn=0,this.firstResponseOn,this.resolvedOn,this.closedOn,this.resolution,this.messageCount=0,this.countedMessageIds,this.lastMessageOn});
     SupportCaseDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -29666,6 +29205,7 @@ class SupportCaseDto implements IHasViewId, IConvertible
         closedOn = json['closedOn'];
         resolution = json['resolution'];
         messageCount = json['messageCount'] ?? 0;
+        countedMessageIds = JsonConverters.fromJson(json['countedMessageIds'],'List<String>',context!);
         lastMessageOn = json['lastMessageOn'];
         return this;
     }
@@ -29691,6 +29231,7 @@ class SupportCaseDto implements IHasViewId, IConvertible
         'closedOn': closedOn,
         'resolution': resolution,
         'messageCount': messageCount,
+        'countedMessageIds': JsonConverters.toJson(countedMessageIds,'List<String>',context!),
         'lastMessageOn': lastMessageOn
     };
 
@@ -31504,153 +31045,6 @@ class GetMyAccountUserProfileResponse extends ResponseBase implements IConvertib
     });
 
     getTypeName() => "GetMyAccountUserProfileResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetLicenseDomainDnsStatusResponse extends ResponseBase implements IConvertible
-{
-    LicenseDomainDnsStatusDto? status;
-
-    GetLicenseDomainDnsStatusResponse({this.status});
-    GetLicenseDomainDnsStatusResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        status = JsonConverters.fromJson(json['status'],'LicenseDomainDnsStatusDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'status': JsonConverters.toJson(status,'LicenseDomainDnsStatusDto',context!)
-    });
-
-    getTypeName() => "GetLicenseDomainDnsStatusResponse";
-    TypeContext? context = _ctx;
-}
-
-class StartLicenseDomainVerificationResponse extends ResponseBase implements IConvertible
-{
-    LicenseDomainVerificationChallengeDto? challenge;
-
-    StartLicenseDomainVerificationResponse({this.challenge});
-    StartLicenseDomainVerificationResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        challenge = JsonConverters.fromJson(json['challenge'],'LicenseDomainVerificationChallengeDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'challenge': JsonConverters.toJson(challenge,'LicenseDomainVerificationChallengeDto',context!)
-    });
-
-    getTypeName() => "StartLicenseDomainVerificationResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetLicenseDomainVerificationStatusResponse extends ResponseBase implements IConvertible
-{
-    LicenseDomainVerificationStatusDto? status;
-
-    GetLicenseDomainVerificationStatusResponse({this.status});
-    GetLicenseDomainVerificationStatusResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        status = JsonConverters.fromJson(json['status'],'LicenseDomainVerificationStatusDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'status': JsonConverters.toJson(status,'LicenseDomainVerificationStatusDto',context!)
-    });
-
-    getTypeName() => "GetLicenseDomainVerificationStatusResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetLicensesResponse extends ResponseBase implements IConvertible
-{
-    List<LicenseDto>? list;
-
-    GetLicensesResponse({this.list});
-    GetLicensesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        list = JsonConverters.fromJson(json['list'],'List<LicenseDto>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'list': JsonConverters.toJson(list,'List<LicenseDto>',context!)
-    });
-
-    getTypeName() => "GetLicensesResponse";
-    TypeContext? context = _ctx;
-}
-
-class PostLicenseHeartbeatResponse extends ResponseBase implements IConvertible
-{
-    LicenseHeartbeatVerdictDto? verdict;
-
-    PostLicenseHeartbeatResponse({this.verdict});
-    PostLicenseHeartbeatResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        verdict = JsonConverters.fromJson(json['verdict'],'LicenseHeartbeatVerdictDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'verdict': JsonConverters.toJson(verdict,'LicenseHeartbeatVerdictDto',context!)
-    });
-
-    getTypeName() => "PostLicenseHeartbeatResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetInstallationLicenseStatusResponse extends ResponseBase implements IConvertible
-{
-    InstallationLicenseStatusDto? status;
-
-    GetInstallationLicenseStatusResponse({this.status});
-    GetInstallationLicenseStatusResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        status = JsonConverters.fromJson(json['status'],'InstallationLicenseStatusDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'status': JsonConverters.toJson(status,'InstallationLicenseStatusDto',context!)
-    });
-
-    getTypeName() => "GetInstallationLicenseStatusResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetLicenseKeyResponse extends ResponseBase implements IConvertible
-{
-    String? key;
-
-    GetLicenseKeyResponse({this.key});
-    GetLicenseKeyResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        key = json['key'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'key': key
-    });
-
-    getTypeName() => "GetLicenseKeyResponse";
     TypeContext? context = _ctx;
 }
 
@@ -43474,178 +42868,6 @@ class UpdateMyAccountUserPhone extends RequestBase implements IReturn<EmptyRespo
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "UpdateMyAccountUserPhone";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/account/licensing/dns-status", "GET")
-class GetLicenseDomainDnsStatus extends RequestBase implements IReturn<GetLicenseDomainDnsStatusResponse>, IConvertible, IGet
-{
-    String? domain;
-
-    GetLicenseDomainDnsStatus({this.domain});
-    GetLicenseDomainDnsStatus.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        domain = json['domain'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'domain': domain
-    });
-
-    createResponse() => GetLicenseDomainDnsStatusResponse();
-    getResponseTypeName() => "GetLicenseDomainDnsStatusResponse";
-    getTypeName() => "GetLicenseDomainDnsStatus";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/licensing/domain-verification/start", "POST")
-class StartLicenseDomainVerificationRequest extends RequestBase implements IReturn<StartLicenseDomainVerificationResponse>, IConvertible, IPost
-{
-    String? domain;
-
-    StartLicenseDomainVerificationRequest({this.domain});
-    StartLicenseDomainVerificationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        domain = json['domain'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'domain': domain
-    });
-
-    createResponse() => StartLicenseDomainVerificationResponse();
-    getResponseTypeName() => "StartLicenseDomainVerificationResponse";
-    getTypeName() => "StartLicenseDomainVerificationRequest";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/licensing/domain-verification/status", "GET")
-class GetLicenseDomainVerificationStatus extends RequestBase implements IReturn<GetLicenseDomainVerificationStatusResponse>, IConvertible, IGet
-{
-    String? domain;
-
-    GetLicenseDomainVerificationStatus({this.domain});
-    GetLicenseDomainVerificationStatus.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        domain = json['domain'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'domain': domain
-    });
-
-    createResponse() => GetLicenseDomainVerificationStatusResponse();
-    getResponseTypeName() => "GetLicenseDomainVerificationStatusResponse";
-    getTypeName() => "GetLicenseDomainVerificationStatus";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/account/licenses", "GET")
-class GetLicenses extends RequestBase implements IReturn<GetLicensesResponse>, IConvertible, IGet
-{
-    GetLicenses();
-    GetLicenses.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => GetLicensesResponse();
-    getResponseTypeName() => "GetLicensesResponse";
-    getTypeName() => "GetLicenses";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/licensing/heartbeat", "POST")
-class PostLicenseHeartbeat extends RequestBase implements IReturn<PostLicenseHeartbeatResponse>, IConvertible, IPost
-{
-    String? license;
-    String? licenseAccountId;
-    String? installationId;
-    String? domain;
-    String? hostKind;
-    String? release;
-    String? instanceVersion;
-
-    PostLicenseHeartbeat({this.license,this.licenseAccountId,this.installationId,this.domain,this.hostKind,this.release,this.instanceVersion});
-    PostLicenseHeartbeat.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        license = json['license'];
-        licenseAccountId = json['licenseAccountId'];
-        installationId = json['installationId'];
-        domain = json['domain'];
-        hostKind = json['hostKind'];
-        release = json['release'];
-        instanceVersion = json['instanceVersion'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'license': license,
-        'licenseAccountId': licenseAccountId,
-        'installationId': installationId,
-        'domain': domain,
-        'hostKind': hostKind,
-        'release': release,
-        'instanceVersion': instanceVersion
-    });
-
-    createResponse() => PostLicenseHeartbeatResponse();
-    getResponseTypeName() => "PostLicenseHeartbeatResponse";
-    getTypeName() => "PostLicenseHeartbeat";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/account/licensing/status", "GET")
-class GetInstallationLicenseStatus extends RequestBase implements IReturn<GetInstallationLicenseStatusResponse>, IConvertible, IGet
-{
-    GetInstallationLicenseStatus();
-    GetInstallationLicenseStatus.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => GetInstallationLicenseStatusResponse();
-    getResponseTypeName() => "GetInstallationLicenseStatusResponse";
-    getTypeName() => "GetInstallationLicenseStatus";
-    TypeContext? context = _ctx;
-}
-
-// @Route("/{version}/account/licenses/{Id}/key", "GET")
-class GetLicenseKey extends RequestBase implements IReturn<GetLicenseKeyResponse>, IConvertible, IGet
-{
-    String? id;
-
-    GetLicenseKey({this.id});
-    GetLicenseKey.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id
-    });
-
-    createResponse() => GetLicenseKeyResponse();
-    getResponseTypeName() => "GetLicenseKeyResponse";
-    getTypeName() => "GetLicenseKey";
     TypeContext? context = _ctx;
 }
 
@@ -61569,16 +60791,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TeamInvitationDto': TypeInfo(TypeOf.Class, create:() => TeamInvitationDto()),
     'Map<String,List<String>?>': TypeInfo(TypeOf.Class, create:() => Map<String,List<String>?>()),
     'AccountPasskeyListItemDto': TypeInfo(TypeOf.Class, create:() => AccountPasskeyListItemDto()),
-    'LicenseDomainDnsRecordDto': TypeInfo(TypeOf.Class, create:() => LicenseDomainDnsRecordDto()),
-    'LicenseDomainDnsStatusDto': TypeInfo(TypeOf.Class, create:() => LicenseDomainDnsStatusDto()),
-    'List<LicenseDomainDnsRecordDto>': TypeInfo(TypeOf.Class, create:() => <LicenseDomainDnsRecordDto>[]),
-    'LicenseDomainVerificationChallengeDto': TypeInfo(TypeOf.Class, create:() => LicenseDomainVerificationChallengeDto()),
-    'LicenseDomainVerificationStatusDto': TypeInfo(TypeOf.Class, create:() => LicenseDomainVerificationStatusDto()),
-    'CodeMashSubscriptionDto': TypeInfo(TypeOf.Class, create:() => CodeMashSubscriptionDto()),
-    'LicenseDto': TypeInfo(TypeOf.Class, create:() => LicenseDto()),
-    'LicenseHeartbeatVerdictDto': TypeInfo(TypeOf.Class, create:() => LicenseHeartbeatVerdictDto()),
-    'InstallationLicenseDetailsDto': TypeInfo(TypeOf.Class, create:() => InstallationLicenseDetailsDto()),
-    'InstallationLicenseStatusDto': TypeInfo(TypeOf.Class, create:() => InstallationLicenseStatusDto()),
     'AiRoleDto': TypeInfo(TypeOf.Class, create:() => AiRoleDto()),
     'AiProjectRolesDto': TypeInfo(TypeOf.Class, create:() => AiProjectRolesDto()),
     'List<AiRoleDto>': TypeInfo(TypeOf.Class, create:() => <AiRoleDto>[]),
@@ -61981,14 +61193,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AccountPasskeyListItemDto>': TypeInfo(TypeOf.Class, create:() => <AccountPasskeyListItemDto>[]),
     'AccountPasskeyEnrollmentResponse': TypeInfo(TypeOf.Class, create:() => AccountPasskeyEnrollmentResponse()),
     'GetMyAccountUserProfileResponse': TypeInfo(TypeOf.Class, create:() => GetMyAccountUserProfileResponse()),
-    'GetLicenseDomainDnsStatusResponse': TypeInfo(TypeOf.Class, create:() => GetLicenseDomainDnsStatusResponse()),
-    'StartLicenseDomainVerificationResponse': TypeInfo(TypeOf.Class, create:() => StartLicenseDomainVerificationResponse()),
-    'GetLicenseDomainVerificationStatusResponse': TypeInfo(TypeOf.Class, create:() => GetLicenseDomainVerificationStatusResponse()),
-    'GetLicensesResponse': TypeInfo(TypeOf.Class, create:() => GetLicensesResponse()),
-    'List<LicenseDto>': TypeInfo(TypeOf.Class, create:() => <LicenseDto>[]),
-    'PostLicenseHeartbeatResponse': TypeInfo(TypeOf.Class, create:() => PostLicenseHeartbeatResponse()),
-    'GetInstallationLicenseStatusResponse': TypeInfo(TypeOf.Class, create:() => GetInstallationLicenseStatusResponse()),
-    'GetLicenseKeyResponse': TypeInfo(TypeOf.Class, create:() => GetLicenseKeyResponse()),
     'CreateAiServiceUserResponse': TypeInfo(TypeOf.Class, create:() => CreateAiServiceUserResponse()),
     'ListAiServiceUsersResponse': TypeInfo(TypeOf.Class, create:() => ListAiServiceUsersResponse()),
     'List<AiServiceUserDto>': TypeInfo(TypeOf.Class, create:() => <AiServiceUserDto>[]),
@@ -62494,13 +61698,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AccountVerifyPasskeyEnrollmentRequest': TypeInfo(TypeOf.Class, create:() => AccountVerifyPasskeyEnrollmentRequest()),
     'GetMyAccountUserProfile': TypeInfo(TypeOf.Class, create:() => GetMyAccountUserProfile()),
     'UpdateMyAccountUserPhone': TypeInfo(TypeOf.Class, create:() => UpdateMyAccountUserPhone()),
-    'GetLicenseDomainDnsStatus': TypeInfo(TypeOf.Class, create:() => GetLicenseDomainDnsStatus()),
-    'StartLicenseDomainVerificationRequest': TypeInfo(TypeOf.Class, create:() => StartLicenseDomainVerificationRequest()),
-    'GetLicenseDomainVerificationStatus': TypeInfo(TypeOf.Class, create:() => GetLicenseDomainVerificationStatus()),
-    'GetLicenses': TypeInfo(TypeOf.Class, create:() => GetLicenses()),
-    'PostLicenseHeartbeat': TypeInfo(TypeOf.Class, create:() => PostLicenseHeartbeat()),
-    'GetInstallationLicenseStatus': TypeInfo(TypeOf.Class, create:() => GetInstallationLicenseStatus()),
-    'GetLicenseKey': TypeInfo(TypeOf.Class, create:() => GetLicenseKey()),
     'CreateAiServiceUserRequest': TypeInfo(TypeOf.Class, create:() => CreateAiServiceUserRequest()),
     'List<AiProjectRoleIdsDto>': TypeInfo(TypeOf.Class, create:() => <AiProjectRoleIdsDto>[]),
     'List<RoleEnvironmentsDto>': TypeInfo(TypeOf.Class, create:() => <RoleEnvironmentsDto>[]),
