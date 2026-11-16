@@ -61,11 +61,11 @@ There is no `client.api.xxx` or `client.hub.xxx` middle layer.
 
 ## Configuration
 
-Defaults to the public `*.norbix.ai` hosts. Override the URL when you
-self-host:
+Defaults to the public `*.norbix.ai` hosts. Override the URL for a
+custom domain or local development:
 
 ```dart
-// Self-hosted at your company domain
+// A custom domain
 final api = NorbixApi(
   config: NorbixConfig(
     baseUrl: 'https://api.norbix.isidos.lt',
@@ -128,7 +128,7 @@ default `NORBIX_PROJECT_ID` / `NORBIX_ACCOUNT_ID`.)
 
 Pin a client to a Norbix region (a region code such as `nb-eu-germany`).
 **There is no default region**: when none is set, no region header is
-sent and requests go to the plain host — existing and self-hosted setups
+sent and requests go to the plain host — existing setups
 are unaffected.
 
 ```dart
@@ -159,7 +159,7 @@ request to the regional host:
 https://hub.norbix.ai  +  region nb-eu-germany  →  https://nb-eu-germany.hub.norbix.ai
 ```
 
-A custom base URL (self-hosted, localhost) is **never rewritten** — the
+A custom base URL (custom domain, localhost) is **never rewritten** — the
 region then only adds the `nb-region` header.
 
 The two region-aware endpoints also accept a per-call `region:` argument

@@ -4,7 +4,7 @@
 import '../../core/resource.dart';
 import '../mcp_response.dart';
 
-/// Account profile, team, licenses, regions, status, Stripe billing.
+/// Account profile, team, regions, status, Stripe billing.
 class AccountsResource extends Resource {
   AccountsResource(super.transport);
 
@@ -186,18 +186,6 @@ class AccountsResource extends Resource {
       {Map<String, Object?>? query, Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/status',
-      method: 'GET',
-      query: query,
-      headers: headers,
-      pathParams: null,
-    );
-  }
-
-  /// `GET /{version}/account/licenses`
-  Future<Object?> getLicenses(
-      {Map<String, Object?>? query, Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/account/licenses',
       method: 'GET',
       query: query,
       headers: headers,
