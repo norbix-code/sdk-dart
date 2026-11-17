@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-16 09:07:08
+Date: 2026-11-17 17:22:40
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -3975,6 +3975,20 @@ class WorkflowWaitSlotDto implements IConvertible
     // @DataMember
     bool? teamRole;
 
+    /**
+    * Set when this slot is an AI agent's: the agent's id in the step. `userId` is then the agent's service user.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set when this slot is an AI agent's: the agent's id in the step. `userId` is then the agent's service user.")
+    String? agent;
+
+    /**
+    * The reason given with the answer that filled this slot. An AI agent always gives one.
+    */
+    // @DataMember
+    // @ApiMember(Description="The reason given with the answer that filled this slot. An AI agent always gives one.")
+    String? reason;
+
     // @DataMember
     String? answeredBy;
 
@@ -3991,7 +4005,7 @@ class WorkflowWaitSlotDto implements IConvertible
     // @ApiMember(Description="True = somebody who was not asked answered for this slot, using the override right.")
     bool? override;
 
-    WorkflowWaitSlotDto({this.label="",this.userId,this.role,this.tag,this.teamRole,this.answeredBy,this.decision,this.at,this.override});
+    WorkflowWaitSlotDto({this.label="",this.userId,this.role,this.tag,this.teamRole,this.agent,this.reason,this.answeredBy,this.decision,this.at,this.override});
     WorkflowWaitSlotDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -4000,6 +4014,8 @@ class WorkflowWaitSlotDto implements IConvertible
         role = json['role'];
         tag = json['tag'];
         teamRole = json['teamRole'];
+        agent = json['agent'];
+        reason = json['reason'];
         answeredBy = json['answeredBy'];
         decision = json['decision'];
         at = JsonConverters.fromJson(json['at'],'DateTime',context!);
@@ -4013,6 +4029,8 @@ class WorkflowWaitSlotDto implements IConvertible
         'role': role,
         'tag': tag,
         'teamRole': teamRole,
+        'agent': agent,
+        'reason': reason,
         'answeredBy': answeredBy,
         'decision': decision,
         'at': JsonConverters.toJson(at,'DateTime',context!),
@@ -4031,6 +4049,9 @@ class WorkflowWaitAnswerDto implements IConvertible
 
     // @DataMember
     String? kind;
+
+    // @DataMember
+    String? reason;
 
     // @DataMember
     String decision = "";
@@ -4052,12 +4073,13 @@ class WorkflowWaitAnswerDto implements IConvertible
     // @DataMember
     DateTime? at;
 
-    WorkflowWaitAnswerDto({this.userId="",this.kind,this.decision="",this.slots,this.override,this.at});
+    WorkflowWaitAnswerDto({this.userId="",this.kind,this.reason,this.decision="",this.slots,this.override,this.at});
     WorkflowWaitAnswerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         userId = json['userId'] ?? "";
         kind = json['kind'];
+        reason = json['reason'];
         decision = json['decision'] ?? "";
         slots = JsonConverters.fromJson(json['slots'],'List<int>',context!);
         override = json['override'];
@@ -4068,6 +4090,7 @@ class WorkflowWaitAnswerDto implements IConvertible
     Map<String, dynamic> toJson() => {
         'userId': userId,
         'kind': kind,
+        'reason': reason,
         'decision': decision,
         'slots': JsonConverters.toJson(slots,'List<int>',context!),
         'override': override,
@@ -14595,7 +14618,14 @@ class ResumeCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
     // @DataMember
     Map<String,dynamic?>? payload;
 
-    ResumeCodeWorkflowRun({this.runId="",this.stepId,this.decision,this.payload});
+    /**
+    * Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).")
+    String? reason;
+
+    ResumeCodeWorkflowRun({this.runId="",this.stepId,this.decision,this.payload,this.reason});
     ResumeCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14604,6 +14634,7 @@ class ResumeCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
         stepId = json['stepId'];
         decision = json['decision'];
         payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        reason = json['reason'];
         return this;
     }
 
@@ -14611,7 +14642,8 @@ class ResumeCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
         'runId': runId,
         'stepId': stepId,
         'decision': decision,
-        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'reason': reason
     });
 
     createResponse() => WorkflowRunResponse();
@@ -14846,7 +14878,14 @@ class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<
     // @DataMember
     Map<String,dynamic?>? payload;
 
-    ResumeCodeWorkflowRunByKey({this.id="",this.key="",this.stepId,this.decision,this.payload});
+    /**
+    * Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).")
+    String? reason;
+
+    ResumeCodeWorkflowRunByKey({this.id="",this.key="",this.stepId,this.decision,this.payload,this.reason});
     ResumeCodeWorkflowRunByKey.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14856,6 +14895,7 @@ class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<
         stepId = json['stepId'];
         decision = json['decision'];
         payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        reason = json['reason'];
         return this;
     }
 
@@ -14864,7 +14904,8 @@ class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<
         'key': key,
         'stepId': stepId,
         'decision': decision,
-        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'reason': reason
     });
 
     createResponse() => WorkflowRunResponse();

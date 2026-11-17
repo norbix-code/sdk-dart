@@ -83,8 +83,10 @@ class AccountsResource extends Resource {
   /// `GET /{version}/account/flex-clusters`
   ///
   /// Lists the account's Norbix-managed Atlas clusters. The response carries
-  /// `clusters` (each with `id`, `displayName`, `tierCode` `FLEX` or `M10`,
-  /// `status`, its `databases`, `usage` and `nearLimits`), `canCreateNew`
+  /// `clusters` (each with `id`, `displayName`, `tierCode` `FLEX` … `M40`,
+  /// `nextTierCode` (the next upgrade step, empty when there is none),
+  /// `topTierCode` (the plan's highest tier), `status`, its `databases`,
+  /// `usage` and `nearLimits`), `canCreateNew`
   /// and, when that is false, `cannotCreateReason` (`TrialOneCluster` or
   /// `ClusterLimitReached`).
   Future<Object?> getFlexClusters(
@@ -100,8 +102,10 @@ class AccountsResource extends Resource {
 
   /// `POST /{version}/account/flex-clusters/{flexClusterId}/upgrade`
   ///
-  /// Queues the upgrade of a cluster to a bigger tier. Body:
-  /// `{'tierCode': 'M10'}`.
+  /// Queues the upgrade of a cluster by one step on the ladder FLEX → M10 →
+  /// M20 → M30 → M40, within the plan (trial: FLEX only, Starter: up to M20,
+  /// Growth: up to M30, Scale: up to M40). Body: `{'tierCode': <the cluster's
+  /// nextTierCode>}`.
   Future<Object?> upgradeFlexCluster(
       {required Object flexClusterId,
       Map<String, Object?>? query,

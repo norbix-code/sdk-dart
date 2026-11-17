@@ -401,7 +401,7 @@ await hub.database.getCollectionImport(id: importId);
 | Schemas | `getDatabaseSchemas`, `getDatabaseSchema`, `saveDatabaseSchema`, `renameDatabaseSchema`, `deleteDatabaseSchema`, `getDatabaseSchemaDraft`, `updateDatabaseSchemaDraft`, `discardDatabaseSchemaDraft`, `publishDatabaseSchema`, `getDatabaseSchemaVersions`, `getDatabaseSchemaVersionDiff`, `updateDatabaseSchemaSettings`, `getDatabaseSchemaListSettings`, `updateDatabaseSchemaListSettings`, `getDatabaseSchemaIndexStatus`, `updateDatabaseSchemaEmbed`, `applyDatabaseSchemaBundle` | `getDatabaseSchemas`, `getDatabaseSchema` |
 | Taxonomies and terms | `getDatabaseTaxonomies`, `getDatabaseTaxonomy`, `saveDatabaseTaxonomy`, `deleteDatabaseTaxonomy`, `getDatabaseTaxonomyTerm`, `saveDatabaseTaxonomyTerm`, `updateDatabaseTaxonomyTerm`, `deleteDatabaseTaxonomyTerm`, `deleteManyDatabaseTaxonomyTerms`, `getDatabaseTaxonomyTree`, `getDatabaseTaxonomyTermTree`, `getDatabaseMergedTermTree` | `findTerms`, `findTermsChildren`, `findTermTree`, `findTaxonomyTree`, `findMergedTermTree` |
 | Schema triggers | `getSchemaTriggers`, `getSchemaTrigger`, `saveSchemaTrigger`, `enableSchemaTrigger`, `disableSchemaTrigger`, `deleteSchemaTrigger` | — |
-| Integrations | `getDatabaseIntegrations`, `getDatabaseIntegration`, `saveDatabaseIntegration`, `testDatabaseIntegration`, `enableDatabaseIntegration`, `disableDatabaseIntegration`, `setDatabaseIntegrationAsDefault`, `deleteDatabaseIntegration`, `getAllowedFlexTiers`, `revealManagedFlexConnectionString` | — |
+| Integrations | `getDatabaseIntegrations`, `getDatabaseIntegration`, `saveDatabaseIntegration`, `testDatabaseIntegration`, `enableDatabaseIntegration`, `disableDatabaseIntegration`, `setDatabaseIntegrationAsDefault`, `deleteDatabaseIntegration`, `getAllowedFlexTiers`, `getNetworkAddresses` (the IP addresses Norbix connects from, per region), `revealManagedFlexConnectionString` | — |
 | Saved aggregates | `getDatabaseAggregates`, `getDatabaseAggregate`, `saveDatabaseAggregate`, `testDatabaseAggregate`, `deleteDatabaseAggregate` | — |
 | Collection imports | `requestImportUploadUrl`, `analyzeImportFile`, `createCollectionImport`, `getCollectionImports`, `getCollectionImport`, `deleteCollectionImport` | — |
 
@@ -1251,8 +1251,8 @@ upgraded on `hub.accounts` too:
 |--------|------|
 | `getManagedServiceBundles()` | `GET /{version}/account/stripe/bundles` — `bundles`, each with `bundle`, `projectCap` and the `monthly` and `annual` prices (`amount` in minor units, lower-case `currency`) |
 | `changeManagedServiceBundle(body:)` | `POST /{version}/account/stripe/change-bundle` — `bundle`, `billingPeriod`; refused with `CM-ERRORS-ACCOUNT-023` when the account has more enabled projects than the new bundle allows |
-| `getFlexClusters()` | `GET /{version}/account/flex-clusters` — `clusters` (with `databases`, `usage`, `nearLimits`), `canCreateNew`, `cannotCreateReason?` (`TrialOneCluster` or `ClusterLimitReached`) |
-| `upgradeFlexCluster(flexClusterId:, body:)` | `POST /{version}/account/flex-clusters/{flexClusterId}/upgrade` — `tierCode` (`M10`); the upgrade is queued |
+| `getFlexClusters()` | `GET /{version}/account/flex-clusters` — `clusters` (with `databases`, `usage`, `nearLimits`, `nextTierCode`, `topTierCode`), `canCreateNew`, `cannotCreateReason?` (`TrialOneCluster` or `ClusterLimitReached`) |
+| `upgradeFlexCluster(flexClusterId:, body:)` | `POST /{version}/account/flex-clusters/{flexClusterId}/upgrade` — `tierCode`: the cluster's `nextTierCode` (one step on FLEX → M10 → M20 → M30 → M40, within the plan: trial FLEX only, Starter up to M20, Growth up to M30, Scale up to M40); the upgrade is queued |
 | `createStripeCheckoutSession(body:)` | `POST /{version}/account/stripe/create-checkout-session` — a Managed Service checkout needs `bundle` and `billingPeriod`. `projectCap` is no longer accepted. |
 
 `getAccountStatus()` now also answers `bundle`, `billingPeriod`, `isTrial`,
@@ -1266,8 +1266,8 @@ await hub.accounts.changeManagedServiceBundle(
 
 final flex = await hub.accounts.getFlexClusters();
 await hub.accounts.upgradeFlexCluster(
-  flexClusterId: 'fc_1',
-  body: {'tierCode': 'M10'},
+  flexClusterId: 'fxc_1',
+  body: {'tierCode': 'M20'}, // the cluster's nextTierCode
 );
 ```
 
@@ -1457,7 +1457,7 @@ The shapes (`WorkflowDefinitionDto`, `WorkflowRunDto`, …) are in
 | `validateCodeWorkflow(body:)` | `POST /{version}/code/workflows/validate` — `definition` |
 | `getCodeWorkflowSchema()` | `GET /{version}/code/workflows/schema` |
 | `enableCodeWorkflows()` | `PUT /{version}/code/workflows/enable` — the Workflows switch |
-| `disableCodeWorkflows()` | `PUT /{version}/code/workflows/disable` |
+| `disableCodeWorkflows()` | `PUT /{version}/code/workflows/disable` — refused since 2026-11-17 (`CM-ERRORS-WORKFLOWS-045`); deprecated |
 | `getCodeWorkflowWaitingRuns(query:)` | `GET /{version}/code/workflows/runs` — `status?`, `waitingKind?`, `assignee?`, `workflowId?`, `key?` + paging |
 | `getCodeWorkflowRun(runId:)` | `GET /{version}/code/workflows/runs/{RunId}` |
 | `getCodeWorkflowRunLogs(runId:, query:)` | `GET /{version}/code/workflows/runs/{RunId}/logs` — `stepId?`, `level?` + paging |
