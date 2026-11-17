@@ -215,6 +215,25 @@ class MembershipResource extends Resource {
     );
   }
 
+  /// `GET /{version}/membership/triggers/event-values`
+  ///
+  /// Every membership trigger event (`when`: `OnRegistered`, `OnInvited`,
+  /// `OnVerified`, `OnUpdated`, `OnDeleted`, `OnBlocked`, `OnReactivated`,
+  /// `OnUserCreated`) and the values it carries by name (`events[].values`:
+  /// `key`, `owner`, `label`, `resolver`). Bind a template token of a
+  /// membership trigger action to one of them as
+  /// `{key: <token>, value: <key>, resolver: <resolver>}` — never `Custom`.
+  Future<Object?> getMembershipTriggerEventValues(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/triggers/event-values',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/membership/passkey/settings`
   Future<Object?> getPasskeySettings(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
@@ -411,6 +430,26 @@ class MembershipResource extends Resource {
       method: 'POST',
       query: query,
       body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/membership/settings/email-bindings`
+  ///
+  /// The tokens of one membership e-mail template and how each gets its value
+  /// (`Auto`, `NeedsValue`, `NotAvailable`). `query: {'setting': 'Welcome'}`
+  /// (`Welcome`, `Verification`, `PasswordReset`, `Invitation`,
+  /// `Deactivation`, `LoginAlert`), optional `templateId` for the template
+  /// about to be chosen. Values are saved with the authorization settings
+  /// (`bindings`); a save with a token without a value is refused with
+  /// `CM-ERRORS-MEMBERSHIP-060`.
+  Future<Object?> getMembershipEmailBindings(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/settings/email-bindings',
+      method: 'GET',
+      query: query,
       headers: headers,
       pathParams: null,
     );
