@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-17 17:22:40
+Date: 2026-11-17 18:32:18
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -20317,6 +20317,107 @@ class MembershipTriggerProjectionList extends TriggerProjectionList implements I
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class MembershipTriggerEventValueDto implements IConvertible
+{
+    // @DataMember
+    String key = "";
+
+    // @DataMember
+    String owner = "";
+
+    // @DataMember
+    String label = "";
+
+    // @DataMember
+    String resolver = "";
+
+    MembershipTriggerEventValueDto({this.key="",this.owner="",this.label="",this.resolver=""});
+    MembershipTriggerEventValueDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        key = json['key'] ?? "";
+        owner = json['owner'] ?? "";
+        label = json['label'] ?? "";
+        resolver = json['resolver'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'key': key,
+        'owner': owner,
+        'label': label,
+        'resolver': resolver
+    };
+
+    getTypeName() => "MembershipTriggerEventValueDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MembershipTriggerEventValuesDto implements IConvertible
+{
+    // @DataMember
+    String when = "";
+
+    // @DataMember
+    String? subject;
+
+    // @DataMember
+    String? subjectBefore;
+
+    // @DataMember
+    List<MembershipTriggerEventValueDto> values = [];
+
+    // @DataMember
+    String initiatorNote = "";
+
+    MembershipTriggerEventValuesDto({this.when="",this.subject,this.subjectBefore,this.values=const [],this.initiatorNote=""});
+    MembershipTriggerEventValuesDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        when = json['when'] ?? "";
+        subject = json['subject'];
+        subjectBefore = json['subjectBefore'];
+        values = JsonConverters.fromJson(json['values'],'List<MembershipTriggerEventValueDto>',context!) ?? [];
+        initiatorNote = json['initiatorNote'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'when': when,
+        'subject': subject,
+        'subjectBefore': subjectBefore,
+        'values': JsonConverters.toJson(values,'List<MembershipTriggerEventValueDto>',context!),
+        'initiatorNote': initiatorNote
+    };
+
+    getTypeName() => "MembershipTriggerEventValuesDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MembershipTriggerEventsDto implements IConvertible
+{
+    // @DataMember
+    List<MembershipTriggerEventValuesDto> events = [];
+
+    MembershipTriggerEventsDto({this.events=const []});
+    MembershipTriggerEventsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        events = JsonConverters.fromJson(json['events'],'List<MembershipTriggerEventValuesDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'events': JsonConverters.toJson(events,'List<MembershipTriggerEventValuesDto>',context!)
+    };
+
+    getTypeName() => "MembershipTriggerEventsDto";
+    TypeContext? context = _ctx;
+}
+
 class RoleListProjectionDto implements IConvertible
 {
     String viewId = "";
@@ -31550,6 +31651,27 @@ class GetMembershipTriggersResponse extends GetTriggersResponse implements IConv
     });
 
     getTypeName() => "GetMembershipTriggersResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetMembershipTriggerEventValuesResponse extends ResponseBase implements IConvertible
+{
+    MembershipTriggerEventsDto? result;
+
+    GetMembershipTriggerEventValuesResponse({this.result});
+    GetMembershipTriggerEventValuesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'MembershipTriggerEventsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'MembershipTriggerEventsDto',context!)
+    });
+
+    getTypeName() => "GetMembershipTriggerEventValuesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -43766,6 +43888,27 @@ class GetMembershipTriggers extends GetTriggers implements IReturn<GetMembership
     TypeContext? context = _ctx;
 }
 
+/**
+* Lists the values each membership trigger event carries, by name, for token bindings.
+*/
+// @Route("/{version}/membership/triggers/event-values", "GET")
+// @Api(Description="Lists the values each membership trigger event carries, by name, for token bindings.")
+class GetMembershipTriggerEventValues extends CodeMashRequestBase implements IReturn<GetMembershipTriggerEventValuesResponse>, IConvertible, IGet
+{
+    GetMembershipTriggerEventValues();
+    GetMembershipTriggerEventValues.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => GetMembershipTriggerEventValuesResponse();
+    getResponseTypeName() => "GetMembershipTriggerEventValuesResponse";
+    getTypeName() => "GetMembershipTriggerEventValues";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/membership/triggers", "POST")
 // @DataContract
 class SaveMembershipTrigger extends SaveTrigger implements IReturn<IdResponse>, IConvertible, IPost
@@ -48606,7 +48749,19 @@ class GetMjml extends CodeMashRequestBase implements IReturn<GetHtmlFromMjmlResp
     // @ApiMember(Description="Set true when rendering for a preview (vs. a final save), to affect how missing tokens are handled.")
     bool? isForPreview;
 
-    GetMjml({this.code="",this.tokens,this.isForPreview});
+    /**
+    * Membership trigger preview: the project user (usr_…) the simulated event is about — the 'Registered user'. Set = the event's User.* tokens and every New / Old binding in Tokens are resolved as the trigger send resolves them.
+    */
+    // @ApiMember(Description="Membership trigger preview: the project user (usr_…) the simulated event is about — the 'Registered user'. Set = the event's User.* tokens and every New / Old binding in Tokens are resolved as the trigger send resolves them.")
+    String? triggerSubjectUserId;
+
+    /**
+    * Membership trigger preview: the same person before the change (Old.User.* tokens), for update events.
+    */
+    // @ApiMember(Description="Membership trigger preview: the same person before the change (Old.User.* tokens), for update events.")
+    String? triggerSubjectBeforeUserId;
+
+    GetMjml({this.code="",this.tokens,this.isForPreview,this.triggerSubjectUserId,this.triggerSubjectBeforeUserId});
     GetMjml.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -48614,13 +48769,17 @@ class GetMjml extends CodeMashRequestBase implements IReturn<GetHtmlFromMjmlResp
         code = json['code'] ?? "";
         tokens = JsonConverters.fromJson(json['tokens'],'List<TokenMappingDto>',context!);
         isForPreview = json['isForPreview'];
+        triggerSubjectUserId = json['triggerSubjectUserId'];
+        triggerSubjectBeforeUserId = json['triggerSubjectBeforeUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'code': code,
         'tokens': JsonConverters.toJson(tokens,'List<TokenMappingDto>',context!),
-        'isForPreview': isForPreview
+        'isForPreview': isForPreview,
+        'triggerSubjectUserId': triggerSubjectUserId,
+        'triggerSubjectBeforeUserId': triggerSubjectBeforeUserId
     });
 
     createResponse() => GetHtmlFromMjmlResponse();
@@ -61307,6 +61466,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetTriggerResponse': TypeInfo(TypeOf.AbstractClass),
     'TriggerProjectionList': TypeInfo(TypeOf.Class, create:() => TriggerProjectionList()),
     'MembershipTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => MembershipTriggerProjectionList()),
+    'MembershipTriggerEventValueDto': TypeInfo(TypeOf.Class, create:() => MembershipTriggerEventValueDto()),
+    'MembershipTriggerEventValuesDto': TypeInfo(TypeOf.Class, create:() => MembershipTriggerEventValuesDto()),
+    'List<MembershipTriggerEventValueDto>': TypeInfo(TypeOf.Class, create:() => <MembershipTriggerEventValueDto>[]),
+    'MembershipTriggerEventsDto': TypeInfo(TypeOf.Class, create:() => MembershipTriggerEventsDto()),
+    'List<MembershipTriggerEventValuesDto>': TypeInfo(TypeOf.Class, create:() => <MembershipTriggerEventValuesDto>[]),
     'RoleListProjectionDto': TypeInfo(TypeOf.Class, create:() => RoleListProjectionDto()),
     'PasskeySettingsDto': TypeInfo(TypeOf.Class, create:() => PasskeySettingsDto()),
     'IntegrationListProjection': TypeInfo(TypeOf.Class, create:() => IntegrationListProjection()),
@@ -61710,6 +61874,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetMembershipTriggerResponse': TypeInfo(TypeOf.Class, create:() => GetMembershipTriggerResponse()),
     'GetMembershipTriggersResponse': TypeInfo(TypeOf.Class, create:() => GetMembershipTriggersResponse()),
     'PaginatedResponse<MembershipTriggerProjectionList>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<MembershipTriggerProjectionList>()),
+    'GetMembershipTriggerEventValuesResponse': TypeInfo(TypeOf.Class, create:() => GetMembershipTriggerEventValuesResponse()),
     'GetRoleResponse': TypeInfo(TypeOf.Class, create:() => GetRoleResponse()),
     'GetRolesResponse': TypeInfo(TypeOf.Class, create:() => GetRolesResponse()),
     'List<RoleListProjectionDto>': TypeInfo(TypeOf.Class, create:() => <RoleListProjectionDto>[]),
@@ -62227,6 +62392,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EnableMembershipTrigger': TypeInfo(TypeOf.Class, create:() => EnableMembershipTrigger()),
     'GetMembershipTrigger': TypeInfo(TypeOf.Class, create:() => GetMembershipTrigger()),
     'GetMembershipTriggers': TypeInfo(TypeOf.Class, create:() => GetMembershipTriggers()),
+    'GetMembershipTriggerEventValues': TypeInfo(TypeOf.Class, create:() => GetMembershipTriggerEventValues()),
     'SaveMembershipTrigger': TypeInfo(TypeOf.Class, create:() => SaveMembershipTrigger()),
     'CreateRole': TypeInfo(TypeOf.Class, create:() => CreateRole()),
     'DeleteRole': TypeInfo(TypeOf.Class, create:() => DeleteRole()),

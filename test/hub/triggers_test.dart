@@ -80,4 +80,26 @@ void main() {
       containsPair('name', 'Orders bot'),
     );
   });
+
+  test('membership trigger event values → GET event-values', () async {
+    final driver = FakeHttpDriver();
+    await _client(driver).membership.getMembershipTriggerEventValues();
+    expect(driver.lastRequest!.method, equals('GET'));
+    expect(
+      driver.lastRequest!.url.path,
+      equals('/v3/membership/triggers/event-values'),
+    );
+  });
+
+  test('membership e-mail bindings → GET email-bindings, setting in the query',
+      () async {
+    final driver = FakeHttpDriver();
+    await _client(driver).membership.getMembershipEmailBindings(
+        query: {'setting': 'Welcome', 'templateId': 'tmpl_1'});
+    final req = driver.lastRequest!;
+    expect(req.method, equals('GET'));
+    expect(req.url.path, equals('/v3/membership/settings/email-bindings'));
+    expect(req.url.queryParameters,
+        equals({'setting': 'Welcome', 'templateId': 'tmpl_1'}));
+  });
 }

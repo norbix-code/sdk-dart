@@ -1343,6 +1343,23 @@ lacks for an action without saving. A Code or Marketplace action no longer takes
 lists one trigger's runs for 30 days; `getTriggerRun(id: ..., query: {...})`
 reads one, and the type is required. Template updates answer `id` and `warnings`.
 
+## Membership e-mail bindings and trigger event values
+
+| Method | What |
+|--------|------|
+| `membership.getMembershipEmailBindings(query:)` | `GET /{version}/membership/settings/email-bindings` — `setting` (`Welcome`, `Verification`, `PasswordReset`, `Invitation`, `Deactivation`, `LoginAlert`), `templateId?`; every token of the template as `Auto` / `NeedsValue` / `NotAvailable`, with the stored binding and `withoutValueCount` |
+| `membership.getMembershipTriggerEventValues()` | `GET /{version}/membership/triggers/event-values` — per trigger event (`when`) the values it carries: `key` (`User.Email`), `owner`, `label`, `resolver` (`New` / `Old`) |
+
+The authorization settings save (`PUT /{version}/membership/authorization`, shapes in
+`references/hub.dtos.dart`) takes `welcomeEmailTemplate` with `setting: 'RegistrationTemplate'`
+(empty = no welcome e-mail in this environment), `bindings` (`token`, `kind`: `Fixed` / `Field` /
+`Empty`, `value`, `translations`) and, with `setting: 'EmailBindings'`, `bindingsEvent`. A save
+that leaves a token without a value is refused with `CM-ERRORS-MEMBERSHIP-060`; a binding that is
+not understood with `-061`. The settings GET answers `welcomeEmailTriggers` (sign-up triggers that
+already e-mail the new user). The e-mail preview (`emailNotifications.getMjml`) takes
+`triggerSubjectUserId` / `triggerSubjectBeforeUserId` to fill a membership trigger event's tokens
+for those people.
+
 ## Code — cloud functions
 
 Norbix does not host code: a trigger's `Code` action, a scheduler
