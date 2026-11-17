@@ -438,6 +438,23 @@ class DatabaseResource extends Resource {
     );
   }
 
+  /// `GET /{version}/database/network-addresses`
+  ///
+  /// The IP addresses Norbix connects to databases from, per region
+  /// (`regions`: each with `regionCode` and `addresses`). Add them to your
+  /// MongoDB Atlas IP access list when you connect your own database with a
+  /// connection string. `query: {'regionCode': 'nb-eu-germany'}` for one region.
+  Future<Object?> getNetworkAddresses(
+      {Map<String, Object?>? query, Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/database/network-addresses',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
   /// `GET /{version}/database/imports/{id}`
   ///
   /// One collection import with its status and counts (`GetCollectionImport`).

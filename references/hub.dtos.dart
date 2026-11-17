@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-16 09:07:07
+Date: 2026-11-17 17:22:40
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -5232,6 +5232,9 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     FunctionRefDto? functionRef;
 
     // @DataMember
+    String? runAsUserId;
+
+    // @DataMember
     CodeInvocationType? invocationType;
 
     // @DataMember
@@ -5249,12 +5252,13 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? meta;
 
-    TriggerActionCodeDto({this.functionRef,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
+    TriggerActionCodeDto({this.functionRef,this.runAsUserId,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
     TriggerActionCodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionRef = JsonConverters.fromJson(json['functionRef'],'FunctionRefDto',context!);
+        runAsUserId = json['runAsUserId'];
         invocationType = JsonConverters.fromJson(json['invocationType'],'CodeInvocationType',context!);
         config = json['config'];
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'CodeDeliverySettingsDto',context!);
@@ -5266,6 +5270,7 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionRef': JsonConverters.toJson(functionRef,'FunctionRefDto',context!),
+        'runAsUserId': runAsUserId,
         'invocationType': JsonConverters.toJson(invocationType,'CodeInvocationType',context!),
         'config': config,
         'deliverySettings': JsonConverters.toJson(deliverySettings,'CodeDeliverySettingsDto',context!),
@@ -5512,19 +5517,24 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    TriggerActionMarketplaceDto({this.functionId="",this.payload});
+    // @DataMember
+    String? runAsUserId;
+
+    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
+        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
         'payload': payload,
+        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -14189,6 +14199,70 @@ class SaveTrigger extends CodeMashRequestBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class MembershipTokenTranslationDto implements IConvertible
+{
+    // @DataMember
+    String language = "";
+
+    // @DataMember
+    String value = "";
+
+    MembershipTokenTranslationDto({this.language="",this.value=""});
+    MembershipTokenTranslationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        language = json['language'] ?? "";
+        value = json['value'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'language': language,
+        'value': value
+    };
+
+    getTypeName() => "MembershipTokenTranslationDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MembershipTokenBindingDto implements IConvertible
+{
+    // @DataMember
+    String token = "";
+
+    // @DataMember
+    String kind = "";
+
+    // @DataMember
+    String? value;
+
+    // @DataMember
+    List<MembershipTokenTranslationDto>? translations;
+
+    MembershipTokenBindingDto({this.token="",this.kind="",this.value,this.translations});
+    MembershipTokenBindingDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        token = json['token'] ?? "";
+        kind = json['kind'] ?? "";
+        value = json['value'];
+        translations = JsonConverters.fromJson(json['translations'],'List<MembershipTokenTranslationDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'token': token,
+        'kind': kind,
+        'value': value,
+        'translations': JsonConverters.toJson(translations,'List<MembershipTokenTranslationDto>',context!)
+    };
+
+    getTypeName() => "MembershipTokenBindingDto";
+    TypeContext? context = _ctx;
+}
+
 class CursorArgs implements ICursorArgs, IConvertible
 {
     String field = "";
@@ -16226,7 +16300,13 @@ class FlexClusterDto implements IConvertible
     // @DataMember
     List<String> nearLimits = [];
 
-    FlexClusterDto({this.id="",this.displayName="",this.atlasClusterName="",this.norbixRegionCode="",this.tierCode="",this.status="",this.databases=const [],this.usage,this.nearLimits=const []});
+    // @DataMember
+    String? nextTierCode;
+
+    // @DataMember
+    String topTierCode = "";
+
+    FlexClusterDto({this.id="",this.displayName="",this.atlasClusterName="",this.norbixRegionCode="",this.tierCode="",this.status="",this.databases=const [],this.usage,this.nearLimits=const [],this.nextTierCode,this.topTierCode=""});
     FlexClusterDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16239,6 +16319,8 @@ class FlexClusterDto implements IConvertible
         databases = JsonConverters.fromJson(json['databases'],'List<FlexClusterDatabaseDto>',context!) ?? [];
         usage = JsonConverters.fromJson(json['usage'],'FlexClusterUsageDto',context!);
         nearLimits = JsonConverters.fromJson(json['nearLimits'],'List<String>',context!) ?? [];
+        nextTierCode = json['nextTierCode'];
+        topTierCode = json['topTierCode'] ?? "";
         return this;
     }
 
@@ -16251,7 +16333,9 @@ class FlexClusterDto implements IConvertible
         'status': status,
         'databases': JsonConverters.toJson(databases,'List<FlexClusterDatabaseDto>',context!),
         'usage': JsonConverters.toJson(usage,'FlexClusterUsageDto',context!),
-        'nearLimits': JsonConverters.toJson(nearLimits,'List<String>',context!)
+        'nearLimits': JsonConverters.toJson(nearLimits,'List<String>',context!),
+        'nextTierCode': nextTierCode,
+        'topTierCode': topTierCode
     };
 
     getTypeName() => "FlexClusterDto";
@@ -18951,6 +19035,9 @@ class ProjectHealthStatsDto implements IConvertible
     int? usersTotal;
 
     // @DataMember
+    int periodDays = 0;
+
+    // @DataMember
     int? usersNew30d;
 
     // @DataMember
@@ -18974,11 +19061,12 @@ class ProjectHealthStatsDto implements IConvertible
     // @DataMember
     int? apiCallsPrevMonth;
 
-    ProjectHealthStatsDto({this.usersTotal,this.usersNew30d,this.usersNewPrev30d,this.emailsSent30d,this.emailsSentPrev30d,this.emailsFailed30d,this.emailsFailedPrev30d,this.apiCallsThisMonth,this.apiCallsPrevMonth});
+    ProjectHealthStatsDto({this.usersTotal,this.periodDays=0,this.usersNew30d,this.usersNewPrev30d,this.emailsSent30d,this.emailsSentPrev30d,this.emailsFailed30d,this.emailsFailedPrev30d,this.apiCallsThisMonth,this.apiCallsPrevMonth});
     ProjectHealthStatsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         usersTotal = json['usersTotal'];
+        periodDays = json['periodDays'] ?? 0;
         usersNew30d = json['usersNew30d'];
         usersNewPrev30d = json['usersNewPrev30d'];
         emailsSent30d = json['emailsSent30d'];
@@ -18992,6 +19080,7 @@ class ProjectHealthStatsDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'usersTotal': usersTotal,
+        'periodDays': periodDays,
         'usersNew30d': usersNew30d,
         'usersNewPrev30d': usersNewPrev30d,
         'emailsSent30d': emailsSent30d,
@@ -20679,7 +20768,10 @@ class MembershipAuthorizationViewDto implements IConvertible
     // @DataMember
     bool? allowAnyoneToSignUp;
 
-    MembershipAuthorizationViewDto({this.emailPreferences,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.allowedProviderRegisterRoles,this.resetPasswordTokenExpiration,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.passwordComplexity,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.allowEmailRegistration,this.allowUsernameRegistration,this.inviteOnly,this.allowAnyoneToSignUp});
+    // @DataMember
+    List<String> welcomeEmailTriggers = [];
+
+    MembershipAuthorizationViewDto({this.emailPreferences,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.allowedProviderRegisterRoles,this.resetPasswordTokenExpiration,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.passwordComplexity,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.allowEmailRegistration,this.allowUsernameRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.welcomeEmailTriggers=const []});
     MembershipAuthorizationViewDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20702,6 +20794,7 @@ class MembershipAuthorizationViewDto implements IConvertible
         allowUsernameRegistration = json['allowUsernameRegistration'];
         inviteOnly = json['inviteOnly'];
         allowAnyoneToSignUp = json['allowAnyoneToSignUp'];
+        welcomeEmailTriggers = JsonConverters.fromJson(json['welcomeEmailTriggers'],'List<String>',context!) ?? [];
         return this;
     }
 
@@ -20724,10 +20817,147 @@ class MembershipAuthorizationViewDto implements IConvertible
         'allowEmailRegistration': allowEmailRegistration,
         'allowUsernameRegistration': allowUsernameRegistration,
         'inviteOnly': inviteOnly,
-        'allowAnyoneToSignUp': allowAnyoneToSignUp
+        'allowAnyoneToSignUp': allowAnyoneToSignUp,
+        'welcomeEmailTriggers': JsonConverters.toJson(welcomeEmailTriggers,'List<String>',context!)
     };
 
     getTypeName() => "MembershipAuthorizationViewDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MembershipEmailTokenDto implements IConvertible
+{
+    // @DataMember
+    String token = "";
+
+    // @DataMember
+    String status = "";
+
+    // @DataMember
+    String? source;
+
+    // @DataMember
+    String? reason;
+
+    // @DataMember
+    bool? isHelper;
+
+    // @DataMember
+    MembershipTokenBindingDto? resolver;
+
+    // @DataMember
+    bool? hasValue;
+
+    MembershipEmailTokenDto({this.token="",this.status="",this.source,this.reason,this.isHelper,this.resolver,this.hasValue});
+    MembershipEmailTokenDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        token = json['token'] ?? "";
+        status = json['status'] ?? "";
+        source = json['source'];
+        reason = json['reason'];
+        isHelper = json['isHelper'];
+        resolver = JsonConverters.fromJson(json['resolver'],'MembershipTokenBindingDto',context!);
+        hasValue = json['hasValue'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'token': token,
+        'status': status,
+        'source': source,
+        'reason': reason,
+        'isHelper': isHelper,
+        'resolver': JsonConverters.toJson(resolver,'MembershipTokenBindingDto',context!),
+        'hasValue': hasValue
+    };
+
+    getTypeName() => "MembershipEmailTokenDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MembershipEventFieldDto implements IConvertible
+{
+    // @DataMember
+    String key = "";
+
+    // @DataMember
+    String label = "";
+
+    MembershipEventFieldDto({this.key="",this.label=""});
+    MembershipEventFieldDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        key = json['key'] ?? "";
+        label = json['label'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'key': key,
+        'label': label
+    };
+
+    getTypeName() => "MembershipEventFieldDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class MembershipEmailBindingsDto implements IConvertible
+{
+    // @DataMember
+    String event = "";
+
+    // @DataMember
+    String env = "";
+
+    // @DataMember
+    String? templateId;
+
+    // @DataMember
+    String? templateName;
+
+    // @DataMember
+    bool? isBuiltIn;
+
+    // @DataMember
+    int withoutValueCount = 0;
+
+    // @DataMember
+    List<MembershipEmailTokenDto> tokens = [];
+
+    // @DataMember
+    List<MembershipEventFieldDto> fields = [];
+
+    MembershipEmailBindingsDto({this.event="",this.env="",this.templateId,this.templateName,this.isBuiltIn,this.withoutValueCount=0,this.tokens=const [],this.fields=const []});
+    MembershipEmailBindingsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        event = json['event'] ?? "";
+        env = json['env'] ?? "";
+        templateId = json['templateId'];
+        templateName = json['templateName'];
+        isBuiltIn = json['isBuiltIn'];
+        withoutValueCount = json['withoutValueCount'] ?? 0;
+        tokens = JsonConverters.fromJson(json['tokens'],'List<MembershipEmailTokenDto>',context!) ?? [];
+        fields = JsonConverters.fromJson(json['fields'],'List<MembershipEventFieldDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'event': event,
+        'env': env,
+        'templateId': templateId,
+        'templateName': templateName,
+        'isBuiltIn': isBuiltIn,
+        'withoutValueCount': withoutValueCount,
+        'tokens': JsonConverters.toJson(tokens,'List<MembershipEmailTokenDto>',context!),
+        'fields': JsonConverters.toJson(fields,'List<MembershipEventFieldDto>',context!)
+    };
+
+    getTypeName() => "MembershipEmailBindingsDto";
     TypeContext? context = _ctx;
 }
 
@@ -21980,6 +22210,33 @@ class FlexTierDto implements IConvertible
     };
 
     getTypeName() => "FlexTierDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class NetworkAddressesDto implements IConvertible
+{
+    // @DataMember
+    String regionCode = "";
+
+    // @DataMember
+    List<String> addresses = [];
+
+    NetworkAddressesDto({this.regionCode="",this.addresses=const []});
+    NetworkAddressesDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        regionCode = json['regionCode'] ?? "";
+        addresses = JsonConverters.fromJson(json['addresses'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'regionCode': regionCode,
+        'addresses': JsonConverters.toJson(addresses,'List<String>',context!)
+    };
+
+    getTypeName() => "NetworkAddressesDto";
     TypeContext? context = _ctx;
 }
 
@@ -24065,6 +24322,20 @@ class WorkflowWaitSlotDto implements IConvertible
     // @DataMember
     bool? teamRole;
 
+    /**
+    * Set when this slot is an AI agent's: the agent's id in the step. `userId` is then the agent's service user.
+    */
+    // @DataMember
+    // @ApiMember(Description="Set when this slot is an AI agent's: the agent's id in the step. `userId` is then the agent's service user.")
+    String? agent;
+
+    /**
+    * The reason given with the answer that filled this slot. An AI agent always gives one.
+    */
+    // @DataMember
+    // @ApiMember(Description="The reason given with the answer that filled this slot. An AI agent always gives one.")
+    String? reason;
+
     // @DataMember
     String? answeredBy;
 
@@ -24081,7 +24352,7 @@ class WorkflowWaitSlotDto implements IConvertible
     // @ApiMember(Description="True = somebody who was not asked answered for this slot, using the override right.")
     bool? override;
 
-    WorkflowWaitSlotDto({this.label="",this.userId,this.role,this.tag,this.teamRole,this.answeredBy,this.decision,this.at,this.override});
+    WorkflowWaitSlotDto({this.label="",this.userId,this.role,this.tag,this.teamRole,this.agent,this.reason,this.answeredBy,this.decision,this.at,this.override});
     WorkflowWaitSlotDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -24090,6 +24361,8 @@ class WorkflowWaitSlotDto implements IConvertible
         role = json['role'];
         tag = json['tag'];
         teamRole = json['teamRole'];
+        agent = json['agent'];
+        reason = json['reason'];
         answeredBy = json['answeredBy'];
         decision = json['decision'];
         at = JsonConverters.fromJson(json['at'],'DateTime',context!);
@@ -24103,6 +24376,8 @@ class WorkflowWaitSlotDto implements IConvertible
         'role': role,
         'tag': tag,
         'teamRole': teamRole,
+        'agent': agent,
+        'reason': reason,
         'answeredBy': answeredBy,
         'decision': decision,
         'at': JsonConverters.toJson(at,'DateTime',context!),
@@ -24121,6 +24396,9 @@ class WorkflowWaitAnswerDto implements IConvertible
 
     // @DataMember
     String? kind;
+
+    // @DataMember
+    String? reason;
 
     // @DataMember
     String decision = "";
@@ -24142,12 +24420,13 @@ class WorkflowWaitAnswerDto implements IConvertible
     // @DataMember
     DateTime? at;
 
-    WorkflowWaitAnswerDto({this.userId="",this.kind,this.decision="",this.slots,this.override,this.at});
+    WorkflowWaitAnswerDto({this.userId="",this.kind,this.reason,this.decision="",this.slots,this.override,this.at});
     WorkflowWaitAnswerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         userId = json['userId'] ?? "";
         kind = json['kind'];
+        reason = json['reason'];
         decision = json['decision'] ?? "";
         slots = JsonConverters.fromJson(json['slots'],'List<int>',context!);
         override = json['override'];
@@ -24158,6 +24437,7 @@ class WorkflowWaitAnswerDto implements IConvertible
     Map<String, dynamic> toJson() => {
         'userId': userId,
         'kind': kind,
+        'reason': reason,
         'decision': decision,
         'slots': JsonConverters.toJson(slots,'List<int>',context!),
         'override': override,
@@ -31462,6 +31742,27 @@ class GetAuthorizationSettingsResponse extends ResponseBase implements IConverti
     TypeContext? context = _ctx;
 }
 
+class GetMembershipEmailBindingsResponse extends ResponseBase implements IConvertible
+{
+    MembershipEmailBindingsDto? result;
+
+    GetMembershipEmailBindingsResponse({this.result});
+    GetMembershipEmailBindingsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'MembershipEmailBindingsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'MembershipEmailBindingsDto',context!)
+    });
+
+    getTypeName() => "GetMembershipEmailBindingsResponse";
+    TypeContext? context = _ctx;
+}
+
 class UpdatePasswordComplexityResponse extends ResponseBase implements IConvertible
 {
     bool? result;
@@ -32116,6 +32417,27 @@ class GetAllowedFlexTiersResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetAllowedFlexTiersResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetNetworkAddressesResponse extends ResponseBase implements IConvertible
+{
+    List<NetworkAddressesDto>? regions;
+
+    GetNetworkAddressesResponse({this.regions});
+    GetNetworkAddressesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        regions = JsonConverters.fromJson(json['regions'],'List<NetworkAddressesDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'regions': JsonConverters.toJson(regions,'List<NetworkAddressesDto>',context!)
+    });
+
+    getTypeName() => "GetNetworkAddressesResponse";
     TypeContext? context = _ctx;
 }
 
@@ -40554,17 +40876,26 @@ class GetProjectHealth extends CodeMashRequestBase implements IReturn<GetProject
     // @ApiMember(Description="Compute the health now instead of reading the last result (at most every 6 hours old).")
     bool? refresh;
 
-    GetProjectHealth({this.refresh});
+    /**
+    * Days the user and e-mail numbers cover: 7, 30 (default) or 90. The problem list is the same for every period.
+    */
+    // @DataMember
+    // @ApiMember(Description="Days the user and e-mail numbers cover: 7, 30 (default) or 90. The problem list is the same for every period.")
+    int? periodDays;
+
+    GetProjectHealth({this.refresh,this.periodDays});
     GetProjectHealth.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         refresh = json['refresh'];
+        periodDays = json['periodDays'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'refresh': refresh
+        'refresh': refresh,
+        'periodDays': periodDays
     });
 
     createResponse() => GetProjectHealthResponse();
@@ -42488,6 +42819,57 @@ class UpdateAccountRole extends RequestBase implements IReturn<IdResponse>, ICon
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/account/password/reset/request", "POST")
+class RequestAccountPasswordResetRequest extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    String email = "";
+
+    RequestAccountPasswordResetRequest({this.email=""});
+    RequestAccountPasswordResetRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        email = json['email'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'email': email
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "RequestAccountPasswordResetRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/password/reset/confirm", "POST")
+class ConfirmAccountPasswordResetRequest extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    String token = "";
+    String newPassword = "";
+
+    ConfirmAccountPasswordResetRequest({this.token="",this.newPassword=""});
+    ConfirmAccountPasswordResetRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        token = json['token'] ?? "";
+        newPassword = json['newPassword'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'token': token,
+        'newPassword': newPassword
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "ConfirmAccountPasswordResetRequest";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/account/userauth/has-passkey", "POST")
 // @DataContract
 class AccountHasPasskeyRequest extends RequestBase implements IReturn<AccountPasskeyOkResponse>, IConvertible, IPost
@@ -44125,6 +44507,46 @@ class GetAuthorizationSettings extends CodeMashRequestBase implements IReturn<Ge
 }
 
 /**
+* Lists the tokens of a membership e-mail template and how each one gets its value.
+*/
+// @Route("/{version}/membership/settings/email-bindings", "GET")
+// @Api(Description="Lists the tokens of a membership e-mail template and how each one gets its value.")
+class GetMembershipEmailBindings extends CodeMashRequestBase implements IReturn<GetMembershipEmailBindingsResponse>, IConvertible, IGet
+{
+    /**
+    * Welcome, Verification, PasswordReset, Invitation, Deactivation or LoginAlert.
+    */
+    // @ApiMember(Description="Welcome, Verification, PasswordReset, Invitation, Deactivation or LoginAlert.", IsRequired=true)
+    String setting = "";
+
+    /**
+    * The template to check (tmpl_…). Omit = the template chosen now, else the built-in one.
+    */
+    // @ApiMember(Description="The template to check (tmpl_…). Omit = the template chosen now, else the built-in one.")
+    String? templateId;
+
+    GetMembershipEmailBindings({this.setting="",this.templateId});
+    GetMembershipEmailBindings.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        setting = json['setting'] ?? "";
+        templateId = json['templateId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'setting': setting,
+        'templateId': templateId
+    });
+
+    createResponse() => GetMembershipEmailBindingsResponse();
+    getResponseTypeName() => "GetMembershipEmailBindingsResponse";
+    getTypeName() => "GetMembershipEmailBindings";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Updates the project's membership authorization settings.
 */
 // @Route("/{version}/membership/authorization", "PUT")
@@ -44216,6 +44638,24 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
     // @ApiMember(Description="Setting = 'PasswordResetCallback': your own \"choose a new password\" page (https://…, http only for localhost); the link is it + #token=…. Empty = the portal page.")
     String? resetPasswordCallback;
 
+    /**
+    * Setting = 'RegistrationTemplate': the welcome e-mail template id (tmpl_…) of this environment; empty = no welcome e-mail in this environment (a sign-up trigger may send it instead).
+    */
+    // @ApiMember(Description="Setting = 'RegistrationTemplate': the welcome e-mail template id (tmpl_…) of this environment; empty = no welcome e-mail in this environment (a sign-up trigger may send it instead).")
+    String? welcomeEmailTemplate;
+
+    /**
+    * With a template setting (RegistrationTemplate, PasswordResetTemplate, UserInvitationTemplate, UserVerificationTemplate, UserDeactivationTemplate) or Setting = 'EmailBindings': the values of the template's tokens Norbix does not fill (GET membership/settings/email-bindings lists them). Omit = keep the stored ones; the save is refused while a token has no value.
+    */
+    // @ApiMember(Description="With a template setting (RegistrationTemplate, PasswordResetTemplate, UserInvitationTemplate, UserVerificationTemplate, UserDeactivationTemplate) or Setting = 'EmailBindings': the values of the template's tokens Norbix does not fill (GET membership/settings/email-bindings lists them). Omit = keep the stored ones; the save is refused while a token has no value.")
+    List<MembershipTokenBindingDto>? bindings;
+
+    /**
+    * Setting = 'EmailBindings': which e-mail the bindings are for (Welcome, Verification, PasswordReset, Invitation, Deactivation, LoginAlert).
+    */
+    // @ApiMember(Description="Setting = 'EmailBindings': which e-mail the bindings are for (Welcome, Verification, PasswordReset, Invitation, Deactivation, LoginAlert).")
+    String? bindingsEvent;
+
     int minLength = 0;
     int? maxLength;
     int? minNumbers;
@@ -44228,7 +44668,7 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
     int? maxSpecial;
     String? allowedSpecial;
 
-    UpdateAuthorizationSettings({this.setting,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.needVerification,this.verificationEmailTemplate,this.deactivationEmailTemplate,this.allowInviteUsers,this.allowDeactivateUsers,this.inviteUserEmailTemplate,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.allowEmailRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.allowResetPassword,this.resetPasswordEmailTemplate,this.resetPasswordTokenExpiration,this.resetPasswordCallback,this.minLength=0,this.maxLength,this.minNumbers,this.maxNumbers,this.minUpper,this.maxUpper,this.minLower,this.maxLower,this.minSpecial,this.maxSpecial,this.allowedSpecial});
+    UpdateAuthorizationSettings({this.setting,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.needVerification,this.verificationEmailTemplate,this.deactivationEmailTemplate,this.allowInviteUsers,this.allowDeactivateUsers,this.inviteUserEmailTemplate,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.allowEmailRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.allowResetPassword,this.resetPasswordEmailTemplate,this.resetPasswordTokenExpiration,this.resetPasswordCallback,this.welcomeEmailTemplate,this.bindings,this.bindingsEvent,this.minLength=0,this.maxLength,this.minNumbers,this.maxNumbers,this.minUpper,this.maxUpper,this.minLower,this.maxLower,this.minSpecial,this.maxSpecial,this.allowedSpecial});
     UpdateAuthorizationSettings.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -44258,6 +44698,9 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
         resetPasswordEmailTemplate = json['resetPasswordEmailTemplate'];
         resetPasswordTokenExpiration = json['resetPasswordTokenExpiration'];
         resetPasswordCallback = json['resetPasswordCallback'];
+        welcomeEmailTemplate = json['welcomeEmailTemplate'];
+        bindings = JsonConverters.fromJson(json['bindings'],'List<MembershipTokenBindingDto>',context!);
+        bindingsEvent = json['bindingsEvent'];
         minLength = json['minLength'] ?? 0;
         maxLength = json['maxLength'];
         minNumbers = json['minNumbers'];
@@ -44298,6 +44741,9 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
         'resetPasswordEmailTemplate': resetPasswordEmailTemplate,
         'resetPasswordTokenExpiration': resetPasswordTokenExpiration,
         'resetPasswordCallback': resetPasswordCallback,
+        'welcomeEmailTemplate': welcomeEmailTemplate,
+        'bindings': JsonConverters.toJson(bindings,'List<MembershipTokenBindingDto>',context!),
+        'bindingsEvent': bindingsEvent,
         'minLength': minLength,
         'maxLength': maxLength,
         'minNumbers': minNumbers,
@@ -46987,6 +47433,38 @@ class GetAllowedFlexTiers extends CodeMashRequestBase implements IReturn<GetAllo
     createResponse() => GetAllowedFlexTiersResponse();
     getResponseTypeName() => "GetAllowedFlexTiersResponse";
     getTypeName() => "GetAllowedFlexTiers";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Returns the IP addresses Norbix connects to databases from, per region
+*/
+// @Route("/{version}/database/network-addresses", "GET")
+// @Api(Description="Returns the IP addresses Norbix connects to databases from, per region")
+class GetNetworkAddresses extends CodeMashRequestBase implements IReturn<GetNetworkAddressesResponse>, IConvertible, IGet
+{
+    /**
+    * A Norbix region code, e.g. nb-eu-germany; empty = every region
+    */
+    // @ApiMember(Description="A Norbix region code, e.g. nb-eu-germany; empty = every region", ParameterType="query")
+    String? regionCode;
+
+    GetNetworkAddresses({this.regionCode});
+    GetNetworkAddresses.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        regionCode = json['regionCode'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'regionCode': regionCode
+    });
+
+    createResponse() => GetNetworkAddressesResponse();
+    getResponseTypeName() => "GetNetworkAddressesResponse";
+    getTypeName() => "GetNetworkAddresses";
     TypeContext? context = _ctx;
 }
 
@@ -51188,7 +51666,14 @@ class ResumeCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
     // @DataMember
     Map<String,dynamic?>? payload;
 
-    ResumeCodeWorkflowRun({this.runId="",this.stepId,this.decision,this.payload});
+    /**
+    * Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).")
+    String? reason;
+
+    ResumeCodeWorkflowRun({this.runId="",this.stepId,this.decision,this.payload,this.reason});
     ResumeCodeWorkflowRun.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -51197,6 +51682,7 @@ class ResumeCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
         stepId = json['stepId'];
         decision = json['decision'];
         payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        reason = json['reason'];
         return this;
     }
 
@@ -51204,7 +51690,8 @@ class ResumeCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
         'runId': runId,
         'stepId': stepId,
         'decision': decision,
-        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'reason': reason
     });
 
     createResponse() => WorkflowRunResponse();
@@ -51439,7 +51926,14 @@ class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<
     // @DataMember
     Map<String,dynamic?>? payload;
 
-    ResumeCodeWorkflowRunByKey({this.id="",this.key="",this.stepId,this.decision,this.payload});
+    /**
+    * Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional: why — one or two sentences. Kept with the answer and shown on the run (at most 2 000 characters).")
+    String? reason;
+
+    ResumeCodeWorkflowRunByKey({this.id="",this.key="",this.stepId,this.decision,this.payload,this.reason});
     ResumeCodeWorkflowRunByKey.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -51449,6 +51943,7 @@ class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<
         stepId = json['stepId'];
         decision = json['decision'];
         payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        reason = json['reason'];
         return this;
     }
 
@@ -51457,7 +51952,8 @@ class ResumeCodeWorkflowRunByKey extends CodeMashRequestBase implements IReturn<
         'key': key,
         'stepId': stepId,
         'decision': decision,
-        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!)
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'reason': reason
     });
 
     createResponse() => WorkflowRunResponse();
@@ -60602,6 +61098,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EnableTrigger': TypeInfo(TypeOf.Class, create:() => EnableTrigger()),
     'GetTrigger': TypeInfo(TypeOf.AbstractClass),
     'SaveTrigger': TypeInfo(TypeOf.Class, create:() => SaveTrigger()),
+    'MembershipTokenTranslationDto': TypeInfo(TypeOf.Class, create:() => MembershipTokenTranslationDto()),
+    'MembershipTokenBindingDto': TypeInfo(TypeOf.Class, create:() => MembershipTokenBindingDto()),
+    'List<MembershipTokenTranslationDto>': TypeInfo(TypeOf.Class, create:() => <MembershipTokenTranslationDto>[]),
     'CursorArgs': TypeInfo(TypeOf.Class, create:() => CursorArgs()),
     'PagingArgs': TypeInfo(TypeOf.Class, create:() => PagingArgs()),
     'SchemaUniqueIndexDto': TypeInfo(TypeOf.Class, create:() => SchemaUniqueIndexDto()),
@@ -60819,6 +61318,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MembershipEmailPreferencesDto': TypeInfo(TypeOf.Class, create:() => MembershipEmailPreferencesDto()),
     'PasswordComplexityDto': TypeInfo(TypeOf.Class, create:() => PasswordComplexityDto()),
     'MembershipAuthorizationViewDto': TypeInfo(TypeOf.Class, create:() => MembershipAuthorizationViewDto()),
+    'MembershipEmailTokenDto': TypeInfo(TypeOf.Class, create:() => MembershipEmailTokenDto()),
+    'MembershipEventFieldDto': TypeInfo(TypeOf.Class, create:() => MembershipEventFieldDto()),
+    'MembershipEmailBindingsDto': TypeInfo(TypeOf.Class, create:() => MembershipEmailBindingsDto()),
+    'List<MembershipEmailTokenDto>': TypeInfo(TypeOf.Class, create:() => <MembershipEmailTokenDto>[]),
+    'List<MembershipEventFieldDto>': TypeInfo(TypeOf.Class, create:() => <MembershipEventFieldDto>[]),
     'MembershipCredentialsSettingsDto': TypeInfo(TypeOf.Class, create:() => MembershipCredentialsSettingsDto()),
     'MembershipAuthenticationViewDto': TypeInfo(TypeOf.Class, create:() => MembershipAuthenticationViewDto()),
     'SchemaTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => SchemaTriggerProjectionList()),
@@ -60860,6 +61364,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<SeedCollectionReportItemDto>': TypeInfo(TypeOf.Class, create:() => <SeedCollectionReportItemDto>[]),
     'DatabaseIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => DatabaseIntegrationListProjection()),
     'FlexTierDto': TypeInfo(TypeOf.Class, create:() => FlexTierDto()),
+    'NetworkAddressesDto': TypeInfo(TypeOf.Class, create:() => NetworkAddressesDto()),
     'IntegrationTestResultItemDto': TypeInfo(TypeOf.Class, create:() => IntegrationTestResultItemDto()),
     'MongoDbAggregateListProjection': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateListProjection()),
     'FilesTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => FilesTriggerProjectionList()),
@@ -61217,6 +61722,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetExecutionIdentitiesResponse': TypeInfo(TypeOf.Class, create:() => GetExecutionIdentitiesResponse()),
     'List<ExecutionIdentityDto>': TypeInfo(TypeOf.Class, create:() => <ExecutionIdentityDto>[]),
     'GetAuthorizationSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetAuthorizationSettingsResponse()),
+    'GetMembershipEmailBindingsResponse': TypeInfo(TypeOf.Class, create:() => GetMembershipEmailBindingsResponse()),
     'UpdatePasswordComplexityResponse': TypeInfo(TypeOf.Class, create:() => UpdatePasswordComplexityResponse()),
     'GetAuthenticationSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetAuthenticationSettingsResponse()),
     'GetSchemaTriggerResponse': TypeInfo(TypeOf.Class, create:() => GetSchemaTriggerResponse()),
@@ -61258,6 +61764,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'PaginatedResponse<DatabaseIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<DatabaseIntegrationListProjection>()),
     'GetAllowedFlexTiersResponse': TypeInfo(TypeOf.Class, create:() => GetAllowedFlexTiersResponse()),
     'List<FlexTierDto>': TypeInfo(TypeOf.Class, create:() => <FlexTierDto>[]),
+    'GetNetworkAddressesResponse': TypeInfo(TypeOf.Class, create:() => GetNetworkAddressesResponse()),
+    'List<NetworkAddressesDto>': TypeInfo(TypeOf.Class, create:() => <NetworkAddressesDto>[]),
     'TestDatabaseIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestDatabaseIntegrationResponse()),
     'IReadOnlyList<IntegrationTestResultItemDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<IntegrationTestResultItemDto>()),
     'GetDatabaseAggregateResponse': TypeInfo(TypeOf.Class, create:() => GetDatabaseAggregateResponse()),
@@ -61684,6 +62192,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<TeamMemberRoleInput>': TypeInfo(TypeOf.Class, create:() => <TeamMemberRoleInput>[]),
     'UpdateAccountPolicy': TypeInfo(TypeOf.Class, create:() => UpdateAccountPolicy()),
     'UpdateAccountRole': TypeInfo(TypeOf.Class, create:() => UpdateAccountRole()),
+    'RequestAccountPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => RequestAccountPasswordResetRequest()),
+    'ConfirmAccountPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => ConfirmAccountPasswordResetRequest()),
     'AccountHasPasskeyRequest': TypeInfo(TypeOf.Class, create:() => AccountHasPasskeyRequest()),
     'AccountStartEmailVerificationRequest': TypeInfo(TypeOf.Class, create:() => AccountStartEmailVerificationRequest()),
     'AccountConfirmEmailVerificationRequest': TypeInfo(TypeOf.Class, create:() => AccountConfirmEmailVerificationRequest()),
@@ -61739,7 +62249,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetExecutionIdentitiesRequest': TypeInfo(TypeOf.Class, create:() => GetExecutionIdentitiesRequest()),
     'CreateExecutionIdentityRequest': TypeInfo(TypeOf.Class, create:() => CreateExecutionIdentityRequest()),
     'GetAuthorizationSettings': TypeInfo(TypeOf.Class, create:() => GetAuthorizationSettings()),
+    'GetMembershipEmailBindings': TypeInfo(TypeOf.Class, create:() => GetMembershipEmailBindings()),
     'UpdateAuthorizationSettings': TypeInfo(TypeOf.Class, create:() => UpdateAuthorizationSettings()),
+    'List<MembershipTokenBindingDto>': TypeInfo(TypeOf.Class, create:() => <MembershipTokenBindingDto>[]),
     'UpdatePasswordComplexity': TypeInfo(TypeOf.Class, create:() => UpdatePasswordComplexity()),
     'GetAuthenticationSettings': TypeInfo(TypeOf.Class, create:() => GetAuthenticationSettings()),
     'UpdateAuthenticationSettings': TypeInfo(TypeOf.Class, create:() => UpdateAuthenticationSettings()),
@@ -61801,6 +62313,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => GetDatabaseIntegration()),
     'GetDatabaseIntegrations': TypeInfo(TypeOf.Class, create:() => GetDatabaseIntegrations()),
     'GetAllowedFlexTiers': TypeInfo(TypeOf.Class, create:() => GetAllowedFlexTiers()),
+    'GetNetworkAddresses': TypeInfo(TypeOf.Class, create:() => GetNetworkAddresses()),
     'SaveDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => SaveDatabaseIntegration()),
     'SetDatabaseIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetDatabaseIntegrationAsDefaultRequest()),
     'TestDatabaseIntegration': TypeInfo(TypeOf.Class, create:() => TestDatabaseIntegration()),

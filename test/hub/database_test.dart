@@ -321,6 +321,17 @@ void main() {
       expect(req.url.path, equals('/v3/database/integrations/flex-tiers'));
       expect(req.url.queryParameters['q'], equals('v'));
     });
+    test('getNetworkAddresses sends GET /{version}/database/network-addresses',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver)
+          .database
+          .getNetworkAddresses(query: {'regionCode': 'nb-eu-germany'});
+      final req = driver.lastRequest!;
+      expect(req.method, equals('GET'));
+      expect(req.url.path, equals('/v3/database/network-addresses'));
+      expect(req.url.queryParameters['regionCode'], equals('nb-eu-germany'));
+    });
     test(
         'getCollectionIndexes sends GET /{version}/database/collections/{collectionName}/indexes',
         () async {

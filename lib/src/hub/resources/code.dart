@@ -1100,7 +1100,10 @@ class CodeResource extends Resource {
 
   /// Beta: `PUT /{version}/code/workflows/disable`
   ///
-  /// Turn the Workflows feature off. Answers `EmptyResponse`.
+  /// Refused since 2026-11-17 (`CM-ERRORS-WORKFLOWS-045`): workflows are part
+  /// of every project and cannot be switched off. Kept so existing code still
+  /// compiles; use `disableCodeWorkflow` to stop one workflow.
+  @Deprecated('Refused by the gateway since 2026-11-17 (CM-ERRORS-WORKFLOWS-045).')
   Future<Object?> disableCodeWorkflows(
       {Map<String, Object?>? query,
       Object? body,
