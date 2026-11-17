@@ -2,6 +2,8 @@ import 'dart:io' show Platform;
 
 import 'package:meta/meta.dart';
 
+export 'project_host.dart';
+
 /// Base configuration for any Norbix SDK client.
 ///
 /// Carries the host URL, the API version, credentials (API key and/or bearer
@@ -67,8 +69,10 @@ class NorbixConfig {
   /// `nb-eu-germany`), sent as the `nb-region` header. Unlike [env] there is
   /// NO default region: when null (the default) no header is sent. When set
   /// and [baseUrl] is an SDK default host, requests are routed to the
-  /// regional host (`https://{region}.api.norbix.ai`); a user-supplied
-  /// custom [baseUrl] is never rewritten.
+  /// regional host (`https://{region}.hub.norbix.ai`); a user-supplied
+  /// custom [baseUrl] is never rewritten. API calls of a project go to the
+  /// project's own host instead, which carries no region label (see
+  /// [projectId]).
   final String? region;
 
   /// Preferred response language, sent verbatim as the standard
@@ -85,6 +89,12 @@ class NorbixConfig {
   /// A signed-in user's bearer token carries no project, so a Flutter app
   /// must set this (or call `setProjectId`) before project calls, or they
   /// fail with "ProjectId is required". Null (the default) sends no header.
+  ///
+  /// When [baseUrl] is the SDK's built-in API default
+  /// (`https://api.norbix.ai`), API calls also go to the project's own host,
+  /// `https://pr-<32 hex>.api.norbix.ai` (see `projectHostLabel`). A custom
+  /// [baseUrl] is never rewritten, and an id that is not a Norbix project id
+  /// keeps the shared host.
   final String? projectId;
 
   /// Account every request is scoped to, sent as the `norbix-account-id`

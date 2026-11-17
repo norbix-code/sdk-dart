@@ -126,15 +126,18 @@ class NorbixApi {
       _transport.config = _transport.config.copyWith(env: env ?? 'PROD');
 
   /// Norbix region all requests target (sent as the `nb-region` header and —
-  /// when the base URL is the SDK default — used to route to the regional
-  /// host). Null (the default) means no region: no header is sent.
+  /// when the base URL is the SDK default and the calls are not on a
+  /// project's own host — used to route to the regional host). Null (the
+  /// default) means no region: no header is sent.
   String? get region => _transport.config.region;
 
   /// Switch the Norbix region for subsequent requests. Pass `null` to clear
-  /// it (no header, default host). When the base URL is the SDK default the
-  /// regional host (`https://{region}.api.norbix.ai`) is used; a custom base
-  /// URL is never rewritten. Per-call `region` arguments still override this
-  /// for individual requests (header only).
+  /// it (no header). A project's calls stay on the project's own host, which
+  /// carries no region label; with no project id (or one that is not a Norbix
+  /// project id) and the SDK default base URL, the regional host
+  /// (`https://{region}.api.norbix.ai`) is used. A custom base URL is never
+  /// rewritten. Per-call `region` arguments still override this for
+  /// individual requests (header only).
   void setRegion(String? region) =>
       _transport.config = _transport.config.copyWith(region: region ?? '');
 
@@ -151,12 +154,15 @@ class NorbixApi {
       _transport.config = _transport.config.copyWith(language: language ?? '');
 
   /// Project every request is scoped to, sent as the `norbix-project-id`
-  /// header. Null (the default) means no header.
+  /// header. Null (the default) means no header. On the SDK default base URL
+  /// the calls also go to the project's own host
+  /// (`https://pr-<32 hex>.api.norbix.ai`).
   String? get projectId => _transport.config.projectId;
 
   /// Set the project for subsequent requests — e.g. once a Flutter app knows
   /// which project the signed-in user works in. Pass `null` to clear it (no
-  /// header).
+  /// header). Host and header follow together: the next call goes to the new
+  /// project's own host.
   void setProjectId(String? projectId) => _transport.config =
       _transport.config.copyWith(projectId: projectId ?? '');
 

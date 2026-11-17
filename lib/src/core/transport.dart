@@ -154,7 +154,6 @@ class Transport {
     bool authenticated = true,
     String? accept,
   }) async {
-    final url = _resolveUrl(route: route, query: query, pathParams: pathParams);
     final allHeaders = _buildHeaders(
       headers,
       env,
@@ -162,6 +161,14 @@ class Transport {
       language,
       authenticated: authenticated,
       accept: accept,
+    );
+    // The host names the project the header names: both are read from the
+    // same value, at the time of the call.
+    final url = _resolveUrl(
+      route: route,
+      query: query,
+      pathParams: pathParams,
+      projectId: _headerValue(allHeaders, 'norbix-project-id'),
     );
     final encodedBody = (body == null || method.toUpperCase() == 'GET')
         ? null
@@ -242,6 +249,10 @@ class Transport {
   /// redirect, not a call). A navigation carries no headers, so the project id
   /// and a non-PROD env go into the query (`?projectId=…&env=…`), followed by
   /// [query] in order; null values are left out.
+  ///
+  /// The link stays on the shared host (or the regional one), never the
+  /// project's own: the gateway's sign-in callback comes back to the shared
+  /// host and its nonce cookie is host-only.
   Uri navigationUrl({
     required String route,
     Map<String, Object?>? pathParams,
@@ -264,6 +275,7 @@ class Transport {
     required String route,
     Map<String, Object?>? query,
     Map<String, Object?>? pathParams,
+    String? projectId,
   }) {
     var normalizedRoute = route;
     // A per-call value wins over the client default, but only when it is
@@ -293,13 +305,19 @@ class Transport {
     normalizedRoute =
         normalizedRoute.replaceAll('{version}', config.apiVersion);
 
-    // Regional routing: when the client has a region AND the base URL is an
-    // SDK default host, requests go to the regional host. A custom base URL
-    // is never rewritten, and per-call region overrides only set the header.
+    // Project host: on the SDK's default API address a project's calls go to
+    // its own host, with no region label (its DNS record already points at
+    // its region, and the certificate covers one level only).
+    //
+    // Otherwise regional routing: when the client has a region AND the base
+    // URL is an SDK default host, requests go to the regional host. A custom
+    // base URL is never rewritten, and per-call region overrides only set the
+    // header.
     final clientRegion = config.region;
-    final base = clientRegion == null
-        ? config.baseUrl
-        : composeRegionalBaseUrl(config.baseUrl, clientRegion);
+    final base = composeProjectBaseUrl(config.baseUrl, projectId) ??
+        (clientRegion == null
+            ? config.baseUrl
+            : composeRegionalBaseUrl(config.baseUrl, clientRegion));
     final fullUrl = normalizedRoute.startsWith('/')
         ? '$base$normalizedRoute'
         : '$base/$normalizedRoute';
@@ -370,6 +388,16 @@ class Transport {
     if (accountId != null) out['norbix-account-id'] = accountId;
     if (extra != null) out.addAll(extra);
     return out;
+  }
+
+  /// A header's value whatever the case of its name (a caller's per-call
+  /// `headers` may spell it differently); the last one written wins.
+  static String? _headerValue(Map<String, String> headers, String name) {
+    String? value;
+    for (final entry in headers.entries) {
+      if (entry.key.toLowerCase() == name) value = entry.value;
+    }
+    return (value == null || value.isEmpty) ? null : value;
   }
 
   /// A client-level path default as a header value; null when unset or blank.
