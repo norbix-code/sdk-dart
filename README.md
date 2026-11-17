@@ -150,14 +150,19 @@ hub.setRegion(null);               // clear — no header, default host
 `NORBIX_REGION`; the per-host factories above set it for you.)
 
 Every request with a resolved region carries the `nb-region` header.
-When the client's base URL is one of the SDK defaults
-(`https://api.norbix.ai`, `https://hub.norbix.ai` —
-`kNorbixRegionalDefaultBaseUrls`), the client region also routes the
-request to the regional host:
+When the Hub client's base URL is the SDK default
+(`https://hub.norbix.ai`), the client region also routes the request to
+the regional host:
 
 ```
 https://hub.norbix.ai  +  region nb-eu-germany  →  https://nb-eu-germany.hub.norbix.ai
 ```
+
+API calls of a project do **not** get the region label: they go to the
+project's own host (see [Project host](#project-host)), whose DNS record
+already points at the project's region. Only an API client with no
+project id — or with an id that is not a Norbix project id — uses
+`https://nb-eu-germany.api.norbix.ai`.
 
 A custom base URL (custom domain, localhost) is **never rewritten** — the
 region then only adds the `nb-region` header.
@@ -169,6 +174,42 @@ override sets the **header only**; the URL is not recomposed:
 ```dart
 await hub.accounts.getAccountRegions(region: 'nb-us-east');
 ```
+
+### Project host
+
+Every project has its own API host, `pr-<32 hex>.api.norbix.ai`. When
+`NorbixApi` runs on its built-in default address (`https://api.norbix.ai`)
+and has a project id, every API call goes to that host:
+
+```dart
+final api = NorbixApi(projectId: 'pr_5XvmrTA6JVggZdmEE5bGdm');
+await api.users.getUsers();
+// → https://pr-022c4aca9f9e4df787ab0a20c83c44b6.api.norbix.ai/v3/membership/auth
+
+projectHostLabel('pr_5XvmrTA6JVggZdmEE5bGdm');
+// 'pr-022c4aca9f9e4df787ab0a20c83c44b6' — built locally, no call
+```
+
+What changes: the host name of API calls, nothing else. The host has no
+region label, whatever the region setting is, and it follows the current
+project — after `setProjectId` (or a per-call `norbix-project-id` header)
+the next call goes to the new project's host.
+
+What does not change:
+
+- the `norbix-project-id` header is still sent, and `nb-region` when a
+  region is set;
+- `NorbixHub` stays on `hub.norbix.ai` (or `<region>.hub.norbix.ai`);
+- a custom base URL (`NorbixConfig(baseUrl: ...)`, `NORBIX_API_BASE_URL`,
+  a custom domain, localhost) is **never rewritten**. The SDK tells the
+  default by its value, as it does for regions, so `https://api.norbix.ai`
+  written out by hand counts as the default;
+- a client with no project id, or with an id that is not a Norbix project
+  id (`projectHostLabel` returns null), keeps the shared host;
+- the social sign-in start link (`api.users.socialSignInUrl`) stays on the
+  shared host, where the gateway's callback returns.
+
+If your network filters outgoing traffic, allow `*.api.norbix.ai`.
 
 ### Language
 
