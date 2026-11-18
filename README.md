@@ -1334,6 +1334,37 @@ To put a new managed database on a cluster the account already has, send
 `flexClusterId` in the `MongoDbAtlasFlexManaged` database integration
 request; to name a new cluster, send `clusterDisplayName`.
 
+### Bundle discount codes
+
+A discount code lowers what a bundle subscription costs, by a percentage or
+by a fixed amount, for a number of months or forever:
+
+| Method | Call |
+|--------|------|
+| `checkBundleDiscount(body:)` | `POST /{version}/account/stripe/discount/check` — `code`, optional `bundle` and `billingPeriod`; answers `discount` (`code`, `percentOff`, `amountOff` in minor units, `currency`, `months` — null means forever — and `endsAt`). Changes nothing. |
+| `applyBundleDiscount(body:)` | `POST /{version}/account/stripe/discount` — `code`; puts the code on the running subscription. `CM-ERRORS-PROJECTS-039` when the account has no subscription. |
+| `createStripeCheckoutSession(body:)` | an optional `discountCode` puts the code on the new subscription. |
+
+`getAccountStatus()` also answers `discount` while one is running.
+
+A refused code fails with HTTP 400 `CM-ERRORS-ACCOUNT-027`. The reason is in
+the error's context: `not_found`, `not_started`, `expired`,
+`not_for_bundle`, `monthly_only`, `wrong_billing_period`,
+`already_has_discount` or `already_used`.
+
+```dart
+try {
+  final check = await hub.accounts.checkBundleDiscount(
+    body: {'code': 'LAUNCH30', 'bundle': 'Growth', 'billingPeriod': 'Annual'},
+  );
+  await hub.accounts.applyBundleDiscount(body: {'code': 'LAUNCH30'});
+} on NorbixClientError catch (e) {
+  if (e.errorCode == 'CM-ERRORS-ACCOUNT-027') {
+    final reason = e.errors.first.context['reason']; // e.g. 'already_used'
+  }
+}
+```
+
 ## Scheduler
 
 `hub.scheduler` runs a task on a cron schedule. **Only `EmailCampaign`

@@ -27,13 +27,60 @@ class AccountsResource extends Resource {
   ///
   /// Opens a Stripe checkout for a subscription. A Managed Service checkout
   /// needs both `bundle` (`Starter`, `Growth` or `Scale`) and
-  /// `billingPeriod` (`Monthly` or `Annual`) in the body.
+  /// `billingPeriod` (`Monthly` or `Annual`) in the body. An optional
+  /// `discountCode` puts a bundle discount code on the new subscription.
   Future<Object?> createStripeCheckoutSession(
       {Map<String, Object?>? query,
       Object? body,
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/stripe/create-checkout-session',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/stripe/discount/check`
+  ///
+  /// Checks a bundle discount code without using it. Body:
+  /// `{'code': 'LAUNCH30'}`, optionally with `bundle` (`Starter`, `Growth`
+  /// or `Scale`) and `billingPeriod` (`Monthly` or `Annual`) to check it
+  /// for that choice. The response carries `discount`: `code`, `percentOff`,
+  /// `amountOff` (minor units), `currency`, `months` (null = forever) and
+  /// `endsAt`. A refused code fails with HTTP 400 `CM-ERRORS-ACCOUNT-027`;
+  /// the error's `context['reason']` says why (`not_found`, `not_started`,
+  /// `expired`, `not_for_bundle`, `monthly_only`, `wrong_billing_period`,
+  /// `already_has_discount`, `already_used`). Changes nothing.
+  Future<Object?> checkBundleDiscount(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/stripe/discount/check',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/stripe/discount`
+  ///
+  /// Puts a bundle discount code on the account's running subscription.
+  /// Body: `{'code': 'LAUNCH30'}`. This changes what the account pays. A
+  /// refused code fails with HTTP 400 `CM-ERRORS-ACCOUNT-027` (reason in the
+  /// error's `context['reason']`); `CM-ERRORS-PROJECTS-039` when the account
+  /// has no subscription.
+  Future<Object?> applyBundleDiscount(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/stripe/discount',
       method: 'POST',
       query: query,
       body: body,
