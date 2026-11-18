@@ -29,6 +29,10 @@ class AccountsResource extends Resource {
   /// needs both `bundle` (`Starter`, `Growth` or `Scale`) and
   /// `billingPeriod` (`Monthly` or `Annual`) in the body. An optional
   /// `discountCode` puts a bundle discount code on the new subscription.
+  /// Trial limits: `region` names the region the trial is for,
+  /// `withoutTrial: true` buys now without a trial, and `trialInvite` carries
+  /// a waiting-list invitation token. A trial checkout in a full region fails
+  /// with `CM-ERRORS-ACCOUNT-040` (see [getTrialAvailability]).
   Future<Object?> createStripeCheckoutSession(
       {Map<String, Object?>? query,
       Object? body,
@@ -81,6 +85,66 @@ class AccountsResource extends Resource {
       Map<String, String>? headers}) {
     return transport.send(
       route: '/{version}/account/stripe/discount',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/account/trial-availability`
+  ///
+  /// Asks whether a free Managed Service trial can start in a region now,
+  /// before opening a checkout. Query: `{'region': 'nb-eu-germany'}`
+  /// (optional). The response carries `limitsOn`, `region`, `trialsOpen`,
+  /// `waitlistOpen`, `onWaitlist` and `refusal`:
+  /// - `limitsOn` false: this installation has no trial limits; start the
+  ///   trial as before.
+  /// - `trialsOpen` false: the region's trials are full. Offer to buy now
+  ///   without a trial (checkout with `withoutTrial: true`) or, when
+  ///   `waitlistOpen` is true, to join the waiting list
+  ///   ([joinTrialWaitlist]).
+  /// - `onWaitlist`: the owner email is already on the list.
+  /// - `refusal`: why this account's trial was refused after checkout
+  ///   (`CardAlreadyHadTrial`), or empty.
+  ///
+  /// A trial checkout in a full region fails with `CM-ERRORS-ACCOUNT-040`.
+  /// An invitation token from the waiting list goes in the checkout's
+  /// `trialInvite` to start the trial once even when the region is full; an
+  /// expired invitation or someone else's fails with `CM-ERRORS-ACCOUNT-042`.
+  Future<Object?> getTrialAvailability(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/trial-availability',
+      method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/account/trial-waitlist`
+  ///
+  /// Puts the account owner's email on the trial waiting list for a region.
+  /// Body: `{'region': 'nb-eu-germany', 'consent': true,
+  /// 'consentVersion': '2026-11'}`. `consent` must be true; `consentVersion`
+  /// names the consent text shown. When a slot frees, Norbix emails an
+  /// invitation link that is valid for a few days. The response carries
+  /// `status` (`added`, `alreadyListed` or `alreadyCustomer` — an email that
+  /// already had a trial or pays is never added) and `message`, which can be
+  /// shown as is. Errors: `CM-ERRORS-ACCOUNT-044` when the list is switched
+  /// off, `CM-ERRORS-ACCOUNT-043` for an unknown region, and a validation
+  /// error when `consent` is not true.
+  Future<Object?> joinTrialWaitlist(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/trial-waitlist',
       method: 'POST',
       query: query,
       body: body,

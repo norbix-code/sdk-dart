@@ -1365,6 +1365,53 @@ try {
 }
 ```
 
+### Trial limits
+
+Ask before opening a checkout whether a free Managed Service trial can start
+in a region now, and put the owner on a waiting list when it cannot:
+
+| Method | Call |
+|--------|------|
+| `getTrialAvailability(query:)` | `GET /{version}/account/trial-availability` — optional `region` in the query; answers `limitsOn`, `region`, `trialsOpen`, `waitlistOpen`, `onWaitlist` and `refusal`. |
+| `joinTrialWaitlist(body:)` | `POST /{version}/account/trial-waitlist` — optional `region`, `consent` (must be true) and optional `consentVersion`; answers `status` (`added`, `alreadyListed`, `alreadyCustomer`) and `message`. |
+| `createStripeCheckoutSession(body:)` | optional `region`, `withoutTrial` and `trialInvite`. |
+
+- `limitsOn` false: this installation has no trial limits; start the trial
+  as before.
+- `trialsOpen` false: the region's trials are full. Offer to buy now without
+  a trial (checkout with `withoutTrial: true`) or, when `waitlistOpen` is
+  true, to join the waiting list.
+- `onWaitlist`: the owner email is already on the list.
+- `refusal`: why this account's trial was refused after checkout
+  (`CardAlreadyHadTrial`), or empty.
+
+A trial checkout in a full region fails with `CM-ERRORS-ACCOUNT-040`. When a
+slot frees, Norbix emails an invitation link valid for a few days; its token
+goes in the checkout's `trialInvite` and starts the trial once even when the
+region is full (an expired invitation or someone else's:
+`CM-ERRORS-ACCOUNT-042`). `joinTrialWaitlist` never adds an email that
+already had a trial or pays; its `message` can be shown as is. It fails with
+`CM-ERRORS-ACCOUNT-044` when the list is switched off,
+`CM-ERRORS-ACCOUNT-043` for an unknown region, and a validation error when
+`consent` is not true.
+
+The website's own intake route (`/account/trial-waitlist/intake`, shared key
+header) is server-only and has no method here.
+
+```dart
+final availability = await hub.accounts.getTrialAvailability(
+  query: {'region': 'nb-eu-germany'},
+) as Map<String, dynamic>;
+if (availability['trialsOpen'] == false &&
+    availability['waitlistOpen'] == true) {
+  await hub.accounts.joinTrialWaitlist(body: {
+    'region': 'nb-eu-germany',
+    'consent': true,
+    'consentVersion': '2026-11',
+  });
+}
+```
+
 ## Scheduler
 
 `hub.scheduler` runs a task on a cron schedule. **Only `EmailCampaign`
