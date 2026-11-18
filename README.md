@@ -164,8 +164,9 @@ already points at the project's region. Only an API client with no
 project id — or with an id that is not a Norbix project id — uses
 `https://nb-eu-germany.api.norbix.ai`.
 
-A custom base URL (custom domain, localhost) is **never rewritten** — the
-region then only adds the `nb-region` header.
+A region never rewrites a custom base URL (custom domain, localhost) — it
+then only adds the `nb-region` header. For the API address see
+[Project host](#project-host).
 
 The two region-aware endpoints also accept a per-call `region:` argument
 that overrides the client region for that single request. A per-call
@@ -178,8 +179,8 @@ await hub.accounts.getAccountRegions(region: 'nb-us-east');
 ### Project host
 
 Every project has its own API host, `pr-<32 hex>.api.norbix.ai`. When
-`NorbixApi` runs on its built-in default address (`https://api.norbix.ai`)
-and has a project id, every API call goes to that host:
+`NorbixApi` has a project id and its base URL serves project hosts, every API
+call goes to that host:
 
 ```dart
 final api = NorbixApi(projectId: 'pr_5XvmrTA6JVggZdmEE5bGdm');
@@ -188,7 +189,26 @@ await api.users.getUsers();
 
 projectHostLabel('pr_5XvmrTA6JVggZdmEE5bGdm');
 // 'pr-022c4aca9f9e4df787ab0a20c83c44b6' — built locally, no call
+
+projectApiBaseUrl('https://{projectHostLabel}.api.example.com',
+    'pr_5XvmrTA6JVggZdmEE5bGdm');
+// (project: 'https://pr-022c….api.example.com',
+//  shared: 'https://api.example.com')
 ```
+
+Which address a project's API calls use, from the API base URL the client
+has (`NorbixConfig(baseUrl: ...)` or `NORBIX_API_BASE_URL`):
+
+| base URL | calls go to |
+| --- | --- |
+| none (the default), `https://api.norbix.ai`, `https://nb-eu-germany.api.norbix.ai` | `https://pr-<hex>.api.norbix.ai` |
+| a template, `https://{projectHostLabel}.api.example.com` | `https://pr-<hex>.api.example.com` |
+| a project's host already, `https://pr-<hex>.api.example.com` | the same, with the current project's label |
+| anything else (`https://api.example.com`, staging, localhost, `http://`) | as given |
+
+An install on its own domain gives its template in `GET /v3/echo` →
+`apiUrlTemplate` when it serves project hosts; put that as the base URL.
+Without it the install's plain address is used as given.
 
 What changes: the host name of API calls, nothing else. The host has no
 region label, whatever the region setting is, and it follows the current
@@ -199,15 +219,13 @@ What does not change:
 
 - the `norbix-project-id` header is still sent, and `nb-region` when a
   region is set;
-- `NorbixHub` stays on `hub.norbix.ai` (or `<region>.hub.norbix.ai`);
-- a custom base URL (`NorbixConfig(baseUrl: ...)`, `NORBIX_API_BASE_URL`,
-  a custom domain, localhost) is **never rewritten**. The SDK tells the
-  default by its value, as it does for regions, so `https://api.norbix.ai`
-  written out by hand counts as the default;
+- `NorbixHub` stays on `hub.norbix.ai` (or `<region>.hub.norbix.ai`, or
+  your own Hub URL);
 - a client with no project id, or with an id that is not a Norbix project
-  id (`projectHostLabel` returns null), keeps the shared host;
+  id (`projectHostLabel` returns null), keeps the shared address (a
+  template loses its label: `https://api.example.com`);
 - the social sign-in start link (`api.users.socialSignInUrl`) stays on the
-  shared host, where the gateway's callback returns.
+  shared address, where the gateway's callback returns.
 
 If your network filters outgoing traffic, allow `*.api.norbix.ai`.
 

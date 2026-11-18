@@ -69,9 +69,9 @@ class NorbixConfig {
   /// `nb-eu-germany`), sent as the `nb-region` header. Unlike [env] there is
   /// NO default region: when null (the default) no header is sent. When set
   /// and [baseUrl] is an SDK default host, requests are routed to the
-  /// regional host (`https://{region}.hub.norbix.ai`); a user-supplied
-  /// custom [baseUrl] is never rewritten. API calls of a project go to the
-  /// project's own host instead, which carries no region label (see
+  /// regional host (`https://{region}.hub.norbix.ai`); a region never
+  /// rewrites a user-supplied custom [baseUrl]. API calls of a project go to
+  /// the project's own host instead, which carries no region label (see
   /// [projectId]).
   final String? region;
 
@@ -90,11 +90,14 @@ class NorbixConfig {
   /// must set this (or call `setProjectId`) before project calls, or they
   /// fail with "ProjectId is required". Null (the default) sends no header.
   ///
-  /// When [baseUrl] is the SDK's built-in API default
-  /// (`https://api.norbix.ai`), API calls also go to the project's own host,
-  /// `https://pr-<32 hex>.api.norbix.ai` (see `projectHostLabel`). A custom
-  /// [baseUrl] is never rewritten, and an id that is not a Norbix project id
-  /// keeps the shared host.
+  /// API calls also go to the project's own host wherever the address serves
+  /// one (see `projectApiBaseUrl`): on `https://api.norbix.ai` or
+  /// `https://<region>.api.norbix.ai` that is
+  /// `https://pr-<32 hex>.api.norbix.ai`; a template with
+  /// `{projectHostLabel}` is filled with the project's label; an address that
+  /// is a project's host already gets the current project's label. Any other
+  /// [baseUrl] is used as given, the Hub URL is never rewritten, and an id
+  /// that is not a Norbix project id keeps the shared address.
   final String? projectId;
 
   /// Account every request is scoped to, sent as the `norbix-account-id`

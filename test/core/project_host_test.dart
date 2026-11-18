@@ -294,7 +294,7 @@ void main() {
     });
   });
 
-  group('project host — a custom base URL is never rewritten', () {
+  group('project host — an address with no project host is used as given', () {
     test('config baseUrl (staging)', () async {
       final driver = FakeHttpDriver();
       final api = NorbixApi(
@@ -351,7 +351,7 @@ void main() {
     });
 
     test(
-        'the default address written out is the default (told by value, as for regions)',
+        'the default address written out gets the project host (trailing slash too)',
         () async {
       final driver = FakeHttpDriver();
       final api = NorbixApi(
@@ -374,6 +374,364 @@ void main() {
       expect(composeProjectBaseUrl('https://api.norbix.io', _virginia), isNull);
       expect(composeProjectBaseUrl('https://api.norbix.ai', 'p1'), isNull);
       expect(composeProjectBaseUrl('https://api.norbix.ai', null), isNull);
+    });
+  });
+
+  group('project host — round 2: any address that serves one', () {
+    const customHost =
+        'https://pr-022c4aca9f9e4df787ab0a20c83c44b6.api.customer.com';
+    const template = 'https://{projectHostLabel}.api.customer.com';
+
+    NorbixApi apiOn(
+      String baseUrl,
+      String? projectId,
+      FakeHttpDriver d, {
+      String? region,
+    }) =>
+        NorbixApi(
+          config: NorbixConfig(
+            baseUrl: baseUrl,
+            projectId: projectId,
+            region: region,
+          ),
+          driver: d,
+        );
+
+    test('the placeholder constant', () {
+      expect(kNorbixProjectHostLabelPlaceholder, equals('{projectHostLabel}'));
+    });
+
+    group('projectApiBaseUrl', () {
+      void expectHosts(
+        String baseUrl,
+        String? projectId,
+        String project,
+        String shared,
+      ) {
+        final hosts = projectApiBaseUrl(baseUrl, projectId);
+        expect(hosts.project, equals(project), reason: 'project');
+        expect(hosts.shared, equals(shared), reason: 'shared');
+      }
+
+      test('https://api.norbix.ai → project host', () {
+        expectHosts(
+          'https://api.norbix.ai',
+          _virginia,
+          _virginiaHost,
+          'https://api.norbix.ai',
+        );
+      });
+
+      test(
+        'a regional norbix.ai address → project host, shared is regional',
+        () {
+          expectHosts(
+            'https://nb-eu-germany.api.norbix.ai',
+            _germany,
+            _germanyHost,
+            'https://nb-eu-germany.api.norbix.ai',
+          );
+        },
+      );
+
+      test('a norbix.ai address keeps its path', () {
+        expectHosts(
+          'https://api.norbix.ai/v3',
+          _virginia,
+          '$_virginiaHost/v3',
+          'https://api.norbix.ai/v3',
+        );
+      });
+
+      test('a template is filled; shared drops the placeholder', () {
+        expectHosts(
+          template,
+          _virginia,
+          customHost,
+          'https://api.customer.com',
+        );
+      });
+
+      test('a template with a port and a path', () {
+        expectHosts(
+          'http://{projectHostLabel}.api.local.norbix.test:8443/v3',
+          _virginia,
+          'http://pr-022c4aca9f9e4df787ab0a20c83c44b6.api.local.norbix.test:8443/v3',
+          'http://api.local.norbix.test:8443/v3',
+        );
+      });
+
+      test('a template with an id that does not decode → shared', () {
+        expectHosts(
+          template,
+          'p1',
+          'https://api.customer.com',
+          'https://api.customer.com',
+        );
+        expectHosts(
+          template,
+          null,
+          'https://api.customer.com',
+          'https://api.customer.com',
+        );
+      });
+
+      test('a pasted project host gets the current project label', () {
+        expectHosts(
+          customHost,
+          _germany,
+          'https://pr-184336d00e2141c3be5138e8dcf52e81.api.customer.com',
+          'https://api.customer.com',
+        );
+      });
+
+      test('a pasted project host in upper case is one too', () {
+        expectHosts(
+          'https://PR-022C4ACA9F9E4DF787AB0A20C83C44B6.api.customer.com:8443',
+          _germany,
+          'https://pr-184336d00e2141c3be5138e8dcf52e81.api.customer.com:8443',
+          'https://api.customer.com:8443',
+        );
+      });
+
+      test(
+        'a pasted project host with an id that does not decode → shared',
+        () {
+          expectHosts(
+            customHost,
+            'p1',
+            'https://api.customer.com',
+            'https://api.customer.com',
+          );
+        },
+      );
+
+      test('a pasted norbix.ai project host follows the project', () {
+        expectHosts(
+          '$_virginiaHost/v3',
+          _germany,
+          '$_germanyHost/v3',
+          'https://api.norbix.ai/v3',
+        );
+      });
+
+      for (final asGiven in [
+        'https://api.customer.com',
+        'https://api.norbix.io',
+        'http://localhost:5002',
+        'http://api.norbix.ai',
+        'https://hub.norbix.ai',
+        'https://a.b.api.norbix.ai',
+        'https://api.norbix.ai.evil.com',
+        'not a url',
+        '',
+      ]) {
+        test('"$asGiven" is used as given', () {
+          expectHosts(asGiven, _virginia, asGiven, asGiven);
+        });
+      }
+
+      test('a norbix.ai address with an id that does not decode stays', () {
+        expectHosts(
+          'https://nb-eu-germany.api.norbix.ai',
+          'p1',
+          'https://nb-eu-germany.api.norbix.ai',
+          'https://nb-eu-germany.api.norbix.ai',
+        );
+      });
+    });
+
+    test(
+        'a written-out regional norbix.ai address: project host; sign-in link on the regional shared host',
+        () async {
+      final driver = FakeHttpDriver();
+      final api = apiOn(
+        'https://nb-eu-germany.api.norbix.ai',
+        _germany,
+        driver,
+      );
+
+      await api.users.getUsers();
+
+      expect(_url(driver), equals('$_germanyHost/v3/membership/auth'));
+      expect(_headers(driver)[_project], equals(_germany));
+      expect(
+        api.users.socialSignInUrl('google').toString(),
+        startsWith(
+          'https://nb-eu-germany.api.norbix.ai/v3/membership/auth/social/google?',
+        ),
+      );
+    });
+
+    test('a written-out https://api.norbix.ai with a region', () async {
+      final driver = FakeHttpDriver();
+      final api = apiOn(
+        'https://api.norbix.ai',
+        _germany,
+        driver,
+        region: 'nb-eu-germany',
+      );
+
+      await api.users.getUsers();
+
+      expect(_url(driver), equals('$_germanyHost/v3/membership/auth'));
+      expect(_headers(driver)['nb-region'], equals('nb-eu-germany'));
+      expect(
+        api.users.socialSignInUrl('google').toString(),
+        startsWith('https://nb-eu-germany.api.norbix.ai/'),
+      );
+    });
+
+    test(
+        'a template: the project host; switching project moves host and header together',
+        () async {
+      final driver = FakeHttpDriver();
+      final api = apiOn(template, _virginia, driver);
+
+      await api.users.getUsers();
+      expect(_url(driver), equals('$customHost/v3/membership/auth'));
+      expect(_headers(driver)[_project], equals(_virginia));
+
+      api.setProjectId(_germany);
+      await api.users.getUsers();
+      expect(
+        _url(driver),
+        equals(
+          'https://pr-184336d00e2141c3be5138e8dcf52e81.api.customer.com/v3/membership/auth',
+        ),
+      );
+      expect(_headers(driver)[_project], equals(_germany));
+
+      await api.users.getUsers(headers: {_project: _virginia});
+      expect(_url(driver), startsWith('$customHost/'));
+      expect(_headers(driver)[_project], equals(_virginia));
+
+      api.setProjectId('p1');
+      await api.users.getUsers();
+      expect(_url(driver), startsWith('https://api.customer.com/'));
+      expect(_headers(driver)[_project], equals('p1'));
+
+      api.setProjectId(null);
+      await api.users.getUsers();
+      expect(_url(driver), startsWith('https://api.customer.com/'));
+      expect(_headers(driver).containsKey(_project), isFalse);
+    });
+
+    test('a template: the sign-in link is on the shared address', () {
+      final api = apiOn(template, _virginia, FakeHttpDriver());
+
+      final url = api.users.socialSignInUrl('google').toString();
+
+      expect(
+        url,
+        startsWith(
+          'https://api.customer.com/v3/membership/auth/social/google?',
+        ),
+      );
+      expect(url, contains('projectId=$_virginia'));
+    });
+
+    test('a template from NORBIX_API_BASE_URL', () async {
+      final driver = FakeHttpDriver();
+      final api = NorbixApi.fromEnv(
+        overrides: {
+          'NORBIX_API_PROJECT_ID': _virginia,
+          'NORBIX_API_BASE_URL': template,
+        },
+        driver: driver,
+      );
+
+      await api.users.getUsers();
+
+      expect(_url(driver), startsWith('$customHost/'));
+    });
+
+    test('a template with a port', () async {
+      final driver = FakeHttpDriver();
+      final api = apiOn(
+        'http://{projectHostLabel}.api.local.norbix.test:8443',
+        _virginia,
+        driver,
+      );
+
+      await api.users.getUsers();
+
+      expect(
+        _url(driver),
+        equals(
+          'http://pr-022c4aca9f9e4df787ab0a20c83c44b6.api.local.norbix.test:8443/v3/membership/auth',
+        ),
+      );
+    });
+
+    test('a template with p1 goes to the shared address', () async {
+      final driver = FakeHttpDriver();
+      final api = apiOn(template, 'p1', driver);
+
+      await api.users.getUsers();
+
+      expect(
+        _url(driver),
+        equals('https://api.customer.com/v3/membership/auth'),
+      );
+      expect(_headers(driver)[_project], equals('p1'));
+    });
+
+    test('a pasted project host follows the client project', () async {
+      final driver = FakeHttpDriver();
+      final api = apiOn(customHost, _germany, driver);
+
+      await api.users.getUsers();
+
+      expect(
+        _url(driver),
+        equals(
+          'https://pr-184336d00e2141c3be5138e8dcf52e81.api.customer.com/v3/membership/auth',
+        ),
+      );
+      expect(_headers(driver)[_project], equals(_germany));
+      expect(
+        api.users.socialSignInUrl('google').toString(),
+        startsWith('https://api.customer.com/'),
+      );
+    });
+
+    for (final asGiven in [
+      'https://api.customer.com',
+      'https://api.norbix.io',
+      'http://localhost:5002',
+      'http://api.norbix.ai',
+    ]) {
+      test('$asGiven is called as given', () async {
+        final driver = FakeHttpDriver();
+        final api = apiOn(asGiven, _virginia, driver);
+
+        await api.users.getUsers();
+
+        expect(_url(driver), equals('$asGiven/v3/membership/auth'));
+        expect(_headers(driver)[_project], equals(_virginia));
+      });
+    }
+
+    group('the Hub stays on its URL', () {
+      for (final hubUrl in [
+        'https://nb-eu-germany.api.norbix.ai',
+        'https://api.norbix.ai',
+        customHost,
+      ]) {
+        test(hubUrl, () async {
+          final driver = FakeHttpDriver();
+          final hub = NorbixHub(
+            config: NorbixConfig(baseUrl: hubUrl, projectId: _germany),
+            driver: driver,
+          );
+
+          await hub.accounts.getAccountRegions();
+
+          expect(_url(driver), equals('$hubUrl/v3/account/regions'));
+          expect(_headers(driver)[_project], equals(_germany));
+        });
+      }
     });
   });
 }
