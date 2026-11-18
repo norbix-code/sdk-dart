@@ -6,9 +6,17 @@
 /// `ProjectId.HostLabel`.
 library;
 
-/// The one base URL a project host is composed under: the SDK's built-in API
-/// default. The Hub default and every user-supplied URL are never rewritten.
+/// The SDK's built-in API default, the address [composeProjectBaseUrl]
+/// rewrites. Where calls really go is decided by [projectApiBaseUrl].
 const String kNorbixProjectHostDefaultBaseUrl = 'https://api.norbix.ai';
+
+/// The placeholder an install on its own domain puts where the project's label
+/// goes, e.g. `https://{projectHostLabel}.api.customer.com` (the
+/// `apiUrlTemplate` of `GET /v3/echo`).
+const String kNorbixProjectHostLabelPlaceholder = '{projectHostLabel}';
+
+const String _norbixApiDomain = 'api.norbix.ai';
+final RegExp _projectLabel = RegExp(r'^pr-[0-9a-f]{32}$', caseSensitive: false);
 
 const String _base62 =
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -77,11 +85,10 @@ String? projectHostLabel(String? projectId) {
   return hex.toString();
 }
 
-/// The project's own base URL: when [baseUrl] is the SDK's built-in API
-/// default and [projectId] is a Norbix project id, the host label becomes a
-/// subdomain prefix (`https://pr-022c….api.norbix.ai`). Returns null in every
-/// other case — a custom base URL, the Hub default, no project id, or an id
-/// that does not decode — and the caller keeps the URL it had.
+/// The project's own base URL under the SDK's built-in API default
+/// (`https://api.norbix.ai` → `https://pr-022c….api.norbix.ai`). Returns null
+/// for any other [baseUrl] or an id that does not decode. Kept for callers of
+/// round 1; the client itself uses [projectApiBaseUrl].
 String? composeProjectBaseUrl(String baseUrl, String? projectId) {
   if (baseUrl != kNorbixProjectHostDefaultBaseUrl) return null;
   final label = projectHostLabel(projectId);
@@ -89,3 +96,71 @@ String? composeProjectBaseUrl(String baseUrl, String? projectId) {
   final uri = Uri.parse(baseUrl);
   return '${uri.scheme}://$label.${uri.host}';
 }
+
+/// Where a project's API calls go, from the API base URL the client has
+/// (the built-in default with its region composed, or the URL as the user
+/// gave it):
+///
+/// - a template with `{projectHostLabel}` (an install on its own domain that
+///   serves project hosts) gets the project's label;
+/// - an address that is already a project's host (`https://pr-<32 hex>.…`, a
+///   pasted `apiHost`) gets the current project's label, so the host and the
+///   `norbix-project-id` header always name the same project;
+/// - a norbix.ai API address — `https://api.norbix.ai` or
+///   `https://<region>.api.norbix.ai` — becomes `https://pr-<hex>.api.norbix.ai`
+///   (its DNS record follows the project's region);
+/// - any other address (staging, localhost, `http://`, a plain own domain) is
+///   used as given.
+///
+/// `shared` is the same address without a project label; the social sign-in
+/// link is built on it. With a project id that does not decode, `project` is
+/// `shared`. Scheme, port and path are kept. Never throws.
+({String project, String shared}) projectApiBaseUrl(
+  String baseUrl,
+  String? projectId,
+) {
+  final label = projectHostLabel(projectId);
+
+  // A string replacement, before any parsing: `{` is not valid in a host.
+  if (baseUrl.contains(kNorbixProjectHostLabelPlaceholder)) {
+    final shared =
+        baseUrl.replaceAll('$kNorbixProjectHostLabelPlaceholder.', '');
+    return (
+      project: label == null
+          ? shared
+          : baseUrl.replaceAll(kNorbixProjectHostLabelPlaceholder, label),
+      shared: shared,
+    );
+  }
+
+  final uri = Uri.tryParse(baseUrl);
+  if (uri == null || uri.host.isEmpty) {
+    return (project: baseUrl, shared: baseUrl);
+  }
+  final labels = uri.host.toLowerCase().split('.');
+
+  if (labels.length > 1 && _projectLabel.hasMatch(labels.first)) {
+    final rest = labels.skip(1).join('.');
+    final shared = _withHost(uri, rest);
+    return (
+      project: label == null ? shared : _withHost(uri, '$label.$rest'),
+      shared: shared,
+    );
+  }
+
+  final host = labels.join('.');
+  final isNorbixApi = host == _norbixApiDomain ||
+      (labels.length == 4 && host.endsWith('.$_norbixApiDomain'));
+  if (isNorbixApi && uri.scheme == 'https') {
+    return (
+      project:
+          label == null ? baseUrl : _withHost(uri, '$label.$_norbixApiDomain'),
+      shared: baseUrl,
+    );
+  }
+
+  return (project: baseUrl, shared: baseUrl);
+}
+
+/// [uri] with another host; scheme, port, path and query are kept.
+String _withHost(Uri uri, String host) => uri.replace(host: host).toString();

@@ -95,6 +95,7 @@ class NorbixHub {
   ) : _transport = Transport(
           config: config,
           driver: driver,
+          projectHosts: false,
           defaultPathParams: {
             'projectId': projectId ?? config.projectId,
             'accountId': accountId ?? config.accountId,
