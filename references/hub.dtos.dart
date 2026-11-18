@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-17 18:32:18
+Date: 2026-11-18 12:58:47
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -16401,6 +16401,53 @@ class AccountStatus
 }
 
 // @DataContract
+class BundleDiscountDto implements IConvertible
+{
+    // @DataMember
+    String? code;
+
+    // @DataMember
+    double? percentOff;
+
+    // @DataMember
+    int? amountOff;
+
+    // @DataMember
+    String? currency;
+
+    // @DataMember
+    int? months;
+
+    // @DataMember
+    DateTime? endsAt;
+
+    BundleDiscountDto({this.code,this.percentOff,this.amountOff,this.currency,this.months,this.endsAt});
+    BundleDiscountDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        code = json['code'];
+        percentOff = JsonConverters.toDouble(json['percentOff']);
+        amountOff = json['amountOff'];
+        currency = json['currency'];
+        months = json['months'];
+        endsAt = JsonConverters.fromJson(json['endsAt'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'code': code,
+        'percentOff': percentOff,
+        'amountOff': amountOff,
+        'currency': currency,
+        'months': months,
+        'endsAt': JsonConverters.toJson(endsAt,'DateTime',context!)
+    };
+
+    getTypeName() => "BundleDiscountDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class AccountStatusDto implements IConvertible
 {
     // @DataMember
@@ -16446,6 +16493,12 @@ class AccountStatusDto implements IConvertible
     bool? isTrial;
 
     // @DataMember
+    int extraRegions = 0;
+
+    // @DataMember
+    BundleDiscountDto? discount;
+
+    // @DataMember
     DateTime? renewsOn;
 
     // @DataMember
@@ -16457,7 +16510,7 @@ class AccountStatusDto implements IConvertible
     // @DataMember
     bool? joinedByInvitation;
 
-    AccountStatusDto({this.accountId="",this.accountIdAsGuid="",this.userId="",this.loggedInUserId="",this.loggedInUserEmail,this.status,this.projectCap=0,this.permissions=const [],this.roles=const [],this.allowedProjects,this.trialWasIssued,this.bundle,this.billingPeriod,this.isTrial,this.renewsOn,this.enabledProjects=0,this.emailVerified,this.joinedByInvitation});
+    AccountStatusDto({this.accountId="",this.accountIdAsGuid="",this.userId="",this.loggedInUserId="",this.loggedInUserEmail,this.status,this.projectCap=0,this.permissions=const [],this.roles=const [],this.allowedProjects,this.trialWasIssued,this.bundle,this.billingPeriod,this.isTrial,this.extraRegions=0,this.discount,this.renewsOn,this.enabledProjects=0,this.emailVerified,this.joinedByInvitation});
     AccountStatusDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16475,6 +16528,8 @@ class AccountStatusDto implements IConvertible
         bundle = JsonConverters.fromJson(json['bundle'],'ManagedServiceBundle',context!);
         billingPeriod = JsonConverters.fromJson(json['billingPeriod'],'SubscriptionBillingPeriod',context!);
         isTrial = json['isTrial'];
+        extraRegions = json['extraRegions'] ?? 0;
+        discount = JsonConverters.fromJson(json['discount'],'BundleDiscountDto',context!);
         renewsOn = JsonConverters.fromJson(json['renewsOn'],'DateTime',context!);
         enabledProjects = json['enabledProjects'] ?? 0;
         emailVerified = json['emailVerified'];
@@ -16497,6 +16552,8 @@ class AccountStatusDto implements IConvertible
         'bundle': JsonConverters.toJson(bundle,'ManagedServiceBundle',context!),
         'billingPeriod': JsonConverters.toJson(billingPeriod,'SubscriptionBillingPeriod',context!),
         'isTrial': isTrial,
+        'extraRegions': extraRegions,
+        'discount': JsonConverters.toJson(discount,'BundleDiscountDto',context!),
         'renewsOn': JsonConverters.toJson(renewsOn,'DateTime',context!),
         'enabledProjects': enabledProjects,
         'emailVerified': emailVerified,
@@ -16535,6 +16592,33 @@ class BundlePriceDto implements IConvertible
 }
 
 // @DataContract
+class ExtraRegionPriceDto implements IConvertible
+{
+    // @DataMember
+    BundlePriceDto? monthly;
+
+    // @DataMember
+    BundlePriceDto? annual;
+
+    ExtraRegionPriceDto({this.monthly,this.annual});
+    ExtraRegionPriceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        monthly = JsonConverters.fromJson(json['monthly'],'BundlePriceDto',context!);
+        annual = JsonConverters.fromJson(json['annual'],'BundlePriceDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'monthly': JsonConverters.toJson(monthly,'BundlePriceDto',context!),
+        'annual': JsonConverters.toJson(annual,'BundlePriceDto',context!)
+    };
+
+    getTypeName() => "ExtraRegionPriceDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class ManagedServiceBundleDto implements IConvertible
 {
     // @DataMember
@@ -16549,7 +16633,13 @@ class ManagedServiceBundleDto implements IConvertible
     // @DataMember
     BundlePriceDto? annual;
 
-    ManagedServiceBundleDto({this.bundle,this.projectCap=0,this.monthly,this.annual});
+    // @DataMember
+    int? regionCap;
+
+    // @DataMember
+    ExtraRegionPriceDto? extraRegion;
+
+    ManagedServiceBundleDto({this.bundle,this.projectCap=0,this.monthly,this.annual,this.regionCap,this.extraRegion});
     ManagedServiceBundleDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16557,6 +16647,8 @@ class ManagedServiceBundleDto implements IConvertible
         projectCap = json['projectCap'] ?? 0;
         monthly = JsonConverters.fromJson(json['monthly'],'BundlePriceDto',context!);
         annual = JsonConverters.fromJson(json['annual'],'BundlePriceDto',context!);
+        regionCap = json['regionCap'];
+        extraRegion = JsonConverters.fromJson(json['extraRegion'],'ExtraRegionPriceDto',context!);
         return this;
     }
 
@@ -16564,7 +16656,9 @@ class ManagedServiceBundleDto implements IConvertible
         'bundle': JsonConverters.toJson(bundle,'ManagedServiceBundle',context!),
         'projectCap': projectCap,
         'monthly': JsonConverters.toJson(monthly,'BundlePriceDto',context!),
-        'annual': JsonConverters.toJson(annual,'BundlePriceDto',context!)
+        'annual': JsonConverters.toJson(annual,'BundlePriceDto',context!),
+        'regionCap': regionCap,
+        'extraRegion': JsonConverters.toJson(extraRegion,'ExtraRegionPriceDto',context!)
     };
 
     getTypeName() => "ManagedServiceBundleDto";
@@ -16618,7 +16712,10 @@ class UsageBillingPeriodDto implements IConvertible
     // @DataMember
     DateTime? recordedAtUtc;
 
-    UsageBillingPeriodDto({this.period="",this.totalCents=0,this.perCluster=const [],this.recordedAtUtc});
+    // @DataMember
+    String? waived;
+
+    UsageBillingPeriodDto({this.period="",this.totalCents=0,this.perCluster=const [],this.recordedAtUtc,this.waived});
     UsageBillingPeriodDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -16626,6 +16723,7 @@ class UsageBillingPeriodDto implements IConvertible
         totalCents = json['totalCents'] ?? 0;
         perCluster = JsonConverters.fromJson(json['perCluster'],'List<UsageBillingClusterChargeDto>',context!) ?? [];
         recordedAtUtc = JsonConverters.fromJson(json['recordedAtUtc'],'DateTime',context!) ?? DateTime(0);
+        waived = json['waived'];
         return this;
     }
 
@@ -16633,7 +16731,8 @@ class UsageBillingPeriodDto implements IConvertible
         'period': period,
         'totalCents': totalCents,
         'perCluster': JsonConverters.toJson(perCluster,'List<UsageBillingClusterChargeDto>',context!),
-        'recordedAtUtc': JsonConverters.toJson(recordedAtUtc,'DateTime',context!)
+        'recordedAtUtc': JsonConverters.toJson(recordedAtUtc,'DateTime',context!),
+        'waived': waived
     };
 
     getTypeName() => "UsageBillingPeriodDto";
@@ -30281,6 +30380,7 @@ class EchoResponse implements IConvertible
     String apiVersion = "";
     String hubVersion = "";
     String? adminUrlTemplate;
+    String? apiUrlTemplate;
     bool? emailServiceConfigured;
     String? rootBootstrapPasswordSource;
     List<EchoRegionDto>? regions;
@@ -30289,7 +30389,7 @@ class EchoResponse implements IConvertible
     EchoConnectDto? connect;
     EchoKeylessDto? keyless;
 
-    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.apiUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -30302,6 +30402,7 @@ class EchoResponse implements IConvertible
         apiVersion = json['apiVersion'] ?? "";
         hubVersion = json['hubVersion'] ?? "";
         adminUrlTemplate = json['adminUrlTemplate'];
+        apiUrlTemplate = json['apiUrlTemplate'];
         emailServiceConfigured = json['emailServiceConfigured'];
         rootBootstrapPasswordSource = json['rootBootstrapPasswordSource'];
         regions = JsonConverters.fromJson(json['regions'],'List<EchoRegionDto>',context!);
@@ -30322,6 +30423,7 @@ class EchoResponse implements IConvertible
         'apiVersion': apiVersion,
         'hubVersion': hubVersion,
         'adminUrlTemplate': adminUrlTemplate,
+        'apiUrlTemplate': apiUrlTemplate,
         'emailServiceConfigured': emailServiceConfigured,
         'rootBootstrapPasswordSource': rootBootstrapPasswordSource,
         'regions': JsonConverters.toJson(regions,'List<EchoRegionDto>',context!),
@@ -30641,6 +30743,29 @@ class GetAccountStatusResponse extends ResponseBase implements IConvertible
 }
 
 // @DataContract
+class CheckBundleDiscountResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    BundleDiscountDto? discount;
+
+    CheckBundleDiscountResponse({this.discount});
+    CheckBundleDiscountResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        discount = JsonConverters.fromJson(json['discount'],'BundleDiscountDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'discount': JsonConverters.toJson(discount,'BundleDiscountDto',context!)
+    });
+
+    getTypeName() => "CheckBundleDiscountResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class CreateStripeCheckoutSessionResponse extends IdResponse implements IConvertible
 {
     // @DataMember
@@ -30726,6 +30851,82 @@ class CreateTeamMemberFromInvitationResponse extends IdResponse implements IConv
     });
 
     getTypeName() => "CreateTeamMemberFromInvitationResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TrialWaitlistResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? status;
+
+    // @DataMember
+    String? message;
+
+    TrialWaitlistResponse({this.status,this.message});
+    TrialWaitlistResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        status = json['status'];
+        message = json['message'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'status': status,
+        'message': message
+    });
+
+    getTypeName() => "TrialWaitlistResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TrialAvailabilityResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    bool? limitsOn;
+
+    // @DataMember
+    String? region;
+
+    // @DataMember
+    bool? trialsOpen;
+
+    // @DataMember
+    bool? waitlistOpen;
+
+    // @DataMember
+    bool? onWaitlist;
+
+    // @DataMember
+    String? refusal;
+
+    TrialAvailabilityResponse({this.limitsOn,this.region,this.trialsOpen,this.waitlistOpen,this.onWaitlist,this.refusal});
+    TrialAvailabilityResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        limitsOn = json['limitsOn'];
+        region = json['region'];
+        trialsOpen = json['trialsOpen'];
+        waitlistOpen = json['waitlistOpen'];
+        onWaitlist = json['onWaitlist'];
+        refusal = json['refusal'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'limitsOn': limitsOn,
+        'region': region,
+        'trialsOpen': trialsOpen,
+        'waitlistOpen': waitlistOpen,
+        'onWaitlist': onWaitlist,
+        'refusal': refusal
+    });
+
+    getTypeName() => "TrialAvailabilityResponse";
     TypeContext? context = _ctx;
 }
 
@@ -40077,6 +40278,68 @@ class GetAccountStatus extends RequestBase implements IReturn<GetAccountStatusRe
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/account/stripe/discount/check", "POST")
+// @DataContract
+class CheckBundleDiscount extends RequestBase implements IReturn<CheckBundleDiscountResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String? code;
+
+    // @DataMember
+    ManagedServiceBundle? bundle;
+
+    // @DataMember
+    SubscriptionBillingPeriod? billingPeriod;
+
+    CheckBundleDiscount({this.code,this.bundle,this.billingPeriod});
+    CheckBundleDiscount.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        code = json['code'];
+        bundle = JsonConverters.fromJson(json['bundle'],'ManagedServiceBundle',context!);
+        billingPeriod = JsonConverters.fromJson(json['billingPeriod'],'SubscriptionBillingPeriod',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'code': code,
+        'bundle': JsonConverters.toJson(bundle,'ManagedServiceBundle',context!),
+        'billingPeriod': JsonConverters.toJson(billingPeriod,'SubscriptionBillingPeriod',context!)
+    });
+
+    createResponse() => CheckBundleDiscountResponse();
+    getResponseTypeName() => "CheckBundleDiscountResponse";
+    getTypeName() => "CheckBundleDiscount";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/stripe/discount", "POST")
+// @DataContract
+class ApplyBundleDiscount extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String? code;
+
+    ApplyBundleDiscount({this.code});
+    ApplyBundleDiscount.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        code = json['code'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'code': code
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "ApplyBundleDiscount";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/account/stripe/change-bundle", "POST")
 // @DataContract
 class ChangeManagedServiceBundle extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
@@ -40130,7 +40393,19 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
     // @DataMember
     String? returnUrl;
 
-    CreateStripeCheckoutSession({this.subscriptionType,this.bundle,this.billingPeriod,this.domain,this.newProjectSessionId,this.returnUrl});
+    // @DataMember
+    String? discountCode;
+
+    // @DataMember
+    String? region;
+
+    // @DataMember
+    bool? withoutTrial;
+
+    // @DataMember
+    String? trialInvite;
+
+    CreateStripeCheckoutSession({this.subscriptionType,this.bundle,this.billingPeriod,this.domain,this.newProjectSessionId,this.returnUrl,this.discountCode,this.region,this.withoutTrial,this.trialInvite});
     CreateStripeCheckoutSession.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -40141,6 +40416,10 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
         domain = json['domain'];
         newProjectSessionId = json['newProjectSessionId'];
         returnUrl = json['returnUrl'];
+        discountCode = json['discountCode'];
+        region = json['region'];
+        withoutTrial = json['withoutTrial'];
+        trialInvite = json['trialInvite'];
         return this;
     }
 
@@ -40150,7 +40429,11 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
         'billingPeriod': JsonConverters.toJson(billingPeriod,'SubscriptionBillingPeriod',context!),
         'domain': domain,
         'newProjectSessionId': newProjectSessionId,
-        'returnUrl': returnUrl
+        'returnUrl': returnUrl,
+        'discountCode': discountCode,
+        'region': region,
+        'withoutTrial': withoutTrial,
+        'trialInvite': trialInvite
     });
 
     createResponse() => CreateStripeCheckoutSessionResponse();
@@ -40216,6 +40499,32 @@ class GetManagedServiceBundles extends RequestBase implements IReturn<GetManaged
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/account/stripe/extra-regions", "POST")
+// @DataContract
+class SetExtraRegions extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IPost
+{
+    // @DataMember
+    int? extraRegions;
+
+    SetExtraRegions({this.extraRegions});
+    SetExtraRegions.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        extraRegions = json['extraRegions'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'extraRegions': extraRegions
+    });
+
+    createResponse() => EmptyResponse();
+    getResponseTypeName() => "EmptyResponse";
+    getTypeName() => "SetExtraRegions";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/account/team/member", "POST")
 class CreateTeamMemberFromInvitation extends RequestBase implements IReturn<CreateTeamMemberFromInvitationResponse>, IConvertible, IPost
 {
@@ -40257,6 +40566,109 @@ class CreateTeamMemberFromInvitation extends RequestBase implements IReturn<Crea
     createResponse() => CreateTeamMemberFromInvitationResponse();
     getResponseTypeName() => "CreateTeamMemberFromInvitationResponse";
     getTypeName() => "CreateTeamMemberFromInvitation";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/trial-waitlist", "POST")
+// @DataContract
+class JoinTrialWaitlistRequest extends RequestBase implements IReturn<TrialWaitlistResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String? region;
+
+    // @DataMember
+    bool? consent;
+
+    // @DataMember
+    String? consentVersion;
+
+    JoinTrialWaitlistRequest({this.region,this.consent,this.consentVersion});
+    JoinTrialWaitlistRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        region = json['region'];
+        consent = json['consent'];
+        consentVersion = json['consentVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'region': region,
+        'consent': consent,
+        'consentVersion': consentVersion
+    });
+
+    createResponse() => TrialWaitlistResponse();
+    getResponseTypeName() => "TrialWaitlistResponse";
+    getTypeName() => "JoinTrialWaitlistRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/trial-waitlist/intake", "POST")
+// @DataContract
+class TrialWaitlistIntakeRequest extends RequestBase implements IReturn<TrialWaitlistResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String? email;
+
+    // @DataMember
+    String? region;
+
+    // @DataMember
+    bool? consent;
+
+    // @DataMember
+    String? consentVersion;
+
+    TrialWaitlistIntakeRequest({this.email,this.region,this.consent,this.consentVersion});
+    TrialWaitlistIntakeRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        email = json['email'];
+        region = json['region'];
+        consent = json['consent'];
+        consentVersion = json['consentVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'email': email,
+        'region': region,
+        'consent': consent,
+        'consentVersion': consentVersion
+    });
+
+    createResponse() => TrialWaitlistResponse();
+    getResponseTypeName() => "TrialWaitlistResponse";
+    getTypeName() => "TrialWaitlistIntakeRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/trial-availability", "GET")
+// @DataContract
+class GetTrialAvailabilityRequest extends RequestBase implements IReturn<TrialAvailabilityResponse>, IConvertible, IGet
+{
+    // @DataMember
+    String? region;
+
+    GetTrialAvailabilityRequest({this.region});
+    GetTrialAvailabilityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        region = json['region'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'region': region
+    });
+
+    createResponse() => TrialAvailabilityResponse();
+    getResponseTypeName() => "TrialAvailabilityResponse";
+    getTypeName() => "GetTrialAvailabilityRequest";
     TypeContext? context = _ctx;
 }
 
@@ -61326,8 +61738,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<FlexClusterDatabaseDto>': TypeInfo(TypeOf.Class, create:() => <FlexClusterDatabaseDto>[]),
     'AccountOwnerDto': TypeInfo(TypeOf.Class, create:() => AccountOwnerDto()),
     'AccountStatus': TypeInfo(TypeOf.Enum, enumValues:AccountStatus.values),
+    'BundleDiscountDto': TypeInfo(TypeOf.Class, create:() => BundleDiscountDto()),
     'AccountStatusDto': TypeInfo(TypeOf.Class, create:() => AccountStatusDto()),
     'BundlePriceDto': TypeInfo(TypeOf.Class, create:() => BundlePriceDto()),
+    'ExtraRegionPriceDto': TypeInfo(TypeOf.Class, create:() => ExtraRegionPriceDto()),
     'ManagedServiceBundleDto': TypeInfo(TypeOf.Class, create:() => ManagedServiceBundleDto()),
     'UsageBillingClusterChargeDto': TypeInfo(TypeOf.Class, create:() => UsageBillingClusterChargeDto()),
     'UsageBillingPeriodDto': TypeInfo(TypeOf.Class, create:() => UsageBillingPeriodDto()),
@@ -61817,11 +62231,14 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'IReadOnlyList<FlexClusterDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<FlexClusterDto>()),
     'GetAccountProfileResponse': TypeInfo(TypeOf.Class, create:() => GetAccountProfileResponse()),
     'GetAccountStatusResponse': TypeInfo(TypeOf.Class, create:() => GetAccountStatusResponse()),
+    'CheckBundleDiscountResponse': TypeInfo(TypeOf.Class, create:() => CheckBundleDiscountResponse()),
     'CreateStripeCheckoutSessionResponse': TypeInfo(TypeOf.Class, create:() => CreateStripeCheckoutSessionResponse()),
     'GetStripeBillingPortalUrlResponse': TypeInfo(TypeOf.Class, create:() => GetStripeBillingPortalUrlResponse()),
     'GetManagedServiceBundlesResponse': TypeInfo(TypeOf.Class, create:() => GetManagedServiceBundlesResponse()),
     'IReadOnlyList<ManagedServiceBundleDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<ManagedServiceBundleDto>()),
     'CreateTeamMemberFromInvitationResponse': TypeInfo(TypeOf.Class, create:() => CreateTeamMemberFromInvitationResponse()),
+    'TrialWaitlistResponse': TypeInfo(TypeOf.Class, create:() => TrialWaitlistResponse()),
+    'TrialAvailabilityResponse': TypeInfo(TypeOf.Class, create:() => TrialAvailabilityResponse()),
     'GetAccountUsageBillingResponse': TypeInfo(TypeOf.Class, create:() => GetAccountUsageBillingResponse()),
     'PromoteEnvironmentResponse': TypeInfo(TypeOf.Class, create:() => PromoteEnvironmentResponse()),
     'RepairEnvironmentBuiltInsResponse': TypeInfo(TypeOf.Class, create:() => RepairEnvironmentBuiltInsResponse()),
@@ -62272,11 +62689,17 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UpdateAccountProfile': TypeInfo(TypeOf.Class, create:() => UpdateAccountProfile()),
     'ResendAccountVerificationToken': TypeInfo(TypeOf.Class, create:() => ResendAccountVerificationToken()),
     'GetAccountStatus': TypeInfo(TypeOf.Class, create:() => GetAccountStatus()),
+    'CheckBundleDiscount': TypeInfo(TypeOf.Class, create:() => CheckBundleDiscount()),
+    'ApplyBundleDiscount': TypeInfo(TypeOf.Class, create:() => ApplyBundleDiscount()),
     'ChangeManagedServiceBundle': TypeInfo(TypeOf.Class, create:() => ChangeManagedServiceBundle()),
     'CreateStripeCheckoutSession': TypeInfo(TypeOf.Class, create:() => CreateStripeCheckoutSession()),
     'GetStripeBillingPortalUrl': TypeInfo(TypeOf.Class, create:() => GetStripeBillingPortalUrl()),
     'GetManagedServiceBundles': TypeInfo(TypeOf.Class, create:() => GetManagedServiceBundles()),
+    'SetExtraRegions': TypeInfo(TypeOf.Class, create:() => SetExtraRegions()),
     'CreateTeamMemberFromInvitation': TypeInfo(TypeOf.Class, create:() => CreateTeamMemberFromInvitation()),
+    'JoinTrialWaitlistRequest': TypeInfo(TypeOf.Class, create:() => JoinTrialWaitlistRequest()),
+    'TrialWaitlistIntakeRequest': TypeInfo(TypeOf.Class, create:() => TrialWaitlistIntakeRequest()),
+    'GetTrialAvailabilityRequest': TypeInfo(TypeOf.Class, create:() => GetTrialAvailabilityRequest()),
     'GetAccountUsageBilling': TypeInfo(TypeOf.Class, create:() => GetAccountUsageBilling()),
     'VerifyAccount': TypeInfo(TypeOf.Class, create:() => VerifyAccount()),
     'DeleteNotificationsGroup': TypeInfo(TypeOf.Class, create:() => DeleteNotificationsGroup()),
