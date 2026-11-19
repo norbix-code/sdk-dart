@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-17 17:22:40
+Date: 2026-11-19 15:03:49
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -6994,7 +6994,7 @@ class EchoResponse implements IConvertible
     String apiUrl = "";
     String apiVersion = "";
     String hubVersion = "";
-    String? adminUrlTemplate;
+    String? apiUrlTemplate;
     bool? emailServiceConfigured;
     String? rootBootstrapPasswordSource;
     List<EchoRegionDto>? regions;
@@ -7003,7 +7003,7 @@ class EchoResponse implements IConvertible
     EchoConnectDto? connect;
     EchoKeylessDto? keyless;
 
-    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.apiUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -7015,7 +7015,7 @@ class EchoResponse implements IConvertible
         apiUrl = json['apiUrl'] ?? "";
         apiVersion = json['apiVersion'] ?? "";
         hubVersion = json['hubVersion'] ?? "";
-        adminUrlTemplate = json['adminUrlTemplate'];
+        apiUrlTemplate = json['apiUrlTemplate'];
         emailServiceConfigured = json['emailServiceConfigured'];
         rootBootstrapPasswordSource = json['rootBootstrapPasswordSource'];
         regions = JsonConverters.fromJson(json['regions'],'List<EchoRegionDto>',context!);
@@ -7035,7 +7035,7 @@ class EchoResponse implements IConvertible
         'apiUrl': apiUrl,
         'apiVersion': apiVersion,
         'hubVersion': hubVersion,
-        'adminUrlTemplate': adminUrlTemplate,
+        'apiUrlTemplate': apiUrlTemplate,
         'emailServiceConfigured': emailServiceConfigured,
         'rootBootstrapPasswordSource': rootBootstrapPasswordSource,
         'regions': JsonConverters.toJson(regions,'List<EchoRegionDto>',context!),
@@ -7052,17 +7052,15 @@ class EchoResponse implements IConvertible
 class PublicProjectConfigDto implements IConvertible
 {
     String displayName = "";
-    bool? adminPortalEnabled;
     PublicBrandDto? branding;
     PublicAuthDto? auth;
     PublicAiChatDto? aiChat;
 
-    PublicProjectConfigDto({this.displayName="",this.adminPortalEnabled,this.branding,this.auth,this.aiChat});
+    PublicProjectConfigDto({this.displayName="",this.branding,this.auth,this.aiChat});
     PublicProjectConfigDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         displayName = json['displayName'] ?? "";
-        adminPortalEnabled = json['adminPortalEnabled'];
         branding = JsonConverters.fromJson(json['branding'],'PublicBrandDto',context!);
         auth = JsonConverters.fromJson(json['auth'],'PublicAuthDto',context!);
         aiChat = JsonConverters.fromJson(json['aiChat'],'PublicAiChatDto',context!);
@@ -7071,7 +7069,6 @@ class PublicProjectConfigDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'displayName': displayName,
-        'adminPortalEnabled': adminPortalEnabled,
         'branding': JsonConverters.toJson(branding,'PublicBrandDto',context!),
         'auth': JsonConverters.toJson(auth,'PublicAuthDto',context!),
         'aiChat': JsonConverters.toJson(aiChat,'PublicAiChatDto',context!)

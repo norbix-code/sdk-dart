@@ -1721,8 +1721,8 @@ final turn = await api.aiChat.startEndUserChatTurn(
 
 Project owners configure the assistant on the Hub: `hub.projects`
 (`getProjectAiSettings`, `updateProjectAiSettings`, `createProjectAiAssistant`,
-`updateProjectAiAssistant`, `deleteProjectAiAssistant`, `getProjectAiUsage`,
-`setAdminPortalEnabled`) and `hub.aiIntegrations` (`getEmbeddingIntegrations`,
+`updateProjectAiAssistant`, `deleteProjectAiAssistant`, `getProjectAiUsage`)
+and `hub.aiIntegrations` (`getEmbeddingIntegrations`,
 `saveEmbeddingIntegration`, `getEmbeddingIntegration`,
 `deleteEmbeddingIntegration`, `testEmbeddingIntegration`,
 `setLlmIntegrationAsDefault`, and the LLM / MCP integration switches

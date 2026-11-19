@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-18 12:58:47
+Date: 2026-11-19 15:03:49
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -5232,9 +5232,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     FunctionRefDto? functionRef;
 
     // @DataMember
-    String? runAsUserId;
-
-    // @DataMember
     CodeInvocationType? invocationType;
 
     // @DataMember
@@ -5252,13 +5249,12 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? meta;
 
-    TriggerActionCodeDto({this.functionRef,this.runAsUserId,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
+    TriggerActionCodeDto({this.functionRef,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
     TriggerActionCodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionRef = JsonConverters.fromJson(json['functionRef'],'FunctionRefDto',context!);
-        runAsUserId = json['runAsUserId'];
         invocationType = JsonConverters.fromJson(json['invocationType'],'CodeInvocationType',context!);
         config = json['config'];
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'CodeDeliverySettingsDto',context!);
@@ -5270,7 +5266,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionRef': JsonConverters.toJson(functionRef,'FunctionRefDto',context!),
-        'runAsUserId': runAsUserId,
         'invocationType': JsonConverters.toJson(invocationType,'CodeInvocationType',context!),
         'config': config,
         'deliverySettings': JsonConverters.toJson(deliverySettings,'CodeDeliverySettingsDto',context!),
@@ -5517,24 +5512,19 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    // @DataMember
-    String? runAsUserId;
-
-    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
+    TriggerActionMarketplaceDto({this.functionId="",this.payload});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
-        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
         'payload': payload,
-        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -13718,9 +13708,9 @@ abstract class ProjectAiAssistantRequestBase extends CodeMashRequestBase
     String? systemPrompt;
 
     /**
-    * Own-scope toolsets the assistant may use: own:records (the user's own database records), own:profile (their profile), own:preferences (their marketing preferences), own:knowledge (search_knowledge — the user's own and the project-wide knowledge). Any other name is refused.
+    * Own-scope toolsets the assistant may use: own:records (the user's own database records), own:profile (their profile), own:preferences (their marketing preferences), own:knowledge (the assistant may search the user's own and the project-wide knowledge). Any other name is refused.
     */
-    // @ApiMember(Description="Own-scope toolsets the assistant may use: own:records (the user's own database records), own:profile (their profile), own:preferences (their marketing preferences), own:knowledge (search_knowledge — the user's own and the project-wide knowledge). Any other name is refused.")
+    // @ApiMember(Description="Own-scope toolsets the assistant may use: own:records (the user's own database records), own:profile (their profile), own:preferences (their marketing preferences), own:knowledge (the assistant may search the user's own and the project-wide knowledge). Any other name is refused.")
     List<String>? toolsets;
 
     /**
@@ -15272,29 +15262,6 @@ class PushDeviceDto implements IConvertible
     };
 
     getTypeName() => "PushDeviceDto";
-    TypeContext? context = _ctx;
-}
-
-abstract class ChatScreenContextDto
-{
-    String kind = "";
-    String? viewId;
-
-    ChatScreenContextDto({this.kind="",this.viewId});
-    ChatScreenContextDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        kind = json['kind'] ?? "";
-        viewId = json['viewId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'kind': kind,
-        'viewId': viewId
-    };
-
-    getTypeName() => "ChatScreenContextDto";
     TypeContext? context = _ctx;
 }
 
@@ -18696,9 +18663,6 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     String? marketingUrl;
 
     // @DataMember
-    String? canonicalAdminUrl;
-
-    // @DataMember
     String? adminUrl;
 
     // @DataMember
@@ -18742,9 +18706,6 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
 
     // @DataMember
     bool? exposeAuthToAdminPortal;
-
-    // @DataMember
-    bool? adminPortalEnabled;
 
     // @DataMember
     String? adminPortalServiceUserId;
@@ -18845,7 +18806,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     // @DataMember
     int connections = 0;
 
-    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.canonicalAdminUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.emailClickTracking,this.environmentAdminUrls,this.defaultExecutionIdentities,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalEnabled,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
+    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.emailClickTracking,this.environmentAdminUrls,this.defaultExecutionIdentities,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
     ProjectDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -18859,7 +18820,6 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         apiHost = json['apiHost'];
         description = json['description'];
         marketingUrl = json['marketingUrl'];
-        canonicalAdminUrl = json['canonicalAdminUrl'];
         adminUrl = json['adminUrl'];
         effectiveAdminUrl = json['effectiveAdminUrl'];
         defaultLanguage = json['defaultLanguage'] ?? "";
@@ -18875,7 +18835,6 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         defaultExecutionIdentities = JsonConverters.fromJson(json['defaultExecutionIdentities'],'List<ProjectEnvironmentExecutionIdentityDto>',context!);
         exposeBrandToAdminPortal = json['exposeBrandToAdminPortal'];
         exposeAuthToAdminPortal = json['exposeAuthToAdminPortal'];
-        adminPortalEnabled = json['adminPortalEnabled'];
         adminPortalServiceUserId = json['adminPortalServiceUserId'];
         membershipAuthenticationFlows = JsonConverters.fromJson(json['membershipAuthenticationFlows'],'List<AuthenticationFlowSummaryDto>',context!);
         exposeLegalToAdminPortal = json['exposeLegalToAdminPortal'];
@@ -18923,7 +18882,6 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         'apiHost': apiHost,
         'description': description,
         'marketingUrl': marketingUrl,
-        'canonicalAdminUrl': canonicalAdminUrl,
         'adminUrl': adminUrl,
         'effectiveAdminUrl': effectiveAdminUrl,
         'defaultLanguage': defaultLanguage,
@@ -18939,7 +18897,6 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         'defaultExecutionIdentities': JsonConverters.toJson(defaultExecutionIdentities,'List<ProjectEnvironmentExecutionIdentityDto>',context!),
         'exposeBrandToAdminPortal': exposeBrandToAdminPortal,
         'exposeAuthToAdminPortal': exposeAuthToAdminPortal,
-        'adminPortalEnabled': adminPortalEnabled,
         'adminPortalServiceUserId': adminPortalServiceUserId,
         'membershipAuthenticationFlows': JsonConverters.toJson(membershipAuthenticationFlows,'List<AuthenticationFlowSummaryDto>',context!),
         'exposeLegalToAdminPortal': exposeLegalToAdminPortal,
@@ -19650,6 +19607,76 @@ class TemplateLanguageGapDto implements IConvertible
     };
 
     getTypeName() => "TemplateLanguageGapDto";
+    TypeContext? context = _ctx;
+}
+
+class AccountTrustedDeviceDto implements IConvertible
+{
+    String id = "";
+    String label = "";
+    DateTime? rememberedAtUtc;
+    DateTime? lastUsedAtUtc;
+    DateTime? expiresAtUtc;
+    bool? isThisDevice;
+
+    AccountTrustedDeviceDto({this.id="",this.label="",this.rememberedAtUtc,this.lastUsedAtUtc,this.expiresAtUtc,this.isThisDevice});
+    AccountTrustedDeviceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        label = json['label'] ?? "";
+        rememberedAtUtc = JsonConverters.fromJson(json['rememberedAtUtc'],'DateTime',context!) ?? DateTime(0);
+        lastUsedAtUtc = JsonConverters.fromJson(json['lastUsedAtUtc'],'DateTime',context!) ?? DateTime(0);
+        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!) ?? DateTime(0);
+        isThisDevice = json['isThisDevice'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'label': label,
+        'rememberedAtUtc': JsonConverters.toJson(rememberedAtUtc,'DateTime',context!),
+        'lastUsedAtUtc': JsonConverters.toJson(lastUsedAtUtc,'DateTime',context!),
+        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!),
+        'isThisDevice': isThisDevice
+    };
+
+    getTypeName() => "AccountTrustedDeviceDto";
+    TypeContext? context = _ctx;
+}
+
+class AccountTeamTwoFactorMemberDto implements IConvertible
+{
+    String id = "";
+    String? email;
+    String? displayName;
+    bool? isOwner;
+    bool? authenticatorEnabled;
+    DateTime? authenticatorEnabledAtUtc;
+
+    AccountTeamTwoFactorMemberDto({this.id="",this.email,this.displayName,this.isOwner,this.authenticatorEnabled,this.authenticatorEnabledAtUtc});
+    AccountTeamTwoFactorMemberDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        email = json['email'];
+        displayName = json['displayName'];
+        isOwner = json['isOwner'];
+        authenticatorEnabled = json['authenticatorEnabled'];
+        authenticatorEnabledAtUtc = JsonConverters.fromJson(json['authenticatorEnabledAtUtc'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'email': email,
+        'displayName': displayName,
+        'isOwner': isOwner,
+        'authenticatorEnabled': authenticatorEnabled,
+        'authenticatorEnabledAtUtc': JsonConverters.toJson(authenticatorEnabledAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "AccountTeamTwoFactorMemberDto";
     TypeContext? context = _ctx;
 }
 
@@ -23336,7 +23363,10 @@ class WorkflowDto implements IConvertible
     // @DataMember
     List<WorkflowValidationIssueDto> warnings = [];
 
-    WorkflowDto({this.workflowId="",this.env="",this.definition,this.version=0,this.isPublished,this.hasDraft,this.isEnabled,this.disabledReason,this.draftUpdatedAt,this.publishedAt,this.createdAt,this.updatedAt,this.savedByAuthId,this.versions=const [],this.warnings=const []});
+    // @DataMember
+    String? canvas;
+
+    WorkflowDto({this.workflowId="",this.env="",this.definition,this.version=0,this.isPublished,this.hasDraft,this.isEnabled,this.disabledReason,this.draftUpdatedAt,this.publishedAt,this.createdAt,this.updatedAt,this.savedByAuthId,this.versions=const [],this.warnings=const [],this.canvas});
     WorkflowDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -23355,6 +23385,7 @@ class WorkflowDto implements IConvertible
         savedByAuthId = json['savedByAuthId'];
         versions = JsonConverters.fromJson(json['versions'],'List<WorkflowVersionSummaryDto>',context!) ?? [];
         warnings = JsonConverters.fromJson(json['warnings'],'List<WorkflowValidationIssueDto>',context!) ?? [];
+        canvas = json['canvas'];
         return this;
     }
 
@@ -23373,7 +23404,8 @@ class WorkflowDto implements IConvertible
         'updatedAt': JsonConverters.toJson(updatedAt,'DateTime',context!),
         'savedByAuthId': savedByAuthId,
         'versions': JsonConverters.toJson(versions,'List<WorkflowVersionSummaryDto>',context!),
-        'warnings': JsonConverters.toJson(warnings,'List<WorkflowValidationIssueDto>',context!)
+        'warnings': JsonConverters.toJson(warnings,'List<WorkflowValidationIssueDto>',context!),
+        'canvas': canvas
     };
 
     getTypeName() => "WorkflowDto";
@@ -25910,10 +25942,9 @@ class AiProjectContextProjectWireDto implements IConvertible
     String? apiHost;
     String? adminUrl;
     String? marketingUrl;
-    bool? adminPortalEnabled;
     List<AiProjectContextModuleWireDto>? modules;
 
-    AiProjectContextProjectWireDto({this.id="",this.name="",this.uniqueName,this.access="",this.description,this.defaultLanguage,this.languages=const [],this.environments,this.primaryRegion,this.additionalRegions,this.corsOrigins,this.apiHost,this.adminUrl,this.marketingUrl,this.adminPortalEnabled,this.modules});
+    AiProjectContextProjectWireDto({this.id="",this.name="",this.uniqueName,this.access="",this.description,this.defaultLanguage,this.languages=const [],this.environments,this.primaryRegion,this.additionalRegions,this.corsOrigins,this.apiHost,this.adminUrl,this.marketingUrl,this.modules});
     AiProjectContextProjectWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -25931,7 +25962,6 @@ class AiProjectContextProjectWireDto implements IConvertible
         apiHost = json['apiHost'];
         adminUrl = json['adminUrl'];
         marketingUrl = json['marketingUrl'];
-        adminPortalEnabled = json['adminPortalEnabled'];
         modules = JsonConverters.fromJson(json['modules'],'List<AiProjectContextModuleWireDto>',context!);
         return this;
     }
@@ -25951,7 +25981,6 @@ class AiProjectContextProjectWireDto implements IConvertible
         'apiHost': apiHost,
         'adminUrl': adminUrl,
         'marketingUrl': marketingUrl,
-        'adminPortalEnabled': adminPortalEnabled,
         'modules': JsonConverters.toJson(modules,'List<AiProjectContextModuleWireDto>',context!)
     };
 
@@ -26046,120 +26075,6 @@ class AiToolManifestItem implements IConvertible
     };
 
     getTypeName() => "AiToolManifestItem";
-    TypeContext? context = _ctx;
-}
-
-class ChatModelOption implements IConvertible
-{
-    String? llmIntegrationId;
-    String kind = "";
-    String provider = "";
-    String model = "";
-    String label = "";
-    bool? isDefault;
-    bool? isAuto;
-    int contextWindow = 0;
-
-    ChatModelOption({this.llmIntegrationId,this.kind="",this.provider="",this.model="",this.label="",this.isDefault,this.isAuto,this.contextWindow=0});
-    ChatModelOption.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        llmIntegrationId = json['llmIntegrationId'];
-        kind = json['kind'] ?? "";
-        provider = json['provider'] ?? "";
-        model = json['model'] ?? "";
-        label = json['label'] ?? "";
-        isDefault = json['isDefault'];
-        isAuto = json['isAuto'];
-        contextWindow = json['contextWindow'] ?? 0;
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'llmIntegrationId': llmIntegrationId,
-        'kind': kind,
-        'provider': provider,
-        'model': model,
-        'label': label,
-        'isDefault': isDefault,
-        'isAuto': isAuto,
-        'contextWindow': contextWindow
-    };
-
-    getTypeName() => "ChatModelOption";
-    TypeContext? context = _ctx;
-}
-
-class ChatMemoryNote implements IConvertible
-{
-    String id = "";
-    String kind = "";
-    String text = "";
-    String? projectId;
-    DateTime? createdAtUtc;
-
-    ChatMemoryNote({this.id="",this.kind="",this.text="",this.projectId,this.createdAtUtc});
-    ChatMemoryNote.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        id = json['id'] ?? "";
-        kind = json['kind'] ?? "";
-        text = json['text'] ?? "";
-        projectId = json['projectId'];
-        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'id': id,
-        'kind': kind,
-        'text': text,
-        'projectId': projectId,
-        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "ChatMemoryNote";
-    TypeContext? context = _ctx;
-}
-
-class ChatSessionListItem implements IConvertible
-{
-    String sessionId = "";
-    String profile = "";
-    String? projectId;
-    String? env;
-    String? title;
-    DateTime? updatedAtUtc;
-    bool? isArchived;
-    bool? isPinned;
-
-    ChatSessionListItem({this.sessionId="",this.profile="",this.projectId,this.env,this.title,this.updatedAtUtc,this.isArchived,this.isPinned});
-    ChatSessionListItem.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        sessionId = json['sessionId'] ?? "";
-        profile = json['profile'] ?? "";
-        projectId = json['projectId'];
-        env = json['env'];
-        title = json['title'];
-        updatedAtUtc = JsonConverters.fromJson(json['updatedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        isArchived = json['isArchived'];
-        isPinned = json['isPinned'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'sessionId': sessionId,
-        'profile': profile,
-        'projectId': projectId,
-        'env': env,
-        'title': title,
-        'updatedAtUtc': JsonConverters.toJson(updatedAtUtc,'DateTime',context!),
-        'isArchived': isArchived,
-        'isPinned': isPinned
-    };
-
-    getTypeName() => "ChatSessionListItem";
     TypeContext? context = _ctx;
 }
 
@@ -26624,298 +26539,157 @@ class ProjectBriefEventWireDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class WorkItemEntryRefWireDto implements IConvertible
+class AppTemplateCollectionDto implements IConvertible
 {
-    String sessionId = "";
-    String entryId = "";
+    String entity = "";
+    String tier = "";
 
-    WorkItemEntryRefWireDto({this.sessionId="",this.entryId=""});
-    WorkItemEntryRefWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    AppTemplateCollectionDto({this.entity="",this.tier=""});
+    AppTemplateCollectionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
-        sessionId = json['sessionId'] ?? "";
-        entryId = json['entryId'] ?? "";
+        entity = json['entity'] ?? "";
+        tier = json['tier'] ?? "";
         return this;
     }
 
     Map<String, dynamic> toJson() => {
-        'sessionId': sessionId,
-        'entryId': entryId
+        'entity': entity,
+        'tier': tier
     };
 
-    getTypeName() => "WorkItemEntryRefWireDto";
+    getTypeName() => "AppTemplateCollectionDto";
     TypeContext? context = _ctx;
 }
 
-class WorkItemRunRefWireDto implements IConvertible
-{
-    String sessionId = "";
-    String planEntryId = "";
-    String? runId;
-
-    WorkItemRunRefWireDto({this.sessionId="",this.planEntryId="",this.runId});
-    WorkItemRunRefWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        sessionId = json['sessionId'] ?? "";
-        planEntryId = json['planEntryId'] ?? "";
-        runId = json['runId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'sessionId': sessionId,
-        'planEntryId': planEntryId,
-        'runId': runId
-    };
-
-    getTypeName() => "WorkItemRunRefWireDto";
-    TypeContext? context = _ctx;
-}
-
-class WorkItemArtifactWireDto implements IConvertible
-{
-    String artifactId = "";
-    String what = "";
-    int step = 0;
-    String? planEntryId;
-    String? kind;
-    String? name;
-
-    WorkItemArtifactWireDto({this.artifactId="",this.what="",this.step=0,this.planEntryId,this.kind,this.name});
-    WorkItemArtifactWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        artifactId = json['artifactId'] ?? "";
-        what = json['what'] ?? "";
-        step = json['step'] ?? 0;
-        planEntryId = json['planEntryId'];
-        kind = json['kind'];
-        name = json['name'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'artifactId': artifactId,
-        'what': what,
-        'step': step,
-        'planEntryId': planEntryId,
-        'kind': kind,
-        'name': name
-    };
-
-    getTypeName() => "WorkItemArtifactWireDto";
-    TypeContext? context = _ctx;
-}
-
-class WorkItemMovedOutWireDto implements IConvertible
-{
-    String text = "";
-    String reason = "";
-    String? movedTo;
-    String source = "";
-    WorkItemEntryRefWireDto? entryRef;
-    DateTime? atUtc;
-
-    WorkItemMovedOutWireDto({this.text="",this.reason="",this.movedTo,this.source="",this.entryRef,this.atUtc});
-    WorkItemMovedOutWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        text = json['text'] ?? "";
-        reason = json['reason'] ?? "";
-        movedTo = json['movedTo'];
-        source = json['source'] ?? "";
-        entryRef = JsonConverters.fromJson(json['entryRef'],'WorkItemEntryRefWireDto',context!);
-        atUtc = JsonConverters.fromJson(json['atUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'text': text,
-        'reason': reason,
-        'movedTo': movedTo,
-        'source': source,
-        'entryRef': JsonConverters.toJson(entryRef,'WorkItemEntryRefWireDto',context!),
-        'atUtc': JsonConverters.toJson(atUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "WorkItemMovedOutWireDto";
-    TypeContext? context = _ctx;
-}
-
-class WorkItemNeedsYouWireDto implements IConvertible
-{
-    String text = "";
-    String kind = "";
-    WorkItemEntryRefWireDto? entryRef;
-    bool? done;
-    DateTime? doneAtUtc;
-    String? doneByUserAuthId;
-
-    WorkItemNeedsYouWireDto({this.text="",this.kind="",this.entryRef,this.done,this.doneAtUtc,this.doneByUserAuthId});
-    WorkItemNeedsYouWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        text = json['text'] ?? "";
-        kind = json['kind'] ?? "";
-        entryRef = JsonConverters.fromJson(json['entryRef'],'WorkItemEntryRefWireDto',context!);
-        done = json['done'];
-        doneAtUtc = JsonConverters.fromJson(json['doneAtUtc'],'DateTime',context!);
-        doneByUserAuthId = json['doneByUserAuthId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'text': text,
-        'kind': kind,
-        'entryRef': JsonConverters.toJson(entryRef,'WorkItemEntryRefWireDto',context!),
-        'done': done,
-        'doneAtUtc': JsonConverters.toJson(doneAtUtc,'DateTime',context!),
-        'doneByUserAuthId': doneByUserAuthId
-    };
-
-    getTypeName() => "WorkItemNeedsYouWireDto";
-    TypeContext? context = _ctx;
-}
-
-class WorkItemOpenQuestionWireDto implements IConvertible
-{
-    WorkItemEntryRefWireDto? entryRef;
-    bool? blocking;
-    String text = "";
-    DateTime? atUtc;
-
-    WorkItemOpenQuestionWireDto({this.entryRef,this.blocking,this.text="",this.atUtc});
-    WorkItemOpenQuestionWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        entryRef = JsonConverters.fromJson(json['entryRef'],'WorkItemEntryRefWireDto',context!);
-        blocking = json['blocking'];
-        text = json['text'] ?? "";
-        atUtc = JsonConverters.fromJson(json['atUtc'],'DateTime',context!) ?? DateTime(0);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'entryRef': JsonConverters.toJson(entryRef,'WorkItemEntryRefWireDto',context!),
-        'blocking': blocking,
-        'text': text,
-        'atUtc': JsonConverters.toJson(atUtc,'DateTime',context!)
-    };
-
-    getTypeName() => "WorkItemOpenQuestionWireDto";
-    TypeContext? context = _ctx;
-}
-
-class WorkItemDoneConditionWireDto implements IConvertible
-{
-    int condition = 0;
-    bool? holds;
-    String reason = "";
-
-    WorkItemDoneConditionWireDto({this.condition=0,this.holds,this.reason=""});
-    WorkItemDoneConditionWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        condition = json['condition'] ?? 0;
-        holds = json['holds'];
-        reason = json['reason'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'condition': condition,
-        'holds': holds,
-        'reason': reason
-    };
-
-    getTypeName() => "WorkItemDoneConditionWireDto";
-    TypeContext? context = _ctx;
-}
-
-class WorkItemWireDto implements IConvertible
+class AppTemplateCardDto implements IConvertible
 {
     String id = "";
-    String? projectId;
-    String status = "";
-    String goal = "";
-    List<String> notInScope = [];
-    List<String> scopeRequirementIds = [];
-    int? difficulty;
-    String? difficultyReason;
-    List<WorkItemEntryRefWireDto> planEntryRefs = [];
-    List<WorkItemRunRefWireDto> runRefs = [];
-    List<WorkItemArtifactWireDto> artifacts = [];
-    List<WorkItemMovedOutWireDto> movedOut = [];
-    List<WorkItemNeedsYouWireDto> needsYou = [];
-    List<WorkItemOpenQuestionWireDto> openQuestions = [];
-    List<String> sessionIds = [];
-    String? parentId;
-    List<String> children = [];
-    WorkItemEntryRefWireDto? summaryEntryRef;
-    String? createdBy;
-    DateTime? createdAtUtc;
-    DateTime? updatedAtUtc;
-    String? doneVerdict;
-    List<WorkItemDoneConditionWireDto> doneConditions = [];
+    String name = "";
+    int version = 0;
+    List<String> tags = [];
+    String summary = "";
+    List<AppTemplateCollectionDto> collections = [];
+    List<String> matchedTags = [];
 
-    WorkItemWireDto({this.id="",this.projectId,this.status="",this.goal="",this.notInScope=const [],this.scopeRequirementIds=const [],this.difficulty,this.difficultyReason,this.planEntryRefs=const [],this.runRefs=const [],this.artifacts=const [],this.movedOut=const [],this.needsYou=const [],this.openQuestions=const [],this.sessionIds=const [],this.parentId,this.children=const [],this.summaryEntryRef,this.createdBy,this.createdAtUtc,this.updatedAtUtc,this.doneVerdict,this.doneConditions=const []});
-    WorkItemWireDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    AppTemplateCardDto({this.id="",this.name="",this.version=0,this.tags=const [],this.summary="",this.collections=const [],this.matchedTags=const []});
+    AppTemplateCardDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         id = json['id'] ?? "";
-        projectId = json['projectId'];
-        status = json['status'] ?? "";
-        goal = json['goal'] ?? "";
-        notInScope = JsonConverters.fromJson(json['notInScope'],'List<String>',context!) ?? [];
-        scopeRequirementIds = JsonConverters.fromJson(json['scopeRequirementIds'],'List<String>',context!) ?? [];
-        difficulty = json['difficulty'];
-        difficultyReason = json['difficultyReason'];
-        planEntryRefs = JsonConverters.fromJson(json['planEntryRefs'],'List<WorkItemEntryRefWireDto>',context!) ?? [];
-        runRefs = JsonConverters.fromJson(json['runRefs'],'List<WorkItemRunRefWireDto>',context!) ?? [];
-        artifacts = JsonConverters.fromJson(json['artifacts'],'List<WorkItemArtifactWireDto>',context!) ?? [];
-        movedOut = JsonConverters.fromJson(json['movedOut'],'List<WorkItemMovedOutWireDto>',context!) ?? [];
-        needsYou = JsonConverters.fromJson(json['needsYou'],'List<WorkItemNeedsYouWireDto>',context!) ?? [];
-        openQuestions = JsonConverters.fromJson(json['openQuestions'],'List<WorkItemOpenQuestionWireDto>',context!) ?? [];
-        sessionIds = JsonConverters.fromJson(json['sessionIds'],'List<String>',context!) ?? [];
-        parentId = json['parentId'];
-        children = JsonConverters.fromJson(json['children'],'List<String>',context!) ?? [];
-        summaryEntryRef = JsonConverters.fromJson(json['summaryEntryRef'],'WorkItemEntryRefWireDto',context!);
-        createdBy = json['createdBy'];
-        createdAtUtc = JsonConverters.fromJson(json['createdAtUtc'],'DateTime',context!) ?? DateTime(0);
-        updatedAtUtc = JsonConverters.fromJson(json['updatedAtUtc'],'DateTime',context!) ?? DateTime(0);
-        doneVerdict = json['doneVerdict'];
-        doneConditions = JsonConverters.fromJson(json['doneConditions'],'List<WorkItemDoneConditionWireDto>',context!) ?? [];
+        name = json['name'] ?? "";
+        version = json['version'] ?? 0;
+        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!) ?? [];
+        summary = json['summary'] ?? "";
+        collections = JsonConverters.fromJson(json['collections'],'List<AppTemplateCollectionDto>',context!) ?? [];
+        matchedTags = JsonConverters.fromJson(json['matchedTags'],'List<String>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'id': id,
-        'projectId': projectId,
-        'status': status,
-        'goal': goal,
-        'notInScope': JsonConverters.toJson(notInScope,'List<String>',context!),
-        'scopeRequirementIds': JsonConverters.toJson(scopeRequirementIds,'List<String>',context!),
-        'difficulty': difficulty,
-        'difficultyReason': difficultyReason,
-        'planEntryRefs': JsonConverters.toJson(planEntryRefs,'List<WorkItemEntryRefWireDto>',context!),
-        'runRefs': JsonConverters.toJson(runRefs,'List<WorkItemRunRefWireDto>',context!),
-        'artifacts': JsonConverters.toJson(artifacts,'List<WorkItemArtifactWireDto>',context!),
-        'movedOut': JsonConverters.toJson(movedOut,'List<WorkItemMovedOutWireDto>',context!),
-        'needsYou': JsonConverters.toJson(needsYou,'List<WorkItemNeedsYouWireDto>',context!),
-        'openQuestions': JsonConverters.toJson(openQuestions,'List<WorkItemOpenQuestionWireDto>',context!),
-        'sessionIds': JsonConverters.toJson(sessionIds,'List<String>',context!),
-        'parentId': parentId,
-        'children': JsonConverters.toJson(children,'List<String>',context!),
-        'summaryEntryRef': JsonConverters.toJson(summaryEntryRef,'WorkItemEntryRefWireDto',context!),
-        'createdBy': createdBy,
-        'createdAtUtc': JsonConverters.toJson(createdAtUtc,'DateTime',context!),
-        'updatedAtUtc': JsonConverters.toJson(updatedAtUtc,'DateTime',context!),
-        'doneVerdict': doneVerdict,
-        'doneConditions': JsonConverters.toJson(doneConditions,'List<WorkItemDoneConditionWireDto>',context!)
+        'name': name,
+        'version': version,
+        'tags': JsonConverters.toJson(tags,'List<String>',context!),
+        'summary': summary,
+        'collections': JsonConverters.toJson(collections,'List<AppTemplateCollectionDto>',context!),
+        'matchedTags': JsonConverters.toJson(matchedTags,'List<String>',context!)
     };
 
-    getTypeName() => "WorkItemWireDto";
+    getTypeName() => "AppTemplateCardDto";
+    TypeContext? context = _ctx;
+}
+
+class AppTemplateCollectionSpecDto implements IConvertible
+{
+    String fileName = "";
+    String json = "";
+
+    AppTemplateCollectionSpecDto({this.fileName="",this.json=""});
+    AppTemplateCollectionSpecDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        fileName = json['fileName'] ?? "";
+        json = json['json'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'fileName': fileName,
+        'json': json
+    };
+
+    getTypeName() => "AppTemplateCollectionSpecDto";
+    TypeContext? context = _ctx;
+}
+
+class SchemaTemplateCardDto implements IConvertible
+{
+    String id = "";
+    String title = "";
+    String summary = "";
+    List<String> aliases = [];
+    List<String> tags = [];
+    List<String> usesBlocks = [];
+    List<String> usesTaxonomies = [];
+    List<String> related = [];
+    List<String> matchedOn = [];
+
+    SchemaTemplateCardDto({this.id="",this.title="",this.summary="",this.aliases=const [],this.tags=const [],this.usesBlocks=const [],this.usesTaxonomies=const [],this.related=const [],this.matchedOn=const []});
+    SchemaTemplateCardDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        title = json['title'] ?? "";
+        summary = json['summary'] ?? "";
+        aliases = JsonConverters.fromJson(json['aliases'],'List<String>',context!) ?? [];
+        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!) ?? [];
+        usesBlocks = JsonConverters.fromJson(json['usesBlocks'],'List<String>',context!) ?? [];
+        usesTaxonomies = JsonConverters.fromJson(json['usesTaxonomies'],'List<String>',context!) ?? [];
+        related = JsonConverters.fromJson(json['related'],'List<String>',context!) ?? [];
+        matchedOn = JsonConverters.fromJson(json['matchedOn'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'summary': summary,
+        'aliases': JsonConverters.toJson(aliases,'List<String>',context!),
+        'tags': JsonConverters.toJson(tags,'List<String>',context!),
+        'usesBlocks': JsonConverters.toJson(usesBlocks,'List<String>',context!),
+        'usesTaxonomies': JsonConverters.toJson(usesTaxonomies,'List<String>',context!),
+        'related': JsonConverters.toJson(related,'List<String>',context!),
+        'matchedOn': JsonConverters.toJson(matchedOn,'List<String>',context!)
+    };
+
+    getTypeName() => "SchemaTemplateCardDto";
+    TypeContext? context = _ctx;
+}
+
+class EntityGraphEntityDto implements IConvertible
+{
+    String id = "";
+    List<String> related = [];
+    String ifDocument = "";
+
+    EntityGraphEntityDto({this.id="",this.related=const [],this.ifDocument=""});
+    EntityGraphEntityDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        related = JsonConverters.fromJson(json['related'],'List<String>',context!) ?? [];
+        ifDocument = json['ifDocument'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'related': JsonConverters.toJson(related,'List<String>',context!),
+        'ifDocument': ifDocument
+    };
+
+    getTypeName() => "EntityGraphEntityDto";
     TypeContext? context = _ctx;
 }
 
@@ -30379,7 +30153,6 @@ class EchoResponse implements IConvertible
     String apiUrl = "";
     String apiVersion = "";
     String hubVersion = "";
-    String? adminUrlTemplate;
     String? apiUrlTemplate;
     bool? emailServiceConfigured;
     String? rootBootstrapPasswordSource;
@@ -30389,7 +30162,7 @@ class EchoResponse implements IConvertible
     EchoConnectDto? connect;
     EchoKeylessDto? keyless;
 
-    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.adminUrlTemplate,this.apiUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
+    EchoResponse({this.release,this.runtime,this.managedServiceHubUrl="",this.managedServiceApiUrl="",this.hubUrl="",this.apiUrl="",this.apiVersion="",this.hubVersion="",this.apiUrlTemplate,this.emailServiceConfigured,this.rootBootstrapPasswordSource,this.regions,this.agent,this.hostingPlatform,this.connect,this.keyless});
     EchoResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -30401,7 +30174,6 @@ class EchoResponse implements IConvertible
         apiUrl = json['apiUrl'] ?? "";
         apiVersion = json['apiVersion'] ?? "";
         hubVersion = json['hubVersion'] ?? "";
-        adminUrlTemplate = json['adminUrlTemplate'];
         apiUrlTemplate = json['apiUrlTemplate'];
         emailServiceConfigured = json['emailServiceConfigured'];
         rootBootstrapPasswordSource = json['rootBootstrapPasswordSource'];
@@ -30422,7 +30194,6 @@ class EchoResponse implements IConvertible
         'apiUrl': apiUrl,
         'apiVersion': apiVersion,
         'hubVersion': hubVersion,
-        'adminUrlTemplate': adminUrlTemplate,
         'apiUrlTemplate': apiUrlTemplate,
         'emailServiceConfigured': emailServiceConfigured,
         'rootBootstrapPasswordSource': rootBootstrapPasswordSource,
@@ -30440,17 +30211,15 @@ class EchoResponse implements IConvertible
 class PublicProjectConfigDto implements IConvertible
 {
     String displayName = "";
-    bool? adminPortalEnabled;
     PublicBrandDto? branding;
     PublicAuthDto? auth;
     PublicAiChatDto? aiChat;
 
-    PublicProjectConfigDto({this.displayName="",this.adminPortalEnabled,this.branding,this.auth,this.aiChat});
+    PublicProjectConfigDto({this.displayName="",this.branding,this.auth,this.aiChat});
     PublicProjectConfigDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         displayName = json['displayName'] ?? "";
-        adminPortalEnabled = json['adminPortalEnabled'];
         branding = JsonConverters.fromJson(json['branding'],'PublicBrandDto',context!);
         auth = JsonConverters.fromJson(json['auth'],'PublicAuthDto',context!);
         aiChat = JsonConverters.fromJson(json['aiChat'],'PublicAiChatDto',context!);
@@ -30459,7 +30228,6 @@ class PublicProjectConfigDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'displayName': displayName,
-        'adminPortalEnabled': adminPortalEnabled,
         'branding': JsonConverters.toJson(branding,'PublicBrandDto',context!),
         'auth': JsonConverters.toJson(auth,'PublicAuthDto',context!),
         'aiChat': JsonConverters.toJson(aiChat,'PublicAiChatDto',context!)
@@ -31175,16 +30943,14 @@ class GetProjectTokensResponse extends ResponseBase implements IConvertible
 class AdminPortalStructureDto implements IConvertible
 {
     String projectId = "";
-    bool? adminPortalEnabled;
     String displayName = "";
     List<AdminPortalModuleDto> modules = [];
 
-    AdminPortalStructureDto({this.projectId="",this.adminPortalEnabled,this.displayName="",this.modules=const []});
+    AdminPortalStructureDto({this.projectId="",this.displayName="",this.modules=const []});
     AdminPortalStructureDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         projectId = json['projectId'] ?? "";
-        adminPortalEnabled = json['adminPortalEnabled'];
         displayName = json['displayName'] ?? "";
         modules = JsonConverters.fromJson(json['modules'],'List<AdminPortalModuleDto>',context!) ?? [];
         return this;
@@ -31192,7 +30958,6 @@ class AdminPortalStructureDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'projectId': projectId,
-        'adminPortalEnabled': adminPortalEnabled,
         'displayName': displayName,
         'modules': JsonConverters.toJson(modules,'List<AdminPortalModuleDto>',context!)
     };
@@ -31373,6 +31138,111 @@ class CreateAccountResponse extends IdResponse implements IConvertible
     TypeContext? context = _ctx;
 }
 
+class AccountTrustedDevicesResponse extends ResponseBase implements IConvertible
+{
+    List<AccountTrustedDeviceDto> devices = [];
+
+    AccountTrustedDevicesResponse({this.devices=const []});
+    AccountTrustedDevicesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        devices = JsonConverters.fromJson(json['devices'],'List<AccountTrustedDeviceDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'devices': JsonConverters.toJson(devices,'List<AccountTrustedDeviceDto>',context!)
+    });
+
+    getTypeName() => "AccountTrustedDevicesResponse";
+    TypeContext? context = _ctx;
+}
+
+class AccountTwoFactorResponse extends ResponseBase implements IConvertible
+{
+    bool? setupAvailable;
+    bool? authenticatorEnabled;
+    DateTime? authenticatorEnabledAtUtc;
+    bool? teamRequiresAuthenticatorApp;
+
+    AccountTwoFactorResponse({this.setupAvailable,this.authenticatorEnabled,this.authenticatorEnabledAtUtc,this.teamRequiresAuthenticatorApp});
+    AccountTwoFactorResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        setupAvailable = json['setupAvailable'];
+        authenticatorEnabled = json['authenticatorEnabled'];
+        authenticatorEnabledAtUtc = JsonConverters.fromJson(json['authenticatorEnabledAtUtc'],'DateTime',context!);
+        teamRequiresAuthenticatorApp = json['teamRequiresAuthenticatorApp'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'setupAvailable': setupAvailable,
+        'authenticatorEnabled': authenticatorEnabled,
+        'authenticatorEnabledAtUtc': JsonConverters.toJson(authenticatorEnabledAtUtc,'DateTime',context!),
+        'teamRequiresAuthenticatorApp': teamRequiresAuthenticatorApp
+    });
+
+    getTypeName() => "AccountTwoFactorResponse";
+    TypeContext? context = _ctx;
+}
+
+class AccountAuthenticatorSetupResponse extends ResponseBase implements IConvertible
+{
+    String? secret;
+    String? setupLink;
+    DateTime? expiresAtUtc;
+
+    AccountAuthenticatorSetupResponse({this.secret,this.setupLink,this.expiresAtUtc});
+    AccountAuthenticatorSetupResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        secret = json['secret'];
+        setupLink = json['setupLink'];
+        expiresAtUtc = JsonConverters.fromJson(json['expiresAtUtc'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'secret': secret,
+        'setupLink': setupLink,
+        'expiresAtUtc': JsonConverters.toJson(expiresAtUtc,'DateTime',context!)
+    });
+
+    getTypeName() => "AccountAuthenticatorSetupResponse";
+    TypeContext? context = _ctx;
+}
+
+class AccountTeamTwoFactorResponse extends ResponseBase implements IConvertible
+{
+    bool? requireAuthenticatorApp;
+    bool? setupAvailable;
+    List<AccountTeamTwoFactorMemberDto> members = [];
+
+    AccountTeamTwoFactorResponse({this.requireAuthenticatorApp,this.setupAvailable,this.members=const []});
+    AccountTeamTwoFactorResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        requireAuthenticatorApp = json['requireAuthenticatorApp'];
+        setupAvailable = json['setupAvailable'];
+        members = JsonConverters.fromJson(json['members'],'List<AccountTeamTwoFactorMemberDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'requireAuthenticatorApp': requireAuthenticatorApp,
+        'setupAvailable': setupAvailable,
+        'members': JsonConverters.toJson(members,'List<AccountTeamTwoFactorMemberDto>',context!)
+    });
+
+    getTypeName() => "AccountTeamTwoFactorResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetAccountCollaboratorsResponse extends ResponseBase implements IConvertible
 {
     PaginatedResponse<AuthDto>? list;
@@ -31475,6 +31345,34 @@ class GetAccountTeamInvitationsResponse extends ResponseBase implements IConvert
     });
 
     getTypeName() => "GetAccountTeamInvitationsResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class CreateDashboardApiTokenResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? accessToken;
+
+    // @DataMember
+    DateTime? expiresAt;
+
+    CreateDashboardApiTokenResponse({this.accessToken,this.expiresAt});
+    CreateDashboardApiTokenResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        accessToken = json['accessToken'];
+        expiresAt = JsonConverters.fromJson(json['expiresAt'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'accessToken': accessToken,
+        'expiresAt': JsonConverters.toJson(expiresAt,'DateTime',context!)
+    });
+
+    getTypeName() => "CreateDashboardApiTokenResponse";
     TypeContext? context = _ctx;
 }
 
@@ -35495,171 +35393,6 @@ class InvokeAiToolResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class UploadChatAttachmentResponse extends ResponseBase implements IConvertible
-{
-    String? id;
-    String? sessionId;
-
-    UploadChatAttachmentResponse({this.id,this.sessionId});
-    UploadChatAttachmentResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        id = json['id'];
-        sessionId = json['sessionId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'id': id,
-        'sessionId': sessionId
-    });
-
-    getTypeName() => "UploadChatAttachmentResponse";
-    TypeContext? context = _ctx;
-}
-
-class ChatAvailabilityResponse extends ResponseBase implements IConvertible
-{
-    bool? available;
-    String? reason;
-    List<String>? profiles;
-    List<ChatModelOption>? models;
-
-    ChatAvailabilityResponse({this.available,this.reason,this.profiles,this.models});
-    ChatAvailabilityResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        available = json['available'];
-        reason = json['reason'];
-        profiles = JsonConverters.fromJson(json['profiles'],'List<String>',context!);
-        models = JsonConverters.fromJson(json['models'],'List<ChatModelOption>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'available': available,
-        'reason': reason,
-        'profiles': JsonConverters.toJson(profiles,'List<String>',context!),
-        'models': JsonConverters.toJson(models,'List<ChatModelOption>',context!)
-    });
-
-    getTypeName() => "ChatAvailabilityResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetChatMemoryResponse extends ResponseBase implements IConvertible
-{
-    List<ChatMemoryNote>? notes;
-
-    GetChatMemoryResponse({this.notes});
-    GetChatMemoryResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        notes = JsonConverters.fromJson(json['notes'],'List<ChatMemoryNote>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'notes': JsonConverters.toJson(notes,'List<ChatMemoryNote>',context!)
-    });
-
-    getTypeName() => "GetChatMemoryResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetChatSessionsResponse extends ResponseBase implements IConvertible
-{
-    List<ChatSessionListItem>? sessions;
-
-    GetChatSessionsResponse({this.sessions});
-    GetChatSessionsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessions = JsonConverters.fromJson(json['sessions'],'List<ChatSessionListItem>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessions': JsonConverters.toJson(sessions,'List<ChatSessionListItem>',context!)
-    });
-
-    getTypeName() => "GetChatSessionsResponse";
-    TypeContext? context = _ctx;
-}
-
-class GetChatSessionEntriesResponse extends ResponseBase implements IConvertible
-{
-    String? sessionId;
-    String? profile;
-    String? projectId;
-    String? env;
-    List<AiChatEntryWireDto>? entries;
-    int lastSeq = 0;
-    List<String>? activeWorkItemIds;
-
-    GetChatSessionEntriesResponse({this.sessionId,this.profile,this.projectId,this.env,this.entries,this.lastSeq=0,this.activeWorkItemIds});
-    GetChatSessionEntriesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'];
-        profile = json['profile'];
-        projectId = json['projectId'];
-        env = json['env'];
-        entries = JsonConverters.fromJson(json['entries'],'List<AiChatEntryWireDto>',context!);
-        lastSeq = json['lastSeq'] ?? 0;
-        activeWorkItemIds = JsonConverters.fromJson(json['activeWorkItemIds'],'List<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'profile': profile,
-        'projectId': projectId,
-        'env': env,
-        'entries': JsonConverters.toJson(entries,'List<AiChatEntryWireDto>',context!),
-        'lastSeq': lastSeq,
-        'activeWorkItemIds': JsonConverters.toJson(activeWorkItemIds,'List<String>',context!)
-    });
-
-    getTypeName() => "GetChatSessionEntriesResponse";
-    TypeContext? context = _ctx;
-}
-
-class ChatTurnResponse extends ResponseBase implements IConvertible
-{
-    String? sessionId;
-    String? reply;
-    ChatScreenContextDto? screenPatch;
-    List<String>? toolTrace;
-
-    ChatTurnResponse({this.sessionId,this.reply,this.screenPatch,this.toolTrace});
-    ChatTurnResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'];
-        reply = json['reply'];
-        screenPatch = JsonConverters.fromJson(json['screenPatch'],'ChatScreenContextDto',context!);
-        toolTrace = JsonConverters.fromJson(json['toolTrace'],'List<String>',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'reply': reply,
-        'screenPatch': JsonConverters.toJson(screenPatch,'ChatScreenContextDto',context!),
-        'toolTrace': JsonConverters.toJson(toolTrace,'List<String>',context!)
-    });
-
-    getTypeName() => "ChatTurnResponse";
-    TypeContext? context = _ctx;
-}
-
 class ScaffoldProjectResponse extends ResponseBase implements IConvertible
 {
     String? mode;
@@ -35780,78 +35513,102 @@ class GetProjectBriefResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class GetWorkItemsResponse extends ResponseBase implements IConvertible
+class GetAppTemplatesResponse extends ResponseBase implements IConvertible
 {
-    String? projectId;
-    List<WorkItemWireDto>? workItems;
+    List<AppTemplateCardDto> templates = [];
 
-    GetWorkItemsResponse({this.projectId,this.workItems});
-    GetWorkItemsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    GetAppTemplatesResponse({this.templates=const []});
+    GetAppTemplatesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
-        projectId = json['projectId'];
-        workItems = JsonConverters.fromJson(json['workItems'],'List<WorkItemWireDto>',context!);
+        templates = JsonConverters.fromJson(json['templates'],'List<AppTemplateCardDto>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'projectId': projectId,
-        'workItems': JsonConverters.toJson(workItems,'List<WorkItemWireDto>',context!)
+        'templates': JsonConverters.toJson(templates,'List<AppTemplateCardDto>',context!)
     });
 
-    getTypeName() => "GetWorkItemsResponse";
+    getTypeName() => "GetAppTemplatesResponse";
     TypeContext? context = _ctx;
 }
 
-class GetWorkItemResponse extends ResponseBase implements IConvertible
+class GetAppTemplateResponse extends ResponseBase implements IConvertible
 {
-    WorkItemWireDto? workItem;
-    List<AiChatEntryWireDto>? plans;
-    List<AiChatEntryWireDto>? steps;
+    AppTemplateCardDto? template;
+    String? guide;
+    List<AppTemplateCollectionSpecDto> collectionSpecs = [];
 
-    GetWorkItemResponse({this.workItem,this.plans,this.steps});
-    GetWorkItemResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    GetAppTemplateResponse({this.template,this.guide,this.collectionSpecs=const []});
+    GetAppTemplateResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
-        workItem = JsonConverters.fromJson(json['workItem'],'WorkItemWireDto',context!);
-        plans = JsonConverters.fromJson(json['plans'],'List<AiChatEntryWireDto>',context!);
-        steps = JsonConverters.fromJson(json['steps'],'List<AiChatEntryWireDto>',context!);
+        template = JsonConverters.fromJson(json['template'],'AppTemplateCardDto',context!);
+        guide = json['guide'];
+        collectionSpecs = JsonConverters.fromJson(json['collectionSpecs'],'List<AppTemplateCollectionSpecDto>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'workItem': JsonConverters.toJson(workItem,'WorkItemWireDto',context!),
-        'plans': JsonConverters.toJson(plans,'List<AiChatEntryWireDto>',context!),
-        'steps': JsonConverters.toJson(steps,'List<AiChatEntryWireDto>',context!)
+        'template': JsonConverters.toJson(template,'AppTemplateCardDto',context!),
+        'guide': guide,
+        'collectionSpecs': JsonConverters.toJson(collectionSpecs,'List<AppTemplateCollectionSpecDto>',context!)
     });
 
-    getTypeName() => "GetWorkItemResponse";
+    getTypeName() => "GetAppTemplateResponse";
     TypeContext? context = _ctx;
 }
 
-class ExportWorkItemResponse extends ResponseBase implements IConvertible
+class SearchSchemaTemplatesResponse extends ResponseBase implements IConvertible
 {
-    String? workItemId;
-    String? markdown;
+    int total = 0;
+    List<SchemaTemplateCardDto> templates = [];
 
-    ExportWorkItemResponse({this.workItemId,this.markdown});
-    ExportWorkItemResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    SearchSchemaTemplatesResponse({this.total=0,this.templates=const []});
+    SearchSchemaTemplatesResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
-        workItemId = json['workItemId'];
-        markdown = json['markdown'];
+        total = json['total'] ?? 0;
+        templates = JsonConverters.fromJson(json['templates'],'List<SchemaTemplateCardDto>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'workItemId': workItemId,
-        'markdown': markdown
+        'total': total,
+        'templates': JsonConverters.toJson(templates,'List<SchemaTemplateCardDto>',context!)
     });
 
-    getTypeName() => "ExportWorkItemResponse";
+    getTypeName() => "SearchSchemaTemplatesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetEntityGraphResponse extends ResponseBase implements IConvertible
+{
+    bool? capped;
+    List<String> unknown = [];
+    List<EntityGraphEntityDto> entities = [];
+
+    GetEntityGraphResponse({this.capped,this.unknown=const [],this.entities=const []});
+    GetEntityGraphResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        capped = json['capped'];
+        unknown = JsonConverters.fromJson(json['unknown'],'List<String>',context!) ?? [];
+        entities = JsonConverters.fromJson(json['entities'],'List<EntityGraphEntityDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'capped': capped,
+        'unknown': JsonConverters.toJson(unknown,'List<String>',context!),
+        'entities': JsonConverters.toJson(entities,'List<EntityGraphEntityDto>',context!)
+    });
+
+    getTypeName() => "GetEntityGraphResponse";
     TypeContext? context = _ctx;
 }
 
@@ -41511,38 +41268,6 @@ class GetProjectTokens extends CodeMashRequestBase implements IReturn<GetProject
 }
 
 /**
-* Turns the project's managed Admin Portal on or off
-*/
-// @Route("/{version}/account/projects/{projectId}/admin-portal/enabled", "PUT")
-// @Api(Description="Turns the project's managed Admin Portal on or off")
-class SetAdminPortalEnabledRequest extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
-{
-    /**
-    * true turns the managed Admin Portal on; false turns it off.
-    */
-    // @ApiMember(Description="true turns the managed Admin Portal on; false turns it off.", IsRequired=true)
-    bool? enabled;
-
-    SetAdminPortalEnabledRequest({this.enabled});
-    SetAdminPortalEnabledRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        enabled = json['enabled'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'enabled': enabled
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "SetAdminPortalEnabledRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
 * Sets whether the project's brand is returned by the public Admin Portal config
 */
 // @Route("/{version}/account/projects/{projectId}/settings/brand/expose", "PATCH")
@@ -41667,9 +41392,9 @@ class GetAdminPortalStructure extends CodeMashRequestBase implements IReturn<Adm
 class UpdateProjectAdminUrl extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
 {
     /**
-    * Custom admin-portal URL to use instead of the canonical address. Null/empty restores the canonical pr-{project hex}.admin.{host} address.
+    * The address where you host the project's Admin Portal (for example https://admin.example.com). Its origin is added to the Allowed Origins. Null/empty: the project has no Admin Portal.
     */
-    // @ApiMember(Description="Custom admin-portal URL to use instead of the canonical address. Null/empty restores the canonical pr-{project hex}.admin.{host} address.")
+    // @ApiMember(Description="The address where you host the project's Admin Portal (for example https://admin.example.com). Its origin is added to the Allowed Origins. Null/empty: the project has no Admin Portal.")
     String? url;
 
     UpdateProjectAdminUrl({this.url});
@@ -42197,9 +41922,9 @@ class UpdateProjectAllowedOrigins extends CodeMashRequestBase implements IReturn
     List<String>? origins;
 
     /**
-    * Optional. true removes the project's own Admin Portal origin (pr-{project hex}.{admin host}) on purpose. Without it, a list that drops that origin is rejected with CM-ERRORS-PROJECTS-037, because the Norbix-generated end-user portal could no longer call the project's API.
+    * Optional. true removes the origin of the project's admin URL (where you host the Admin Portal) on purpose. Without it, a list that drops that origin is rejected with CM-ERRORS-PROJECTS-037, because your portal could no longer call the project's API.
     */
-    // @ApiMember(Description="Optional. true removes the project's own Admin Portal origin (pr-{project hex}.{admin host}) on purpose. Without it, a list that drops that origin is rejected with CM-ERRORS-PROJECTS-037, because the Norbix-generated end-user portal could no longer call the project's API.")
+    // @ApiMember(Description="Optional. true removes the origin of the project's admin URL (where you host the Admin Portal) on purpose. Without it, a list that drops that origin is rejected with CM-ERRORS-PROJECTS-037, because your portal could no longer call the project's API.")
     bool? removeAdminPortalOrigin;
 
     UpdateProjectAllowedOrigins({this.origins,this.removeAdminPortalOrigin});
@@ -42625,6 +42350,210 @@ class CreateAccount extends RequestBase implements IReturn<CreateAccountResponse
     createResponse() => CreateAccountResponse();
     getResponseTypeName() => "CreateAccountResponse";
     getTypeName() => "CreateAccount";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/devices", "GET")
+class GetAccountTrustedDevicesRequest extends RequestBase implements IReturn<AccountTrustedDevicesResponse>, IConvertible, IGet
+{
+    GetAccountTrustedDevicesRequest();
+    GetAccountTrustedDevicesRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => AccountTrustedDevicesResponse();
+    getResponseTypeName() => "AccountTrustedDevicesResponse";
+    getTypeName() => "GetAccountTrustedDevicesRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/devices/remove", "POST")
+class RemoveAccountTrustedDevicesRequest extends RequestBase implements IReturn<AccountTrustedDevicesResponse>, IConvertible, IPost
+{
+    String? id;
+    bool? all;
+
+    RemoveAccountTrustedDevicesRequest({this.id,this.all});
+    RemoveAccountTrustedDevicesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'];
+        all = json['all'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'all': all
+    });
+
+    createResponse() => AccountTrustedDevicesResponse();
+    getResponseTypeName() => "AccountTrustedDevicesResponse";
+    getTypeName() => "RemoveAccountTrustedDevicesRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa", "GET")
+class GetAccountTwoFactorRequest extends RequestBase implements IReturn<AccountTwoFactorResponse>, IConvertible, IGet
+{
+    GetAccountTwoFactorRequest();
+    GetAccountTwoFactorRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => AccountTwoFactorResponse();
+    getResponseTypeName() => "AccountTwoFactorResponse";
+    getTypeName() => "GetAccountTwoFactorRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/authenticator/start", "POST")
+class StartAccountAuthenticatorRequest extends RequestBase implements IReturn<AccountAuthenticatorSetupResponse>, IConvertible, IPost
+{
+    String currentPassword = "";
+
+    StartAccountAuthenticatorRequest({this.currentPassword=""});
+    StartAccountAuthenticatorRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        currentPassword = json['currentPassword'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'currentPassword': currentPassword
+    });
+
+    createResponse() => AccountAuthenticatorSetupResponse();
+    getResponseTypeName() => "AccountAuthenticatorSetupResponse";
+    getTypeName() => "StartAccountAuthenticatorRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/authenticator/confirm", "POST")
+class ConfirmAccountAuthenticatorRequest extends RequestBase implements IReturn<AccountTwoFactorResponse>, IConvertible, IPost
+{
+    String code = "";
+
+    ConfirmAccountAuthenticatorRequest({this.code=""});
+    ConfirmAccountAuthenticatorRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        code = json['code'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'code': code
+    });
+
+    createResponse() => AccountTwoFactorResponse();
+    getResponseTypeName() => "AccountTwoFactorResponse";
+    getTypeName() => "ConfirmAccountAuthenticatorRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/authenticator/remove", "POST")
+class RemoveAccountAuthenticatorRequest extends RequestBase implements IReturn<AccountTwoFactorResponse>, IConvertible, IPost
+{
+    String currentPassword = "";
+
+    RemoveAccountAuthenticatorRequest({this.currentPassword=""});
+    RemoveAccountAuthenticatorRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        currentPassword = json['currentPassword'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'currentPassword': currentPassword
+    });
+
+    createResponse() => AccountTwoFactorResponse();
+    getResponseTypeName() => "AccountTwoFactorResponse";
+    getTypeName() => "RemoveAccountAuthenticatorRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/team", "GET")
+class GetAccountTeamTwoFactorRequest extends RequestBase implements IReturn<AccountTeamTwoFactorResponse>, IConvertible, IGet
+{
+    GetAccountTeamTwoFactorRequest();
+    GetAccountTeamTwoFactorRequest.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => AccountTeamTwoFactorResponse();
+    getResponseTypeName() => "AccountTeamTwoFactorResponse";
+    getTypeName() => "GetAccountTeamTwoFactorRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/team/policy", "PUT")
+class SetAccountTwoFactorPolicyRequest extends RequestBase implements IReturn<AccountTeamTwoFactorResponse>, IConvertible, IPut
+{
+    bool? requireAuthenticatorApp;
+    String currentPassword = "";
+
+    SetAccountTwoFactorPolicyRequest({this.requireAuthenticatorApp,this.currentPassword=""});
+    SetAccountTwoFactorPolicyRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        requireAuthenticatorApp = json['requireAuthenticatorApp'];
+        currentPassword = json['currentPassword'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'requireAuthenticatorApp': requireAuthenticatorApp,
+        'currentPassword': currentPassword
+    });
+
+    createResponse() => AccountTeamTwoFactorResponse();
+    getResponseTypeName() => "AccountTeamTwoFactorResponse";
+    getTypeName() => "SetAccountTwoFactorPolicyRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/2fa/team/reset", "POST")
+class ResetTeamMemberAuthenticatorRequest extends RequestBase implements IReturn<AccountTeamTwoFactorResponse>, IConvertible, IPost
+{
+    String memberId = "";
+    String currentPassword = "";
+
+    ResetTeamMemberAuthenticatorRequest({this.memberId="",this.currentPassword=""});
+    ResetTeamMemberAuthenticatorRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        memberId = json['memberId'] ?? "";
+        currentPassword = json['currentPassword'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'memberId': memberId,
+        'currentPassword': currentPassword
+    });
+
+    createResponse() => AccountTeamTwoFactorResponse();
+    getResponseTypeName() => "AccountTeamTwoFactorResponse";
+    getTypeName() => "ResetTeamMemberAuthenticatorRequest";
     TypeContext? context = _ctx;
 }
 
@@ -43350,6 +43279,23 @@ class UpdateAccountRole extends RequestBase implements IReturn<IdResponse>, ICon
     createResponse() => IdResponse();
     getResponseTypeName() => "IdResponse";
     getTypeName() => "UpdateAccountRole";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/session/api-token", "POST")
+class CreateDashboardApiToken extends RequestBase implements IReturn<CreateDashboardApiTokenResponse>, IConvertible, IPost
+{
+    CreateDashboardApiToken();
+    CreateDashboardApiToken.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    createResponse() => CreateDashboardApiTokenResponse();
+    getResponseTypeName() => "CreateDashboardApiTokenResponse";
+    getTypeName() => "CreateDashboardApiToken";
     TypeContext? context = _ctx;
 }
 
@@ -50915,22 +50861,70 @@ class SaveCodeWorkflow extends CodeMashRequestBase implements IReturn<WorkflowRe
     // @ApiMember(Description="The definition (JSON Schema v1 from GET /code/workflows/schema).", IsRequired=true)
     WorkflowDefinitionDto? definition;
 
-    SaveCodeWorkflow({this.definition});
+    /**
+    * The canvas document of the Cloud visual builder (JSON text, where the steps are drawn). Leave it out: the stored one stays.
+    */
+    // @DataMember
+    // @ApiMember(Description="The canvas document of the Cloud visual builder (JSON text, where the steps are drawn). Leave it out: the stored one stays.")
+    String? canvas;
+
+    SaveCodeWorkflow({this.definition,this.canvas});
     SaveCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         definition = JsonConverters.fromJson(json['definition'],'WorkflowDefinitionDto',context!);
+        canvas = json['canvas'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'definition': JsonConverters.toJson(definition,'WorkflowDefinitionDto',context!)
+        'definition': JsonConverters.toJson(definition,'WorkflowDefinitionDto',context!),
+        'canvas': canvas
     });
 
     createResponse() => WorkflowResponse();
     getResponseTypeName() => "WorkflowResponse";
     getTypeName() => "SaveCodeWorkflow";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/canvas", "PUT")
+// @DataContract
+class SaveCodeWorkflowCanvas extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IPut
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * The canvas document as JSON text (an object, 64 KB at most). Empty or absent: back to the automatic layout.
+    */
+    // @DataMember
+    // @ApiMember(Description="The canvas document as JSON text (an object, 64 KB at most). Empty or absent: back to the automatic layout.")
+    String? canvas;
+
+    SaveCodeWorkflowCanvas({this.id="",this.canvas});
+    SaveCodeWorkflowCanvas.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        canvas = json['canvas'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'canvas': canvas
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "SaveCodeWorkflowCanvas";
     TypeContext? context = _ctx;
 }
 
@@ -54811,513 +54805,6 @@ class InvokeAiToolRequest extends RequestBase implements IReturn<InvokeAiToolRes
 }
 
 /**
-* Uploads a file into an AI chat session.
-*/
-// @Route("/{version}/account/chat/attachments", "POST")
-// @Api(Description="Uploads a file into an AI chat session.")
-class UploadChatAttachmentRequest extends RequestBase implements IReturn<UploadChatAttachmentResponse>, IConvertible, IPost
-{
-    String? sessionId;
-    String fileName = "";
-    String contentType = "";
-    String base64Content = "";
-    String? profile;
-    String? topic;
-    String? projectId;
-    String? env;
-
-    UploadChatAttachmentRequest({this.sessionId,this.fileName="",this.contentType="",this.base64Content="",this.profile,this.topic,this.projectId,this.env});
-    UploadChatAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'];
-        fileName = json['fileName'] ?? "";
-        contentType = json['contentType'] ?? "";
-        base64Content = json['base64Content'] ?? "";
-        profile = json['profile'];
-        topic = json['topic'];
-        projectId = json['projectId'];
-        env = json['env'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'fileName': fileName,
-        'contentType': contentType,
-        'base64Content': base64Content,
-        'profile': profile,
-        'topic': topic,
-        'projectId': projectId,
-        'env': env
-    });
-
-    createResponse() => UploadChatAttachmentResponse();
-    getResponseTypeName() => "UploadChatAttachmentResponse";
-    getTypeName() => "UploadChatAttachmentRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Reports AI chat availability and the model-picker menu.
-*/
-// @Route("/{version}/account/chat/availability", "GET")
-// @Api(Description="Reports AI chat availability and the model-picker menu.")
-class ChatAvailabilityRequest extends RequestBase implements IReturn<ChatAvailabilityResponse>, IConvertible, IGet
-{
-    String? projectId;
-    String? env;
-
-    ChatAvailabilityRequest({this.projectId,this.env});
-    ChatAvailabilityRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        projectId = json['projectId'];
-        env = json['env'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'projectId': projectId,
-        'env': env
-    });
-
-    createResponse() => ChatAvailabilityResponse();
-    getResponseTypeName() => "ChatAvailabilityResponse";
-    getTypeName() => "ChatAvailabilityRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Lists what the AI assistant remembers about this account.
-*/
-// @Route("/{version}/account/chat/memory", "GET")
-// @Api(Description="Lists what the AI assistant remembers about this account.")
-class GetChatMemoryRequest extends RequestBase implements IReturn<GetChatMemoryResponse>, IConvertible, IGet
-{
-    String? projectId;
-
-    GetChatMemoryRequest({this.projectId});
-    GetChatMemoryRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        projectId = json['projectId'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'projectId': projectId
-    });
-
-    createResponse() => GetChatMemoryResponse();
-    getResponseTypeName() => "GetChatMemoryResponse";
-    getTypeName() => "GetChatMemoryRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Deletes one AI memory note ('forget this').
-*/
-// @Route("/{version}/account/chat/memory/{NoteId}", "DELETE")
-// @Api(Description="Deletes one AI memory note ('forget this').")
-class ForgetChatMemoryRequest extends RequestBase implements IReturn<EmptyResponse>, IConvertible, IDelete
-{
-    String noteId = "";
-
-    ForgetChatMemoryRequest({this.noteId=""});
-    ForgetChatMemoryRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        noteId = json['noteId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'noteId': noteId
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "ForgetChatMemoryRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Deletes an AI chat session (soft delete).
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}", "DELETE")
-// @Api(Description="Deletes an AI chat session (soft delete).")
-class DeleteChatSessionRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IDelete
-{
-    String sessionId = "";
-
-    DeleteChatSessionRequest({this.sessionId=""});
-    DeleteChatSessionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "DeleteChatSessionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Archives or unarchives an AI chat session.
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/archive", "PATCH")
-// @Api(Description="Archives or unarchives an AI chat session.")
-class SetChatSessionArchivedRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPatch
-{
-    String sessionId = "";
-    bool? archived;
-
-    SetChatSessionArchivedRequest({this.sessionId="",this.archived});
-    SetChatSessionArchivedRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        archived = json['archived'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'archived': archived
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "SetChatSessionArchivedRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Pins or unpins an AI chat session.
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/pin", "PATCH")
-// @Api(Description="Pins or unpins an AI chat session.")
-class SetChatSessionPinnedRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPatch
-{
-    String sessionId = "";
-    bool? pinned;
-
-    SetChatSessionPinnedRequest({this.sessionId="",this.pinned});
-    SetChatSessionPinnedRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        pinned = json['pinned'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'pinned': pinned
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "SetChatSessionPinnedRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Marks or unmarks an AI chat session as "do not share".
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/sharing", "PATCH")
-// @Api(Description="Marks or unmarks an AI chat session as \"do not share\".")
-class SetChatSessionSharingRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPatch
-{
-    String sessionId = "";
-    bool? doNotShare;
-
-    SetChatSessionSharingRequest({this.sessionId="",this.doNotShare});
-    SetChatSessionSharingRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        doNotShare = json['doNotShare'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'doNotShare': doNotShare
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "SetChatSessionSharingRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Lists the account's recent AI chat sessions.
-*/
-// @Route("/{version}/account/chat/sessions", "GET")
-// @Api(Description="Lists the account's recent AI chat sessions.")
-class GetChatSessionsRequest extends RequestBase implements IReturn<GetChatSessionsResponse>, IConvertible, IGet
-{
-    int? take;
-    bool? includeArchived;
-
-    GetChatSessionsRequest({this.take,this.includeArchived});
-    GetChatSessionsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        take = json['take'];
-        includeArchived = json['includeArchived'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'take': take,
-        'includeArchived': includeArchived
-    });
-
-    createResponse() => GetChatSessionsResponse();
-    getResponseTypeName() => "GetChatSessionsResponse";
-    getTypeName() => "GetChatSessionsRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Returns one AI chat session's conversation entries — the transcript.
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/entries", "GET")
-// @Api(Description="Returns one AI chat session's conversation entries — the transcript.")
-class GetChatSessionEntriesRequest extends RequestBase implements IReturn<GetChatSessionEntriesResponse>, IConvertible, IGet
-{
-    String sessionId = "";
-    int? sinceSeq;
-
-    GetChatSessionEntriesRequest({this.sessionId="",this.sinceSeq});
-    GetChatSessionEntriesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        sinceSeq = json['sinceSeq'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'sinceSeq': sinceSeq
-    });
-
-    createResponse() => GetChatSessionEntriesResponse();
-    getResponseTypeName() => "GetChatSessionEntriesResponse";
-    getTypeName() => "GetChatSessionEntriesRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Records like / dislike feedback on one AI chat entry, or clears it.
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/entries/{EntryId}/feedback", "POST")
-// @Api(Description="Records like / dislike feedback on one AI chat entry, or clears it.")
-class SetChatEntryFeedbackRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    String sessionId = "";
-    String entryId = "";
-    String? feedback;
-
-    SetChatEntryFeedbackRequest({this.sessionId="",this.entryId="",this.feedback});
-    SetChatEntryFeedbackRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        entryId = json['entryId'] ?? "";
-        feedback = json['feedback'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'entryId': entryId,
-        'feedback': feedback
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "SetChatEntryFeedbackRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Answers one open AI chat question — or a prepared change's Apply / Skip — and continues the conversation.
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/questions/{EntryId}/answer", "POST")
-// @Api(Description="Answers one open AI chat question — or a prepared change's Apply / Skip — and continues the conversation.")
-class AnswerChatQuestionRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    String sessionId = "";
-    String entryId = "";
-    Map<String,String?>? answers;
-
-    AnswerChatQuestionRequest({this.sessionId="",this.entryId="",this.answers});
-    AnswerChatQuestionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        entryId = json['entryId'] ?? "";
-        answers = JsonConverters.toStringMap(json['answers']);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'entryId': entryId,
-        'answers': answers
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "AnswerChatQuestionRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Approves or rejects a proposed AI chat plan.
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/plans/{EntryId}/decision", "POST")
-// @Api(Description="Approves or rejects a proposed AI chat plan.")
-class DecideChatPlanRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    String sessionId = "";
-    String entryId = "";
-    String decision = "";
-    String? comment;
-
-    DecideChatPlanRequest({this.sessionId="",this.entryId="",this.decision="",this.comment});
-    DecideChatPlanRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        entryId = json['entryId'] ?? "";
-        decision = json['decision'] ?? "";
-        comment = json['comment'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'entryId': entryId,
-        'decision': decision,
-        'comment': comment
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "DecideChatPlanRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Stops one running step of an AI chat plan run.
-*/
-// @Route("/{version}/account/chat/sessions/{SessionId}/steps/{EntryId}/stop", "POST")
-// @Api(Description="Stops one running step of an AI chat plan run.")
-class StopChatRunStepRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    String sessionId = "";
-    String entryId = "";
-
-    StopChatRunStepRequest({this.sessionId="",this.entryId=""});
-    StopChatRunStepRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'] ?? "";
-        entryId = json['entryId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'entryId': entryId
-    });
-
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "StopChatRunStepRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Runs one AI chat conversation turn.
-*/
-// @Route("/{version}/account/chat/turn", "POST")
-// @Api(Description="Runs one AI chat conversation turn.")
-class ChatTurnRequest extends RequestBase implements IReturn<ChatTurnResponse>, IConvertible, IPost
-{
-    String? sessionId;
-    String message = "";
-    String? profile;
-    String? topic;
-    String? llmIntegrationId;
-    String? model;
-    String? projectId;
-    String? env;
-    ChatScreenContextDto? screenContext;
-
-    ChatTurnRequest({this.sessionId,this.message="",this.profile,this.topic,this.llmIntegrationId,this.model,this.projectId,this.env,this.screenContext});
-    ChatTurnRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        sessionId = json['sessionId'];
-        message = json['message'] ?? "";
-        profile = json['profile'];
-        topic = json['topic'];
-        llmIntegrationId = json['llmIntegrationId'];
-        model = json['model'];
-        projectId = json['projectId'];
-        env = json['env'];
-        screenContext = JsonConverters.fromJson(json['screenContext'],'ChatScreenContextDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'sessionId': sessionId,
-        'message': message,
-        'profile': profile,
-        'topic': topic,
-        'llmIntegrationId': llmIntegrationId,
-        'model': model,
-        'projectId': projectId,
-        'env': env,
-        'screenContext': JsonConverters.toJson(screenContext,'ChatScreenContextDto',context!)
-    });
-
-    createResponse() => ChatTurnResponse();
-    getResponseTypeName() => "ChatTurnResponse";
-    getTypeName() => "ChatTurnRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
 * Plans (preview) or builds (apply) a whole project from one spec.
 */
 // @Route("/{version}/account/ai/scaffold", "POST")
@@ -55536,128 +55023,146 @@ class GetProjectBriefRequest extends CodeMashRequestBase implements IReturn<GetP
 }
 
 /**
-* Lists a project's AI work items: one serious ask each, with its goal, plans, changes, moved-out items, needs-you list and open questions.
+* Lists the app templates: reviewed starting points for a whole backend (blog, CRM, HR …).
 */
-// @Route("/{version}/projects/{projectId}/ai/work-items", "GET")
-// @Api(Description="Lists a project's AI work items: one serious ask each, with its goal, plans, changes, moved-out items, needs-you list and open questions.")
-class GetWorkItemsRequest extends CodeMashRequestBase implements IReturn<GetWorkItemsResponse>, IConvertible, IGet
+// @Route("/{version}/account/ai/templates/apps", "GET")
+// @Api(Description="Lists the app templates: reviewed starting points for a whole backend (blog, CRM, HR …).")
+class GetAppTemplatesRequest extends RequestBase implements IReturn<GetAppTemplatesResponse>, IConvertible, IGet
 {
     /**
-    * Filter by status: proposed, active, waiting, done, partly-done or dropped. Omit for all.
+    * A few words about the app being built. Templates whose tags match come first. Optional.
     */
-    // @ApiMember(Description="Filter by status: proposed, active, waiting, done, partly-done or dropped. Omit for all.")
-    String? status;
+    // @ApiMember(Description="A few words about the app being built. Templates whose tags match come first. Optional.")
+    String? query;
 
-    GetWorkItemsRequest({this.status});
-    GetWorkItemsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    GetAppTemplatesRequest({this.query});
+    GetAppTemplatesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
-        status = json['status'];
+        query = json['query'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'status': status
+        'query': query
     });
 
-    createResponse() => GetWorkItemsResponse();
-    getResponseTypeName() => "GetWorkItemsResponse";
-    getTypeName() => "GetWorkItemsRequest";
+    createResponse() => GetAppTemplatesResponse();
+    getResponseTypeName() => "GetAppTemplatesResponse";
+    getTypeName() => "GetAppTemplatesRequest";
     TypeContext? context = _ctx;
 }
 
 /**
-* Reads one AI work item: the six long-task sections and the definition-of-done verdict.
+* Reads one app template: its guide and its collection specs.
 */
-// @Route("/{version}/projects/{projectId}/ai/work-items/{WorkItemId}", "GET")
-// @Api(Description="Reads one AI work item: the six long-task sections and the definition-of-done verdict.")
-class GetWorkItemRequest extends CodeMashRequestBase implements IReturn<GetWorkItemResponse>, IConvertible, IGet
+// @Route("/{version}/account/ai/templates/apps/{Id}", "GET")
+// @Api(Description="Reads one app template: its guide and its collection specs.")
+class GetAppTemplateRequest extends RequestBase implements IReturn<GetAppTemplateResponse>, IConvertible, IGet
 {
-    String workItemId = "";
-
-    GetWorkItemRequest({this.workItemId=""});
-    GetWorkItemRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        workItemId = json['workItemId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'workItemId': workItemId
-    });
-
-    createResponse() => GetWorkItemResponse();
-    getResponseTypeName() => "GetWorkItemResponse";
-    getTypeName() => "GetWorkItemRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Exports one AI work item as markdown in the long-task shape: Goal, Plan, Changes, Rejected / moved out, Needs you, Open questions.
-*/
-// @Route("/{version}/projects/{projectId}/ai/work-items/{WorkItemId}/export.md", "GET")
-// @Api(Description="Exports one AI work item as markdown in the long-task shape: Goal, Plan, Changes, Rejected / moved out, Needs you, Open questions.")
-class ExportWorkItemRequest extends CodeMashRequestBase implements IReturn<ExportWorkItemResponse>, IConvertible, IGet
-{
-    String workItemId = "";
-
-    ExportWorkItemRequest({this.workItemId=""});
-    ExportWorkItemRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        workItemId = json['workItemId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'workItemId': workItemId
-    });
-
-    createResponse() => ExportWorkItemResponse();
-    getResponseTypeName() => "ExportWorkItemResponse";
-    getTypeName() => "ExportWorkItemRequest";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Ticks one manual line of a work item's "Needs you" checklist — the one write a human makes to a work item directly.
-*/
-// @Route("/{version}/projects/{projectId}/ai/work-items/{WorkItemId}/needs-you/{Index}/done", "POST")
-// @Api(Description="Ticks one manual line of a work item's \"Needs you\" checklist — the one write a human makes to a work item directly.")
-class MarkNeedsYouDoneRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
-{
-    String workItemId = "";
-    int index = 0;
     /**
-    * Set false to un-tick the line. Default true.
+    * The template id, e.g. hr.
     */
-    // @ApiMember(Description="Set false to un-tick the line. Default true.")
-    bool? done;
+    // @ApiMember(Description="The template id, e.g. hr.", IsRequired=true)
+    String id = "";
 
-    MarkNeedsYouDoneRequest({this.workItemId="",this.index=0,this.done});
-    MarkNeedsYouDoneRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    GetAppTemplateRequest({this.id=""});
+    GetAppTemplateRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
-        workItemId = json['workItemId'] ?? "";
-        index = json['index'] ?? 0;
-        done = json['done'];
+        id = json['id'] ?? "";
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'workItemId': workItemId,
-        'index': index,
-        'done': done
+        'id': id
     });
 
-    createResponse() => IdResponse();
-    getResponseTypeName() => "IdResponse";
-    getTypeName() => "MarkNeedsYouDoneRequest";
+    createResponse() => GetAppTemplateResponse();
+    getResponseTypeName() => "GetAppTemplateResponse";
+    getTypeName() => "GetAppTemplateRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Searches the schema registry: reviewed collection shapes to build from.
+*/
+// @Route("/{version}/account/ai/templates/schemas", "GET")
+// @Api(Description="Searches the schema registry: reviewed collection shapes to build from.")
+class SearchSchemaTemplatesRequest extends RequestBase implements IReturn<SearchSchemaTemplatesResponse>, IConvertible, IGet
+{
+    /**
+    * One or a few words, e.g. employee. Empty lists the first entities by id.
+    */
+    // @ApiMember(Description="One or a few words, e.g. employee. Empty lists the first entities by id.")
+    String? query;
+
+    /**
+    * How many hits to return: 10 by default, 25 at most.
+    */
+    // @ApiMember(Description="How many hits to return: 10 by default, 25 at most.")
+    int? take;
+
+    SearchSchemaTemplatesRequest({this.query,this.take});
+    SearchSchemaTemplatesRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        query = json['query'];
+        take = json['take'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'query': query,
+        'take': take
+    });
+
+    createResponse() => SearchSchemaTemplatesResponse();
+    getResponseTypeName() => "SearchSchemaTemplatesResponse";
+    getTypeName() => "SearchSchemaTemplatesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Reads schema registry entities with their related ones.
+*/
+// @Route("/{version}/account/ai/templates/schemas/graph", "GET")
+// @Api(Description="Reads schema registry entities with their related ones.")
+class GetEntityGraphRequest extends RequestBase implements IReturn<GetEntityGraphResponse>, IConvertible, IGet
+{
+    /**
+    * Comma-separated entity ids, e.g. blog_posts,comments.
+    */
+    // @ApiMember(Description="Comma-separated entity ids, e.g. blog_posts,comments.", IsRequired=true)
+    String names = "";
+
+    /**
+    * 0 = named only, 1 = with directly related entities (default), 3 at most.
+    */
+    // @ApiMember(Description="0 = named only, 1 = with directly related entities (default), 3 at most.")
+    int? depth;
+
+    GetEntityGraphRequest({this.names="",this.depth});
+    GetEntityGraphRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        names = json['names'] ?? "";
+        depth = json['depth'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'names': names,
+        'depth': depth
+    });
+
+    createResponse() => GetEntityGraphResponse();
+    getResponseTypeName() => "GetEntityGraphResponse";
+    getTypeName() => "GetEntityGraphRequest";
     TypeContext? context = _ctx;
 }
 
@@ -61698,7 +61203,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SavePushTemplate': TypeInfo(TypeOf.Class, create:() => SavePushTemplate()),
     'DeviceType': TypeInfo(TypeOf.Enum, enumValues:DeviceType.values),
     'PushDeviceDto': TypeInfo(TypeOf.Class, create:() => PushDeviceDto()),
-    'ChatScreenContextDto': TypeInfo(TypeOf.AbstractClass),
     'INoSessionCookies': TypeInfo(TypeOf.Interface),
     'EmbeddingProvider': TypeInfo(TypeOf.Enum, enumValues:EmbeddingProvider.values),
     'EmbeddingIntegrationRequest': TypeInfo(TypeOf.AbstractClass),
@@ -61852,6 +61356,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AiUsageGroupDto>': TypeInfo(TypeOf.Class, create:() => <AiUsageGroupDto>[]),
     'LanguageGapKind': TypeInfo(TypeOf.Enum, enumValues:LanguageGapKind.values),
     'TemplateLanguageGapDto': TypeInfo(TypeOf.Class, create:() => TemplateLanguageGapDto()),
+    'AccountTrustedDeviceDto': TypeInfo(TypeOf.Class, create:() => AccountTrustedDeviceDto()),
+    'AccountTeamTwoFactorMemberDto': TypeInfo(TypeOf.Class, create:() => AccountTeamTwoFactorMemberDto()),
     'AuthType': TypeInfo(TypeOf.Enum, enumValues:AuthType.values),
     'AccessInformationDto': TypeInfo(TypeOf.Class, create:() => AccessInformationDto()),
     'RegistrationDto': TypeInfo(TypeOf.Class, create:() => RegistrationDto()),
@@ -62044,9 +61550,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AiToolManifestParameter': TypeInfo(TypeOf.Class, create:() => AiToolManifestParameter()),
     'AiToolManifestItem': TypeInfo(TypeOf.Class, create:() => AiToolManifestItem()),
     'List<AiToolManifestParameter>': TypeInfo(TypeOf.Class, create:() => <AiToolManifestParameter>[]),
-    'ChatModelOption': TypeInfo(TypeOf.Class, create:() => ChatModelOption()),
-    'ChatMemoryNote': TypeInfo(TypeOf.Class, create:() => ChatMemoryNote()),
-    'ChatSessionListItem': TypeInfo(TypeOf.Class, create:() => ChatSessionListItem()),
     'ScaffoldStep': TypeInfo(TypeOf.Class, create:() => ScaffoldStep()),
     'JsonObject': TypeInfo(TypeOf.Class, create:() => JsonObject()),
     'ScaffoldIssue': TypeInfo(TypeOf.Class, create:() => ScaffoldIssue()),
@@ -62068,21 +61571,12 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<ProjectBriefDecisionWireDto>': TypeInfo(TypeOf.Class, create:() => <ProjectBriefDecisionWireDto>[]),
     'List<ProjectBriefAssumptionWireDto>': TypeInfo(TypeOf.Class, create:() => <ProjectBriefAssumptionWireDto>[]),
     'ProjectBriefEventWireDto': TypeInfo(TypeOf.Class, create:() => ProjectBriefEventWireDto()),
-    'WorkItemEntryRefWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemEntryRefWireDto()),
-    'WorkItemRunRefWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemRunRefWireDto()),
-    'WorkItemArtifactWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemArtifactWireDto()),
-    'WorkItemMovedOutWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemMovedOutWireDto()),
-    'WorkItemNeedsYouWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemNeedsYouWireDto()),
-    'WorkItemOpenQuestionWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemOpenQuestionWireDto()),
-    'WorkItemDoneConditionWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemDoneConditionWireDto()),
-    'WorkItemWireDto': TypeInfo(TypeOf.Class, create:() => WorkItemWireDto()),
-    'List<WorkItemEntryRefWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemEntryRefWireDto>[]),
-    'List<WorkItemRunRefWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemRunRefWireDto>[]),
-    'List<WorkItemArtifactWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemArtifactWireDto>[]),
-    'List<WorkItemMovedOutWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemMovedOutWireDto>[]),
-    'List<WorkItemNeedsYouWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemNeedsYouWireDto>[]),
-    'List<WorkItemOpenQuestionWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemOpenQuestionWireDto>[]),
-    'List<WorkItemDoneConditionWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemDoneConditionWireDto>[]),
+    'AppTemplateCollectionDto': TypeInfo(TypeOf.Class, create:() => AppTemplateCollectionDto()),
+    'AppTemplateCardDto': TypeInfo(TypeOf.Class, create:() => AppTemplateCardDto()),
+    'List<AppTemplateCollectionDto>': TypeInfo(TypeOf.Class, create:() => <AppTemplateCollectionDto>[]),
+    'AppTemplateCollectionSpecDto': TypeInfo(TypeOf.Class, create:() => AppTemplateCollectionSpecDto()),
+    'SchemaTemplateCardDto': TypeInfo(TypeOf.Class, create:() => SchemaTemplateCardDto()),
+    'EntityGraphEntityDto': TypeInfo(TypeOf.Class, create:() => EntityGraphEntityDto()),
     'AiTriggerType': TypeInfo(TypeOf.Enum, enumValues:AiTriggerType.values),
     'AiTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => AiTriggerProjectionList()),
     'AiTriggerDto': TypeInfo(TypeOf.Class, create:() => AiTriggerDto()),
@@ -62263,6 +61757,12 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'CheckProjectLanguagesResponse': TypeInfo(TypeOf.Class, create:() => CheckProjectLanguagesResponse()),
     'List<TemplateLanguageGapDto>': TypeInfo(TypeOf.Class, create:() => <TemplateLanguageGapDto>[]),
     'CreateAccountResponse': TypeInfo(TypeOf.Class, create:() => CreateAccountResponse()),
+    'AccountTrustedDevicesResponse': TypeInfo(TypeOf.Class, create:() => AccountTrustedDevicesResponse()),
+    'List<AccountTrustedDeviceDto>': TypeInfo(TypeOf.Class, create:() => <AccountTrustedDeviceDto>[]),
+    'AccountTwoFactorResponse': TypeInfo(TypeOf.Class, create:() => AccountTwoFactorResponse()),
+    'AccountAuthenticatorSetupResponse': TypeInfo(TypeOf.Class, create:() => AccountAuthenticatorSetupResponse()),
+    'AccountTeamTwoFactorResponse': TypeInfo(TypeOf.Class, create:() => AccountTeamTwoFactorResponse()),
+    'List<AccountTeamTwoFactorMemberDto>': TypeInfo(TypeOf.Class, create:() => <AccountTeamTwoFactorMemberDto>[]),
     'GetAccountCollaboratorsResponse': TypeInfo(TypeOf.Class, create:() => GetAccountCollaboratorsResponse()),
     'PaginatedResponse<AuthDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AuthDto>()),
     'GetAccountPasswordPolicyResponse': TypeInfo(TypeOf.Class, create:() => GetAccountPasswordPolicyResponse()),
@@ -62271,6 +61771,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AccountTeamRoleDto>': TypeInfo(TypeOf.Class, create:() => <AccountTeamRoleDto>[]),
     'GetAccountTeamInvitationsResponse': TypeInfo(TypeOf.Class, create:() => GetAccountTeamInvitationsResponse()),
     'List<TeamInvitationDto>': TypeInfo(TypeOf.Class, create:() => <TeamInvitationDto>[]),
+    'CreateDashboardApiTokenResponse': TypeInfo(TypeOf.Class, create:() => CreateDashboardApiTokenResponse()),
     'AccountPasskeyOkResponse': TypeInfo(TypeOf.Class, create:() => AccountPasskeyOkResponse()),
     'AccountPasskeyVerificationTokenResponse': TypeInfo(TypeOf.Class, create:() => AccountPasskeyVerificationTokenResponse()),
     'AccountPasskeyCeremonyOptionsResponse': TypeInfo(TypeOf.Class, create:() => AccountPasskeyCeremonyOptionsResponse()),
@@ -62507,16 +62008,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetAiToolsResponse': TypeInfo(TypeOf.Class, create:() => GetAiToolsResponse()),
     'List<AiToolManifestItem>': TypeInfo(TypeOf.Class, create:() => <AiToolManifestItem>[]),
     'InvokeAiToolResponse': TypeInfo(TypeOf.Class, create:() => InvokeAiToolResponse()),
-    'UploadChatAttachmentResponse': TypeInfo(TypeOf.Class, create:() => UploadChatAttachmentResponse()),
-    'ChatAvailabilityResponse': TypeInfo(TypeOf.Class, create:() => ChatAvailabilityResponse()),
-    'List<ChatModelOption>': TypeInfo(TypeOf.Class, create:() => <ChatModelOption>[]),
-    'GetChatMemoryResponse': TypeInfo(TypeOf.Class, create:() => GetChatMemoryResponse()),
-    'List<ChatMemoryNote>': TypeInfo(TypeOf.Class, create:() => <ChatMemoryNote>[]),
-    'GetChatSessionsResponse': TypeInfo(TypeOf.Class, create:() => GetChatSessionsResponse()),
-    'List<ChatSessionListItem>': TypeInfo(TypeOf.Class, create:() => <ChatSessionListItem>[]),
-    'GetChatSessionEntriesResponse': TypeInfo(TypeOf.Class, create:() => GetChatSessionEntriesResponse()),
-    'List<AiChatEntryWireDto>': TypeInfo(TypeOf.Class, create:() => <AiChatEntryWireDto>[]),
-    'ChatTurnResponse': TypeInfo(TypeOf.Class, create:() => ChatTurnResponse()),
     'ScaffoldProjectResponse': TypeInfo(TypeOf.Class, create:() => ScaffoldProjectResponse()),
     'List<ScaffoldStep>': TypeInfo(TypeOf.Class, create:() => <ScaffoldStep>[]),
     'List<ScaffoldIssue>': TypeInfo(TypeOf.Class, create:() => <ScaffoldIssue>[]),
@@ -62524,10 +62015,14 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RenderTemplatePreviewResponse': TypeInfo(TypeOf.Class, create:() => RenderTemplatePreviewResponse()),
     'GetProjectBriefResponse': TypeInfo(TypeOf.Class, create:() => GetProjectBriefResponse()),
     'List<ProjectBriefEventWireDto>': TypeInfo(TypeOf.Class, create:() => <ProjectBriefEventWireDto>[]),
-    'GetWorkItemsResponse': TypeInfo(TypeOf.Class, create:() => GetWorkItemsResponse()),
-    'List<WorkItemWireDto>': TypeInfo(TypeOf.Class, create:() => <WorkItemWireDto>[]),
-    'GetWorkItemResponse': TypeInfo(TypeOf.Class, create:() => GetWorkItemResponse()),
-    'ExportWorkItemResponse': TypeInfo(TypeOf.Class, create:() => ExportWorkItemResponse()),
+    'GetAppTemplatesResponse': TypeInfo(TypeOf.Class, create:() => GetAppTemplatesResponse()),
+    'List<AppTemplateCardDto>': TypeInfo(TypeOf.Class, create:() => <AppTemplateCardDto>[]),
+    'GetAppTemplateResponse': TypeInfo(TypeOf.Class, create:() => GetAppTemplateResponse()),
+    'List<AppTemplateCollectionSpecDto>': TypeInfo(TypeOf.Class, create:() => <AppTemplateCollectionSpecDto>[]),
+    'SearchSchemaTemplatesResponse': TypeInfo(TypeOf.Class, create:() => SearchSchemaTemplatesResponse()),
+    'List<SchemaTemplateCardDto>': TypeInfo(TypeOf.Class, create:() => <SchemaTemplateCardDto>[]),
+    'GetEntityGraphResponse': TypeInfo(TypeOf.Class, create:() => GetEntityGraphResponse()),
+    'List<EntityGraphEntityDto>': TypeInfo(TypeOf.Class, create:() => <EntityGraphEntityDto>[]),
     'GetAiTriggersResponse': TypeInfo(TypeOf.Class, create:() => GetAiTriggersResponse()),
     'PaginatedResponse<AiTriggerProjectionList>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AiTriggerProjectionList>()),
     'GetAiTriggerResponse': TypeInfo(TypeOf.Class, create:() => GetAiTriggerResponse()),
@@ -62725,7 +62220,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetProjectHealth': TypeInfo(TypeOf.Class, create:() => GetProjectHealth()),
     'WaitForProjectActiveRequest': TypeInfo(TypeOf.Class, create:() => WaitForProjectActiveRequest()),
     'GetProjectTokens': TypeInfo(TypeOf.Class, create:() => GetProjectTokens()),
-    'SetAdminPortalEnabledRequest': TypeInfo(TypeOf.Class, create:() => SetAdminPortalEnabledRequest()),
     'UpdateProjectExposeBrand': TypeInfo(TypeOf.Class, create:() => UpdateProjectExposeBrand()),
     'UpdateProjectExposeAuth': TypeInfo(TypeOf.Class, create:() => UpdateProjectExposeAuth()),
     'AssignAdminPortalServiceUserRequest': TypeInfo(TypeOf.Class, create:() => AssignAdminPortalServiceUserRequest()),
@@ -62760,6 +62254,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UpdateProjectName': TypeInfo(TypeOf.Class, create:() => UpdateProjectName()),
     'UpdateProjectRegions': TypeInfo(TypeOf.Class, create:() => UpdateProjectRegions()),
     'CreateAccount': TypeInfo(TypeOf.Class, create:() => CreateAccount()),
+    'GetAccountTrustedDevicesRequest': TypeInfo(TypeOf.Class, create:() => GetAccountTrustedDevicesRequest()),
+    'RemoveAccountTrustedDevicesRequest': TypeInfo(TypeOf.Class, create:() => RemoveAccountTrustedDevicesRequest()),
+    'GetAccountTwoFactorRequest': TypeInfo(TypeOf.Class, create:() => GetAccountTwoFactorRequest()),
+    'StartAccountAuthenticatorRequest': TypeInfo(TypeOf.Class, create:() => StartAccountAuthenticatorRequest()),
+    'ConfirmAccountAuthenticatorRequest': TypeInfo(TypeOf.Class, create:() => ConfirmAccountAuthenticatorRequest()),
+    'RemoveAccountAuthenticatorRequest': TypeInfo(TypeOf.Class, create:() => RemoveAccountAuthenticatorRequest()),
+    'GetAccountTeamTwoFactorRequest': TypeInfo(TypeOf.Class, create:() => GetAccountTeamTwoFactorRequest()),
+    'SetAccountTwoFactorPolicyRequest': TypeInfo(TypeOf.Class, create:() => SetAccountTwoFactorPolicyRequest()),
+    'ResetTeamMemberAuthenticatorRequest': TypeInfo(TypeOf.Class, create:() => ResetTeamMemberAuthenticatorRequest()),
     'ChangeTeamMemberPassword': TypeInfo(TypeOf.Class, create:() => ChangeTeamMemberPassword()),
     'CreateTeamMember': TypeInfo(TypeOf.Class, create:() => CreateTeamMember()),
     'CreateAccountPolicy': TypeInfo(TypeOf.Class, create:() => CreateAccountPolicy()),
@@ -62780,6 +62283,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<TeamMemberRoleInput>': TypeInfo(TypeOf.Class, create:() => <TeamMemberRoleInput>[]),
     'UpdateAccountPolicy': TypeInfo(TypeOf.Class, create:() => UpdateAccountPolicy()),
     'UpdateAccountRole': TypeInfo(TypeOf.Class, create:() => UpdateAccountRole()),
+    'CreateDashboardApiToken': TypeInfo(TypeOf.Class, create:() => CreateDashboardApiToken()),
     'RequestAccountPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => RequestAccountPasswordResetRequest()),
     'ConfirmAccountPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => ConfirmAccountPasswordResetRequest()),
     'AccountHasPasskeyRequest': TypeInfo(TypeOf.Class, create:() => AccountHasPasskeyRequest()),
@@ -62996,6 +62500,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SetSmsIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetSmsIntegrationAsDefaultRequest()),
     'TestSmsIntegration': TypeInfo(TypeOf.Class, create:() => TestSmsIntegration()),
     'SaveCodeWorkflow': TypeInfo(TypeOf.Class, create:() => SaveCodeWorkflow()),
+    'SaveCodeWorkflowCanvas': TypeInfo(TypeOf.Class, create:() => SaveCodeWorkflowCanvas()),
     'PublishCodeWorkflow': TypeInfo(TypeOf.Class, create:() => PublishCodeWorkflow()),
     'GetCodeWorkflowDraft': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowDraft()),
     'DiscardCodeWorkflowDraft': TypeInfo(TypeOf.Class, create:() => DiscardCodeWorkflowDraft()),
@@ -63107,30 +62612,15 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetAiContextRequest': TypeInfo(TypeOf.Class, create:() => GetAiContextRequest()),
     'GetAiToolsRequest': TypeInfo(TypeOf.Class, create:() => GetAiToolsRequest()),
     'InvokeAiToolRequest': TypeInfo(TypeOf.Class, create:() => InvokeAiToolRequest()),
-    'UploadChatAttachmentRequest': TypeInfo(TypeOf.Class, create:() => UploadChatAttachmentRequest()),
-    'ChatAvailabilityRequest': TypeInfo(TypeOf.Class, create:() => ChatAvailabilityRequest()),
-    'GetChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => GetChatMemoryRequest()),
-    'ForgetChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => ForgetChatMemoryRequest()),
-    'DeleteChatSessionRequest': TypeInfo(TypeOf.Class, create:() => DeleteChatSessionRequest()),
-    'SetChatSessionArchivedRequest': TypeInfo(TypeOf.Class, create:() => SetChatSessionArchivedRequest()),
-    'SetChatSessionPinnedRequest': TypeInfo(TypeOf.Class, create:() => SetChatSessionPinnedRequest()),
-    'SetChatSessionSharingRequest': TypeInfo(TypeOf.Class, create:() => SetChatSessionSharingRequest()),
-    'GetChatSessionsRequest': TypeInfo(TypeOf.Class, create:() => GetChatSessionsRequest()),
-    'GetChatSessionEntriesRequest': TypeInfo(TypeOf.Class, create:() => GetChatSessionEntriesRequest()),
-    'SetChatEntryFeedbackRequest': TypeInfo(TypeOf.Class, create:() => SetChatEntryFeedbackRequest()),
-    'AnswerChatQuestionRequest': TypeInfo(TypeOf.Class, create:() => AnswerChatQuestionRequest()),
-    'DecideChatPlanRequest': TypeInfo(TypeOf.Class, create:() => DecideChatPlanRequest()),
-    'StopChatRunStepRequest': TypeInfo(TypeOf.Class, create:() => StopChatRunStepRequest()),
-    'ChatTurnRequest': TypeInfo(TypeOf.Class, create:() => ChatTurnRequest()),
     'ScaffoldProjectRequest': TypeInfo(TypeOf.Class, create:() => ScaffoldProjectRequest()),
     'ValidateSchemaRequest': TypeInfo(TypeOf.Class, create:() => ValidateSchemaRequest()),
     'RenderTemplatePreviewRequest': TypeInfo(TypeOf.Class, create:() => RenderTemplatePreviewRequest()),
     'McpRequest': TypeInfo(TypeOf.Class, create:() => McpRequest()),
     'GetProjectBriefRequest': TypeInfo(TypeOf.Class, create:() => GetProjectBriefRequest()),
-    'GetWorkItemsRequest': TypeInfo(TypeOf.Class, create:() => GetWorkItemsRequest()),
-    'GetWorkItemRequest': TypeInfo(TypeOf.Class, create:() => GetWorkItemRequest()),
-    'ExportWorkItemRequest': TypeInfo(TypeOf.Class, create:() => ExportWorkItemRequest()),
-    'MarkNeedsYouDoneRequest': TypeInfo(TypeOf.Class, create:() => MarkNeedsYouDoneRequest()),
+    'GetAppTemplatesRequest': TypeInfo(TypeOf.Class, create:() => GetAppTemplatesRequest()),
+    'GetAppTemplateRequest': TypeInfo(TypeOf.Class, create:() => GetAppTemplateRequest()),
+    'SearchSchemaTemplatesRequest': TypeInfo(TypeOf.Class, create:() => SearchSchemaTemplatesRequest()),
+    'GetEntityGraphRequest': TypeInfo(TypeOf.Class, create:() => GetEntityGraphRequest()),
     'SaveAiProjectTrigger': TypeInfo(TypeOf.Class, create:() => SaveAiProjectTrigger()),
     'GetAiProjectTriggers': TypeInfo(TypeOf.Class, create:() => GetAiProjectTriggers()),
     'GetAiProjectTrigger': TypeInfo(TypeOf.Class, create:() => GetAiProjectTrigger()),
