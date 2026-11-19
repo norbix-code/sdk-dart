@@ -84,16 +84,5 @@ void main() {
           endsWith('/v3/account/projects/projectId_1/ai/usage'));
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
-    test(
-        'setAdminPortalEnabled sends PUT /{version}/account/projects/{projectId}/admin-portal/enabled',
-        () async {
-      final driver = FakeHttpDriver();
-      await _client(driver).projects.setAdminPortalEnabled(
-          projectId: 'projectId_1', body: {'probe': 'value'});
-      expect(driver.lastRequest!.method, equals('PUT'));
-      expect(driver.lastRequest!.url.toString(),
-          endsWith('/v3/account/projects/projectId_1/admin-portal/enabled'));
-      expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
-    });
   });
 }

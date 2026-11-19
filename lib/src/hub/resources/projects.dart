@@ -490,22 +490,6 @@ class ProjectsResource extends Resource {
     );
   }
 
-  /// `PUT /{version}/account/projects/{projectId}/admin-portal/enabled`
-  Future<Object?> setAdminPortalEnabled(
-      {required Object projectId,
-      Map<String, Object?>? query,
-      Object? body,
-      Map<String, String>? headers}) {
-    return transport.send(
-      route: '/{version}/account/projects/{projectId}/admin-portal/enabled',
-      method: 'PUT',
-      query: query,
-      body: body,
-      headers: headers,
-      pathParams: <String, Object?>{'projectId': projectId},
-    );
-  }
-
   /// `PATCH /{version}/account/projects/{projectId}/settings/admin-url`
   ///
   /// Set or clear the project's admin portal URL. Body: `{'url': 'https://admin.example.com'}` (`null` clears it).
