@@ -1737,9 +1737,6 @@ Project settings on `hub.projects`:
 |--------|-------|
 | `updateProjectAdminUrl` | `PATCH /{version}/account/projects/{projectId}/settings/admin-url` |
 | `updateProjectLegalDocuments` | `PATCH /{version}/account/projects/{projectId}/settings/legal` |
-| `updateProjectExposeLegal` | `PATCH /{version}/account/projects/{projectId}/settings/legal/expose` |
-| `updateProjectExposeBrand` | `PATCH /{version}/account/projects/{projectId}/settings/brand/expose` |
-| `updateProjectExposeAuth` | `PATCH /{version}/account/projects/{projectId}/settings/auth/expose` |
 | `getAdminPortalStructure` | `GET /{version}/account/projects/{projectId}/admin-portal/structure` |
 | `assignAdminPortalServiceUser` | `PUT /{version}/account/projects/{projectId}/settings/admin-portal/service-user` |
 
@@ -1748,10 +1745,7 @@ await hub.projects.updateProjectLegalDocuments(
   projectId: projectId,
   body: {'termsMarkdown': '# Terms', 'privacyMarkdown': '# Privacy'},
 );
-await hub.projects.updateProjectExposeLegal(projectId: projectId, body: {'exposed': true});
-// Show the brand and the sign-in settings in the Admin Portal.
-await hub.projects.updateProjectExposeBrand(projectId: projectId, body: {'exposed': true});
-await hub.projects.updateProjectExposeAuth(projectId: projectId, body: {'exposed': true});
+// Saved documents, the brand and the sign-in settings are always public.
 ```
 
 Public project routes on the API host, `api.publicProjects`. They need no

@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-19 15:03:49
+Date: 2026-11-19 15:30:31
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -18702,19 +18702,10 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     List<ProjectEnvironmentExecutionIdentityDto>? defaultExecutionIdentities;
 
     // @DataMember
-    bool? exposeBrandToAdminPortal;
-
-    // @DataMember
-    bool? exposeAuthToAdminPortal;
-
-    // @DataMember
     String? adminPortalServiceUserId;
 
     // @DataMember
     List<AuthenticationFlowSummaryDto>? membershipAuthenticationFlows;
-
-    // @DataMember
-    bool? exposeLegalToAdminPortal;
 
     // @DataMember
     ProjectAiSettingsDto? aiChat;
@@ -18806,7 +18797,7 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
     // @DataMember
     int connections = 0;
 
-    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.emailClickTracking,this.environmentAdminUrls,this.defaultExecutionIdentities,this.exposeBrandToAdminPortal,this.exposeAuthToAdminPortal,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.exposeLegalToAdminPortal,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
+    ProjectDto({this.accountViewId="",this.projectStatus,this.isActive,this.viewId="",this.name="",this.uniqueName="",this.hostLabel,this.apiHost,this.description,this.marketingUrl,this.adminUrl,this.effectiveAdminUrl,this.defaultLanguage="",this.languages=const [],this.primaryRegion,this.additionalRegions,this.isMultiRegionEligible,this.brand,this.notificationSettings,this.allowedOrigins,this.emailClickTracking,this.environmentAdminUrls,this.defaultExecutionIdentities,this.adminPortalServiceUserId,this.membershipAuthenticationFlows,this.aiChat,this.legalTermsMarkdown,this.legalPrivacyMarkdown,this.environments=const [],this.environmentRanks=const {},this.database,this.email,this.ai,this.membership,this.logging,this.serverEvents,this.push,this.scheduler,this.code,this.files,this.payments,this.sms,this.databaseEnabled,this.emailEnabled,this.membershipEnabled,this.loggingEnabled,this.serverEventsEnabled,this.pushEnabled,this.schedulerEnabled,this.codeEnabled,this.filesEnabled,this.paymentsEnabled,this.smsEnabled,this.defaultLlmIntegrationViewId,this.connections=0});
     ProjectDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -18833,11 +18824,8 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         emailClickTracking = json['emailClickTracking'];
         environmentAdminUrls = JsonConverters.fromJson(json['environmentAdminUrls'],'List<ProjectEnvironmentAdminUrlDto>',context!);
         defaultExecutionIdentities = JsonConverters.fromJson(json['defaultExecutionIdentities'],'List<ProjectEnvironmentExecutionIdentityDto>',context!);
-        exposeBrandToAdminPortal = json['exposeBrandToAdminPortal'];
-        exposeAuthToAdminPortal = json['exposeAuthToAdminPortal'];
         adminPortalServiceUserId = json['adminPortalServiceUserId'];
         membershipAuthenticationFlows = JsonConverters.fromJson(json['membershipAuthenticationFlows'],'List<AuthenticationFlowSummaryDto>',context!);
-        exposeLegalToAdminPortal = json['exposeLegalToAdminPortal'];
         aiChat = JsonConverters.fromJson(json['aiChat'],'ProjectAiSettingsDto',context!);
         legalTermsMarkdown = json['legalTermsMarkdown'];
         legalPrivacyMarkdown = json['legalPrivacyMarkdown'];
@@ -18895,11 +18883,8 @@ class ProjectDto implements IHasViewId, IBindableContract, IConvertible
         'emailClickTracking': emailClickTracking,
         'environmentAdminUrls': JsonConverters.toJson(environmentAdminUrls,'List<ProjectEnvironmentAdminUrlDto>',context!),
         'defaultExecutionIdentities': JsonConverters.toJson(defaultExecutionIdentities,'List<ProjectEnvironmentExecutionIdentityDto>',context!),
-        'exposeBrandToAdminPortal': exposeBrandToAdminPortal,
-        'exposeAuthToAdminPortal': exposeAuthToAdminPortal,
         'adminPortalServiceUserId': adminPortalServiceUserId,
         'membershipAuthenticationFlows': JsonConverters.toJson(membershipAuthenticationFlows,'List<AuthenticationFlowSummaryDto>',context!),
-        'exposeLegalToAdminPortal': exposeLegalToAdminPortal,
         'aiChat': JsonConverters.toJson(aiChat,'ProjectAiSettingsDto',context!),
         'legalTermsMarkdown': legalTermsMarkdown,
         'legalPrivacyMarkdown': legalPrivacyMarkdown,
@@ -41268,70 +41253,6 @@ class GetProjectTokens extends CodeMashRequestBase implements IReturn<GetProject
 }
 
 /**
-* Sets whether the project's brand is returned by the public Admin Portal config
-*/
-// @Route("/{version}/account/projects/{projectId}/settings/brand/expose", "PATCH")
-// @Api(Description="Sets whether the project's brand is returned by the public Admin Portal config")
-class UpdateProjectExposeBrand extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
-{
-    /**
-    * True to return the brand in the public Admin Portal config, false to hide it.
-    */
-    // @ApiMember(Description="True to return the brand in the public Admin Portal config, false to hide it.")
-    bool? exposed;
-
-    UpdateProjectExposeBrand({this.exposed});
-    UpdateProjectExposeBrand.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        exposed = json['exposed'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'exposed': exposed
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "UpdateProjectExposeBrand";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Sets whether the project's sign-in methods and password policy are returned by the public Admin Portal config
-*/
-// @Route("/{version}/account/projects/{projectId}/settings/auth/expose", "PATCH")
-// @Api(Description="Sets whether the project's sign-in methods and password policy are returned by the public Admin Portal config")
-class UpdateProjectExposeAuth extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
-{
-    /**
-    * True to return sign-in methods and password policy in the public Admin Portal config, false to hide them.
-    */
-    // @ApiMember(Description="True to return sign-in methods and password policy in the public Admin Portal config, false to hide them.")
-    bool? exposed;
-
-    UpdateProjectExposeAuth({this.exposed});
-    UpdateProjectExposeAuth.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        exposed = json['exposed'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'exposed': exposed
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "UpdateProjectExposeAuth";
-    TypeContext? context = _ctx;
-}
-
-/**
 * Assigns the project's Admin Portal service user
 */
 // @Route("/{version}/account/projects/{projectId}/settings/admin-portal/service-user", "PUT")
@@ -42166,38 +42087,6 @@ class UpdateProjectLegalDocuments extends CodeMashRequestBase implements IReturn
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "UpdateProjectLegalDocuments";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Sets whether the project's legal documents are publicly readable via the Admin Portal
-*/
-// @Route("/{version}/account/projects/{projectId}/settings/legal/expose", "PATCH")
-// @Api(Description="Sets whether the project's legal documents are publicly readable via the Admin Portal")
-class UpdateProjectExposeLegal extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPatch
-{
-    /**
-    * True to make the legal documents publicly readable via the Admin Portal, false to hide them.
-    */
-    // @ApiMember(Description="True to make the legal documents publicly readable via the Admin Portal, false to hide them.")
-    bool? exposed;
-
-    UpdateProjectExposeLegal({this.exposed});
-    UpdateProjectExposeLegal.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        exposed = json['exposed'];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'exposed': exposed
-    });
-
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "UpdateProjectExposeLegal";
     TypeContext? context = _ctx;
 }
 
@@ -62220,8 +62109,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetProjectHealth': TypeInfo(TypeOf.Class, create:() => GetProjectHealth()),
     'WaitForProjectActiveRequest': TypeInfo(TypeOf.Class, create:() => WaitForProjectActiveRequest()),
     'GetProjectTokens': TypeInfo(TypeOf.Class, create:() => GetProjectTokens()),
-    'UpdateProjectExposeBrand': TypeInfo(TypeOf.Class, create:() => UpdateProjectExposeBrand()),
-    'UpdateProjectExposeAuth': TypeInfo(TypeOf.Class, create:() => UpdateProjectExposeAuth()),
     'AssignAdminPortalServiceUserRequest': TypeInfo(TypeOf.Class, create:() => AssignAdminPortalServiceUserRequest()),
     'GetAdminPortalStructure': TypeInfo(TypeOf.Class, create:() => GetAdminPortalStructure()),
     'UpdateProjectAdminUrl': TypeInfo(TypeOf.Class, create:() => UpdateProjectAdminUrl()),
@@ -62249,7 +62136,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UpdateProjectLanguages': TypeInfo(TypeOf.Class, create:() => UpdateProjectLanguages()),
     'CheckProjectLanguages': TypeInfo(TypeOf.Class, create:() => CheckProjectLanguages()),
     'UpdateProjectLegalDocuments': TypeInfo(TypeOf.Class, create:() => UpdateProjectLegalDocuments()),
-    'UpdateProjectExposeLegal': TypeInfo(TypeOf.Class, create:() => UpdateProjectExposeLegal()),
     'UpdateProjectUrl': TypeInfo(TypeOf.Class, create:() => UpdateProjectUrl()),
     'UpdateProjectName': TypeInfo(TypeOf.Class, create:() => UpdateProjectName()),
     'UpdateProjectRegions': TypeInfo(TypeOf.Class, create:() => UpdateProjectRegions()),
