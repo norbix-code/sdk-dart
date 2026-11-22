@@ -342,6 +342,45 @@ await api.users.linkIdentity(userId: 'usr_…',
   `returnUrl` sends the browser to the mode's failure page with
   `error=return_url_not_allowed`.
 
+## E-mail address verification (password sign-up)
+
+A project can ask e-mail + password users to verify their address, and can
+refuse password sign-in until they do (Hub membership authorization settings
+`AllowUserVerification`, `UserVerificationCallback`, `RequireEmailVerification`).
+The e-mail links to the project's verification callback with `#token=…`.
+Both calls are public: no API key or sign-in needed.
+
+```dart
+// The callback page reads the token from the URL fragment:
+final verified = await api.userAuth
+    .verifyEmailAddress(body: {'token': token}) as Map<String, Object?>;
+print('${verified['authId']} verified at ${verified['verifiedAtUtc']}');
+
+// Sign-in refused because the address is not verified yet:
+try {
+  await signIn(email, password);
+} on NorbixError catch (e) {
+  if (isEmailNotVerifiedError(e)) {
+    // "Check your inbox" — and offer a new link. Always answers OK.
+    await api.userAuth
+        .resendEmailAddressVerification(body: {'email': email});
+  }
+}
+```
+
+| Method | Route |
+|--------|-------|
+| `userAuth.verifyEmailAddress(body:)` | `POST /{version}/membership/userauth/email-verification/confirm` — `token`, `databaseIntegrationId?` → `authId`, `verifiedAtUtc` |
+| `userAuth.resendEmailAddressVerification(body:)` | `POST /{version}/membership/userauth/email-verification/resend` — `email`, `databaseIntegrationId?`; always OK |
+
+- `kEmailNotVerifiedErrorCode` is `CM-ERRORS-MEMBERSHIP-USERS-052`, the HTTP 401
+  password sign-in refusal; `isEmailNotVerifiedError(e)` checks the error's
+  code and every entry in `e.errors`.
+- `verifyEmailAddress` refusals: `CM-ERRORS-MEMBERSHIP-USERS-051` (link invalid,
+  expired, used or replaced), `-049` (the link is for another environment).
+- These are not the passkey sign-up code routes (`startEmailVerification` /
+  `confirmEmailVerification`).
+
 ## Errors
 
 ```dart
