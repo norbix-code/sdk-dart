@@ -275,4 +275,47 @@ class UserAuthResource extends Resource {
       pathParams: null,
     );
   }
+
+  /// `POST /{version}/membership/userauth/email-verification/confirm`
+  ///
+  /// Confirms the e-mail address of an e-mail + password user with the token
+  /// from the verification link (Norbix adds `#token=…` to the project's
+  /// verification callback). Body: `token`, optional `databaseIntegrationId`.
+  /// Answers `authId` and `verifiedAtUtc`. Public: no sign-in needed.
+  /// Refusals: `CM-ERRORS-MEMBERSHIP-USERS-051` (link invalid, expired, used
+  /// or replaced), `-049` (the link is for another environment).
+  ///
+  /// Not the passkey sign-up code ([confirmEmailVerification]).
+  Future<Object?> verifyEmailAddress(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/userauth/email-verification/confirm',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
+
+  /// `POST /{version}/membership/userauth/email-verification/resend`
+  ///
+  /// Sends a new verification link to an e-mail + password user. Body:
+  /// `email`, optional `databaseIntegrationId`. Always answers OK, so it
+  /// never tells whether the address is known. Public: no sign-in needed.
+  Future<Object?> resendEmailAddressVerification(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/userauth/email-verification/resend',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
 }

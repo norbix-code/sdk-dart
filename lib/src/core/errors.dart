@@ -306,3 +306,18 @@ class NorbixTransportError extends NorbixError {
     super.details,
   }) : super(status: 0);
 }
+
+/// The gateway's code for a password sign-in refused because the login's
+/// e-mail address is not verified yet, while the project blocks sign-in until
+/// it is (HTTP 401). Show "check your inbox" and offer
+/// `api.userAuth.resendEmailAddressVerification(body: {'email': …})`.
+const String kEmailNotVerifiedErrorCode = 'CM-ERRORS-MEMBERSHIP-USERS-052';
+
+/// `true` when [error] is the "e-mail not verified" sign-in refusal
+/// ([kEmailNotVerifiedErrorCode]), whether the code is the error's own or one
+/// of its [NorbixError.errors].
+bool isEmailNotVerifiedError(Object? error) {
+  if (error is! NorbixError) return false;
+  if (error.code == kEmailNotVerifiedErrorCode) return true;
+  return error.errors.any((e) => e.errorCode == kEmailNotVerifiedErrorCode);
+}
