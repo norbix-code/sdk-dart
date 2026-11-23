@@ -39,7 +39,7 @@ jobs:
 
       - name: Setup Dart
         # With id-token: write, setup-dart configures pub.dev's OIDC credentials.
-        uses: dart-lang/setup-dart@v1.8.1
+        uses: dart-lang/setup-dart@v1.8.2
         with:
           sdk: stable
 
