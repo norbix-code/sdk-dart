@@ -51,7 +51,7 @@ jobs:
           git reset --hard "origin/${GITHUB_REF_NAME}"
 
       - name: Setup Dart
-        uses: dart-lang/setup-dart@v1.8.1
+        uses: dart-lang/setup-dart@v1.8.2
         with:
           sdk: stable
 
