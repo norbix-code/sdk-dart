@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-23 09:26:21
+Date: 2026-11-23 17:05:49
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -13432,7 +13432,10 @@ class UpdateOneRequest extends CodeMashRequestBase implements IReturn<EmptyRespo
     // @DataMember
     String? arrayFilters;
 
-    UpdateOneRequest({this.collectionName="",this.id="",this.databaseIntegrationId,this.update="",this.arrayFilters});
+    // @DataMember
+    String? condition;
+
+    UpdateOneRequest({this.collectionName="",this.id="",this.databaseIntegrationId,this.update="",this.arrayFilters,this.condition});
     UpdateOneRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -13442,6 +13445,7 @@ class UpdateOneRequest extends CodeMashRequestBase implements IReturn<EmptyRespo
         databaseIntegrationId = json['databaseIntegrationId'];
         update = json['update'] ?? "";
         arrayFilters = json['arrayFilters'];
+        condition = json['condition'];
         return this;
     }
 
@@ -13450,7 +13454,8 @@ class UpdateOneRequest extends CodeMashRequestBase implements IReturn<EmptyRespo
         'id': id,
         'databaseIntegrationId': databaseIntegrationId,
         'update': update,
-        'arrayFilters': arrayFilters
+        'arrayFilters': arrayFilters,
+        'condition': condition
     });
 
     createResponse() => EmptyResponse();
@@ -15134,6 +15139,108 @@ class CancelCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
     createResponse() => WorkflowRunResponse();
     getResponseTypeName() => "WorkflowRunResponse";
     getTypeName() => "CancelCodeWorkflowRun";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/test", "POST")
+// @DataContract
+class TestCodeWorkflow extends CodeMashRequestBase implements IReturn<InvokeCodeWorkflowResponse>, IConvertible, IPost
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * database | membership | manual.
+    */
+    // @DataMember
+    // @ApiMember(Description="database | membership | manual.", IsRequired=true)
+    String source = "";
+
+    /**
+    * The event name, e.g. database.record.inserted; absent = inserted (database) or updated (membership).
+    */
+    // @DataMember
+    // @ApiMember(Description="The event name, e.g. database.record.inserted; absent = inserted (database) or updated (membership).")
+    String? event;
+
+    /**
+    * database: the collection the record is in.
+    */
+    // @DataMember
+    // @ApiMember(Description="database: the collection the record is in.")
+    String? collection;
+
+    /**
+    * database: the record's id.
+    */
+    // @DataMember
+    // @ApiMember(Description="database: the record's id.")
+    String? recordId;
+
+    /**
+    * membership: the user's id (usr_…).
+    */
+    // @DataMember
+    // @ApiMember(Description="membership: the user's id (usr_…).")
+    String? userId;
+
+    /**
+    * An update only: fields laid over the record or user as its new state (null removes a field).
+    */
+    // @DataMember
+    // @ApiMember(Description="An update only: fields laid over the record or user as its new state (null removes a field).")
+    Map<String,dynamic?>? edits;
+
+    /**
+    * The @Model.Request object; for a manual test it is checked against the definition's inputs.
+    */
+    // @DataMember
+    // @ApiMember(Description="The @Model.Request object; for a manual test it is checked against the definition's inputs.")
+    Map<String,dynamic?>? payload;
+
+    /**
+    * "draft" or a version number; absent = the draft when there is one, else the latest published.
+    */
+    // @DataMember
+    // @ApiMember(Description="\"draft\" or a version number; absent = the draft when there is one, else the latest published.")
+    String? runVersion;
+
+    TestCodeWorkflow({this.id="",this.source="",this.event,this.collection,this.recordId,this.userId,this.edits,this.payload,this.runVersion});
+    TestCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        source = json['source'] ?? "";
+        event = json['event'];
+        collection = json['collection'];
+        recordId = json['recordId'];
+        userId = json['userId'];
+        edits = JsonConverters.fromJson(json['edits'],'Map<String,dynamic?>',context!);
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        runVersion = json['runVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'source': source,
+        'event': event,
+        'collection': collection,
+        'recordId': recordId,
+        'userId': userId,
+        'edits': JsonConverters.toJson(edits,'Map<String,dynamic?>',context!),
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'runVersion': runVersion
+    });
+
+    createResponse() => InvokeCodeWorkflowResponse();
+    getResponseTypeName() => "InvokeCodeWorkflowResponse";
+    getTypeName() => "TestCodeWorkflow";
     TypeContext? context = _ctx;
 }
 
@@ -18756,6 +18863,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ResumeCodeWorkflowRunByKey': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRunByKey()),
     'RetryCodeWorkflowRunStep': TypeInfo(TypeOf.Class, create:() => RetryCodeWorkflowRunStep()),
     'CancelCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => CancelCodeWorkflowRun()),
+    'TestCodeWorkflow': TypeInfo(TypeOf.Class, create:() => TestCodeWorkflow()),
     'GetNotificationInboxRequest': TypeInfo(TypeOf.Class, create:() => GetNotificationInboxRequest()),
     'GetUnreadCountRequest': TypeInfo(TypeOf.Class, create:() => GetUnreadCountRequest()),
     'MarkNotificationReadRequest': TypeInfo(TypeOf.Class, create:() => MarkNotificationReadRequest()),

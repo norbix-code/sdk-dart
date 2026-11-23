@@ -1011,6 +1011,14 @@ for (final step in res['items'] as List) {
 }
 ```
 
+## Saved secrets of an integration
+
+`hub.integrations.getIntegrationSecrets(integrationId: id, query: {'env': 'TEST'})`
+lists which secrets of an integration of any module are saved (`isSet`) and which
+may be removed (`isOptional`) — never a value. Remove optional ones with
+`hub.integrations.removeIntegrationSecrets(integrationId: id, body: {'keys': ['webhookSigningSecret']})`;
+a needed key answers `CM-ERRORS-SECRETS-012` and nothing changes.
+
 ## Keyless cloud connections
 
 The AWS (S3, SES, Lambda) and Azure (Blob, Communication Services, Functions)
