@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-19 15:30:31
+Date: 2026-11-23 09:26:21
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -7499,6 +7499,48 @@ class SocialSignInTokenResponse extends ResponseBase implements IConvertible
 }
 
 // @DataContract
+class EmailAddressVerifiedResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? authId;
+
+    // @DataMember
+    DateTime? verifiedAtUtc;
+
+    EmailAddressVerifiedResponse({this.authId,this.verifiedAtUtc});
+    EmailAddressVerifiedResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        authId = json['authId'];
+        verifiedAtUtc = JsonConverters.fromJson(json['verifiedAtUtc'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'authId': authId,
+        'verifiedAtUtc': JsonConverters.toJson(verifiedAtUtc,'DateTime',context!)
+    });
+
+    getTypeName() => "EmailAddressVerifiedResponse";
+    TypeContext? context = _ctx;
+}
+
+class PasskeyOkResponse extends ResponseBase implements IConvertible
+{
+    PasskeyOkResponse();
+    PasskeyOkResponse.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson();
+    getTypeName() => "PasskeyOkResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class CredentialChangedResponse extends ResponseBase implements IConvertible
 {
     // @DataMember
@@ -7523,20 +7565,6 @@ class CredentialChangedResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "CredentialChangedResponse";
-    TypeContext? context = _ctx;
-}
-
-class PasskeyOkResponse extends ResponseBase implements IConvertible
-{
-    PasskeyOkResponse();
-    PasskeyOkResponse.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    getTypeName() => "PasskeyOkResponse";
     TypeContext? context = _ctx;
 }
 
@@ -9758,6 +9786,44 @@ class SetEndUserChatEntryFeedbackRequest extends CodeMashRequestBase implements 
 }
 
 /**
+* Applies or dismisses an action the caller's AI chat held for them.
+*/
+// @Route("/{version}/ai/chat/sessions/{SessionId}/actions/{EntryId}", "POST")
+// @Api(Description="Applies or dismisses an action the caller's AI chat held for them.")
+class DecideEndUserChatActionRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    String sessionId = "";
+    String entryId = "";
+    /**
+    * apply (runs the held action once, as you) or dismiss (runs nothing).
+    */
+    // @ApiMember(Description="apply (runs the held action once, as you) or dismiss (runs nothing).", IsRequired=true)
+    String decision = "";
+
+    DecideEndUserChatActionRequest({this.sessionId="",this.entryId="",this.decision=""});
+    DecideEndUserChatActionRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        sessionId = json['sessionId'] ?? "";
+        entryId = json['entryId'] ?? "";
+        decision = json['decision'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'sessionId': sessionId,
+        'entryId': entryId,
+        'decision': decision
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "DecideEndUserChatActionRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Lists what the AI chat remembers about the caller.
 */
 // @Route("/{version}/ai/chat/memory", "GET")
@@ -11583,6 +11649,92 @@ class UpdateUserPreferencesRequest extends CodeMashRequestBase implements IRetur
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "UpdateUserPreferencesRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Membership · E-mail verification
+*/
+// @Route("/{version}/membership/userauth/email-verification/confirm", "POST")
+// @Api(Description="Membership · E-mail verification")
+// @DataContract
+class VerifyEmailAddressRequest extends CodeMashRequestBase implements IReturn<EmailAddressVerifiedResponse>, IConvertible, IPost
+{
+    /**
+    * The one-time token from the verification link (the part after #token=).
+    */
+    // @DataMember
+    // @ApiMember(Description="The one-time token from the verification link (the part after #token=).", IsRequired=true)
+    String token = "";
+
+    /**
+    * Database integration id. Optional — defaults to the request environment's default integration.
+    */
+    // @DataMember
+    // @ApiMember(Description="Database integration id. Optional — defaults to the request environment's default integration.")
+    String? databaseIntegrationId;
+
+    VerifyEmailAddressRequest({this.token="",this.databaseIntegrationId});
+    VerifyEmailAddressRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        token = json['token'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'token': token,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => EmailAddressVerifiedResponse();
+    getResponseTypeName() => "EmailAddressVerifiedResponse";
+    getTypeName() => "VerifyEmailAddressRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
+* Membership · E-mail verification
+*/
+// @Route("/{version}/membership/userauth/email-verification/resend", "POST")
+// @Api(Description="Membership · E-mail verification")
+// @DataContract
+class ResendEmailAddressVerificationRequest extends CodeMashRequestBase implements IReturn<PasskeyOkResponse>, IConvertible, IPost
+{
+    /**
+    * The e-mail address the user signed up with.
+    */
+    // @DataMember
+    // @ApiMember(Description="The e-mail address the user signed up with.", IsRequired=true)
+    String email = "";
+
+    /**
+    * Database integration id. Optional — defaults to the request environment's default integration.
+    */
+    // @DataMember
+    // @ApiMember(Description="Database integration id. Optional — defaults to the request environment's default integration.")
+    String? databaseIntegrationId;
+
+    ResendEmailAddressVerificationRequest({this.email="",this.databaseIntegrationId});
+    ResendEmailAddressVerificationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        email = json['email'] ?? "";
+        databaseIntegrationId = json['databaseIntegrationId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'email': email,
+        'databaseIntegrationId': databaseIntegrationId
+    });
+
+    createResponse() => PasskeyOkResponse();
+    getResponseTypeName() => "PasskeyOkResponse";
+    getTypeName() => "ResendEmailAddressVerificationRequest";
     TypeContext? context = _ctx;
 }
 
@@ -18361,8 +18513,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'StartLinkIdentityResponse': TypeInfo(TypeOf.Class, create:() => StartLinkIdentityResponse()),
     'SocialSignInStartResponse': TypeInfo(TypeOf.Class, create:() => SocialSignInStartResponse()),
     'SocialSignInTokenResponse': TypeInfo(TypeOf.Class, create:() => SocialSignInTokenResponse()),
-    'CredentialChangedResponse': TypeInfo(TypeOf.Class, create:() => CredentialChangedResponse()),
+    'EmailAddressVerifiedResponse': TypeInfo(TypeOf.Class, create:() => EmailAddressVerifiedResponse()),
     'PasskeyOkResponse': TypeInfo(TypeOf.Class, create:() => PasskeyOkResponse()),
+    'CredentialChangedResponse': TypeInfo(TypeOf.Class, create:() => CredentialChangedResponse()),
     'SendTestPasswordResetResponse': TypeInfo(TypeOf.Class, create:() => SendTestPasswordResetResponse()),
     'PasskeyCeremonyOptionsResponse': TypeInfo(TypeOf.Class, create:() => PasskeyCeremonyOptionsResponse()),
     'PasskeyAuthTokensResponse': TypeInfo(TypeOf.Class, create:() => PasskeyAuthTokensResponse()),
@@ -18475,6 +18628,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ListEndUserChatAttachmentsRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatAttachmentsRequest()),
     'DeleteEndUserChatAttachmentRequest': TypeInfo(TypeOf.Class, create:() => DeleteEndUserChatAttachmentRequest()),
     'SetEndUserChatEntryFeedbackRequest': TypeInfo(TypeOf.Class, create:() => SetEndUserChatEntryFeedbackRequest()),
+    'DecideEndUserChatActionRequest': TypeInfo(TypeOf.Class, create:() => DecideEndUserChatActionRequest()),
     'ListEndUserChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => ListEndUserChatMemoryRequest()),
     'ForgetEndUserChatMemoryRequest': TypeInfo(TypeOf.Class, create:() => ForgetEndUserChatMemoryRequest()),
     'GetEndUserChatAvailabilityRequest': TypeInfo(TypeOf.Class, create:() => GetEndUserChatAvailabilityRequest()),
@@ -18518,6 +18672,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'UnsubscribeContactRequest': TypeInfo(TypeOf.Class, create:() => UnsubscribeContactRequest()),
     'UpdateUserRequest': TypeInfo(TypeOf.Class, create:() => UpdateUserRequest()),
     'UpdateUserPreferencesRequest': TypeInfo(TypeOf.Class, create:() => UpdateUserPreferencesRequest()),
+    'VerifyEmailAddressRequest': TypeInfo(TypeOf.Class, create:() => VerifyEmailAddressRequest()),
+    'ResendEmailAddressVerificationRequest': TypeInfo(TypeOf.Class, create:() => ResendEmailAddressVerificationRequest()),
     'ChangePasswordRequest': TypeInfo(TypeOf.Class, create:() => ChangePasswordRequest()),
     'RequestPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => RequestPasswordResetRequest()),
     'ConfirmPasswordResetRequest': TypeInfo(TypeOf.Class, create:() => ConfirmPasswordResetRequest()),

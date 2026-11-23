@@ -257,4 +257,24 @@ class PaymentsResource extends Resource {
       pathParams: null,
     );
   }
+
+  /// `POST /{version}/payments/integrations/test-payment` — opens a real 0.01
+  /// test payment at the provider of a payments integration. Body:
+  /// `integrationId` and `returnUrl` (absolute https; http only for
+  /// localhost). Answer: `payUrl` (open it to pay), `reference`,
+  /// `amountMinor`, `currency`. Neopay and Montonio only; another provider
+  /// answers `CM-ERRORS-PAYMENTS-014`.
+  Future<Object?> startPaymentsIntegrationTestPayment(
+      {Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/payments/integrations/test-payment',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: null,
+    );
+  }
 }
