@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-23 09:26:20
+Date: 2026-11-23 17:05:49
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -22598,6 +22598,35 @@ class FilesIntegrationListProjection extends IntegrationListProjection implement
     TypeContext? context = _ctx;
 }
 
+class IntegrationSecretDto implements IConvertible
+{
+    String key = "";
+    String field = "";
+    bool? isSet;
+    bool? isOptional;
+
+    IntegrationSecretDto({this.key="",this.field="",this.isSet,this.isOptional});
+    IntegrationSecretDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        key = json['key'] ?? "";
+        field = json['field'] ?? "";
+        isSet = json['isSet'];
+        isOptional = json['isOptional'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'key': key,
+        'field': field,
+        'isSet': isSet,
+        'isOptional': isOptional
+    };
+
+    getTypeName() => "IntegrationSecretDto";
+    TypeContext? context = _ctx;
+}
+
 class KeylessIntegrationSetupTemplate implements IConvertible
 {
     String kind = "";
@@ -33004,6 +33033,27 @@ class GetFilesIntegrationsResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetFilesIntegrationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetIntegrationSecretsResponse extends ResponseBase implements IConvertible
+{
+    List<IntegrationSecretDto> result = [];
+
+    GetIntegrationSecretsResponse({this.result=const []});
+    GetIntegrationSecretsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'List<IntegrationSecretDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'List<IntegrationSecretDto>',context!)
+    });
+
+    getTypeName() => "GetIntegrationSecretsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -47913,7 +47963,13 @@ class UpdateOneRecord extends CodeMashRequestBase implements IReturn<EmptyRespon
     // @ApiMember(Description="Optional MongoDB arrayFilters — a JSON array of filter documents, one per $[name] identifier used in the Update paths, e.g. [{\"line.sku\":\"A-1\"}] for {\"lines.$[line].qty\":3}.")
     String? arrayFilters;
 
-    UpdateOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId,this.update="",this.arrayFilters});
+    /**
+    * Optional condition — a MongoDB extended-JSON filter the record must also match to be changed, e.g. {"revision":4}. When the record exists but does not match, nothing is written and the call fails with CM-ERRORS-DATABASE-070 (409).
+    */
+    // @ApiMember(Description="Optional condition — a MongoDB extended-JSON filter the record must also match to be changed, e.g. {\"revision\":4}. When the record exists but does not match, nothing is written and the call fails with CM-ERRORS-DATABASE-070 (409).")
+    String? condition;
+
+    UpdateOneRecord({this.collectionName="",this.id="",this.databaseIntegrationId,this.update="",this.arrayFilters,this.condition});
     UpdateOneRecord.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -47923,6 +47979,7 @@ class UpdateOneRecord extends CodeMashRequestBase implements IReturn<EmptyRespon
         databaseIntegrationId = json['databaseIntegrationId'];
         update = json['update'] ?? "";
         arrayFilters = json['arrayFilters'];
+        condition = json['condition'];
         return this;
     }
 
@@ -47931,7 +47988,8 @@ class UpdateOneRecord extends CodeMashRequestBase implements IReturn<EmptyRespon
         'id': id,
         'databaseIntegrationId': databaseIntegrationId,
         'update': update,
-        'arrayFilters': arrayFilters
+        'arrayFilters': arrayFilters,
+        'condition': condition
     });
 
     createResponse() => EmptyResponse();
@@ -48778,6 +48836,34 @@ class GetFilesIntegrations extends CodeMashListPaginationRequestBase implements 
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/integrations/{IntegrationId}/secrets", "GET")
+class GetIntegrationSecrets extends CodeMashRequestBase implements IReturn<GetIntegrationSecretsResponse>, IConvertible, IGet
+{
+    /**
+    * The integration id (any module).
+    */
+    // @ApiMember(Description="The integration id (any module).", IsRequired=true)
+    String integrationId = "";
+
+    GetIntegrationSecrets({this.integrationId=""});
+    GetIntegrationSecrets.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationId = json['integrationId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationId': integrationId
+    });
+
+    createResponse() => GetIntegrationSecretsResponse();
+    getResponseTypeName() => "GetIntegrationSecretsResponse";
+    getTypeName() => "GetIntegrationSecrets";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/integrations/keyless/setup", "GET")
 class GetKeylessIntegrationSetup extends CodeMashRequestBase implements IReturn<GetKeylessIntegrationSetupResponse>, IConvertible, IGet
 {
@@ -48819,6 +48905,42 @@ class GetKeylessIntegrationSetup extends CodeMashRequestBase implements IReturn<
     createResponse() => GetKeylessIntegrationSetupResponse();
     getResponseTypeName() => "GetKeylessIntegrationSetupResponse";
     getTypeName() => "GetKeylessIntegrationSetup";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/integrations/{IntegrationId}/secrets/remove", "POST")
+class RemoveIntegrationSecretsRequest extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    /**
+    * The integration id (any module).
+    */
+    // @ApiMember(Description="The integration id (any module).", IsRequired=true)
+    String integrationId = "";
+
+    /**
+    * Secret keys to remove, as GET /integrations/{integrationId}/secrets lists them (only optional ones).
+    */
+    // @ApiMember(Description="Secret keys to remove, as GET /integrations/{integrationId}/secrets lists them (only optional ones).", IsRequired=true)
+    List<String> keys = [];
+
+    RemoveIntegrationSecretsRequest({this.integrationId="",this.keys=const []});
+    RemoveIntegrationSecretsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationId = json['integrationId'] ?? "";
+        keys = JsonConverters.fromJson(json['keys'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationId': integrationId,
+        'keys': JsonConverters.toJson(keys,'List<String>',context!)
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "RemoveIntegrationSecretsRequest";
     TypeContext? context = _ctx;
 }
 
@@ -52778,6 +52900,108 @@ class CancelCodeWorkflowRun extends CodeMashRequestBase implements IReturn<Workf
     createResponse() => WorkflowRunResponse();
     getResponseTypeName() => "WorkflowRunResponse";
     getTypeName() => "CancelCodeWorkflowRun";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/code/workflows/{Id}/test", "POST")
+// @DataContract
+class TestCodeWorkflow extends CodeMashRequestBase implements IReturn<InvokeCodeWorkflowResponse>, IConvertible, IPost
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * database | membership | manual.
+    */
+    // @DataMember
+    // @ApiMember(Description="database | membership | manual.", IsRequired=true)
+    String source = "";
+
+    /**
+    * The event name, e.g. database.record.inserted; absent = inserted (database) or updated (membership).
+    */
+    // @DataMember
+    // @ApiMember(Description="The event name, e.g. database.record.inserted; absent = inserted (database) or updated (membership).")
+    String? event;
+
+    /**
+    * database: the collection the record is in.
+    */
+    // @DataMember
+    // @ApiMember(Description="database: the collection the record is in.")
+    String? collection;
+
+    /**
+    * database: the record's id.
+    */
+    // @DataMember
+    // @ApiMember(Description="database: the record's id.")
+    String? recordId;
+
+    /**
+    * membership: the user's id (usr_…).
+    */
+    // @DataMember
+    // @ApiMember(Description="membership: the user's id (usr_…).")
+    String? userId;
+
+    /**
+    * An update only: fields laid over the record or user as its new state (null removes a field).
+    */
+    // @DataMember
+    // @ApiMember(Description="An update only: fields laid over the record or user as its new state (null removes a field).")
+    Map<String,dynamic?>? edits;
+
+    /**
+    * The @Model.Request object; for a manual test it is checked against the definition's inputs.
+    */
+    // @DataMember
+    // @ApiMember(Description="The @Model.Request object; for a manual test it is checked against the definition's inputs.")
+    Map<String,dynamic?>? payload;
+
+    /**
+    * "draft" or a version number; absent = the draft when there is one, else the latest published.
+    */
+    // @DataMember
+    // @ApiMember(Description="\"draft\" or a version number; absent = the draft when there is one, else the latest published.")
+    String? runVersion;
+
+    TestCodeWorkflow({this.id="",this.source="",this.event,this.collection,this.recordId,this.userId,this.edits,this.payload,this.runVersion});
+    TestCodeWorkflow.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        source = json['source'] ?? "";
+        event = json['event'];
+        collection = json['collection'];
+        recordId = json['recordId'];
+        userId = json['userId'];
+        edits = JsonConverters.fromJson(json['edits'],'Map<String,dynamic?>',context!);
+        payload = JsonConverters.fromJson(json['payload'],'Map<String,dynamic?>',context!);
+        runVersion = json['runVersion'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'source': source,
+        'event': event,
+        'collection': collection,
+        'recordId': recordId,
+        'userId': userId,
+        'edits': JsonConverters.toJson(edits,'Map<String,dynamic?>',context!),
+        'payload': JsonConverters.toJson(payload,'Map<String,dynamic?>',context!),
+        'runVersion': runVersion
+    });
+
+    createResponse() => InvokeCodeWorkflowResponse();
+    getResponseTypeName() => "InvokeCodeWorkflowResponse";
+    getTypeName() => "TestCodeWorkflow";
     TypeContext? context = _ctx;
 }
 
@@ -61848,6 +62072,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'MongoDbAggregateListProjection': TypeInfo(TypeOf.Class, create:() => MongoDbAggregateListProjection()),
     'FilesTriggerProjectionList': TypeInfo(TypeOf.Class, create:() => FilesTriggerProjectionList()),
     'FilesIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => FilesIntegrationListProjection()),
+    'IntegrationSecretDto': TypeInfo(TypeOf.Class, create:() => IntegrationSecretDto()),
     'KeylessIntegrationSetupTemplate': TypeInfo(TypeOf.Class, create:() => KeylessIntegrationSetupTemplate()),
     'NotificationModuleDependencyItemDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDependencyItemDto()),
     'NotificationModuleDisableDependenciesDto': TypeInfo(TypeOf.Class, create:() => NotificationModuleDisableDependenciesDto()),
@@ -62260,6 +62485,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetFilesIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetFilesIntegrationsResponse()),
     'PaginatedResponse<FilesIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<FilesIntegrationListProjection>()),
     'List<FileProvider>': TypeInfo(TypeOf.Class, create:() => <FileProvider>[]),
+    'GetIntegrationSecretsResponse': TypeInfo(TypeOf.Class, create:() => GetIntegrationSecretsResponse()),
+    'List<IntegrationSecretDto>': TypeInfo(TypeOf.Class, create:() => <IntegrationSecretDto>[]),
     'GetKeylessIntegrationSetupResponse': TypeInfo(TypeOf.Class, create:() => GetKeylessIntegrationSetupResponse()),
     'List<KeylessIntegrationSetupTemplate>': TypeInfo(TypeOf.Class, create:() => <KeylessIntegrationSetupTemplate>[]),
     'TestFilesIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestFilesIntegrationResponse()),
@@ -62826,7 +63053,9 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EnableFilesIntegrationRequest': TypeInfo(TypeOf.Class, create:() => EnableFilesIntegrationRequest()),
     'GetFilesIntegration': TypeInfo(TypeOf.Class, create:() => GetFilesIntegration()),
     'GetFilesIntegrations': TypeInfo(TypeOf.Class, create:() => GetFilesIntegrations()),
+    'GetIntegrationSecrets': TypeInfo(TypeOf.Class, create:() => GetIntegrationSecrets()),
     'GetKeylessIntegrationSetup': TypeInfo(TypeOf.Class, create:() => GetKeylessIntegrationSetup()),
+    'RemoveIntegrationSecretsRequest': TypeInfo(TypeOf.Class, create:() => RemoveIntegrationSecretsRequest()),
     'SaveFilesIntegration': TypeInfo(TypeOf.Class, create:() => SaveFilesIntegration()),
     'SetFilesIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetFilesIntegrationAsDefaultRequest()),
     'TestFilesIntegration': TypeInfo(TypeOf.Class, create:() => TestFilesIntegration()),
@@ -62941,6 +63170,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'ResumeCodeWorkflowRunByKey': TypeInfo(TypeOf.Class, create:() => ResumeCodeWorkflowRunByKey()),
     'RetryCodeWorkflowRunStep': TypeInfo(TypeOf.Class, create:() => RetryCodeWorkflowRunStep()),
     'CancelCodeWorkflowRun': TypeInfo(TypeOf.Class, create:() => CancelCodeWorkflowRun()),
+    'TestCodeWorkflow': TypeInfo(TypeOf.Class, create:() => TestCodeWorkflow()),
     'DisablePush': TypeInfo(TypeOf.Class, create:() => DisablePush()),
     'GetPushDisableDependencies': TypeInfo(TypeOf.Class, create:() => GetPushDisableDependencies()),
     'EnablePush': TypeInfo(TypeOf.Class, create:() => EnablePush()),

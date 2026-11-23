@@ -3,7 +3,8 @@
 
 import '../../core/resource.dart';
 
-/// Helpers shared by the integrations of every module (files, email, code).
+/// Helpers shared by the integrations of every module: keyless setup and
+/// saved secrets.
 class IntegrationsResource extends Resource {
   IntegrationsResource(super.transport);
 
@@ -25,6 +26,48 @@ class IntegrationsResource extends Resource {
       query: query,
       headers: headers,
       pathParams: null,
+    );
+  }
+
+  /// `GET /{version}/integrations/{IntegrationId}/secrets`
+  ///
+  /// Which secrets of an integration (any module) are saved and which are
+  /// optional — never a value or any part of one. The answer's `result` is a
+  /// list of `{key, field, isSet, isOptional}` maps (`field` is the save
+  /// request property that fills the key). Empty for keyless and
+  /// Norbix-owned integrations and for MCP, Marketplace and Webhook
+  /// integrations. Query: optional `env`.
+  Future<Object?> getIntegrationSecrets(
+      {required Object integrationId,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/integrations/{IntegrationId}/secrets',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationId': integrationId},
+    );
+  }
+
+  /// `POST /{version}/integrations/{IntegrationId}/secrets/remove`
+  ///
+  /// Removes optional secrets: body `{keys: [...]}` (as
+  /// [getIntegrationSecrets] lists them; optional `env`). A key the
+  /// integration needs is refused with `CM-ERRORS-SECRETS-012` (400) and
+  /// nothing is written. Answer: `id`.
+  Future<Object?> removeIntegrationSecrets(
+      {required Object integrationId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/integrations/{IntegrationId}/secrets/remove',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'IntegrationId': integrationId},
     );
   }
 }
