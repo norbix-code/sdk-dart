@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-19 15:30:31
+Date: 2026-11-23 09:26:20
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -2660,7 +2660,13 @@ class GoogleInAppPaymentIntegrationRequest extends PaymentIntegrationRequest imp
     // @ApiMember(Description="AccessKey: true = I accept that Norbix stores this long-lived secret (required with AuthMode AccessKey; may be omitted otherwise).")
     bool? acceptKeyRisk;
 
-    GoogleInAppPaymentIntegrationRequest({this.provider,this.authMode,this.webhookPackageName="",this.merchantId,this.merchantName,this.gateway,this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail,this.privateKeyOrToken,this.gatewayMerchantId,this.acceptKeyRisk});
+    /**
+    * Re-save only: true removes the saved key or token. An empty privateKeyOrToken keeps the saved one (review batch 3, D3).
+    */
+    // @ApiMember(Description="Re-save only: true removes the saved key or token. An empty privateKeyOrToken keeps the saved one (review batch 3, D3).")
+    bool? removePrivateKeyOrToken;
+
+    GoogleInAppPaymentIntegrationRequest({this.provider,this.authMode,this.webhookPackageName="",this.merchantId,this.merchantName,this.gateway,this.projectNumber,this.poolId,this.providerId,this.serviceAccountEmail,this.privateKeyOrToken,this.gatewayMerchantId,this.acceptKeyRisk,this.removePrivateKeyOrToken});
     GoogleInAppPaymentIntegrationRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -2678,6 +2684,7 @@ class GoogleInAppPaymentIntegrationRequest extends PaymentIntegrationRequest imp
         privateKeyOrToken = json['privateKeyOrToken'];
         gatewayMerchantId = json['gatewayMerchantId'];
         acceptKeyRisk = json['acceptKeyRisk'];
+        removePrivateKeyOrToken = json['removePrivateKeyOrToken'];
         return this;
     }
 
@@ -2694,7 +2701,8 @@ class GoogleInAppPaymentIntegrationRequest extends PaymentIntegrationRequest imp
         'serviceAccountEmail': serviceAccountEmail,
         'privateKeyOrToken': privateKeyOrToken,
         'gatewayMerchantId': gatewayMerchantId,
-        'acceptKeyRisk': acceptKeyRisk
+        'acceptKeyRisk': acceptKeyRisk,
+        'removePrivateKeyOrToken': removePrivateKeyOrToken
     });
 
     getTypeName() => "GoogleInAppPaymentIntegrationRequest";
@@ -5232,6 +5240,9 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     FunctionRefDto? functionRef;
 
     // @DataMember
+    String? runAsUserId;
+
+    // @DataMember
     CodeInvocationType? invocationType;
 
     // @DataMember
@@ -5249,12 +5260,13 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? meta;
 
-    TriggerActionCodeDto({this.functionRef,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
+    TriggerActionCodeDto({this.functionRef,this.runAsUserId,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
     TriggerActionCodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionRef = JsonConverters.fromJson(json['functionRef'],'FunctionRefDto',context!);
+        runAsUserId = json['runAsUserId'];
         invocationType = JsonConverters.fromJson(json['invocationType'],'CodeInvocationType',context!);
         config = json['config'];
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'CodeDeliverySettingsDto',context!);
@@ -5266,6 +5278,7 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionRef': JsonConverters.toJson(functionRef,'FunctionRefDto',context!),
+        'runAsUserId': runAsUserId,
         'invocationType': JsonConverters.toJson(invocationType,'CodeInvocationType',context!),
         'config': config,
         'deliverySettings': JsonConverters.toJson(deliverySettings,'CodeDeliverySettingsDto',context!),
@@ -5512,19 +5525,24 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    TriggerActionMarketplaceDto({this.functionId="",this.payload});
+    // @DataMember
+    String? runAsUserId;
+
+    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
+        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
         'payload': payload,
+        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -17748,20 +17766,25 @@ class AuthenticationFlowSummaryDto implements IConvertible
     // @DataMember
     AuthenticationFlowPasswordPolicyDto? passwordComplexity;
 
-    AuthenticationFlowSummaryDto({this.type="",this.provider,this.passwordComplexity});
+    // @DataMember
+    bool? requireEmailVerification;
+
+    AuthenticationFlowSummaryDto({this.type="",this.provider,this.passwordComplexity,this.requireEmailVerification});
     AuthenticationFlowSummaryDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         type = json['type'] ?? "";
         provider = json['provider'];
         passwordComplexity = JsonConverters.fromJson(json['passwordComplexity'],'AuthenticationFlowPasswordPolicyDto',context!);
+        requireEmailVerification = json['requireEmailVerification'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'type': type,
         'provider': provider,
-        'passwordComplexity': JsonConverters.toJson(passwordComplexity,'AuthenticationFlowPasswordPolicyDto',context!)
+        'passwordComplexity': JsonConverters.toJson(passwordComplexity,'AuthenticationFlowPasswordPolicyDto',context!),
+        'requireEmailVerification': requireEmailVerification
     };
 
     getTypeName() => "AuthenticationFlowSummaryDto";
@@ -18951,7 +18974,10 @@ class ProjectListItemDto implements IConvertible
     // @DataMember
     int usersCount = 0;
 
-    ProjectListItemDto({this.viewId="",this.isActive,this.projectStatus,this.name="",this.uniqueName="",this.primaryRegion,this.additionalRegions,this.modulesCount=0,this.usersCount=0});
+    // @DataMember
+    FileResourceRefDto? icon;
+
+    ProjectListItemDto({this.viewId="",this.isActive,this.projectStatus,this.name="",this.uniqueName="",this.primaryRegion,this.additionalRegions,this.modulesCount=0,this.usersCount=0,this.icon});
     ProjectListItemDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -18964,6 +18990,7 @@ class ProjectListItemDto implements IConvertible
         additionalRegions = JsonConverters.fromJson(json['additionalRegions'],'List<ProjectRegionDto>',context!);
         modulesCount = json['modulesCount'] ?? 0;
         usersCount = json['usersCount'] ?? 0;
+        icon = JsonConverters.fromJson(json['icon'],'FileResourceRefDto',context!);
         return this;
     }
 
@@ -18976,7 +19003,8 @@ class ProjectListItemDto implements IConvertible
         'primaryRegion': JsonConverters.toJson(primaryRegion,'ProjectRegionDto',context!),
         'additionalRegions': JsonConverters.toJson(additionalRegions,'List<ProjectRegionDto>',context!),
         'modulesCount': modulesCount,
-        'usersCount': usersCount
+        'usersCount': usersCount,
+        'icon': JsonConverters.toJson(icon,'FileResourceRefDto',context!)
     };
 
     getTypeName() => "ProjectListItemDto";
@@ -20983,7 +21011,10 @@ class MembershipAuthorizationViewDto implements IConvertible
     // @DataMember
     List<String> welcomeEmailTriggers = [];
 
-    MembershipAuthorizationViewDto({this.emailPreferences,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.allowedProviderRegisterRoles,this.resetPasswordTokenExpiration,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.passwordComplexity,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.allowEmailRegistration,this.allowUsernameRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.welcomeEmailTriggers=const []});
+    // @DataMember
+    bool? requireEmailVerification;
+
+    MembershipAuthorizationViewDto({this.emailPreferences,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.allowedProviderRegisterRoles,this.resetPasswordTokenExpiration,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.passwordComplexity,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.allowEmailRegistration,this.allowUsernameRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.welcomeEmailTriggers=const [],this.requireEmailVerification});
     MembershipAuthorizationViewDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -21007,6 +21038,7 @@ class MembershipAuthorizationViewDto implements IConvertible
         inviteOnly = json['inviteOnly'];
         allowAnyoneToSignUp = json['allowAnyoneToSignUp'];
         welcomeEmailTriggers = JsonConverters.fromJson(json['welcomeEmailTriggers'],'List<String>',context!) ?? [];
+        requireEmailVerification = json['requireEmailVerification'];
         return this;
     }
 
@@ -21030,7 +21062,8 @@ class MembershipAuthorizationViewDto implements IConvertible
         'allowUsernameRegistration': allowUsernameRegistration,
         'inviteOnly': inviteOnly,
         'allowAnyoneToSignUp': allowAnyoneToSignUp,
-        'welcomeEmailTriggers': JsonConverters.toJson(welcomeEmailTriggers,'List<String>',context!)
+        'welcomeEmailTriggers': JsonConverters.toJson(welcomeEmailTriggers,'List<String>',context!),
+        'requireEmailVerification': requireEmailVerification
     };
 
     getTypeName() => "MembershipAuthorizationViewDto";
@@ -29351,6 +29384,15 @@ enum DeploymentMode
     Enterprise,
 }
 
+enum SupportCaseSource
+{
+    Cloud,
+    Api,
+    Cli,
+    Sdk,
+    Mcp,
+}
+
 // @DataContract
 class SupportCaseDto implements IHasViewId, IConvertible
 {
@@ -29412,6 +29454,21 @@ class SupportCaseDto implements IHasViewId, IConvertible
     String? resolution;
 
     // @DataMember
+    String? assigneeId;
+
+    // @DataMember
+    String? assigneeName;
+
+    // @DataMember
+    SupportCaseSource? source;
+
+    // @DataMember
+    bool? automatic;
+
+    // @DataMember
+    String? reportedBy;
+
+    // @DataMember
     int messageCount = 0;
 
     // @DataMember
@@ -29420,7 +29477,16 @@ class SupportCaseDto implements IHasViewId, IConvertible
     // @DataMember
     int? lastMessageOn;
 
-    SupportCaseDto({this.viewId="",this.accountId="",this.projectId,this.reporterId,this.kind,this.severity,this.status,this.customerStatus,this.subject="",this.affectedModule,this.deploymentMode,this.gatewayVersion,this.region,this.planTier,this.openedOn=0,this.firstResponseOn,this.resolvedOn,this.closedOn,this.resolution,this.messageCount=0,this.countedMessageIds,this.lastMessageOn});
+    // @DataMember
+    int attachmentCount = 0;
+
+    // @DataMember
+    List<String>? attachmentIds;
+
+    // @DataMember
+    List<String>? removedAttachmentIds;
+
+    SupportCaseDto({this.viewId="",this.accountId="",this.projectId,this.reporterId,this.kind,this.severity,this.status,this.customerStatus,this.subject="",this.affectedModule,this.deploymentMode,this.gatewayVersion,this.region,this.planTier,this.openedOn=0,this.firstResponseOn,this.resolvedOn,this.closedOn,this.resolution,this.assigneeId,this.assigneeName,this.source,this.automatic,this.reportedBy,this.messageCount=0,this.countedMessageIds,this.lastMessageOn,this.attachmentCount=0,this.attachmentIds,this.removedAttachmentIds});
     SupportCaseDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -29443,9 +29509,17 @@ class SupportCaseDto implements IHasViewId, IConvertible
         resolvedOn = json['resolvedOn'];
         closedOn = json['closedOn'];
         resolution = json['resolution'];
+        assigneeId = json['assigneeId'];
+        assigneeName = json['assigneeName'];
+        source = JsonConverters.fromJson(json['source'],'SupportCaseSource',context!);
+        automatic = json['automatic'];
+        reportedBy = json['reportedBy'];
         messageCount = json['messageCount'] ?? 0;
         countedMessageIds = JsonConverters.fromJson(json['countedMessageIds'],'List<String>',context!);
         lastMessageOn = json['lastMessageOn'];
+        attachmentCount = json['attachmentCount'] ?? 0;
+        attachmentIds = JsonConverters.fromJson(json['attachmentIds'],'List<String>',context!);
+        removedAttachmentIds = JsonConverters.fromJson(json['removedAttachmentIds'],'List<String>',context!);
         return this;
     }
 
@@ -29469,9 +29543,17 @@ class SupportCaseDto implements IHasViewId, IConvertible
         'resolvedOn': resolvedOn,
         'closedOn': closedOn,
         'resolution': resolution,
+        'assigneeId': assigneeId,
+        'assigneeName': assigneeName,
+        'source': JsonConverters.toJson(source,'SupportCaseSource',context!),
+        'automatic': automatic,
+        'reportedBy': reportedBy,
         'messageCount': messageCount,
         'countedMessageIds': JsonConverters.toJson(countedMessageIds,'List<String>',context!),
-        'lastMessageOn': lastMessageOn
+        'lastMessageOn': lastMessageOn,
+        'attachmentCount': attachmentCount,
+        'attachmentIds': JsonConverters.toJson(attachmentIds,'List<String>',context!),
+        'removedAttachmentIds': JsonConverters.toJson(removedAttachmentIds,'List<String>',context!)
     };
 
     getTypeName() => "SupportCaseDto";
@@ -29510,7 +29592,10 @@ class SupportCaseMessageDto implements IConvertible
     // @DataMember
     int sentOn = 0;
 
-    SupportCaseMessageDto({this.id="",this.caseId="",this.authorKind,this.authorId,this.authorDisplayName,this.body="",this.sentOn=0});
+    // @DataMember
+    Map<String,String?>? evidence;
+
+    SupportCaseMessageDto({this.id="",this.caseId="",this.authorKind,this.authorId,this.authorDisplayName,this.body="",this.sentOn=0,this.evidence});
     SupportCaseMessageDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -29521,6 +29606,7 @@ class SupportCaseMessageDto implements IConvertible
         authorDisplayName = json['authorDisplayName'];
         body = json['body'] ?? "";
         sentOn = json['sentOn'] ?? 0;
+        evidence = JsonConverters.toStringMap(json['evidence']);
         return this;
     }
 
@@ -29531,10 +29617,78 @@ class SupportCaseMessageDto implements IConvertible
         'authorId': authorId,
         'authorDisplayName': authorDisplayName,
         'body': body,
-        'sentOn': sentOn
+        'sentOn': sentOn,
+        'evidence': evidence
     };
 
     getTypeName() => "SupportCaseMessageDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class SupportCaseAttachmentDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String caseId = "";
+
+    // @DataMember
+    String fileName = "";
+
+    // @DataMember
+    int sizeBytes = 0;
+
+    // @DataMember
+    String contentType = "";
+
+    // @DataMember
+    SupportMessageAuthorKind? addedByKind;
+
+    // @DataMember
+    String? addedById;
+
+    // @DataMember
+    int addedOn = 0;
+
+    // @DataMember
+    bool? addedByYou;
+
+    // @DataMember
+    bool? canDelete;
+
+    SupportCaseAttachmentDto({this.id="",this.caseId="",this.fileName="",this.sizeBytes=0,this.contentType="",this.addedByKind,this.addedById,this.addedOn=0,this.addedByYou,this.canDelete});
+    SupportCaseAttachmentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        caseId = json['caseId'] ?? "";
+        fileName = json['fileName'] ?? "";
+        sizeBytes = json['sizeBytes'] ?? 0;
+        contentType = json['contentType'] ?? "";
+        addedByKind = JsonConverters.fromJson(json['addedByKind'],'SupportMessageAuthorKind',context!);
+        addedById = json['addedById'];
+        addedOn = json['addedOn'] ?? 0;
+        addedByYou = json['addedByYou'];
+        canDelete = json['canDelete'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'caseId': caseId,
+        'fileName': fileName,
+        'sizeBytes': sizeBytes,
+        'contentType': contentType,
+        'addedByKind': JsonConverters.toJson(addedByKind,'SupportMessageAuthorKind',context!),
+        'addedById': addedById,
+        'addedOn': addedOn,
+        'addedByYou': addedByYou,
+        'canDelete': canDelete
+    };
+
+    getTypeName() => "SupportCaseAttachmentDto";
     TypeContext? context = _ctx;
 }
 
@@ -29547,18 +29701,23 @@ class SupportCaseDetailDto implements IConvertible
     // @DataMember
     List<SupportCaseMessageDto> messages = [];
 
-    SupportCaseDetailDto({this.Case,this.messages=const []});
+    // @DataMember
+    List<SupportCaseAttachmentDto> attachments = [];
+
+    SupportCaseDetailDto({this.Case,this.messages=const [],this.attachments=const []});
     SupportCaseDetailDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         Case = JsonConverters.fromJson(json['case'],'SupportCaseDto',context!);
         messages = JsonConverters.fromJson(json['messages'],'List<SupportCaseMessageDto>',context!) ?? [];
+        attachments = JsonConverters.fromJson(json['attachments'],'List<SupportCaseAttachmentDto>',context!) ?? [];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'case': JsonConverters.toJson(Case,'SupportCaseDto',context!),
-        'messages': JsonConverters.toJson(messages,'List<SupportCaseMessageDto>',context!)
+        'messages': JsonConverters.toJson(messages,'List<SupportCaseMessageDto>',context!),
+        'attachments': JsonConverters.toJson(attachments,'List<SupportCaseAttachmentDto>',context!)
     };
 
     getTypeName() => "SupportCaseDetailDto";
@@ -29598,7 +29757,16 @@ class SupportCaseListProjection implements IHasViewId, IConvertible
     // @DataMember
     int? lastMessageOn;
 
-    SupportCaseListProjection({this.viewId="",this.projectId,this.kind,this.severity,this.status,this.customerStatus,this.subject="",this.openedOn=0,this.messageCount=0,this.lastMessageOn});
+    // @DataMember
+    SupportCaseSource? source;
+
+    // @DataMember
+    bool? automatic;
+
+    // @DataMember
+    int attachmentCount = 0;
+
+    SupportCaseListProjection({this.viewId="",this.projectId,this.kind,this.severity,this.status,this.customerStatus,this.subject="",this.openedOn=0,this.messageCount=0,this.lastMessageOn,this.source,this.automatic,this.attachmentCount=0});
     SupportCaseListProjection.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -29612,6 +29780,9 @@ class SupportCaseListProjection implements IHasViewId, IConvertible
         openedOn = json['openedOn'] ?? 0;
         messageCount = json['messageCount'] ?? 0;
         lastMessageOn = json['lastMessageOn'];
+        source = JsonConverters.fromJson(json['source'],'SupportCaseSource',context!);
+        automatic = json['automatic'];
+        attachmentCount = json['attachmentCount'] ?? 0;
         return this;
     }
 
@@ -29625,7 +29796,10 @@ class SupportCaseListProjection implements IHasViewId, IConvertible
         'subject': subject,
         'openedOn': openedOn,
         'messageCount': messageCount,
-        'lastMessageOn': lastMessageOn
+        'lastMessageOn': lastMessageOn,
+        'source': JsonConverters.toJson(source,'SupportCaseSource',context!),
+        'automatic': automatic,
+        'attachmentCount': attachmentCount
     };
 
     getTypeName() => "SupportCaseListProjection";
@@ -30527,19 +30701,29 @@ class CreateStripeCheckoutSessionResponse extends IdResponse implements IConvert
     // @DataMember
     String? noTrialReason;
 
-    CreateStripeCheckoutSessionResponse({this.trialIncluded,this.noTrialReason});
+    // @DataMember
+    String? clientSecret;
+
+    // @DataMember
+    String? publishableKey;
+
+    CreateStripeCheckoutSessionResponse({this.trialIncluded,this.noTrialReason,this.clientSecret,this.publishableKey});
     CreateStripeCheckoutSessionResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         trialIncluded = json['trialIncluded'];
         noTrialReason = json['noTrialReason'];
+        clientSecret = json['clientSecret'];
+        publishableKey = json['publishableKey'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'trialIncluded': trialIncluded,
-        'noTrialReason': noTrialReason
+        'noTrialReason': noTrialReason,
+        'clientSecret': clientSecret,
+        'publishableKey': publishableKey
     });
 
     getTypeName() => "CreateStripeCheckoutSessionResponse";
@@ -34958,6 +35142,44 @@ class TestPaymentsIntegrationResponse extends ResponseBase implements IConvertib
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class StartPaymentsIntegrationTestPaymentResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    String? payUrl;
+
+    // @DataMember
+    String? reference;
+
+    // @DataMember
+    int amountMinor = 0;
+
+    // @DataMember
+    String? currency;
+
+    StartPaymentsIntegrationTestPaymentResponse({this.payUrl,this.reference,this.amountMinor=0,this.currency});
+    StartPaymentsIntegrationTestPaymentResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        payUrl = json['payUrl'];
+        reference = json['reference'];
+        amountMinor = json['amountMinor'] ?? 0;
+        currency = json['currency'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'payUrl': payUrl,
+        'reference': reference,
+        'amountMinor': amountMinor,
+        'currency': currency
+    });
+
+    getTypeName() => "StartPaymentsIntegrationTestPaymentResponse";
+    TypeContext? context = _ctx;
+}
+
 class GetQuickConnectProvidersResponse extends ResponseBase implements IConvertible
 {
     List<QuickConnectProviderDto> providers = [];
@@ -37289,6 +37511,54 @@ class GetSupportCasesResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetSupportCasesResponse";
+    TypeContext? context = _ctx;
+}
+
+class ReportNorbixIssueResponse extends ResponseBase implements IConvertible
+{
+    String? caseId;
+    bool? alreadyReported;
+    int timesReported = 0;
+
+    ReportNorbixIssueResponse({this.caseId,this.alreadyReported,this.timesReported=0});
+    ReportNorbixIssueResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        caseId = json['caseId'];
+        alreadyReported = json['alreadyReported'];
+        timesReported = json['timesReported'] ?? 0;
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'caseId': caseId,
+        'alreadyReported': alreadyReported,
+        'timesReported': timesReported
+    });
+
+    getTypeName() => "ReportNorbixIssueResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetSupportCaseAttachmentsResponse extends ResponseBase implements IConvertible
+{
+    List<SupportCaseAttachmentDto>? result;
+
+    GetSupportCaseAttachmentsResponse({this.result});
+    GetSupportCaseAttachmentsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        result = JsonConverters.fromJson(json['result'],'List<SupportCaseAttachmentDto>',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'result': JsonConverters.toJson(result,'List<SupportCaseAttachmentDto>',context!)
+    });
+
+    getTypeName() => "GetSupportCaseAttachmentsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -40147,7 +40417,10 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
     // @DataMember
     String? trialInvite;
 
-    CreateStripeCheckoutSession({this.subscriptionType,this.bundle,this.billingPeriod,this.domain,this.newProjectSessionId,this.returnUrl,this.discountCode,this.region,this.withoutTrial,this.trialInvite});
+    // @DataMember
+    bool? embedded;
+
+    CreateStripeCheckoutSession({this.subscriptionType,this.bundle,this.billingPeriod,this.domain,this.newProjectSessionId,this.returnUrl,this.discountCode,this.region,this.withoutTrial,this.trialInvite,this.embedded});
     CreateStripeCheckoutSession.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -40162,6 +40435,7 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
         region = json['region'];
         withoutTrial = json['withoutTrial'];
         trialInvite = json['trialInvite'];
+        embedded = json['embedded'];
         return this;
     }
 
@@ -40175,7 +40449,8 @@ class CreateStripeCheckoutSession extends RequestBase implements IReturn<CreateS
         'discountCode': discountCode,
         'region': region,
         'withoutTrial': withoutTrial,
-        'trialInvite': trialInvite
+        'trialInvite': trialInvite,
+        'embedded': embedded
     });
 
     createResponse() => CreateStripeCheckoutSessionResponse();
@@ -45029,6 +45304,18 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
     String? resetPasswordCallback;
 
     /**
+    * Setting = 'RequireEmailVerification': true = a password sign-in is refused (CM-ERRORS-MEMBERSHIP-USERS-052) until the user opened the verification link. Needs verification e-mails on ('AllowUserVerification'). Default false.
+    */
+    // @ApiMember(Description="Setting = 'RequireEmailVerification': true = a password sign-in is refused (CM-ERRORS-MEMBERSHIP-USERS-052) until the user opened the verification link. Needs verification e-mails on ('AllowUserVerification'). Default false.")
+    bool? requireEmailVerification;
+
+    /**
+    * Setting = 'UserVerificationCallback': your app's "confirm your e-mail" page (https://…, http only for localhost); the link is it + #token=…, and the page confirms the token. Empty = the admin portal page.
+    */
+    // @ApiMember(Description="Setting = 'UserVerificationCallback': your app's \"confirm your e-mail\" page (https://…, http only for localhost); the link is it + #token=…, and the page confirms the token. Empty = the admin portal page.")
+    String? verificationCallback;
+
+    /**
     * Setting = 'RegistrationTemplate': the welcome e-mail template id (tmpl_…) of this environment; empty = no welcome e-mail in this environment (a sign-up trigger may send it instead).
     */
     // @ApiMember(Description="Setting = 'RegistrationTemplate': the welcome e-mail template id (tmpl_…) of this environment; empty = no welcome e-mail in this environment (a sign-up trigger may send it instead).")
@@ -45058,7 +45345,7 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
     int? maxSpecial;
     String? allowedSpecial;
 
-    UpdateAuthorizationSettings({this.setting,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.needVerification,this.verificationEmailTemplate,this.deactivationEmailTemplate,this.allowInviteUsers,this.allowDeactivateUsers,this.inviteUserEmailTemplate,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.allowEmailRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.allowResetPassword,this.resetPasswordEmailTemplate,this.resetPasswordTokenExpiration,this.resetPasswordCallback,this.welcomeEmailTemplate,this.bindings,this.bindingsEvent,this.minLength=0,this.maxLength,this.minNumbers,this.maxNumbers,this.minUpper,this.maxUpper,this.minLower,this.maxLower,this.minSpecial,this.maxSpecial,this.allowedSpecial});
+    UpdateAuthorizationSettings({this.setting,this.defaultRoles,this.allowedRegistrationRoles,this.allowGuestUsers,this.guestCleanupPeriodDays,this.userRegistersAsRole,this.guestRegistersAsRole,this.allowedRegisterRoles,this.needVerification,this.verificationEmailTemplate,this.deactivationEmailTemplate,this.allowInviteUsers,this.allowDeactivateUsers,this.inviteUserEmailTemplate,this.invitationExpiration,this.emailVerificationExpiration,this.deactivationExpiration,this.defaultSubscribeToNews,this.allowEmailRegistration,this.inviteOnly,this.allowAnyoneToSignUp,this.allowResetPassword,this.resetPasswordEmailTemplate,this.resetPasswordTokenExpiration,this.resetPasswordCallback,this.requireEmailVerification,this.verificationCallback,this.welcomeEmailTemplate,this.bindings,this.bindingsEvent,this.minLength=0,this.maxLength,this.minNumbers,this.maxNumbers,this.minUpper,this.maxUpper,this.minLower,this.maxLower,this.minSpecial,this.maxSpecial,this.allowedSpecial});
     UpdateAuthorizationSettings.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -45088,6 +45375,8 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
         resetPasswordEmailTemplate = json['resetPasswordEmailTemplate'];
         resetPasswordTokenExpiration = json['resetPasswordTokenExpiration'];
         resetPasswordCallback = json['resetPasswordCallback'];
+        requireEmailVerification = json['requireEmailVerification'];
+        verificationCallback = json['verificationCallback'];
         welcomeEmailTemplate = json['welcomeEmailTemplate'];
         bindings = JsonConverters.fromJson(json['bindings'],'List<MembershipTokenBindingDto>',context!);
         bindingsEvent = json['bindingsEvent'];
@@ -45131,6 +45420,8 @@ class UpdateAuthorizationSettings extends CodeMashRequestBase implements IReturn
         'resetPasswordEmailTemplate': resetPasswordEmailTemplate,
         'resetPasswordTokenExpiration': resetPasswordTokenExpiration,
         'resetPasswordCallback': resetPasswordCallback,
+        'requireEmailVerification': requireEmailVerification,
+        'verificationCallback': verificationCallback,
         'welcomeEmailTemplate': welcomeEmailTemplate,
         'bindings': JsonConverters.toJson(bindings,'List<MembershipTokenBindingDto>',context!),
         'bindingsEvent': bindingsEvent,
@@ -54055,6 +54346,49 @@ class TestPaymentsIntegration extends CodeMashRequestBase implements IReturn<Tes
 }
 
 /**
+* Opens a 0.01 test payment at the provider of a payments integration and returns the link to pay it.
+*/
+// @Route("/{version}/payments/integrations/test-payment", "POST")
+// @Api(Description="Opens a 0.01 test payment at the provider of a payments integration and returns the link to pay it.")
+// @DataContract
+class StartPaymentsIntegrationTestPaymentRequest extends CodeMashRequestBase implements IReturn<StartPaymentsIntegrationTestPaymentResponse>, IConvertible, IPost
+{
+    /**
+    * The id of the payments integration to test with a real payment.
+    */
+    // @DataMember
+    // @ApiMember(Description="The id of the payments integration to test with a real payment.", IsRequired=true)
+    String integrationId = "";
+
+    /**
+    * Where the provider sends the payer back after paying: an absolute https URL (http only for localhost).
+    */
+    // @DataMember
+    // @ApiMember(Description="Where the provider sends the payer back after paying: an absolute https URL (http only for localhost).", IsRequired=true)
+    String returnUrl = "";
+
+    StartPaymentsIntegrationTestPaymentRequest({this.integrationId="",this.returnUrl=""});
+    StartPaymentsIntegrationTestPaymentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        integrationId = json['integrationId'] ?? "";
+        returnUrl = json['returnUrl'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'integrationId': integrationId,
+        'returnUrl': returnUrl
+    });
+
+    createResponse() => StartPaymentsIntegrationTestPaymentResponse();
+    getResponseTypeName() => "StartPaymentsIntegrationTestPaymentResponse";
+    getTypeName() => "StartPaymentsIntegrationTestPaymentRequest";
+    TypeContext? context = _ctx;
+}
+
+/**
 * Disable logging service
 */
 // @Route("/{version}/logs/disable", "PUT")
@@ -60360,6 +60694,178 @@ class OpenSupportCaseRequest extends RequestBase implements IReturn<IdResponse>,
     TypeContext? context = _ctx;
 }
 
+/**
+* Report a problem in Norbix itself to Norbix support.
+*/
+// @Route("/{version}/support/issues", "POST")
+// @Api(Description="Report a problem in Norbix itself to Norbix support.")
+// @DataContract
+class ReportNorbixIssueRequest extends RequestBase implements IReturn<ReportNorbixIssueResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String subject = "";
+
+    // @DataMember
+    String message = "";
+
+    // @DataMember
+    String? kind;
+
+    // @DataMember
+    String? severity;
+
+    // @DataMember
+    String? projectId;
+
+    // @DataMember
+    String? source;
+
+    // @DataMember
+    bool? automatic;
+
+    // @DataMember
+    String? reportedBy;
+
+    // @DataMember
+    Map<String,String?>? evidence;
+
+    ReportNorbixIssueRequest({this.subject="",this.message="",this.kind,this.severity,this.projectId,this.source,this.automatic,this.reportedBy,this.evidence});
+    ReportNorbixIssueRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        subject = json['subject'] ?? "";
+        message = json['message'] ?? "";
+        kind = json['kind'];
+        severity = json['severity'];
+        projectId = json['projectId'];
+        source = json['source'];
+        automatic = json['automatic'];
+        reportedBy = json['reportedBy'];
+        evidence = JsonConverters.toStringMap(json['evidence']);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'subject': subject,
+        'message': message,
+        'kind': kind,
+        'severity': severity,
+        'projectId': projectId,
+        'source': source,
+        'automatic': automatic,
+        'reportedBy': reportedBy,
+        'evidence': evidence
+    });
+
+    createResponse() => ReportNorbixIssueResponse();
+    getResponseTypeName() => "ReportNorbixIssueResponse";
+    getTypeName() => "ReportNorbixIssueRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/support/cases/{CaseId}/attachments", "POST")
+class AddSupportCaseAttachmentRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IPost
+{
+    String caseId = "";
+
+    AddSupportCaseAttachmentRequest({this.caseId=""});
+    AddSupportCaseAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        caseId = json['caseId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'caseId': caseId
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "AddSupportCaseAttachmentRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/support/cases/{CaseId}/attachments", "GET")
+class GetSupportCaseAttachmentsRequest extends RequestBase implements IReturn<GetSupportCaseAttachmentsResponse>, IConvertible, IGet
+{
+    String caseId = "";
+
+    GetSupportCaseAttachmentsRequest({this.caseId=""});
+    GetSupportCaseAttachmentsRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        caseId = json['caseId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'caseId': caseId
+    });
+
+    createResponse() => GetSupportCaseAttachmentsResponse();
+    getResponseTypeName() => "GetSupportCaseAttachmentsResponse";
+    getTypeName() => "GetSupportCaseAttachmentsRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/support/cases/{CaseId}/attachments/{AttachmentId}/download", "GET")
+class DownloadSupportCaseAttachmentRequest extends RequestBase implements IReturn<Uint8List>, IConvertible, IGet
+{
+    String caseId = "";
+    String attachmentId = "";
+
+    DownloadSupportCaseAttachmentRequest({this.caseId="",this.attachmentId=""});
+    DownloadSupportCaseAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        caseId = json['caseId'] ?? "";
+        attachmentId = json['attachmentId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'caseId': caseId,
+        'attachmentId': attachmentId
+    });
+
+    createResponse() => Uint8List(0);
+    getResponseTypeName() => "Uint8List";
+    getTypeName() => "DownloadSupportCaseAttachmentRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/support/cases/{CaseId}/attachments/{AttachmentId}", "DELETE")
+class DeleteSupportCaseAttachmentRequest extends RequestBase implements IReturn<IdResponse>, IConvertible, IDelete
+{
+    String caseId = "";
+    String attachmentId = "";
+
+    DeleteSupportCaseAttachmentRequest({this.caseId="",this.attachmentId=""});
+    DeleteSupportCaseAttachmentRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        caseId = json['caseId'] ?? "";
+        attachmentId = json['attachmentId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'caseId': caseId,
+        'attachmentId': attachmentId
+    });
+
+    createResponse() => IdResponse();
+    getResponseTypeName() => "IdResponse";
+    getTypeName() => "DeleteSupportCaseAttachmentRequest";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/diagnostics/packs", "GET")
 class GetDiagnosticPacks extends CodeMashRequestBase implements IReturn<GetDiagnosticPacksResponse>, IConvertible, IGet
 {
@@ -61564,11 +62070,14 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SupportCaseStatus': TypeInfo(TypeOf.Enum, enumValues:SupportCaseStatus.values),
     'SupportCustomerStatus': TypeInfo(TypeOf.Enum, enumValues:SupportCustomerStatus.values),
     'DeploymentMode': TypeInfo(TypeOf.Enum, enumValues:DeploymentMode.values),
+    'SupportCaseSource': TypeInfo(TypeOf.Enum, enumValues:SupportCaseSource.values),
     'SupportCaseDto': TypeInfo(TypeOf.Class, create:() => SupportCaseDto()),
     'SupportMessageAuthorKind': TypeInfo(TypeOf.Enum, enumValues:SupportMessageAuthorKind.values),
     'SupportCaseMessageDto': TypeInfo(TypeOf.Class, create:() => SupportCaseMessageDto()),
+    'SupportCaseAttachmentDto': TypeInfo(TypeOf.Class, create:() => SupportCaseAttachmentDto()),
     'SupportCaseDetailDto': TypeInfo(TypeOf.Class, create:() => SupportCaseDetailDto()),
     'List<SupportCaseMessageDto>': TypeInfo(TypeOf.Class, create:() => <SupportCaseMessageDto>[]),
+    'List<SupportCaseAttachmentDto>': TypeInfo(TypeOf.Class, create:() => <SupportCaseAttachmentDto>[]),
     'SupportCaseListProjection': TypeInfo(TypeOf.Class, create:() => SupportCaseListProjection()),
     'DiagnosticPackStepDescriptorDto': TypeInfo(TypeOf.Class, create:() => DiagnosticPackStepDescriptorDto()),
     'DiagnosticPackDescriptorDto': TypeInfo(TypeOf.Class, create:() => DiagnosticPackDescriptorDto()),
@@ -61875,6 +62384,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentsIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetPaymentsIntegrationsResponse()),
     'PaginatedResponse<PaymentsIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<PaymentsIntegrationListProjection>()),
     'TestPaymentsIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestPaymentsIntegrationResponse()),
+    'StartPaymentsIntegrationTestPaymentResponse': TypeInfo(TypeOf.Class, create:() => StartPaymentsIntegrationTestPaymentResponse()),
     'GetQuickConnectProvidersResponse': TypeInfo(TypeOf.Class, create:() => GetQuickConnectProvidersResponse()),
     'StartIntegrationConnectResponse': TypeInfo(TypeOf.Class, create:() => StartIntegrationConnectResponse()),
     'GetIntegrationConnectTargetsResponse': TypeInfo(TypeOf.Class, create:() => GetIntegrationConnectTargetsResponse()),
@@ -62012,6 +62522,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetSupportCaseResponse': TypeInfo(TypeOf.Class, create:() => GetSupportCaseResponse()),
     'GetSupportCasesResponse': TypeInfo(TypeOf.Class, create:() => GetSupportCasesResponse()),
     'PaginatedResponse<SupportCaseListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<SupportCaseListProjection>()),
+    'ReportNorbixIssueResponse': TypeInfo(TypeOf.Class, create:() => ReportNorbixIssueResponse()),
+    'GetSupportCaseAttachmentsResponse': TypeInfo(TypeOf.Class, create:() => GetSupportCaseAttachmentsResponse()),
     'GetDiagnosticPacksResponse': TypeInfo(TypeOf.Class, create:() => GetDiagnosticPacksResponse()),
     'List<DiagnosticPackDescriptorDto>': TypeInfo(TypeOf.Class, create:() => <DiagnosticPackDescriptorDto>[]),
     'RunDiagnosticPackResponse': TypeInfo(TypeOf.Class, create:() => RunDiagnosticPackResponse()),
@@ -62479,6 +62991,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetPaymentsIntegrations': TypeInfo(TypeOf.Class, create:() => GetPaymentsIntegrations()),
     'SavePaymentsIntegration': TypeInfo(TypeOf.Class, create:() => SavePaymentsIntegration()),
     'TestPaymentsIntegration': TypeInfo(TypeOf.Class, create:() => TestPaymentsIntegration()),
+    'StartPaymentsIntegrationTestPaymentRequest': TypeInfo(TypeOf.Class, create:() => StartPaymentsIntegrationTestPaymentRequest()),
     'DisableLogging': TypeInfo(TypeOf.Class, create:() => DisableLogging()),
     'EnableLogging': TypeInfo(TypeOf.Class, create:() => EnableLogging()),
     'DeleteLoggingIntegrationRequest': TypeInfo(TypeOf.Class, create:() => DeleteLoggingIntegrationRequest()),
@@ -62649,6 +63162,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetSupportCase': TypeInfo(TypeOf.Class, create:() => GetSupportCase()),
     'GetSupportCases': TypeInfo(TypeOf.Class, create:() => GetSupportCases()),
     'OpenSupportCaseRequest': TypeInfo(TypeOf.Class, create:() => OpenSupportCaseRequest()),
+    'ReportNorbixIssueRequest': TypeInfo(TypeOf.Class, create:() => ReportNorbixIssueRequest()),
+    'AddSupportCaseAttachmentRequest': TypeInfo(TypeOf.Class, create:() => AddSupportCaseAttachmentRequest()),
+    'GetSupportCaseAttachmentsRequest': TypeInfo(TypeOf.Class, create:() => GetSupportCaseAttachmentsRequest()),
+    'DownloadSupportCaseAttachmentRequest': TypeInfo(TypeOf.Class, create:() => DownloadSupportCaseAttachmentRequest()),
+    'DeleteSupportCaseAttachmentRequest': TypeInfo(TypeOf.Class, create:() => DeleteSupportCaseAttachmentRequest()),
     'GetDiagnosticPacks': TypeInfo(TypeOf.Class, create:() => GetDiagnosticPacks()),
     'RunDiagnosticPackRequest': TypeInfo(TypeOf.Class, create:() => RunDiagnosticPackRequest()),
     'GetDiagnosticEcho': TypeInfo(TypeOf.Class, create:() => GetDiagnosticEcho()),

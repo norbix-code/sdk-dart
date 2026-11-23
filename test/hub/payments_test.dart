@@ -63,4 +63,27 @@ void main() {
     );
     expect((body['integration'] as Map).containsKey('isSandbox'), isFalse);
   });
+
+  test(
+      'startPaymentsIntegrationTestPayment → POST /v3/payments/integrations/test-payment with the integration and return URL',
+      () async {
+    final driver = FakeHttpDriver();
+    await _client(driver).payments.startPaymentsIntegrationTestPayment(
+      body: {
+        'integrationId': 'int_neopay',
+        'returnUrl': 'https://app.example.test/back',
+      },
+    );
+
+    final req = driver.lastRequest!;
+    expect(req.method, equals('POST'));
+    expect(req.url.path, equals('/v3/payments/integrations/test-payment'));
+    expect(
+      jsonDecode(req.body!),
+      equals({
+        'integrationId': 'int_neopay',
+        'returnUrl': 'https://app.example.test/back',
+      }),
+    );
+  });
 }
