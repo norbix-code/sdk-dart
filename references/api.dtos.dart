@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-24 07:35:35
+Date: 2026-11-24 14:33:13
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -7104,15 +7104,17 @@ class EchoResponse implements IConvertible
 class PublicProjectConfigDto implements IConvertible
 {
     String displayName = "";
+    String? websiteUrl;
     PublicBrandDto? branding;
     PublicAuthDto? auth;
     PublicAiChatDto? aiChat;
 
-    PublicProjectConfigDto({this.displayName="",this.branding,this.auth,this.aiChat});
+    PublicProjectConfigDto({this.displayName="",this.websiteUrl,this.branding,this.auth,this.aiChat});
     PublicProjectConfigDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         displayName = json['displayName'] ?? "";
+        websiteUrl = json['websiteUrl'];
         branding = JsonConverters.fromJson(json['branding'],'PublicBrandDto',context!);
         auth = JsonConverters.fromJson(json['auth'],'PublicAuthDto',context!);
         aiChat = JsonConverters.fromJson(json['aiChat'],'PublicAiChatDto',context!);
@@ -7121,6 +7123,7 @@ class PublicProjectConfigDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'displayName': displayName,
+        'websiteUrl': websiteUrl,
         'branding': JsonConverters.toJson(branding,'PublicBrandDto',context!),
         'auth': JsonConverters.toJson(auth,'PublicAuthDto',context!),
         'aiChat': JsonConverters.toJson(aiChat,'PublicAiChatDto',context!)

@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-24 07:35:34
+Date: 2026-11-24 14:33:13
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -5245,9 +5245,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     FunctionRefDto? functionRef;
 
     // @DataMember
-    String? runAsUserId;
-
-    // @DataMember
     CodeInvocationType? invocationType;
 
     // @DataMember
@@ -5265,13 +5262,12 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
     // @DataMember
     Map<String,String?>? meta;
 
-    TriggerActionCodeDto({this.functionRef,this.runAsUserId,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
+    TriggerActionCodeDto({this.functionRef,this.invocationType,this.config,this.deliverySettings,this.functionId,this.activationCode,this.meta});
     TriggerActionCodeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionRef = JsonConverters.fromJson(json['functionRef'],'FunctionRefDto',context!);
-        runAsUserId = json['runAsUserId'];
         invocationType = JsonConverters.fromJson(json['invocationType'],'CodeInvocationType',context!);
         config = json['config'];
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'CodeDeliverySettingsDto',context!);
@@ -5283,7 +5279,6 @@ class TriggerActionCodeDto extends TriggerActionDto implements IConvertible
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionRef': JsonConverters.toJson(functionRef,'FunctionRefDto',context!),
-        'runAsUserId': runAsUserId,
         'invocationType': JsonConverters.toJson(invocationType,'CodeInvocationType',context!),
         'config': config,
         'deliverySettings': JsonConverters.toJson(deliverySettings,'CodeDeliverySettingsDto',context!),
@@ -5530,24 +5525,19 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
     // @DataMember
     Map<String,String?>? payload;
 
-    // @DataMember
-    String? runAsUserId;
-
-    TriggerActionMarketplaceDto({this.functionId="",this.payload,this.runAsUserId});
+    TriggerActionMarketplaceDto({this.functionId="",this.payload});
     TriggerActionMarketplaceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         functionId = json['functionId'] ?? "";
         payload = JsonConverters.toStringMap(json['payload']);
-        runAsUserId = json['runAsUserId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'functionId': functionId,
         'payload': payload,
-        'runAsUserId': runAsUserId
     });
 
     getTypeName() => "TriggerActionMarketplaceDto";
@@ -14938,6 +14928,13 @@ class WorkflowStepDto implements IConvertible
     // @ApiMember(Description="wait: the step when the wait times out; absent = the run fails (-022).")
     String? onTimeout;
 
+    /**
+    * The earlier steps whose output this step also uses, beside its input (the output of the step it was reached from, @Model.Input): step ids. The step reads each as @Model.Steps.<id>.Output; the run keeps every step's output, so nothing has to be carried along.
+    */
+    // @DataMember
+    // @ApiMember(Description="The earlier steps whose output this step also uses, beside its input (the output of the step it was reached from, @Model.Input): step ids. The step reads each as @Model.Steps.<id>.Output; the run keeps every step's output, so nothing has to be carried along.")
+    List<String>? uses;
+
     // @DataMember
     WorkflowStepRetryDto? retry;
 
@@ -14965,7 +14962,7 @@ class WorkflowStepDto implements IConvertible
     // @ApiMember(Description="Flow kinds: expression | level, message, meta | seconds, until | mode, key, inputs, assignees, timeoutSeconds, notify | branches, join | mode | workflowRef, payload, wait, timeoutSeconds | items, body, concurrency. One assignees entry is a usr_ id, a @Model.* binding, or a rule: role:<name or id>, tag:<name>, the two joined with '+', or teamrole:<name>.")
     Map<String,dynamic?>? config;
 
-    WorkflowStepDto({this.id="",this.kind="",this.name,this.next,this.then,this.Else,this.rejected,this.onTimeout,this.retry,this.timeoutSeconds,this.onError,this.action,this.config});
+    WorkflowStepDto({this.id="",this.kind="",this.name,this.next,this.then,this.Else,this.rejected,this.onTimeout,this.uses,this.retry,this.timeoutSeconds,this.onError,this.action,this.config});
     WorkflowStepDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14977,6 +14974,7 @@ class WorkflowStepDto implements IConvertible
         Else = json['else'];
         rejected = json['rejected'];
         onTimeout = json['onTimeout'];
+        uses = JsonConverters.fromJson(json['uses'],'List<String>',context!);
         retry = JsonConverters.fromJson(json['retry'],'WorkflowStepRetryDto',context!);
         timeoutSeconds = json['timeoutSeconds'];
         onError = JsonConverters.fromJson(json['onError'],'WorkflowOnErrorDto',context!);
@@ -14994,6 +14992,7 @@ class WorkflowStepDto implements IConvertible
         'else': Else,
         'rejected': rejected,
         'onTimeout': onTimeout,
+        'uses': JsonConverters.toJson(uses,'List<String>',context!),
         'retry': JsonConverters.toJson(retry,'WorkflowStepRetryDto',context!),
         'timeoutSeconds': timeoutSeconds,
         'onError': JsonConverters.toJson(onError,'WorkflowOnErrorDto',context!),
@@ -23616,6 +23615,218 @@ class WorkflowVersionDiffDto implements IConvertible
 }
 
 // @DataContract
+class WorkflowPortOutputDto implements IConvertible
+{
+    // @DataMember
+    String format = "";
+
+    // @DataMember
+    String? collection;
+
+    // @DataMember
+    List<String> choices = [];
+
+    // @DataMember
+    String? description;
+
+    // @DataMember
+    String? value;
+
+    WorkflowPortOutputDto({this.format="",this.collection,this.choices=const [],this.description,this.value});
+    WorkflowPortOutputDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        format = json['format'] ?? "";
+        collection = json['collection'];
+        choices = JsonConverters.fromJson(json['choices'],'List<String>',context!) ?? [];
+        description = json['description'];
+        value = json['value'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'format': format,
+        'collection': collection,
+        'choices': JsonConverters.toJson(choices,'List<String>',context!),
+        'description': description,
+        'value': value
+    };
+
+    getTypeName() => "WorkflowPortOutputDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowPortInputDto implements IConvertible
+{
+    // @DataMember
+    String from = "";
+
+    // @DataMember
+    String exit = "";
+
+    // @DataMember
+    String format = "";
+
+    // @DataMember
+    String? collection;
+
+    WorkflowPortInputDto({this.from="",this.exit="",this.format="",this.collection});
+    WorkflowPortInputDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        from = json['from'] ?? "";
+        exit = json['exit'] ?? "";
+        format = json['format'] ?? "";
+        collection = json['collection'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'from': from,
+        'exit': exit,
+        'format': format,
+        'collection': collection
+    };
+
+    getTypeName() => "WorkflowPortInputDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowPortUsedDto implements IConvertible
+{
+    // @DataMember
+    String stepId = "";
+
+    // @DataMember
+    String format = "";
+
+    // @DataMember
+    String? collection;
+
+    WorkflowPortUsedDto({this.stepId="",this.format="",this.collection});
+    WorkflowPortUsedDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        stepId = json['stepId'] ?? "";
+        format = json['format'] ?? "";
+        collection = json['collection'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'stepId': stepId,
+        'format': format,
+        'collection': collection
+    };
+
+    getTypeName() => "WorkflowPortUsedDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowPortTakeDto implements IConvertible
+{
+    // @DataMember
+    String field = "";
+
+    // @DataMember
+    List<String> accepts = [];
+
+    WorkflowPortTakeDto({this.field="",this.accepts=const []});
+    WorkflowPortTakeDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        field = json['field'] ?? "";
+        accepts = JsonConverters.fromJson(json['accepts'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'field': field,
+        'accepts': JsonConverters.toJson(accepts,'List<String>',context!)
+    };
+
+    getTypeName() => "WorkflowPortTakeDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowStepPortsDto implements IConvertible
+{
+    // @DataMember
+    String stepId = "";
+
+    // @DataMember
+    List<WorkflowPortInputDto> inputs = [];
+
+    // @DataMember
+    WorkflowPortOutputDto? output;
+
+    // @DataMember
+    List<WorkflowPortUsedDto> uses = [];
+
+    // @DataMember
+    List<WorkflowPortTakeDto> takes = [];
+
+    WorkflowStepPortsDto({this.stepId="",this.inputs=const [],this.output,this.uses=const [],this.takes=const []});
+    WorkflowStepPortsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        stepId = json['stepId'] ?? "";
+        inputs = JsonConverters.fromJson(json['inputs'],'List<WorkflowPortInputDto>',context!) ?? [];
+        output = JsonConverters.fromJson(json['output'],'WorkflowPortOutputDto',context!);
+        uses = JsonConverters.fromJson(json['uses'],'List<WorkflowPortUsedDto>',context!) ?? [];
+        takes = JsonConverters.fromJson(json['takes'],'List<WorkflowPortTakeDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'stepId': stepId,
+        'inputs': JsonConverters.toJson(inputs,'List<WorkflowPortInputDto>',context!),
+        'output': JsonConverters.toJson(output,'WorkflowPortOutputDto',context!),
+        'uses': JsonConverters.toJson(uses,'List<WorkflowPortUsedDto>',context!),
+        'takes': JsonConverters.toJson(takes,'List<WorkflowPortTakeDto>',context!)
+    };
+
+    getTypeName() => "WorkflowStepPortsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowPortsDto implements IConvertible
+{
+    // @DataMember
+    WorkflowPortOutputDto? start;
+
+    // @DataMember
+    String? startEvent;
+
+    // @DataMember
+    List<WorkflowStepPortsDto> steps = [];
+
+    WorkflowPortsDto({this.start,this.startEvent,this.steps=const []});
+    WorkflowPortsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        start = JsonConverters.fromJson(json['start'],'WorkflowPortOutputDto',context!);
+        startEvent = json['startEvent'];
+        steps = JsonConverters.fromJson(json['steps'],'List<WorkflowStepPortsDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'start': JsonConverters.toJson(start,'WorkflowPortOutputDto',context!),
+        'startEvent': startEvent,
+        'steps': JsonConverters.toJson(steps,'List<WorkflowStepPortsDto>',context!)
+    };
+
+    getTypeName() => "WorkflowPortsDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class WorkflowLastRunDto implements IConvertible
 {
     // @DataMember
@@ -23745,9 +23956,15 @@ class WorkflowStepKindSchemaDto implements IConvertible
     Map<String,dynamic?>? outputSchema;
 
     // @DataMember
+    List<String> outputFormats = [];
+
+    // @DataMember
+    String? outputDescription;
+
+    // @DataMember
     List<String> requires = [];
 
-    WorkflowStepKindSchemaDto({this.kind="",this.description="",this.configSchema,this.outputSchema,this.requires=const []});
+    WorkflowStepKindSchemaDto({this.kind="",this.description="",this.configSchema,this.outputSchema,this.outputFormats=const [],this.outputDescription,this.requires=const []});
     WorkflowStepKindSchemaDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -23755,6 +23972,8 @@ class WorkflowStepKindSchemaDto implements IConvertible
         description = json['description'] ?? "";
         configSchema = JsonConverters.fromJson(json['configSchema'],'Map<String,dynamic?>',context!);
         outputSchema = JsonConverters.fromJson(json['outputSchema'],'Map<String,dynamic?>',context!);
+        outputFormats = JsonConverters.fromJson(json['outputFormats'],'List<String>',context!) ?? [];
+        outputDescription = json['outputDescription'];
         requires = JsonConverters.fromJson(json['requires'],'List<String>',context!) ?? [];
         return this;
     }
@@ -23764,6 +23983,8 @@ class WorkflowStepKindSchemaDto implements IConvertible
         'description': description,
         'configSchema': JsonConverters.toJson(configSchema,'Map<String,dynamic?>',context!),
         'outputSchema': JsonConverters.toJson(outputSchema,'Map<String,dynamic?>',context!),
+        'outputFormats': JsonConverters.toJson(outputFormats,'List<String>',context!),
+        'outputDescription': outputDescription,
         'requires': JsonConverters.toJson(requires,'List<String>',context!)
     };
 
@@ -23799,6 +24020,80 @@ class WorkflowBindingFamilyDto implements IConvertible
 }
 
 // @DataContract
+class WorkflowFormatDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String label = "";
+
+    // @DataMember
+    String description = "";
+
+    WorkflowFormatDto({this.id="",this.label="",this.description=""});
+    WorkflowFormatDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        label = json['label'] ?? "";
+        description = json['description'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'label': label,
+        'description': description
+    };
+
+    getTypeName() => "WorkflowFormatDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class WorkflowStartOutputDto implements IConvertible
+{
+    // @DataMember
+    String source = "";
+
+    // @DataMember
+    String? event;
+
+    // @DataMember
+    String format = "";
+
+    // @DataMember
+    List<String> reads = [];
+
+    // @DataMember
+    String description = "";
+
+    WorkflowStartOutputDto({this.source="",this.event,this.format="",this.reads=const [],this.description=""});
+    WorkflowStartOutputDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        source = json['source'] ?? "";
+        event = json['event'];
+        format = json['format'] ?? "";
+        reads = JsonConverters.fromJson(json['reads'],'List<String>',context!) ?? [];
+        description = json['description'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'source': source,
+        'event': event,
+        'format': format,
+        'reads': JsonConverters.toJson(reads,'List<String>',context!),
+        'description': description
+    };
+
+    getTypeName() => "WorkflowStartOutputDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class WorkflowSchemaDto implements IConvertible
 {
     // @DataMember
@@ -23813,7 +24108,16 @@ class WorkflowSchemaDto implements IConvertible
     // @DataMember
     List<WorkflowBindingFamilyDto> bindings = [];
 
-    WorkflowSchemaDto({this.schemaVersion="",this.definition=const {},this.stepKinds=const [],this.bindings=const []});
+    // @DataMember
+    List<WorkflowFormatDto> formats = [];
+
+    // @DataMember
+    List<WorkflowStartOutputDto> startEvents = [];
+
+    // @DataMember
+    Map<String,dynamic?> triggerSchemas = {};
+
+    WorkflowSchemaDto({this.schemaVersion="",this.definition=const {},this.stepKinds=const [],this.bindings=const [],this.formats=const [],this.startEvents=const [],this.triggerSchemas=const {}});
     WorkflowSchemaDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -23821,6 +24125,9 @@ class WorkflowSchemaDto implements IConvertible
         definition = JsonConverters.fromJson(json['definition'],'Map<String,dynamic?>',context!) ?? {};
         stepKinds = JsonConverters.fromJson(json['stepKinds'],'List<WorkflowStepKindSchemaDto>',context!) ?? [];
         bindings = JsonConverters.fromJson(json['bindings'],'List<WorkflowBindingFamilyDto>',context!) ?? [];
+        formats = JsonConverters.fromJson(json['formats'],'List<WorkflowFormatDto>',context!) ?? [];
+        startEvents = JsonConverters.fromJson(json['startEvents'],'List<WorkflowStartOutputDto>',context!) ?? [];
+        triggerSchemas = JsonConverters.fromJson(json['triggerSchemas'],'Map<String,dynamic?>',context!) ?? {};
         return this;
     }
 
@@ -23828,7 +24135,10 @@ class WorkflowSchemaDto implements IConvertible
         'schemaVersion': schemaVersion,
         'definition': JsonConverters.toJson(definition,'Map<String,dynamic?>',context!),
         'stepKinds': JsonConverters.toJson(stepKinds,'List<WorkflowStepKindSchemaDto>',context!),
-        'bindings': JsonConverters.toJson(bindings,'List<WorkflowBindingFamilyDto>',context!)
+        'bindings': JsonConverters.toJson(bindings,'List<WorkflowBindingFamilyDto>',context!),
+        'formats': JsonConverters.toJson(formats,'List<WorkflowFormatDto>',context!),
+        'startEvents': JsonConverters.toJson(startEvents,'List<WorkflowStartOutputDto>',context!),
+        'triggerSchemas': JsonConverters.toJson(triggerSchemas,'Map<String,dynamic?>',context!)
     };
 
     getTypeName() => "WorkflowSchemaDto";
@@ -30523,15 +30833,17 @@ class EchoResponse implements IConvertible
 class PublicProjectConfigDto implements IConvertible
 {
     String displayName = "";
+    String? websiteUrl;
     PublicBrandDto? branding;
     PublicAuthDto? auth;
     PublicAiChatDto? aiChat;
 
-    PublicProjectConfigDto({this.displayName="",this.branding,this.auth,this.aiChat});
+    PublicProjectConfigDto({this.displayName="",this.websiteUrl,this.branding,this.auth,this.aiChat});
     PublicProjectConfigDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         displayName = json['displayName'] ?? "";
+        websiteUrl = json['websiteUrl'];
         branding = JsonConverters.fromJson(json['branding'],'PublicBrandDto',context!);
         auth = JsonConverters.fromJson(json['auth'],'PublicAuthDto',context!);
         aiChat = JsonConverters.fromJson(json['aiChat'],'PublicAiChatDto',context!);
@@ -30540,6 +30852,7 @@ class PublicProjectConfigDto implements IConvertible
 
     Map<String, dynamic> toJson() => {
         'displayName': displayName,
+        'websiteUrl': websiteUrl,
         'branding': JsonConverters.toJson(branding,'PublicBrandDto',context!),
         'auth': JsonConverters.toJson(auth,'PublicAuthDto',context!),
         'aiChat': JsonConverters.toJson(aiChat,'PublicAiChatDto',context!)
@@ -33980,7 +34293,10 @@ class ValidateCodeWorkflowResponse extends ResponseBase implements IConvertible
     // @DataMember
     List<WorkflowValidationIssueDto> warnings = [];
 
-    ValidateCodeWorkflowResponse({this.isValid,this.errors=const [],this.warnings=const []});
+    // @DataMember
+    WorkflowPortsDto? ports;
+
+    ValidateCodeWorkflowResponse({this.isValid,this.errors=const [],this.warnings=const [],this.ports});
     ValidateCodeWorkflowResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -33988,13 +34304,15 @@ class ValidateCodeWorkflowResponse extends ResponseBase implements IConvertible
         isValid = json['isValid'];
         errors = JsonConverters.fromJson(json['errors'],'List<WorkflowValidationIssueDto>',context!) ?? [];
         warnings = JsonConverters.fromJson(json['warnings'],'List<WorkflowValidationIssueDto>',context!) ?? [];
+        ports = JsonConverters.fromJson(json['ports'],'WorkflowPortsDto',context!);
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'isValid': isValid,
         'errors': JsonConverters.toJson(errors,'List<WorkflowValidationIssueDto>',context!),
-        'warnings': JsonConverters.toJson(warnings,'List<WorkflowValidationIssueDto>',context!)
+        'warnings': JsonConverters.toJson(warnings,'List<WorkflowValidationIssueDto>',context!),
+        'ports': JsonConverters.toJson(ports,'WorkflowPortsDto',context!)
     });
 
     getTypeName() => "ValidateCodeWorkflowResponse";
@@ -62271,13 +62589,27 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'WorkflowStepDiffDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepDiffDto()),
     'WorkflowVersionDiffDto': TypeInfo(TypeOf.Class, create:() => WorkflowVersionDiffDto()),
     'List<WorkflowStepDiffDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStepDiffDto>[]),
+    'WorkflowPortOutputDto': TypeInfo(TypeOf.Class, create:() => WorkflowPortOutputDto()),
+    'WorkflowPortInputDto': TypeInfo(TypeOf.Class, create:() => WorkflowPortInputDto()),
+    'WorkflowPortUsedDto': TypeInfo(TypeOf.Class, create:() => WorkflowPortUsedDto()),
+    'WorkflowPortTakeDto': TypeInfo(TypeOf.Class, create:() => WorkflowPortTakeDto()),
+    'WorkflowStepPortsDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepPortsDto()),
+    'List<WorkflowPortInputDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowPortInputDto>[]),
+    'List<WorkflowPortUsedDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowPortUsedDto>[]),
+    'List<WorkflowPortTakeDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowPortTakeDto>[]),
+    'WorkflowPortsDto': TypeInfo(TypeOf.Class, create:() => WorkflowPortsDto()),
+    'List<WorkflowStepPortsDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStepPortsDto>[]),
     'WorkflowLastRunDto': TypeInfo(TypeOf.Class, create:() => WorkflowLastRunDto()),
     'WorkflowListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowListProjection()),
     'WorkflowStepKindSchemaDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepKindSchemaDto()),
     'WorkflowBindingFamilyDto': TypeInfo(TypeOf.Class, create:() => WorkflowBindingFamilyDto()),
+    'WorkflowFormatDto': TypeInfo(TypeOf.Class, create:() => WorkflowFormatDto()),
+    'WorkflowStartOutputDto': TypeInfo(TypeOf.Class, create:() => WorkflowStartOutputDto()),
     'WorkflowSchemaDto': TypeInfo(TypeOf.Class, create:() => WorkflowSchemaDto()),
     'List<WorkflowStepKindSchemaDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStepKindSchemaDto>[]),
     'List<WorkflowBindingFamilyDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowBindingFamilyDto>[]),
+    'List<WorkflowFormatDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowFormatDto>[]),
+    'List<WorkflowStartOutputDto>': TypeInfo(TypeOf.Class, create:() => <WorkflowStartOutputDto>[]),
     'MarketplaceListingProjection': TypeInfo(TypeOf.Class, create:() => MarketplaceListingProjection()),
     'MarketplaceAccessCustomPolicyDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessCustomPolicyDto()),
     'MarketplaceAccessRoleDto': TypeInfo(TypeOf.Class, create:() => MarketplaceAccessRoleDto()),

@@ -1676,6 +1676,15 @@ module's trigger, linked to the workflow (`managedByWorkflowId` on the trigger);
 routes cannot change it (`CM-ERRORS-WORKFLOWS-052`). Its condition reads `Old`, `New` and
 `Event`, like a trigger's activation code: `return New.status == "review";`.
 
+Data between steps: a step reads what the step before gives as `@Model.Input` (in a condition
+or a transform: `Input`) and names the earlier steps it also reads in `uses`.
+`validateCodeWorkflow` answers `ports`: what the start hands over, and for each step what comes
+in, what it gives and which formats its input-taking fields can take; a connection that carries
+another format is refused (`CM-ERRORS-WORKFLOWS-055`). An `ai.invoke` step takes one value as
+data beside the prompt: `config.context` (for example `'@Model.Input'`, the record that started
+the run — its file fields go as files), `config.contextExclude` (fields that are not sent) and
+`config.reask` (0–3: ask again on a wrong JSON answer).
+
 `api.code` (a project user) has four of them: `getCodeWorkflowWaitingRuns`,
 `resumeCodeWorkflowRun`, `openCodeWorkflowResumeLink` and
 `useCodeWorkflowResumeLink`. The resume link's token is its own key: the call
