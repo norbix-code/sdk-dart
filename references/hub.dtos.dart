@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-23 17:05:49
+Date: 2026-11-24 07:35:34
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -435,7 +435,10 @@ abstract class EmailCampaignRequest
     // @DataMember
     int? campaignTime;
 
-    EmailCampaignRequest({this.source,this.templateId="",this.integrationId,this.validationIntegrationId,this.language,this.initiatorId,this.notes,this.mappedTokens,this.campaignTime});
+    // @DataMember
+    List<String>? attachments;
+
+    EmailCampaignRequest({this.source,this.templateId="",this.integrationId,this.validationIntegrationId,this.language,this.initiatorId,this.notes,this.mappedTokens,this.campaignTime,this.attachments});
     EmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -448,6 +451,7 @@ abstract class EmailCampaignRequest
         notes = json['notes'];
         mappedTokens = JsonConverters.fromJson(json['mappedTokens'],'List<TokenMappingDto>',context!);
         campaignTime = json['campaignTime'];
+        attachments = JsonConverters.fromJson(json['attachments'],'List<String>',context!);
         return this;
     }
 
@@ -460,7 +464,8 @@ abstract class EmailCampaignRequest
         'initiatorId': initiatorId,
         'notes': notes,
         'mappedTokens': JsonConverters.toJson(mappedTokens,'List<TokenMappingDto>',context!),
-        'campaignTime': campaignTime
+        'campaignTime': campaignTime,
+        'attachments': JsonConverters.toJson(attachments,'List<String>',context!)
     };
 
     getTypeName() => "EmailCampaignRequest";
@@ -5552,7 +5557,11 @@ class TriggerActionMarketplaceDto extends TriggerActionDto implements IConvertib
 // @DataContract
 class TriggerActionWorkflowDto extends TriggerActionDto implements IConvertible
 {
+    /**
+    * The workflow (wf_…). From a trigger screen a Workflow action must have resumeKey (it resumes a waiting run); to START a workflow on an event, set the workflow's start event with set_code_workflow_start_event (PUT /code/workflows/{id}/start-event) and publish — a start saved here is refused (CM-ERRORS-WORKFLOWS-053).
+    */
     // @DataMember
+    // @ApiMember(Description="The workflow (wf_…). From a trigger screen a Workflow action must have resumeKey (it resumes a waiting run); to START a workflow on an event, set the workflow's start event with set_code_workflow_start_event (PUT /code/workflows/{id}/start-event) and publish — a start saved here is refused (CM-ERRORS-WORKFLOWS-053).")
     String? workflowRef;
 
     // @DataMember
@@ -10656,6 +10665,7 @@ enum MarketplaceFormKind
     Prompt,
     Web,
     MembershipUser,
+    Document,
 }
 
 // @DataContract
@@ -14751,6 +14761,59 @@ class SaveSmsTemplate extends CodeMashRequestBase implements IConvertible
 }
 
 // @DataContract
+class WorkflowStartEventDto implements IConvertible
+{
+    /**
+    * database | membership | files | payments | ai.
+    */
+    // @DataMember
+    // @ApiMember(Description="database | membership | files | payments | ai.", IsRequired=true)
+    String source = "";
+
+    /**
+    * The event name, e.g. database.record.inserted, database.record.updated, membership.user.registered, files.file.uploaded, payments.order.paid.
+    */
+    // @DataMember
+    // @ApiMember(Description="The event name, e.g. database.record.inserted, database.record.updated, membership.user.registered, files.file.uploaded, payments.order.paid.", IsRequired=true)
+    String event = "";
+
+    /**
+    * Database only: the collection (schema unique name).
+    */
+    // @DataMember
+    // @ApiMember(Description="Database only: the collection (schema unique name).")
+    String? schema;
+
+    /**
+    * Optional sandbox code that must return true for a run to start (like a trigger's pre-execute code).
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional sandbox code that must return true for a run to start (like a trigger's pre-execute code).")
+    String? condition;
+
+    WorkflowStartEventDto({this.source="",this.event="",this.schema,this.condition});
+    WorkflowStartEventDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        source = json['source'] ?? "";
+        event = json['event'] ?? "";
+        schema = json['schema'];
+        condition = json['condition'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'source': source,
+        'event': event,
+        'schema': schema,
+        'condition': condition
+    };
+
+    getTypeName() => "WorkflowStartEventDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class WorkflowStepRetryDto implements IConvertible
 {
     /**
@@ -15081,6 +15144,13 @@ class WorkflowDefinitionDto implements IConvertible
     // @ApiMember(Description="Optional JSON Schema (draft 2020-12, type object) of the manual-invoke payload.")
     Map<String,dynamic?>? inputs;
 
+    /**
+    * Optional: the event that starts the workflow — { source: database | membership | files | payments | ai, event: e.g. database.record.inserted, schema: the collection (database only), condition: optional sandbox code that must return true }. Publishing writes the matching trigger; the trigger screens cannot change it.
+    */
+    // @DataMember
+    // @ApiMember(Description="Optional: the event that starts the workflow — { source: database | membership | files | payments | ai, event: e.g. database.record.inserted, schema: the collection (database only), condition: optional sandbox code that must return true }. Publishing writes the matching trigger; the trigger screens cannot change it.")
+    WorkflowStartEventDto? trigger;
+
     // @DataMember
     String? start;
 
@@ -15097,7 +15167,7 @@ class WorkflowDefinitionDto implements IConvertible
     // @DataMember
     WorkflowLimitsDto? limits;
 
-    WorkflowDefinitionDto({this.schemaVersion="",this.workflowId,this.name="",this.description,this.version,this.isEnabled,this.executionIdentityId,this.inputs,this.start,this.steps=const [],this.onError,this.limits});
+    WorkflowDefinitionDto({this.schemaVersion="",this.workflowId,this.name="",this.description,this.version,this.isEnabled,this.executionIdentityId,this.inputs,this.trigger,this.start,this.steps=const [],this.onError,this.limits});
     WorkflowDefinitionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -15109,6 +15179,7 @@ class WorkflowDefinitionDto implements IConvertible
         isEnabled = json['isEnabled'];
         executionIdentityId = json['executionIdentityId'];
         inputs = JsonConverters.fromJson(json['inputs'],'Map<String,dynamic?>',context!);
+        trigger = JsonConverters.fromJson(json['trigger'],'WorkflowStartEventDto',context!);
         start = json['start'];
         steps = JsonConverters.fromJson(json['steps'],'List<WorkflowStepDto>',context!) ?? [];
         onError = JsonConverters.fromJson(json['onError'],'WorkflowOnErrorDto',context!);
@@ -15125,6 +15196,7 @@ class WorkflowDefinitionDto implements IConvertible
         'isEnabled': isEnabled,
         'executionIdentityId': executionIdentityId,
         'inputs': JsonConverters.toJson(inputs,'Map<String,dynamic?>',context!),
+        'trigger': JsonConverters.toJson(trigger,'WorkflowStartEventDto',context!),
         'start': start,
         'steps': JsonConverters.toJson(steps,'List<WorkflowStepDto>',context!),
         'onError': JsonConverters.toJson(onError,'WorkflowOnErrorDto',context!),
@@ -17958,7 +18030,10 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
     // @DataMember
     ExecutionIdentitySummaryDto? executionIdentity;
 
-    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId,this.executionIdentityId,this.executionIdentity});
+    // @DataMember
+    String? managedByWorkflowId;
+
+    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId,this.executionIdentityId,this.executionIdentity,this.managedByWorkflowId});
     TriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -17972,6 +18047,7 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         savedByAuthId = json['savedByAuthId'];
         executionIdentityId = json['executionIdentityId'];
         executionIdentity = JsonConverters.fromJson(json['executionIdentity'],'ExecutionIdentitySummaryDto',context!);
+        managedByWorkflowId = json['managedByWorkflowId'];
         return this;
     }
 
@@ -17985,7 +18061,8 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         'activationCode': activationCode,
         'savedByAuthId': savedByAuthId,
         'executionIdentityId': executionIdentityId,
-        'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!)
+        'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!),
+        'managedByWorkflowId': managedByWorkflowId
     };
 
     getTypeName() => "TriggerDto";
@@ -20402,7 +20479,10 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
     // @DataMember
     String? executionIdentityId;
 
-    TriggerProjectionList({this.viewId="",this.name="",this.actionType,this.hasPreExecuteCode,this.isEnabled,this.executionIdentityId});
+    // @DataMember
+    String? managedByWorkflowId;
+
+    TriggerProjectionList({this.viewId="",this.name="",this.actionType,this.hasPreExecuteCode,this.isEnabled,this.executionIdentityId,this.managedByWorkflowId});
     TriggerProjectionList.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -20412,6 +20492,7 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
         hasPreExecuteCode = json['hasPreExecuteCode'];
         isEnabled = json['isEnabled'];
         executionIdentityId = json['executionIdentityId'];
+        managedByWorkflowId = json['managedByWorkflowId'];
         return this;
     }
 
@@ -20421,7 +20502,8 @@ class TriggerProjectionList implements IHasViewId, IQueuedTrigger, IConvertible
         'actionType': JsonConverters.toJson(actionType,'TriggerActionType',context!),
         'hasPreExecuteCode': hasPreExecuteCode,
         'isEnabled': isEnabled,
-        'executionIdentityId': executionIdentityId
+        'executionIdentityId': executionIdentityId,
+        'managedByWorkflowId': managedByWorkflowId
     };
 
     getTypeName() => "TriggerProjectionList";
@@ -27970,9 +28052,12 @@ class EmailCampaignDto extends CampaignDto implements IConvertible
     String? validationIntegrationId;
 
     // @DataMember
+    List<String>? attachmentFileIds;
+
+    // @DataMember
     bool? templateIsSystem;
 
-    EmailCampaignDto({this.deliverySettings,this.template,this.validationIntegrationId,this.templateIsSystem});
+    EmailCampaignDto({this.deliverySettings,this.template,this.validationIntegrationId,this.attachmentFileIds,this.templateIsSystem});
     EmailCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -27980,6 +28065,7 @@ class EmailCampaignDto extends CampaignDto implements IConvertible
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'EmailCampaignDeliverySettingsDto',context!);
         template = JsonConverters.fromJson(json['template'],'EmailTemplateDto',context!);
         validationIntegrationId = json['validationIntegrationId'];
+        attachmentFileIds = JsonConverters.fromJson(json['attachmentFileIds'],'List<String>',context!);
         templateIsSystem = json['templateIsSystem'];
         return this;
     }
@@ -27988,6 +28074,7 @@ class EmailCampaignDto extends CampaignDto implements IConvertible
         'deliverySettings': JsonConverters.toJson(deliverySettings,'EmailCampaignDeliverySettingsDto',context!),
         'template': JsonConverters.toJson(template,'EmailTemplateDto',context!),
         'validationIntegrationId': validationIntegrationId,
+        'attachmentFileIds': JsonConverters.toJson(attachmentFileIds,'List<String>',context!),
         'templateIsSystem': templateIsSystem
     });
 
@@ -28611,6 +28698,38 @@ class RemovedRecipientDto implements IConvertible
 }
 
 // @DataContract
+class SentAttachmentDto implements IConvertible
+{
+    // @DataMember
+    String fileName = "";
+
+    // @DataMember
+    int sizeBytes = 0;
+
+    // @DataMember
+    String contentType = "";
+
+    SentAttachmentDto({this.fileName="",this.sizeBytes=0,this.contentType=""});
+    SentAttachmentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        fileName = json['fileName'] ?? "";
+        sizeBytes = json['sizeBytes'] ?? 0;
+        contentType = json['contentType'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'fileName': fileName,
+        'sizeBytes': sizeBytes,
+        'contentType': contentType
+    };
+
+    getTypeName() => "SentAttachmentDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
 {
     // @DataMember
@@ -28626,9 +28745,12 @@ class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto imp
     EmailMessageContentDto? content;
 
     // @DataMember
+    List<SentAttachmentDto>? attachments;
+
+    // @DataMember
     String? transactionalKind;
 
-    EmailCampaignBatchNotificationDto({this.subject,this.recipients,this.removedRecipients,this.content,this.transactionalKind});
+    EmailCampaignBatchNotificationDto({this.subject,this.recipients,this.removedRecipients,this.content,this.attachments,this.transactionalKind});
     EmailCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -28637,6 +28759,7 @@ class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto imp
         recipients = JsonConverters.fromJson(json['recipients'],'EmailRecipientsDto',context!);
         removedRecipients = JsonConverters.fromJson(json['removedRecipients'],'List<RemovedRecipientDto>',context!);
         content = JsonConverters.fromJson(json['content'],'EmailMessageContentDto',context!);
+        attachments = JsonConverters.fromJson(json['attachments'],'List<SentAttachmentDto>',context!);
         transactionalKind = json['transactionalKind'];
         return this;
     }
@@ -28646,6 +28769,7 @@ class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto imp
         'recipients': JsonConverters.toJson(recipients,'EmailRecipientsDto',context!),
         'removedRecipients': JsonConverters.toJson(removedRecipients,'List<RemovedRecipientDto>',context!),
         'content': JsonConverters.toJson(content,'EmailMessageContentDto',context!),
+        'attachments': JsonConverters.toJson(attachments,'List<SentAttachmentDto>',context!),
         'transactionalKind': transactionalKind
     });
 
@@ -51230,6 +51354,45 @@ class SaveCodeWorkflowCanvas extends CodeMashRequestBase implements IReturn<Work
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/code/workflows/{Id}/start-event", "PUT")
+// @DataContract
+class SetCodeWorkflowStartEvent extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IPut
+{
+    /**
+    * wf_…
+    */
+    // @DataMember
+    // @ApiMember(Description="wf_…", IsRequired=true)
+    String id = "";
+
+    /**
+    * { source, event, schema? (database), condition? }
+    */
+    // @DataMember
+    // @ApiMember(Description="{ source, event, schema? (database), condition? }", IsRequired=true)
+    WorkflowStartEventDto? start;
+
+    SetCodeWorkflowStartEvent({this.id="",this.start});
+    SetCodeWorkflowStartEvent.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        id = json['id'] ?? "";
+        start = JsonConverters.fromJson(json['start'],'WorkflowStartEventDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'id': id,
+        'start': JsonConverters.toJson(start,'WorkflowStartEventDto',context!)
+    });
+
+    createResponse() => WorkflowResponse();
+    getResponseTypeName() => "WorkflowResponse";
+    getTypeName() => "SetCodeWorkflowStartEvent";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/code/workflows/{Id}/publish", "POST")
 // @DataContract
 class PublishCodeWorkflow extends CodeMashRequestBase implements IReturn<WorkflowResponse>, IConvertible, IPost
@@ -61812,6 +61975,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TranslationDto': TypeInfo(TypeOf.Class, create:() => TranslationDto()),
     'EmailClickDto': TypeInfo(TypeOf.Class, create:() => EmailClickDto()),
     'SaveSmsTemplate': TypeInfo(TypeOf.Class, create:() => SaveSmsTemplate()),
+    'WorkflowStartEventDto': TypeInfo(TypeOf.Class, create:() => WorkflowStartEventDto()),
     'WorkflowStepRetryDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepRetryDto()),
     'WorkflowOnErrorDto': TypeInfo(TypeOf.Class, create:() => WorkflowOnErrorDto()),
     'WorkflowStepDto': TypeInfo(TypeOf.Class, create:() => WorkflowStepDto()),
@@ -62263,8 +62427,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmailRecipientField': TypeInfo(TypeOf.Enum, enumValues:EmailRecipientField.values),
     'RecipientRemovalReason': TypeInfo(TypeOf.Enum, enumValues:RecipientRemovalReason.values),
     'RemovedRecipientDto': TypeInfo(TypeOf.Class, create:() => RemovedRecipientDto()),
+    'SentAttachmentDto': TypeInfo(TypeOf.Class, create:() => SentAttachmentDto()),
     'EmailCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchNotificationDto()),
     'List<RemovedRecipientDto>': TypeInfo(TypeOf.Class, create:() => <RemovedRecipientDto>[]),
+    'List<SentAttachmentDto>': TypeInfo(TypeOf.Class, create:() => <SentAttachmentDto>[]),
     'CampaignStatsDto': TypeInfo(TypeOf.Class, create:() => CampaignStatsDto()),
     'SmsCampaignDto': TypeInfo(TypeOf.Class, create:() => SmsCampaignDto()),
     'SmsRecipientDto': TypeInfo(TypeOf.Class, create:() => SmsRecipientDto()),
@@ -63128,6 +63294,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TestSmsIntegration': TypeInfo(TypeOf.Class, create:() => TestSmsIntegration()),
     'SaveCodeWorkflow': TypeInfo(TypeOf.Class, create:() => SaveCodeWorkflow()),
     'SaveCodeWorkflowCanvas': TypeInfo(TypeOf.Class, create:() => SaveCodeWorkflowCanvas()),
+    'SetCodeWorkflowStartEvent': TypeInfo(TypeOf.Class, create:() => SetCodeWorkflowStartEvent()),
     'PublishCodeWorkflow': TypeInfo(TypeOf.Class, create:() => PublishCodeWorkflow()),
     'GetCodeWorkflowDraft': TypeInfo(TypeOf.Class, create:() => GetCodeWorkflowDraft()),
     'DiscardCodeWorkflowDraft': TypeInfo(TypeOf.Class, create:() => DiscardCodeWorkflowDraft()),

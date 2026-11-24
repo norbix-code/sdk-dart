@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-23 17:05:49
+Date: 2026-11-24 07:35:35
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -1450,7 +1450,10 @@ abstract class EmailCampaignRequest
     // @DataMember
     int? campaignTime;
 
-    EmailCampaignRequest({this.source,this.templateId="",this.integrationId,this.validationIntegrationId,this.language,this.initiatorId,this.notes,this.mappedTokens,this.campaignTime});
+    // @DataMember
+    List<String>? attachments;
+
+    EmailCampaignRequest({this.source,this.templateId="",this.integrationId,this.validationIntegrationId,this.language,this.initiatorId,this.notes,this.mappedTokens,this.campaignTime,this.attachments});
     EmailCampaignRequest.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -1463,6 +1466,7 @@ abstract class EmailCampaignRequest
         notes = json['notes'];
         mappedTokens = JsonConverters.fromJson(json['mappedTokens'],'List<TokenMappingDto>',context!);
         campaignTime = json['campaignTime'];
+        attachments = JsonConverters.fromJson(json['attachments'],'List<String>',context!);
         return this;
     }
 
@@ -1475,7 +1479,8 @@ abstract class EmailCampaignRequest
         'initiatorId': initiatorId,
         'notes': notes,
         'mappedTokens': JsonConverters.toJson(mappedTokens,'List<TokenMappingDto>',context!),
-        'campaignTime': campaignTime
+        'campaignTime': campaignTime,
+        'attachments': JsonConverters.toJson(attachments,'List<String>',context!)
     };
 
     getTypeName() => "EmailCampaignRequest";
@@ -3294,7 +3299,10 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
     // @DataMember
     ExecutionIdentitySummaryDto? executionIdentity;
 
-    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId,this.executionIdentityId,this.executionIdentity});
+    // @DataMember
+    String? managedByWorkflowId;
+
+    TriggerDto({this.type,this.viewId="",this.name="",this.thenAction,this.description,this.isEnabled,this.activationCode,this.savedByAuthId,this.executionIdentityId,this.executionIdentity,this.managedByWorkflowId});
     TriggerDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -3308,6 +3316,7 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         savedByAuthId = json['savedByAuthId'];
         executionIdentityId = json['executionIdentityId'];
         executionIdentity = JsonConverters.fromJson(json['executionIdentity'],'ExecutionIdentitySummaryDto',context!);
+        managedByWorkflowId = json['managedByWorkflowId'];
         return this;
     }
 
@@ -3321,7 +3330,8 @@ class TriggerDto implements IHasViewId, IQueuedTrigger, IConvertible
         'activationCode': activationCode,
         'savedByAuthId': savedByAuthId,
         'executionIdentityId': executionIdentityId,
-        'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!)
+        'executionIdentity': JsonConverters.toJson(executionIdentity,'ExecutionIdentitySummaryDto',context!),
+        'managedByWorkflowId': managedByWorkflowId
     };
 
     getTypeName() => "TriggerDto";
@@ -5572,9 +5582,12 @@ class EmailCampaignDto extends CampaignDto implements IConvertible
     String? validationIntegrationId;
 
     // @DataMember
+    List<String>? attachmentFileIds;
+
+    // @DataMember
     bool? templateIsSystem;
 
-    EmailCampaignDto({this.deliverySettings,this.template,this.validationIntegrationId,this.templateIsSystem});
+    EmailCampaignDto({this.deliverySettings,this.template,this.validationIntegrationId,this.attachmentFileIds,this.templateIsSystem});
     EmailCampaignDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -5582,6 +5595,7 @@ class EmailCampaignDto extends CampaignDto implements IConvertible
         deliverySettings = JsonConverters.fromJson(json['deliverySettings'],'EmailCampaignDeliverySettingsDto',context!);
         template = JsonConverters.fromJson(json['template'],'EmailTemplateDto',context!);
         validationIntegrationId = json['validationIntegrationId'];
+        attachmentFileIds = JsonConverters.fromJson(json['attachmentFileIds'],'List<String>',context!);
         templateIsSystem = json['templateIsSystem'];
         return this;
     }
@@ -5590,6 +5604,7 @@ class EmailCampaignDto extends CampaignDto implements IConvertible
         'deliverySettings': JsonConverters.toJson(deliverySettings,'EmailCampaignDeliverySettingsDto',context!),
         'template': JsonConverters.toJson(template,'EmailTemplateDto',context!),
         'validationIntegrationId': validationIntegrationId,
+        'attachmentFileIds': JsonConverters.toJson(attachmentFileIds,'List<String>',context!),
         'templateIsSystem': templateIsSystem
     });
 
@@ -6213,6 +6228,38 @@ class RemovedRecipientDto implements IConvertible
 }
 
 // @DataContract
+class SentAttachmentDto implements IConvertible
+{
+    // @DataMember
+    String fileName = "";
+
+    // @DataMember
+    int sizeBytes = 0;
+
+    // @DataMember
+    String contentType = "";
+
+    SentAttachmentDto({this.fileName="",this.sizeBytes=0,this.contentType=""});
+    SentAttachmentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        fileName = json['fileName'] ?? "";
+        sizeBytes = json['sizeBytes'] ?? 0;
+        contentType = json['contentType'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'fileName': fileName,
+        'sizeBytes': sizeBytes,
+        'contentType': contentType
+    };
+
+    getTypeName() => "SentAttachmentDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
 class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto implements IConvertible
 {
     // @DataMember
@@ -6228,9 +6275,12 @@ class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto imp
     EmailMessageContentDto? content;
 
     // @DataMember
+    List<SentAttachmentDto>? attachments;
+
+    // @DataMember
     String? transactionalKind;
 
-    EmailCampaignBatchNotificationDto({this.subject,this.recipients,this.removedRecipients,this.content,this.transactionalKind});
+    EmailCampaignBatchNotificationDto({this.subject,this.recipients,this.removedRecipients,this.content,this.attachments,this.transactionalKind});
     EmailCampaignBatchNotificationDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -6239,6 +6289,7 @@ class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto imp
         recipients = JsonConverters.fromJson(json['recipients'],'EmailRecipientsDto',context!);
         removedRecipients = JsonConverters.fromJson(json['removedRecipients'],'List<RemovedRecipientDto>',context!);
         content = JsonConverters.fromJson(json['content'],'EmailMessageContentDto',context!);
+        attachments = JsonConverters.fromJson(json['attachments'],'List<SentAttachmentDto>',context!);
         transactionalKind = json['transactionalKind'];
         return this;
     }
@@ -6248,6 +6299,7 @@ class EmailCampaignBatchNotificationDto extends CampaignBatchNotificationDto imp
         'recipients': JsonConverters.toJson(recipients,'EmailRecipientsDto',context!),
         'removedRecipients': JsonConverters.toJson(removedRecipients,'List<RemovedRecipientDto>',context!),
         'content': JsonConverters.toJson(content,'EmailMessageContentDto',context!),
+        'attachments': JsonConverters.toJson(attachments,'List<SentAttachmentDto>',context!),
         'transactionalKind': transactionalKind
     });
 
@@ -18556,8 +18608,10 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmailRecipientField': TypeInfo(TypeOf.Enum, enumValues:EmailRecipientField.values),
     'RecipientRemovalReason': TypeInfo(TypeOf.Enum, enumValues:RecipientRemovalReason.values),
     'RemovedRecipientDto': TypeInfo(TypeOf.Class, create:() => RemovedRecipientDto()),
+    'SentAttachmentDto': TypeInfo(TypeOf.Class, create:() => SentAttachmentDto()),
     'EmailCampaignBatchNotificationDto': TypeInfo(TypeOf.Class, create:() => EmailCampaignBatchNotificationDto()),
     'List<RemovedRecipientDto>': TypeInfo(TypeOf.Class, create:() => <RemovedRecipientDto>[]),
+    'List<SentAttachmentDto>': TypeInfo(TypeOf.Class, create:() => <SentAttachmentDto>[]),
     'CampaignStatsDto': TypeInfo(TypeOf.Class, create:() => CampaignStatsDto()),
     'SmsMessageContentDto': TypeInfo(TypeOf.Class, create:() => SmsMessageContentDto()),
     'SmsMessageTranslationDto': TypeInfo(TypeOf.Class, create:() => SmsMessageTranslationDto()),
