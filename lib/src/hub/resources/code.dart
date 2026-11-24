@@ -895,6 +895,45 @@ class CodeResource extends Resource {
     );
   }
 
+  /// Beta: `PUT /{version}/code/workflows/{Id}/start-event`
+  ///
+  /// Sets the event that starts the workflow (body `{'start': {'source', 'event',
+  /// 'schema', 'condition'}}`) and saves a draft; publishing it writes the trigger.
+  /// A different start answers `CM-ERRORS-WORKFLOWS-054`. Answers `WorkflowResponse`.
+  Future<Object?> setCodeWorkflowStartEvent(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/start-event',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `PUT /{version}/code/workflows/{Id}/canvas`
+  ///
+  /// Saves where the visual builder draws the steps (body `{'canvas': '<json text>'}`);
+  /// no draft, no version. Answers `WorkflowResponse`.
+  Future<Object?> saveCodeWorkflowCanvas(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/canvas',
+      method: 'PUT',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
   /// Beta: `POST /{version}/code/workflows/{Id}/publish`
   ///
   /// Publish the draft as a new version. Answers `WorkflowResponse`.
@@ -979,6 +1018,26 @@ class CodeResource extends Resource {
     return transport.send(
       route: '/{version}/code/workflows/{Id}/versions/diff',
       method: 'GET',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'Id': id},
+    );
+  }
+
+  /// Beta: `POST /{version}/code/workflows/{Id}/test`
+  ///
+  /// Starts a real run with a test event: a database record (`source: 'database'`,
+  /// `collection`, `recordId`, `edits`), a Membership user (`source: 'membership'`,
+  /// `userId`) or a manual `payload`. Answers `InvokeCodeWorkflowResponse`.
+  Future<Object?> testCodeWorkflow(
+      {required Object id,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/code/workflows/{Id}/test',
+      method: 'POST',
       query: query,
       body: body,
       headers: headers,

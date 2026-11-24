@@ -1550,8 +1550,8 @@ Norbix does not host code: a trigger's `Code` action, a scheduler
 `CodeFunctionalCall` task or a manual call runs a function in **your** cloud
 (AWS Lambda, Azure Functions, Google Cloud Functions) through a Code
 integration (`hub.code.getCodeIntegrations`, `saveCodeIntegration`,
-`testCodeIntegration`, …). `hub.code` covers every Code Hub endpoint (70,
-with the 26 workflow routes below); the five cloud-function routes:
+`testCodeIntegration`, …). `hub.code` covers every Code Hub endpoint (73,
+with the 29 workflow routes below); the five cloud-function routes:
 
 | Method | Call |
 |--------|------|
@@ -1647,12 +1647,15 @@ The shapes (`WorkflowDefinitionDto`, `WorkflowRunDto`, …) are in
 | `deleteCodeWorkflow(id:)` | `DELETE /{version}/code/workflows/{Id}` |
 | `enableCodeWorkflow(id:)` | `PUT /{version}/code/workflows/{Id}/enable` |
 | `disableCodeWorkflow(id:)` | `PUT /{version}/code/workflows/{Id}/disable` |
+| `setCodeWorkflowStartEvent(id:, body:)` | `PUT /{version}/code/workflows/{Id}/start-event` — `start` (`source`, `event`, `schema?`, `condition?`); saves a draft, publishing writes the trigger; a different start is `CM-ERRORS-WORKFLOWS-054` |
+| `saveCodeWorkflowCanvas(id:, body:)` | `PUT /{version}/code/workflows/{Id}/canvas` — `canvas` (layout JSON text; no draft, no version) |
 | `publishCodeWorkflow(id:)` | `POST /{version}/code/workflows/{Id}/publish` |
 | `getCodeWorkflowDraft(id:)` | `GET /{version}/code/workflows/{Id}/draft` |
 | `discardCodeWorkflowDraft(id:)` | `DELETE /{version}/code/workflows/{Id}/draft` |
 | `getCodeWorkflowVersions(id:)` | `GET /{version}/code/workflows/{Id}/versions` |
 | `getCodeWorkflowVersionDiff(id:, query:)` | `GET /{version}/code/workflows/{Id}/versions/diff` — `fromVersion`, `toVersion` |
 | `invokeCodeWorkflow(id:, body:)` | `POST /{version}/code/workflows/{Id}/invoke` — `payload?`, `waitSeconds?` (0–30), `runVersion?` |
+| `testCodeWorkflow(id:, body:)` | `POST /{version}/code/workflows/{Id}/test` — `source` (`database` / `membership` / `manual`), `event?`, `collection?`, `recordId?`, `userId?`, `edits?`, `payload?`; a real run |
 | `getCodeWorkflowRuns(id:, query:)` | `GET /{version}/code/workflows/{Id}/runs` — `status?`, `from?`, `to?` + paging |
 | `resumeCodeWorkflowRunByKey(id:, body:)` | `POST /{version}/code/workflows/{Id}/resume` — `key`, `stepId?`, `decision?`, `payload?` |
 | `validateCodeWorkflow(body:)` | `POST /{version}/code/workflows/validate` — `definition` |
@@ -1667,6 +1670,11 @@ The shapes (`WorkflowDefinitionDto`, `WorkflowRunDto`, …) are in
 | `cancelCodeWorkflowRun(runId:, body:)` | `POST /{version}/code/workflows/runs/{RunId}/cancel` — `reason?` |
 | `openCodeWorkflowResumeLink(token:)` | `GET /{version}/code/workflows/resume/{Token}` |
 | `useCodeWorkflowResumeLink(token:, body:)` | `POST /{version}/code/workflows/resume/{Token}` |
+
+The start event is the event that starts the workflow. Publishing a version with it writes the
+module's trigger, linked to the workflow (`managedByWorkflowId` on the trigger); the trigger
+routes cannot change it (`CM-ERRORS-WORKFLOWS-052`). Its condition reads `Old`, `New` and
+`Event`, like a trigger's activation code: `return New.status == "review";`.
 
 `api.code` (a project user) has four of them: `getCodeWorkflowWaitingRuns`,
 `resumeCodeWorkflowRun`, `openCodeWorkflowResumeLink` and

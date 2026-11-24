@@ -221,6 +221,21 @@ class _WorkflowRoute {
   final Map<String, Object?>? body;
 }
 
+const _startEvent = <String, Object?>{
+  'source': 'database',
+  'event': 'database.record.inserted',
+  'schema': 'moto_listings',
+  'condition': 'return New.status == "review";',
+};
+
+const _testRun = <String, Object?>{
+  'source': 'database',
+  'event': 'database.record.updated',
+  'collection': 'moto_listings',
+  'recordId': 'rec_1',
+  'edits': {'status': 'review'},
+};
+
 const _definition = <String, Object?>{
   'name': 'Order approval',
   'trigger': {'kind': 'manual'},
@@ -255,6 +270,26 @@ final _workflowRoutes = <_WorkflowRoute>[
       'PUT',
       '/v3/code/workflows/wf_1/disable',
       (c) => c.disableCodeWorkflow(id: 'wf_1')),
+  _WorkflowRoute(
+      'setCodeWorkflowStartEvent',
+      'PUT',
+      '/v3/code/workflows/wf_1/start-event',
+      (c) => c.setCodeWorkflowStartEvent(
+          id: 'wf_1', body: {'start': _startEvent}),
+      body: {'start': _startEvent}),
+  _WorkflowRoute(
+      'saveCodeWorkflowCanvas',
+      'PUT',
+      '/v3/code/workflows/wf_1/canvas',
+      (c) => c.saveCodeWorkflowCanvas(
+          id: 'wf_1', body: {'canvas': '{"nodes":{}}'}),
+      body: {'canvas': '{"nodes":{}}'}),
+  _WorkflowRoute(
+      'testCodeWorkflow',
+      'POST',
+      '/v3/code/workflows/wf_1/test',
+      (c) => c.testCodeWorkflow(id: 'wf_1', body: _testRun),
+      body: _testRun),
   _WorkflowRoute(
       'publishCodeWorkflow',
       'POST',
@@ -414,8 +449,8 @@ void main() {
         ..._workflowRoutes.map((r) => r.name),
       ];
       expect(_routes.length, equals(44));
-      expect(_workflowRoutes.length, equals(26));
-      expect(names.toSet().length, equals(70));
+      expect(_workflowRoutes.length, equals(29));
+      expect(names.toSet().length, equals(73));
     });
 
     for (final route in _routes) {
