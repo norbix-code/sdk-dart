@@ -104,6 +104,20 @@ class NorbixConfig {
   /// header. Null (the default) sends no header.
   final String? accountId;
 
+  /// Called when the server renews the stored bearer token (sessions).
+  ///
+  /// A project user's token lives a sliding 12 hours (30 days with
+  /// `rememberMe`), never more than 90 days from sign-in. While it is used,
+  /// an answer may carry a fresh token in the `norbix-session-token` header.
+  /// The client then uses the new token for every later call and calls this
+  /// so the app can save it (the old token still works until it expires).
+  ///
+  /// Only for the stored [bearerToken] (set here, by `setBearerToken` or by
+  /// `auth.signIn`): never for an API key, a token passed in per-call
+  /// `headers`, or a call made with no credentials. An empty header value is
+  /// ignored. [copyWith] keeps it.
+  final void Function(String token)? onSessionToken;
+
   NorbixConfig({
     required String baseUrl,
     this.apiVersion = 'v3',
@@ -117,6 +131,7 @@ class NorbixConfig {
     String? language,
     String? projectId,
     String? accountId,
+    this.onSessionToken,
   })  : baseUrl = _stripTrailingSlash(baseUrl),
         region = _blankToNull(region),
         language = _blankToNull(language),
@@ -191,6 +206,7 @@ class NorbixConfig {
     String? language,
     String? projectId,
     String? accountId,
+    void Function(String token)? onSessionToken,
   }) {
     return NorbixConfig(
       baseUrl: baseUrl ?? this.baseUrl,
@@ -205,6 +221,7 @@ class NorbixConfig {
       language: language ?? this.language,
       projectId: projectId ?? this.projectId,
       accountId: accountId ?? this.accountId,
+      onSessionToken: onSessionToken ?? this.onSessionToken,
     );
   }
 
