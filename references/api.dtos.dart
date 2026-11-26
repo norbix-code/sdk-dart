@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-24 14:33:13
+Date: 2026-11-26 14:47:19
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5002
@@ -2371,10 +2371,9 @@ class EndUserChatPlan implements IConvertible
     int used = 0;
     int remaining = 0;
     bool? attachments;
-    bool? rag;
     bool? memory;
 
-    EndUserChatPlan({this.id="",this.name="",this.quotaUnit="",this.monthlyQuota=0,this.used=0,this.remaining=0,this.attachments,this.rag,this.memory});
+    EndUserChatPlan({this.id="",this.name="",this.quotaUnit="",this.monthlyQuota=0,this.used=0,this.remaining=0,this.attachments,this.memory});
     EndUserChatPlan.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -2385,7 +2384,6 @@ class EndUserChatPlan implements IConvertible
         used = json['used'] ?? 0;
         remaining = json['remaining'] ?? 0;
         attachments = json['attachments'];
-        rag = json['rag'];
         memory = json['memory'];
         return this;
     }
@@ -2398,7 +2396,6 @@ class EndUserChatPlan implements IConvertible
         'used': used,
         'remaining': remaining,
         'attachments': attachments,
-        'rag': rag,
         'memory': memory
     };
 
@@ -4671,6 +4668,48 @@ class InAppNotificationDto implements IConvertible
     };
 
     getTypeName() => "InAppNotificationDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class UserAiPlanDto implements IConvertible
+{
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String? planId;
+
+    // @DataMember
+    String? planName;
+
+    // @DataMember
+    String reason = "";
+
+    // @DataMember
+    String? roleId;
+
+    UserAiPlanDto({this.userId="",this.planId,this.planName,this.reason="",this.roleId});
+    UserAiPlanDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'] ?? "";
+        planId = json['planId'];
+        planName = json['planName'];
+        reason = json['reason'] ?? "";
+        roleId = json['roleId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'planId': planId,
+        'planName': planName,
+        'reason': reason,
+        'roleId': roleId
+    };
+
+    getTypeName() => "UserAiPlanDto";
     TypeContext? context = _ctx;
 }
 
@@ -8692,6 +8731,27 @@ class MarkAllNotificationsReadResponse extends ResponseBase implements IConverti
 
     Map<String, dynamic> toJson() => super.toJson();
     getTypeName() => "MarkAllNotificationsReadResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetUserAiPlanResponse extends ResponseBase implements IConvertible
+{
+    UserAiPlanDto? item;
+
+    GetUserAiPlanResponse({this.item});
+    GetUserAiPlanResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'UserAiPlanDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'UserAiPlanDto',context!)
+    });
+
+    getTypeName() => "GetUserAiPlanResponse";
     TypeContext? context = _ctx;
 }
 
@@ -14953,7 +15013,14 @@ class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements I
     // @DataMember
     DateTime? to;
 
-    GetCodeWorkflowRuns({this.id="",this.status,this.from,this.to});
+    /**
+    * Only runs of this published workflow version (1, 2, …). Empty = every version.
+    */
+    // @DataMember
+    // @ApiMember(DataType="integer", Description="Only runs of this published workflow version (1, 2, …). Empty = every version.")
+    int? workflowVersion;
+
+    GetCodeWorkflowRuns({this.id="",this.status,this.from,this.to,this.workflowVersion});
     GetCodeWorkflowRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -14962,6 +15029,7 @@ class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements I
         status = json['status'];
         from = JsonConverters.fromJson(json['from'],'DateTime',context!);
         to = JsonConverters.fromJson(json['to'],'DateTime',context!);
+        workflowVersion = json['workflowVersion'];
         return this;
     }
 
@@ -14969,7 +15037,8 @@ class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements I
         'id': id,
         'status': status,
         'from': JsonConverters.toJson(from,'DateTime',context!),
-        'to': JsonConverters.toJson(to,'DateTime',context!)
+        'to': JsonConverters.toJson(to,'DateTime',context!),
+        'workflowVersion': workflowVersion
     });
 
     createResponse() => WorkflowRunsResponse();
@@ -15385,11 +15454,11 @@ class MarkAllNotificationsReadRequest extends CodeMashRequestBase implements IRe
 }
 
 /**
-* Sets or removes one user's own end-user AI plan
+* Reads which end-user AI plan one user gets and why
 */
-// @Route("/{version}/membership/users/{userId}/ai-plan", "PUT")
-// @Api(Description="Sets or removes one user's own end-user AI plan")
-class SetUserAiPlan extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+// @Route("/{version}/membership/users/{userId}/ai-plan", "GET")
+// @Api(Description="Reads which end-user AI plan one user gets and why")
+class GetUserAiPlan extends CodeMashRequestBase implements IReturn<GetUserAiPlanResponse>, IConvertible, IGet
 {
     /**
     * The human user id (ct_…).
@@ -15398,37 +15467,29 @@ class SetUserAiPlan extends CodeMashRequestBase implements IReturn<EmptyResponse
     String userId = "";
 
     /**
-    * The plan id (aip_…). Empty removes the user's own plan.
-    */
-    // @ApiMember(Description="The plan id (aip_…). Empty removes the user's own plan.")
-    String? planId;
-
-    /**
     * Database integration id. Optional — defaults to the request environment's default integration.
     */
     // @ApiMember(Description="Database integration id. Optional — defaults to the request environment's default integration.")
     String? databaseIntegrationId;
 
-    SetUserAiPlan({this.userId="",this.planId,this.databaseIntegrationId});
-    SetUserAiPlan.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    GetUserAiPlan({this.userId="",this.databaseIntegrationId});
+    GetUserAiPlan.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         userId = json['userId'] ?? "";
-        planId = json['planId'];
         databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'userId': userId,
-        'planId': planId,
         'databaseIntegrationId': databaseIntegrationId
     });
 
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "SetUserAiPlan";
+    createResponse() => GetUserAiPlanResponse();
+    getResponseTypeName() => "GetUserAiPlanResponse";
+    getTypeName() => "GetUserAiPlan";
     TypeContext? context = _ctx;
 }
 
@@ -18556,6 +18617,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'WorkflowRunListProjection': TypeInfo(TypeOf.Class, create:() => WorkflowRunListProjection()),
     'TenantLogEntryDto': TypeInfo(TypeOf.Class, create:() => TenantLogEntryDto()),
     'InAppNotificationDto': TypeInfo(TypeOf.Class, create:() => InAppNotificationDto()),
+    'UserAiPlanDto': TypeInfo(TypeOf.Class, create:() => UserAiPlanDto()),
     'ChannelSubscriptionStateDto': TypeInfo(TypeOf.Class, create:() => ChannelSubscriptionStateDto()),
     'Map<String,List<String>?>': TypeInfo(TypeOf.Class, create:() => Map<String,List<String>?>()),
     'UserDto': TypeInfo(TypeOf.Class, create:() => UserDto()),
@@ -18735,6 +18797,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetUnreadCountResponse': TypeInfo(TypeOf.Class, create:() => GetUnreadCountResponse()),
     'MarkNotificationReadResponse': TypeInfo(TypeOf.Class, create:() => MarkNotificationReadResponse()),
     'MarkAllNotificationsReadResponse': TypeInfo(TypeOf.Class, create:() => MarkAllNotificationsReadResponse()),
+    'GetUserAiPlanResponse': TypeInfo(TypeOf.Class, create:() => GetUserAiPlanResponse()),
     'GetContactResponse': TypeInfo(TypeOf.Class, create:() => GetContactResponse()),
     'GetAllContactsResponse': TypeInfo(TypeOf.Class, create:() => GetAllContactsResponse()),
     'IReadOnlyList<UserDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<UserDto>()),
@@ -18925,7 +18988,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetUnreadCountRequest': TypeInfo(TypeOf.Class, create:() => GetUnreadCountRequest()),
     'MarkNotificationReadRequest': TypeInfo(TypeOf.Class, create:() => MarkNotificationReadRequest()),
     'MarkAllNotificationsReadRequest': TypeInfo(TypeOf.Class, create:() => MarkAllNotificationsReadRequest()),
-    'SetUserAiPlan': TypeInfo(TypeOf.Class, create:() => SetUserAiPlan()),
+    'GetUserAiPlan': TypeInfo(TypeOf.Class, create:() => GetUserAiPlan()),
     'ClearContactBounceRequest': TypeInfo(TypeOf.Class, create:() => ClearContactBounceRequest()),
     'CreateContactRequest': TypeInfo(TypeOf.Class, create:() => CreateContactRequest()),
     'DeleteContact': TypeInfo(TypeOf.Class, create:() => DeleteContact()),

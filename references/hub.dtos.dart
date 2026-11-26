@@ -1,5 +1,5 @@
 /* Options:
-Date: 2026-11-24 14:33:13
+Date: 2026-11-26 14:47:19
 Version: 10.20
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: http://localhost:5001
@@ -13555,6 +13555,40 @@ class PromotionIntegrationChoiceDto implements IConvertible
     TypeContext? context = _ctx;
 }
 
+enum ProjectHealthSeverity
+{
+    Warning,
+    Error,
+}
+
+// @flags()
+class ApplicationModule
+{
+    static const ApplicationModule Account = const ApplicationModule._(0);
+    static const ApplicationModule Membership = const ApplicationModule._(1);
+    static const ApplicationModule Database = const ApplicationModule._(2);
+    static const ApplicationModule Files = const ApplicationModule._(4);
+    static const ApplicationModule Code = const ApplicationModule._(8);
+    static const ApplicationModule Email = const ApplicationModule._(16);
+    static const ApplicationModule Push = const ApplicationModule._(32);
+    static const ApplicationModule Payment = const ApplicationModule._(64);
+    static const ApplicationModule Scheduler = const ApplicationModule._(128);
+    static const ApplicationModule Logging = const ApplicationModule._(256);
+    static const ApplicationModule ServerEvents = const ApplicationModule._(512);
+    static const ApplicationModule Ai = const ApplicationModule._(1024);
+    static const ApplicationModule Sms = const ApplicationModule._(2048);
+    static const ApplicationModule Project = const ApplicationModule._(4096);
+    static const ApplicationModule Compliance = const ApplicationModule._(8192);
+    static const ApplicationModule Contacts = const ApplicationModule._(16384);
+    static const ApplicationModule Marketplace = const ApplicationModule._(32768);
+    static const ApplicationModule Diagnostics = const ApplicationModule._(65536);
+
+    final int _value;
+    const ApplicationModule._(this._value);
+    int get value => _value;
+    static List<ApplicationModule> get values => const [Account,Membership,Database,Files,Code,Email,Push,Payment,Scheduler,Logging,ServerEvents,Ai,Sms,Project,Compliance,Contacts,Marketplace,Diagnostics];
+}
+
 // @DataContract
 class AiPlanModelDto implements IConvertible
 {
@@ -13596,24 +13630,19 @@ class AiPlanFeaturesDto implements IConvertible
     bool? attachments;
 
     // @DataMember
-    bool? rag;
-
-    // @DataMember
     bool? memory;
 
-    AiPlanFeaturesDto({this.attachments,this.rag,this.memory});
+    AiPlanFeaturesDto({this.attachments,this.memory});
     AiPlanFeaturesDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         attachments = json['attachments'];
-        rag = json['rag'];
         memory = json['memory'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'attachments': attachments,
-        'rag': rag,
         'memory': memory
     };
 
@@ -17625,7 +17654,13 @@ class ProjectBrandDto implements IConvertible
     // @DataMember
     FileResourceRefDto? icon;
 
-    ProjectBrandDto({this.mainColor,this.accentColor,this.logo,this.icon});
+    // @DataMember
+    String? logoEnv;
+
+    // @DataMember
+    String? iconEnv;
+
+    ProjectBrandDto({this.mainColor,this.accentColor,this.logo,this.icon,this.logoEnv,this.iconEnv});
     ProjectBrandDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -17633,6 +17668,8 @@ class ProjectBrandDto implements IConvertible
         accentColor = json['accentColor'];
         logo = JsonConverters.fromJson(json['logo'],'FileResourceRefDto',context!);
         icon = JsonConverters.fromJson(json['icon'],'FileResourceRefDto',context!);
+        logoEnv = json['logoEnv'];
+        iconEnv = json['iconEnv'];
         return this;
     }
 
@@ -17640,7 +17677,9 @@ class ProjectBrandDto implements IConvertible
         'mainColor': mainColor,
         'accentColor': accentColor,
         'logo': JsonConverters.toJson(logo,'FileResourceRefDto',context!),
-        'icon': JsonConverters.toJson(icon,'FileResourceRefDto',context!)
+        'icon': JsonConverters.toJson(icon,'FileResourceRefDto',context!),
+        'logoEnv': logoEnv,
+        'iconEnv': iconEnv
     };
 
     getTypeName() => "ProjectBrandDto";
@@ -19053,7 +19092,10 @@ class ProjectListItemDto implements IConvertible
     // @DataMember
     FileResourceRefDto? icon;
 
-    ProjectListItemDto({this.viewId="",this.isActive,this.projectStatus,this.name="",this.uniqueName="",this.primaryRegion,this.additionalRegions,this.modulesCount=0,this.usersCount=0,this.icon});
+    // @DataMember
+    String? iconEnv;
+
+    ProjectListItemDto({this.viewId="",this.isActive,this.projectStatus,this.name="",this.uniqueName="",this.primaryRegion,this.additionalRegions,this.modulesCount=0,this.usersCount=0,this.icon,this.iconEnv});
     ProjectListItemDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -19067,6 +19109,7 @@ class ProjectListItemDto implements IConvertible
         modulesCount = json['modulesCount'] ?? 0;
         usersCount = json['usersCount'] ?? 0;
         icon = JsonConverters.fromJson(json['icon'],'FileResourceRefDto',context!);
+        iconEnv = json['iconEnv'];
         return this;
     }
 
@@ -19080,45 +19123,12 @@ class ProjectListItemDto implements IConvertible
         'additionalRegions': JsonConverters.toJson(additionalRegions,'List<ProjectRegionDto>',context!),
         'modulesCount': modulesCount,
         'usersCount': usersCount,
-        'icon': JsonConverters.toJson(icon,'FileResourceRefDto',context!)
+        'icon': JsonConverters.toJson(icon,'FileResourceRefDto',context!),
+        'iconEnv': iconEnv
     };
 
     getTypeName() => "ProjectListItemDto";
     TypeContext? context = _ctx;
-}
-
-enum ProjectHealthSeverity
-{
-    Warning,
-    Error,
-}
-
-// @flags()
-class ApplicationModule
-{
-    static const ApplicationModule Account = const ApplicationModule._(0);
-    static const ApplicationModule Membership = const ApplicationModule._(1);
-    static const ApplicationModule Database = const ApplicationModule._(2);
-    static const ApplicationModule Files = const ApplicationModule._(4);
-    static const ApplicationModule Code = const ApplicationModule._(8);
-    static const ApplicationModule Email = const ApplicationModule._(16);
-    static const ApplicationModule Push = const ApplicationModule._(32);
-    static const ApplicationModule Payment = const ApplicationModule._(64);
-    static const ApplicationModule Scheduler = const ApplicationModule._(128);
-    static const ApplicationModule Logging = const ApplicationModule._(256);
-    static const ApplicationModule ServerEvents = const ApplicationModule._(512);
-    static const ApplicationModule Ai = const ApplicationModule._(1024);
-    static const ApplicationModule Sms = const ApplicationModule._(2048);
-    static const ApplicationModule Project = const ApplicationModule._(4096);
-    static const ApplicationModule Compliance = const ApplicationModule._(8192);
-    static const ApplicationModule Contacts = const ApplicationModule._(16384);
-    static const ApplicationModule Marketplace = const ApplicationModule._(32768);
-    static const ApplicationModule Diagnostics = const ApplicationModule._(65536);
-
-    final int _value;
-    const ApplicationModule._(this._value);
-    int get value => _value;
-    static List<ApplicationModule> get values => const [Account,Membership,Database,Files,Code,Email,Push,Payment,Scheduler,Logging,ServerEvents,Ai,Sms,Project,Compliance,Contacts,Marketplace,Diagnostics];
 }
 
 // @DataContract
@@ -19280,18 +19290,30 @@ class ProjectHealthDto implements IConvertible
     List<ProjectHealthWarningDto> warnings = [];
 
     // @DataMember
+    int warningsTotal = 0;
+
+    // @DataMember
+    int pageNumber = 0;
+
+    // @DataMember
+    int? pageSize;
+
+    // @DataMember
     ProjectHealthStatsDto? stats;
 
     // @DataMember
     List<ProjectHealthSkippedCheckDto> skippedChecks = [];
 
-    ProjectHealthDto({this.checkedAtUtc,this.env="",this.warnings=const [],this.stats,this.skippedChecks=const []});
+    ProjectHealthDto({this.checkedAtUtc,this.env="",this.warnings=const [],this.warningsTotal=0,this.pageNumber=0,this.pageSize,this.stats,this.skippedChecks=const []});
     ProjectHealthDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         checkedAtUtc = JsonConverters.fromJson(json['checkedAtUtc'],'DateTime',context!) ?? DateTime(0);
         env = json['env'] ?? "";
         warnings = JsonConverters.fromJson(json['warnings'],'List<ProjectHealthWarningDto>',context!) ?? [];
+        warningsTotal = json['warningsTotal'] ?? 0;
+        pageNumber = json['pageNumber'] ?? 0;
+        pageSize = json['pageSize'];
         stats = JsonConverters.fromJson(json['stats'],'ProjectHealthStatsDto',context!);
         skippedChecks = JsonConverters.fromJson(json['skippedChecks'],'List<ProjectHealthSkippedCheckDto>',context!) ?? [];
         return this;
@@ -19301,6 +19323,9 @@ class ProjectHealthDto implements IConvertible
         'checkedAtUtc': JsonConverters.toJson(checkedAtUtc,'DateTime',context!),
         'env': env,
         'warnings': JsonConverters.toJson(warnings,'List<ProjectHealthWarningDto>',context!),
+        'warningsTotal': warningsTotal,
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
         'stats': JsonConverters.toJson(stats,'ProjectHealthStatsDto',context!),
         'skippedChecks': JsonConverters.toJson(skippedChecks,'List<ProjectHealthSkippedCheckDto>',context!)
     };
@@ -19385,55 +19410,6 @@ class ProjectAiPlansDto implements IConvertible
     };
 
     getTypeName() => "ProjectAiPlansDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class AiUserPlanAssignmentDto implements IConvertible
-{
-    // @DataMember
-    String userId = "";
-
-    // @DataMember
-    String planId = "";
-
-    AiUserPlanAssignmentDto({this.userId="",this.planId=""});
-    AiUserPlanAssignmentDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        userId = json['userId'] ?? "";
-        planId = json['planId'] ?? "";
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'userId': userId,
-        'planId': planId
-    };
-
-    getTypeName() => "AiUserPlanAssignmentDto";
-    TypeContext? context = _ctx;
-}
-
-// @DataContract
-class AiUserPlansDto implements IConvertible
-{
-    // @DataMember
-    List<AiUserPlanAssignmentDto> users = [];
-
-    AiUserPlansDto({this.users=const []});
-    AiUserPlansDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        users = JsonConverters.fromJson(json['users'],'List<AiUserPlanAssignmentDto>',context!) ?? [];
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => {
-        'users': JsonConverters.toJson(users,'List<AiUserPlanAssignmentDto>',context!)
-    };
-
-    getTypeName() => "AiUserPlansDto";
     TypeContext? context = _ctx;
 }
 
@@ -19916,6 +19892,177 @@ class AuthDto implements IBindableContract, IConvertible
     };
 
     getTypeName() => "AuthDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TeamMemberRoleDto implements IConvertible
+{
+    // @DataMember
+    String roleId = "";
+
+    // @DataMember
+    List<String> environments = [];
+
+    // @DataMember
+    List<String> projects = [];
+
+    TeamMemberRoleDto({this.roleId="",this.environments=const [],this.projects=const []});
+    TeamMemberRoleDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        roleId = json['roleId'] ?? "";
+        environments = JsonConverters.fromJson(json['environments'],'List<String>',context!) ?? [];
+        projects = JsonConverters.fromJson(json['projects'],'List<String>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'roleId': roleId,
+        'environments': JsonConverters.toJson(environments,'List<String>',context!),
+        'projects': JsonConverters.toJson(projects,'List<String>',context!)
+    };
+
+    getTypeName() => "TeamMemberRoleDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TeamMemberPushDeviceDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String deviceOs = "";
+
+    // @DataMember
+    String? deviceName;
+
+    // @DataMember
+    String? brand;
+
+    // @DataMember
+    String? modelName;
+
+    // @DataMember
+    String? osName;
+
+    // @DataMember
+    String? osVersion;
+
+    // @DataMember
+    String? appVersion;
+
+    // @DataMember
+    DateTime? updatedAtUtc;
+
+    TeamMemberPushDeviceDto({this.id="",this.deviceOs="",this.deviceName,this.brand,this.modelName,this.osName,this.osVersion,this.appVersion,this.updatedAtUtc});
+    TeamMemberPushDeviceDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        deviceOs = json['deviceOs'] ?? "";
+        deviceName = json['deviceName'];
+        brand = json['brand'];
+        modelName = json['modelName'];
+        osName = json['osName'];
+        osVersion = json['osVersion'];
+        appVersion = json['appVersion'];
+        updatedAtUtc = JsonConverters.fromJson(json['updatedAtUtc'],'DateTime',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'deviceOs': deviceOs,
+        'deviceName': deviceName,
+        'brand': brand,
+        'modelName': modelName,
+        'osName': osName,
+        'osVersion': osVersion,
+        'appVersion': appVersion,
+        'updatedAtUtc': JsonConverters.toJson(updatedAtUtc,'DateTime',context!)
+    };
+
+    getTypeName() => "TeamMemberPushDeviceDto";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class TeamMemberDetailsDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    String? email;
+
+    // @DataMember
+    String? displayName;
+
+    // @DataMember
+    String? firstName;
+
+    // @DataMember
+    String? lastName;
+
+    // @DataMember
+    String? fullName;
+
+    // @DataMember
+    String? phone;
+
+    // @DataMember
+    AuthStatus? status;
+
+    // @DataMember
+    bool? isAccountOwner;
+
+    // @DataMember
+    List<TeamMemberRoleDto> roles = [];
+
+    // @DataMember
+    List<TeamMemberPushDeviceDto> pushDevices = [];
+
+    // @DataMember
+    DateTime? createdOn;
+
+    TeamMemberDetailsDto({this.id="",this.email,this.displayName,this.firstName,this.lastName,this.fullName,this.phone,this.status,this.isAccountOwner,this.roles=const [],this.pushDevices=const [],this.createdOn});
+    TeamMemberDetailsDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        email = json['email'];
+        displayName = json['displayName'];
+        firstName = json['firstName'];
+        lastName = json['lastName'];
+        fullName = json['fullName'];
+        phone = json['phone'];
+        status = JsonConverters.fromJson(json['status'],'AuthStatus',context!);
+        isAccountOwner = json['isAccountOwner'];
+        roles = JsonConverters.fromJson(json['roles'],'List<TeamMemberRoleDto>',context!) ?? [];
+        pushDevices = JsonConverters.fromJson(json['pushDevices'],'List<TeamMemberPushDeviceDto>',context!) ?? [];
+        createdOn = JsonConverters.fromJson(json['createdOn'],'DateTime',context!) ?? DateTime(0);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'email': email,
+        'displayName': displayName,
+        'firstName': firstName,
+        'lastName': lastName,
+        'fullName': fullName,
+        'phone': phone,
+        'status': JsonConverters.toJson(status,'AuthStatus',context!),
+        'isAccountOwner': isAccountOwner,
+        'roles': JsonConverters.toJson(roles,'List<TeamMemberRoleDto>',context!),
+        'pushDevices': JsonConverters.toJson(pushDevices,'List<TeamMemberPushDeviceDto>',context!),
+        'createdOn': JsonConverters.toJson(createdOn,'DateTime',context!)
+    };
+
+    getTypeName() => "TeamMemberDetailsDto";
     TypeContext? context = _ctx;
 }
 
@@ -22578,20 +22725,25 @@ class IntegrationTestResultItemDto implements IConvertible
     // @DataMember
     IReadOnlyList<String>? errors;
 
-    IntegrationTestResultItemDto({this.operation="",this.result="",this.errors});
+    // @DataMember
+    String? detail;
+
+    IntegrationTestResultItemDto({this.operation="",this.result="",this.errors,this.detail});
     IntegrationTestResultItemDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         operation = json['operation'] ?? "";
         result = json['result'] ?? "";
         errors = JsonConverters.fromJson(json['errors'],'IReadOnlyList<String>',context!);
+        detail = json['detail'];
         return this;
     }
 
     Map<String, dynamic> toJson() => {
         'operation': operation,
         'result': result,
-        'errors': JsonConverters.toJson(errors,'IReadOnlyList<String>',context!)
+        'errors': JsonConverters.toJson(errors,'IReadOnlyList<String>',context!),
+        'detail': detail
     };
 
     getTypeName() => "IntegrationTestResultItemDto";
@@ -25988,8 +26140,9 @@ class PaymentsWebhookRunActionDto implements IConvertible
     int? deliveries;
     String norbixEvent = "";
     DateTime? at;
+    String? triggerRunId;
 
-    PaymentsWebhookRunActionDto({this.triggerId="",this.triggerName,this.action,this.status="",this.reason,this.queue,this.messageId,this.deliveries,this.norbixEvent="",this.at});
+    PaymentsWebhookRunActionDto({this.triggerId="",this.triggerName,this.action,this.status="",this.reason,this.queue,this.messageId,this.deliveries,this.norbixEvent="",this.at,this.triggerRunId});
     PaymentsWebhookRunActionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -26003,6 +26156,7 @@ class PaymentsWebhookRunActionDto implements IConvertible
         deliveries = json['deliveries'];
         norbixEvent = json['norbixEvent'] ?? "";
         at = JsonConverters.fromJson(json['at'],'DateTime',context!) ?? DateTime(0);
+        triggerRunId = json['triggerRunId'];
         return this;
     }
 
@@ -26016,7 +26170,8 @@ class PaymentsWebhookRunActionDto implements IConvertible
         'messageId': messageId,
         'deliveries': deliveries,
         'norbixEvent': norbixEvent,
-        'at': JsonConverters.toJson(at,'DateTime',context!)
+        'at': JsonConverters.toJson(at,'DateTime',context!),
+        'triggerRunId': triggerRunId
     };
 
     getTypeName() => "PaymentsWebhookRunActionDto";
@@ -27282,6 +27437,78 @@ class LlmIntegrationListProjection extends IntegrationListProjection implements 
     TypeContext? context = _ctx;
 }
 
+// @DataContract
+class LlmModelSuggestionDto implements IConvertible
+{
+    // @DataMember
+    String id = "";
+
+    // @DataMember
+    LlmProvider? provider;
+
+    // @DataMember
+    String vendor = "";
+
+    // @DataMember
+    String modelId = "";
+
+    // @DataMember
+    String displayName = "";
+
+    // @DataMember
+    String? description;
+
+    // @DataMember
+    List<String> tags = [];
+
+    // @DataMember
+    int? contextWindow;
+
+    // @DataMember
+    int order = 0;
+
+    // @DataMember
+    String? modelsPageUrl;
+
+    // @DataMember
+    String checkedOn = "";
+
+    LlmModelSuggestionDto({this.id="",this.provider,this.vendor="",this.modelId="",this.displayName="",this.description,this.tags=const [],this.contextWindow,this.order=0,this.modelsPageUrl,this.checkedOn=""});
+    LlmModelSuggestionDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        id = json['id'] ?? "";
+        provider = JsonConverters.fromJson(json['provider'],'LlmProvider',context!);
+        vendor = json['vendor'] ?? "";
+        modelId = json['modelId'] ?? "";
+        displayName = json['displayName'] ?? "";
+        description = json['description'];
+        tags = JsonConverters.fromJson(json['tags'],'List<String>',context!) ?? [];
+        contextWindow = json['contextWindow'];
+        order = json['order'] ?? 0;
+        modelsPageUrl = json['modelsPageUrl'];
+        checkedOn = json['checkedOn'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'id': id,
+        'provider': JsonConverters.toJson(provider,'LlmProvider',context!),
+        'vendor': vendor,
+        'modelId': modelId,
+        'displayName': displayName,
+        'description': description,
+        'tags': JsonConverters.toJson(tags,'List<String>',context!),
+        'contextWindow': contextWindow,
+        'order': order,
+        'modelsPageUrl': modelsPageUrl,
+        'checkedOn': checkedOn
+    };
+
+    getTypeName() => "LlmModelSuggestionDto";
+    TypeContext? context = _ctx;
+}
+
 class McpIntegrationListProjection extends IntegrationListProjection implements IConvertible
 {
     McpProvider? mcpProvider;
@@ -27660,6 +27887,48 @@ class ResolvedResourceEntry implements IConvertible
     };
 
     getTypeName() => "ResolvedResourceEntry";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class UserAiPlanDto implements IConvertible
+{
+    // @DataMember
+    String userId = "";
+
+    // @DataMember
+    String? planId;
+
+    // @DataMember
+    String? planName;
+
+    // @DataMember
+    String reason = "";
+
+    // @DataMember
+    String? roleId;
+
+    UserAiPlanDto({this.userId="",this.planId,this.planName,this.reason="",this.roleId});
+    UserAiPlanDto.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        userId = json['userId'] ?? "";
+        planId = json['planId'];
+        planName = json['planName'];
+        reason = json['reason'] ?? "";
+        roleId = json['roleId'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'planId': planId,
+        'planName': planName,
+        'reason': reason,
+        'roleId': roleId
+    };
+
+    getTypeName() => "UserAiPlanDto";
     TypeContext? context = _ctx;
 }
 
@@ -31664,27 +31933,6 @@ class UpdateProjectAiPlansResponse extends ResponseBase implements IConvertible
     TypeContext? context = _ctx;
 }
 
-class GetProjectAiUserPlansResponse extends ResponseBase implements IConvertible
-{
-    AiUserPlansDto? result;
-
-    GetProjectAiUserPlansResponse({this.result});
-    GetProjectAiUserPlansResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
-
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        result = JsonConverters.fromJson(json['result'],'AiUserPlansDto',context!);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'result': JsonConverters.toJson(result,'AiUserPlansDto',context!)
-    });
-
-    getTypeName() => "GetProjectAiUserPlansResponse";
-    TypeContext? context = _ctx;
-}
-
 class GetProjectAiSettingsResponse extends ResponseBase implements IConvertible
 {
     ProjectAiSettingsDto? result;
@@ -31896,6 +32144,27 @@ class GetAccountCollaboratorsResponse extends ResponseBase implements IConvertib
     });
 
     getTypeName() => "GetAccountCollaboratorsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetTeamMemberResponse extends ResponseBase implements IConvertible
+{
+    TeamMemberDetailsDto? item;
+
+    GetTeamMemberResponse({this.item});
+    GetTeamMemberResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'TeamMemberDetailsDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'TeamMemberDetailsDto',context!)
+    });
+
+    getTypeName() => "GetTeamMemberResponse";
     TypeContext? context = _ctx;
 }
 
@@ -32139,6 +32408,29 @@ class AccountPasskeyEnrollmentResponse extends ResponseBase implements IConverti
     });
 
     getTypeName() => "AccountPasskeyEnrollmentResponse";
+    TypeContext? context = _ctx;
+}
+
+// @DataContract
+class OnboardingEmailsResponse extends ResponseBase implements IConvertible
+{
+    // @DataMember
+    bool? stopped;
+
+    OnboardingEmailsResponse({this.stopped});
+    OnboardingEmailsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        stopped = json['stopped'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'stopped': stopped
+    });
+
+    getTypeName() => "OnboardingEmailsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -36359,10 +36651,11 @@ class AuthDeviceStartResponse extends ResponseBase implements IConvertible
     String? userCode;
     String? verificationUri;
     String? verificationUriComplete;
+    String? signInText;
     int expiresIn = 0;
     int interval = 0;
 
-    AuthDeviceStartResponse({this.deviceCode,this.userCode,this.verificationUri,this.verificationUriComplete,this.expiresIn=0,this.interval=0});
+    AuthDeviceStartResponse({this.deviceCode,this.userCode,this.verificationUri,this.verificationUriComplete,this.signInText,this.expiresIn=0,this.interval=0});
     AuthDeviceStartResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -36371,6 +36664,7 @@ class AuthDeviceStartResponse extends ResponseBase implements IConvertible
         userCode = json['userCode'];
         verificationUri = json['verificationUri'];
         verificationUriComplete = json['verificationUriComplete'];
+        signInText = json['signInText'];
         expiresIn = json['expiresIn'] ?? 0;
         interval = json['interval'] ?? 0;
         return this;
@@ -36381,6 +36675,7 @@ class AuthDeviceStartResponse extends ResponseBase implements IConvertible
         'userCode': userCode,
         'verificationUri': verificationUri,
         'verificationUriComplete': verificationUriComplete,
+        'signInText': signInText,
         'expiresIn': expiresIn,
         'interval': interval
     });
@@ -36673,6 +36968,27 @@ class GetLlmIntegrationsResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "GetLlmIntegrationsResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetLlmModelSuggestionsResponse extends ResponseBase implements IConvertible
+{
+    List<LlmModelSuggestionDto> items = [];
+
+    GetLlmModelSuggestionsResponse({this.items=const []});
+    GetLlmModelSuggestionsResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        items = JsonConverters.fromJson(json['items'],'List<LlmModelSuggestionDto>',context!) ?? [];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'items': JsonConverters.toJson(items,'List<LlmModelSuggestionDto>',context!)
+    });
+
+    getTypeName() => "GetLlmModelSuggestionsResponse";
     TypeContext? context = _ctx;
 }
 
@@ -37007,6 +37323,27 @@ class ResolveResourcesResponse extends ResponseBase implements IConvertible
     });
 
     getTypeName() => "ResolveResourcesResponse";
+    TypeContext? context = _ctx;
+}
+
+class GetUserAiPlanResponse extends ResponseBase implements IConvertible
+{
+    UserAiPlanDto? item;
+
+    GetUserAiPlanResponse({this.item});
+    GetUserAiPlanResponse.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        item = JsonConverters.fromJson(json['item'],'UserAiPlanDto',context!);
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'item': JsonConverters.toJson(item,'UserAiPlanDto',context!)
+    });
+
+    getTypeName() => "GetUserAiPlanResponse";
     TypeContext? context = _ctx;
 }
 
@@ -41926,19 +42263,55 @@ class GetProjectHealth extends CodeMashRequestBase implements IReturn<GetProject
     // @ApiMember(Description="Days the user and e-mail numbers cover: 7, 30 (default) or 90. The problem list is the same for every period.")
     int? periodDays;
 
-    GetProjectHealth({this.refresh,this.periodDays});
+    /**
+    * Only problems of this severity: Warning or Error. Empty = both.
+    */
+    // @DataMember
+    // @ApiMember(Description="Only problems of this severity: Warning or Error. Empty = both.")
+    ProjectHealthSeverity? severity;
+
+    /**
+    * Only problems of this module (Email, Files, Payments, …). Empty = every module.
+    */
+    // @DataMember
+    // @ApiMember(Description="Only problems of this module (Email, Files, Payments, …). Empty = every module.")
+    ApplicationModule? module;
+
+    /**
+    * The page of problems to return, 0-based. Used with pageSize.
+    */
+    // @DataMember
+    // @ApiMember(Description="The page of problems to return, 0-based. Used with pageSize.")
+    int pageNumber = 0;
+
+    /**
+    * Problems per page, 1 to 100. Empty = every matching problem. warningsTotal says how many match.
+    */
+    // @DataMember
+    // @ApiMember(Description="Problems per page, 1 to 100. Empty = every matching problem. warningsTotal says how many match.")
+    int? pageSize;
+
+    GetProjectHealth({this.refresh,this.periodDays,this.severity,this.module,this.pageNumber=0,this.pageSize});
     GetProjectHealth.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         refresh = json['refresh'];
         periodDays = json['periodDays'];
+        severity = JsonConverters.fromJson(json['severity'],'ProjectHealthSeverity',context!);
+        module = JsonConverters.fromJson(json['module'],'ApplicationModule',context!);
+        pageNumber = json['pageNumber'] ?? 0;
+        pageSize = json['pageSize'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'refresh': refresh,
-        'periodDays': periodDays
+        'periodDays': periodDays,
+        'severity': JsonConverters.toJson(severity,'ProjectHealthSeverity',context!),
+        'module': JsonConverters.toJson(module,'ApplicationModule',context!),
+        'pageNumber': pageNumber,
+        'pageSize': pageSize
     });
 
     createResponse() => GetProjectHealthResponse();
@@ -42211,9 +42584,9 @@ class UpdateProjectAiPlanAssignments extends CodeMashRequestBase implements IRet
     List<AiPlanRoleAssignmentDto>? roles;
 
     /**
-    * Plan id (aip_…) of users with no per-user plan and no mapped role. Empty = no default.
+    * Plan id (aip_…) of users with no mapped role. Empty = no default.
     */
-    // @ApiMember(Description="Plan id (aip_…) of users with no per-user plan and no mapped role. Empty = no default.")
+    // @ApiMember(Description="Plan id (aip_…) of users with no mapped role. Empty = no default.")
     String? defaultPlanId;
 
     UpdateProjectAiPlanAssignments({this.roles,this.defaultPlanId});
@@ -42234,27 +42607,6 @@ class UpdateProjectAiPlanAssignments extends CodeMashRequestBase implements IRet
     createResponse() => EmptyResponse();
     getResponseTypeName() => "EmptyResponse";
     getTypeName() => "UpdateProjectAiPlanAssignments";
-    TypeContext? context = _ctx;
-}
-
-/**
-* Lists the users that have their own end-user AI plan
-*/
-// @Route("/{version}/account/projects/{projectId}/ai/plans/users", "GET")
-// @Api(Description="Lists the users that have their own end-user AI plan")
-class GetProjectAiUserPlans extends CodeMashRequestBase implements IReturn<GetProjectAiUserPlansResponse>, IConvertible, IGet
-{
-    GetProjectAiUserPlans();
-    GetProjectAiUserPlans.fromJson(Map<String, dynamic> json) : super.fromJson(json);
-    fromMap(Map<String, dynamic> json) {
-        super.fromMap(json);
-        return this;
-    }
-
-    Map<String, dynamic> toJson() => super.toJson();
-    createResponse() => GetProjectAiUserPlansResponse();
-    getResponseTypeName() => "GetProjectAiUserPlansResponse";
-    getTypeName() => "GetProjectAiUserPlans";
     TypeContext? context = _ctx;
 }
 
@@ -43514,6 +43866,38 @@ class GetAccountCollaborators extends RequestBase implements IReturn<GetAccountC
     TypeContext? context = _ctx;
 }
 
+/**
+* Gets one team member: names, e-mail, phone, account roles and push devices
+*/
+// @Route("/{version}/account/team/member/{MemberId}", "GET")
+// @Api(Description="Gets one team member: names, e-mail, phone, account roles and push devices")
+class GetTeamMember extends RequestBase implements IReturn<GetTeamMemberResponse>, IConvertible, IGet
+{
+    /**
+    * The team member's id (usr_…).
+    */
+    // @ApiMember(Description="The team member's id (usr_…).", IsRequired=true, ParameterType="path")
+    String memberId = "";
+
+    GetTeamMember({this.memberId=""});
+    GetTeamMember.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        memberId = json['memberId'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'memberId': memberId
+    });
+
+    createResponse() => GetTeamMemberResponse();
+    getResponseTypeName() => "GetTeamMemberResponse";
+    getTypeName() => "GetTeamMember";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/account/team/password-policy", "GET")
 class GetAccountPasswordPolicy extends RequestBase implements IReturn<GetAccountPasswordPolicyResponse>, IConvertible, IGet
 {
@@ -43787,10 +44171,10 @@ class CancelTeamInvitation extends RequestBase implements IReturn<IdResponse>, I
 }
 
 /**
-* Updates a team member's display name and/or account roles
+* Updates a team member's display name, phone and/or account roles
 */
 // @Route("/{version}/account/team/member", "PUT")
-// @Api(Description="Updates a team member's display name and/or account roles")
+// @Api(Description="Updates a team member's display name, phone and/or account roles")
 class UpdateTeamMember extends RequestBase implements IReturn<IdResponse>, IConvertible, IPut
 {
     /**
@@ -43811,7 +44195,13 @@ class UpdateTeamMember extends RequestBase implements IReturn<IdResponse>, IConv
     // @ApiMember(Description="The member's account roles after the change — REPLACES the current ones. Omit to keep the roles; an empty list removes every account role (the member stays on the team).")
     List<TeamMemberRoleInput>? roles;
 
-    UpdateTeamMember({this.memberId="",this.displayName,this.roles});
+    /**
+    * The member's phone in E.164 format (+ and the country code, then digits, e.g. +37060000000). Omit to keep it; an empty string removes it.
+    */
+    // @ApiMember(Description="The member's phone in E.164 format (+ and the country code, then digits, e.g. +37060000000). Omit to keep it; an empty string removes it.")
+    String? phone;
+
+    UpdateTeamMember({this.memberId="",this.displayName,this.roles,this.phone});
     UpdateTeamMember.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -43819,13 +44209,15 @@ class UpdateTeamMember extends RequestBase implements IReturn<IdResponse>, IConv
         memberId = json['memberId'] ?? "";
         displayName = json['displayName'];
         roles = JsonConverters.fromJson(json['roles'],'List<TeamMemberRoleInput>',context!);
+        phone = json['phone'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'memberId': memberId,
         'displayName': displayName,
-        'roles': JsonConverters.toJson(roles,'List<TeamMemberRoleInput>',context!)
+        'roles': JsonConverters.toJson(roles,'List<TeamMemberRoleInput>',context!),
+        'phone': phone
     });
 
     createResponse() => IdResponse();
@@ -44339,6 +44731,63 @@ class AccountVerifyPasskeyEnrollmentRequest extends RequestBase implements IRetu
     createResponse() => AccountPasskeyEnrollmentResponse();
     getResponseTypeName() => "AccountPasskeyEnrollmentResponse";
     getTypeName() => "AccountVerifyPasskeyEnrollmentRequest";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/emails/onboarding/{Token}", "GET")
+// @DataContract
+class OpenOnboardingEmailsLink extends RequestBase implements IReturn<OnboardingEmailsResponse>, IConvertible, IGet
+{
+    // @DataMember
+    String token = "";
+
+    OpenOnboardingEmailsLink({this.token=""});
+    OpenOnboardingEmailsLink.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        token = json['token'] ?? "";
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'token': token
+    });
+
+    createResponse() => OnboardingEmailsResponse();
+    getResponseTypeName() => "OnboardingEmailsResponse";
+    getTypeName() => "OpenOnboardingEmailsLink";
+    TypeContext? context = _ctx;
+}
+
+// @Route("/{version}/account/emails/onboarding/{Token}", "POST")
+// @DataContract
+class UseOnboardingEmailsLink extends RequestBase implements IReturn<OnboardingEmailsResponse>, IConvertible, IPost
+{
+    // @DataMember
+    String token = "";
+
+    // @DataMember
+    String? action;
+
+    UseOnboardingEmailsLink({this.token="",this.action});
+    UseOnboardingEmailsLink.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        token = json['token'] ?? "";
+        action = json['action'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'token': token,
+        'action': action
+    });
+
+    createResponse() => OnboardingEmailsResponse();
+    getResponseTypeName() => "OnboardingEmailsResponse";
+    getTypeName() => "UseOnboardingEmailsLink";
     TypeContext? context = _ctx;
 }
 
@@ -51917,17 +52366,26 @@ class GetCodeWorkflows extends CodeMashListPaginationRequestBase implements IRet
     // @ApiMember(Description="Only enabled (true) or only disabled (false) workflows.")
     bool? isEnabled;
 
-    GetCodeWorkflows({this.isEnabled});
+    /**
+    * Only workflows whose name contains this text (any case). Empty = every workflow.
+    */
+    // @DataMember
+    // @ApiMember(Description="Only workflows whose name contains this text (any case). Empty = every workflow.")
+    String? search;
+
+    GetCodeWorkflows({this.isEnabled,this.search});
     GetCodeWorkflows.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         isEnabled = json['isEnabled'];
+        search = json['search'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
-        'isEnabled': isEnabled
+        'isEnabled': isEnabled,
+        'search': search
     });
 
     createResponse() => WorkflowsResponse();
@@ -53140,7 +53598,14 @@ class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements I
     // @DataMember
     DateTime? to;
 
-    GetCodeWorkflowRuns({this.id="",this.status,this.from,this.to});
+    /**
+    * Only runs of this published workflow version (1, 2, …). Empty = every version.
+    */
+    // @DataMember
+    // @ApiMember(DataType="integer", Description="Only runs of this published workflow version (1, 2, …). Empty = every version.")
+    int? workflowVersion;
+
+    GetCodeWorkflowRuns({this.id="",this.status,this.from,this.to,this.workflowVersion});
     GetCodeWorkflowRuns.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
@@ -53149,6 +53614,7 @@ class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements I
         status = json['status'];
         from = JsonConverters.fromJson(json['from'],'DateTime',context!);
         to = JsonConverters.fromJson(json['to'],'DateTime',context!);
+        workflowVersion = json['workflowVersion'];
         return this;
     }
 
@@ -53156,7 +53622,8 @@ class GetCodeWorkflowRuns extends CodeMashListPaginationRequestBase implements I
         'id': id,
         'status': status,
         'from': JsonConverters.toJson(from,'DateTime',context!),
-        'to': JsonConverters.toJson(to,'DateTime',context!)
+        'to': JsonConverters.toJson(to,'DateTime',context!),
+        'workflowVersion': workflowVersion
     });
 
     createResponse() => WorkflowRunsResponse();
@@ -57023,6 +57490,30 @@ class GetLlmIntegrations extends CodeMashListPaginationRequestBase implements IR
     TypeContext? context = _ctx;
 }
 
+// @Route("/{version}/ai/integrations/llms/model-suggestions", "GET")
+class GetLlmModelSuggestions extends CodeMashRequestBase implements IReturn<GetLlmModelSuggestionsResponse>, IConvertible, IGet
+{
+    String? provider;
+
+    GetLlmModelSuggestions({this.provider});
+    GetLlmModelSuggestions.fromJson(Map<String, dynamic> json) { fromMap(json); }
+
+    fromMap(Map<String, dynamic> json) {
+        super.fromMap(json);
+        provider = json['provider'];
+        return this;
+    }
+
+    Map<String, dynamic> toJson() => super.toJson()..addAll({
+        'provider': provider
+    });
+
+    createResponse() => GetLlmModelSuggestionsResponse();
+    getResponseTypeName() => "GetLlmModelSuggestionsResponse";
+    getTypeName() => "GetLlmModelSuggestions";
+    TypeContext? context = _ctx;
+}
+
 // @Route("/{version}/ai/integrations/llms/", "POST")
 // @DataContract
 class SaveLlmIntegration extends CodeMashRequestBase implements IReturn<IdResponse>, IConvertible, IPost
@@ -57863,11 +58354,11 @@ class ResolveResources extends CodeMashRequestBase implements IReturn<ResolveRes
 }
 
 /**
-* Sets or removes one user's own end-user AI plan
+* Reads which end-user AI plan one user gets and why
 */
-// @Route("/{version}/membership/users/{userId}/ai-plan", "PUT")
-// @Api(Description="Sets or removes one user's own end-user AI plan")
-class SetUserAiPlan extends CodeMashRequestBase implements IReturn<EmptyResponse>, IConvertible, IPut
+// @Route("/{version}/membership/users/{userId}/ai-plan", "GET")
+// @Api(Description="Reads which end-user AI plan one user gets and why")
+class GetUserAiPlan extends CodeMashRequestBase implements IReturn<GetUserAiPlanResponse>, IConvertible, IGet
 {
     /**
     * The human user id (ct_…).
@@ -57876,37 +58367,29 @@ class SetUserAiPlan extends CodeMashRequestBase implements IReturn<EmptyResponse
     String userId = "";
 
     /**
-    * The plan id (aip_…). Empty removes the user's own plan.
-    */
-    // @ApiMember(Description="The plan id (aip_…). Empty removes the user's own plan.")
-    String? planId;
-
-    /**
     * Database integration id. Optional — defaults to the request environment's default integration.
     */
     // @ApiMember(Description="Database integration id. Optional — defaults to the request environment's default integration.")
     String? databaseIntegrationId;
 
-    SetUserAiPlan({this.userId="",this.planId,this.databaseIntegrationId});
-    SetUserAiPlan.fromJson(Map<String, dynamic> json) { fromMap(json); }
+    GetUserAiPlan({this.userId="",this.databaseIntegrationId});
+    GetUserAiPlan.fromJson(Map<String, dynamic> json) { fromMap(json); }
 
     fromMap(Map<String, dynamic> json) {
         super.fromMap(json);
         userId = json['userId'] ?? "";
-        planId = json['planId'];
         databaseIntegrationId = json['databaseIntegrationId'];
         return this;
     }
 
     Map<String, dynamic> toJson() => super.toJson()..addAll({
         'userId': userId,
-        'planId': planId,
         'databaseIntegrationId': databaseIntegrationId
     });
 
-    createResponse() => EmptyResponse();
-    getResponseTypeName() => "EmptyResponse";
-    getTypeName() => "SetUserAiPlan";
+    createResponse() => GetUserAiPlanResponse();
+    getResponseTypeName() => "GetUserAiPlanResponse";
+    getTypeName() => "GetUserAiPlan";
     TypeContext? context = _ctx;
 }
 
@@ -62252,6 +62735,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'TagDefinitionDto': TypeInfo(TypeOf.Class, create:() => TagDefinitionDto()),
     'Map<DeliveryChannel,bool?>': TypeInfo(TypeOf.Class, create:() => Map<DeliveryChannel,bool?>()),
     'PromotionIntegrationChoiceDto': TypeInfo(TypeOf.Class, create:() => PromotionIntegrationChoiceDto()),
+    'ProjectHealthSeverity': TypeInfo(TypeOf.Enum, enumValues:ProjectHealthSeverity.values),
+    'ApplicationModule': TypeInfo(TypeOf.Enum, enumValues:ApplicationModule.values),
     'AiPlanModelDto': TypeInfo(TypeOf.Class, create:() => AiPlanModelDto()),
     'AiPlanQuotaUnit': TypeInfo(TypeOf.Enum, enumValues:AiPlanQuotaUnit.values),
     'AiPlanFeaturesDto': TypeInfo(TypeOf.Class, create:() => AiPlanFeaturesDto()),
@@ -62436,8 +62921,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AuthenticationFlowSummaryDto>': TypeInfo(TypeOf.Class, create:() => <AuthenticationFlowSummaryDto>[]),
     'Map<String,int?>': TypeInfo(TypeOf.Class, create:() => Map<String,int?>()),
     'ProjectListItemDto': TypeInfo(TypeOf.Class, create:() => ProjectListItemDto()),
-    'ProjectHealthSeverity': TypeInfo(TypeOf.Enum, enumValues:ProjectHealthSeverity.values),
-    'ApplicationModule': TypeInfo(TypeOf.Enum, enumValues:ApplicationModule.values),
     'ProjectHealthWarningDto': TypeInfo(TypeOf.Class, create:() => ProjectHealthWarningDto()),
     'ProjectHealthStatsDto': TypeInfo(TypeOf.Class, create:() => ProjectHealthStatsDto()),
     'ProjectHealthSkippedCheckDto': TypeInfo(TypeOf.Class, create:() => ProjectHealthSkippedCheckDto()),
@@ -62446,9 +62929,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<ProjectHealthSkippedCheckDto>': TypeInfo(TypeOf.Class, create:() => <ProjectHealthSkippedCheckDto>[]),
     'AiCreditPackCheckoutDto': TypeInfo(TypeOf.Class, create:() => AiCreditPackCheckoutDto()),
     'ProjectAiPlansDto': TypeInfo(TypeOf.Class, create:() => ProjectAiPlansDto()),
-    'AiUserPlanAssignmentDto': TypeInfo(TypeOf.Class, create:() => AiUserPlanAssignmentDto()),
-    'AiUserPlansDto': TypeInfo(TypeOf.Class, create:() => AiUserPlansDto()),
-    'List<AiUserPlanAssignmentDto>': TypeInfo(TypeOf.Class, create:() => <AiUserPlanAssignmentDto>[]),
     'AiUsageGroupDto': TypeInfo(TypeOf.Class, create:() => AiUsageGroupDto()),
     'AiWalletLineDto': TypeInfo(TypeOf.Class, create:() => AiWalletLineDto()),
     'ProjectAiWalletDto': TypeInfo(TypeOf.Class, create:() => ProjectAiWalletDto()),
@@ -62465,6 +62945,11 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'LoginDto': TypeInfo(TypeOf.Class, create:() => LoginDto()),
     'AuthStatus': TypeInfo(TypeOf.Enum, enumValues:AuthStatus.values),
     'AuthDto': TypeInfo(TypeOf.Class, create:() => AuthDto()),
+    'TeamMemberRoleDto': TypeInfo(TypeOf.Class, create:() => TeamMemberRoleDto()),
+    'TeamMemberPushDeviceDto': TypeInfo(TypeOf.Class, create:() => TeamMemberPushDeviceDto()),
+    'TeamMemberDetailsDto': TypeInfo(TypeOf.Class, create:() => TeamMemberDetailsDto()),
+    'List<TeamMemberRoleDto>': TypeInfo(TypeOf.Class, create:() => <TeamMemberRoleDto>[]),
+    'List<TeamMemberPushDeviceDto>': TypeInfo(TypeOf.Class, create:() => <TeamMemberPushDeviceDto>[]),
     'AccountPasswordPolicyDto': TypeInfo(TypeOf.Class, create:() => AccountPasswordPolicyDto()),
     'AccountTeamRoleDto': TypeInfo(TypeOf.Class, create:() => AccountTeamRoleDto()),
     'TeamInvitationDto': TypeInfo(TypeOf.Class, create:() => TeamInvitationDto()),
@@ -62699,6 +63184,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EmbeddingIntegrationDto': TypeInfo(TypeOf.AbstractClass),
     'EmbeddingIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => EmbeddingIntegrationListProjection()),
     'LlmIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => LlmIntegrationListProjection()),
+    'LlmModelSuggestionDto': TypeInfo(TypeOf.Class, create:() => LlmModelSuggestionDto()),
     'McpIntegrationListProjection': TypeInfo(TypeOf.Class, create:() => McpIntegrationListProjection()),
     'IVirtualDirectory': TypeInfo(TypeOf.Interface),
     'IVirtualPathProvider': TypeInfo(TypeOf.Interface),
@@ -62715,6 +63201,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SchedulerTaskRunDto': TypeInfo(TypeOf.Class, create:() => SchedulerTaskRunDto()),
     'ResolvedRefStatus': TypeInfo(TypeOf.Enum, enumValues:ResolvedRefStatus.values),
     'ResolvedResourceEntry': TypeInfo(TypeOf.Class, create:() => ResolvedResourceEntry()),
+    'UserAiPlanDto': TypeInfo(TypeOf.Class, create:() => UserAiPlanDto()),
     'ChannelSubscriptionStateDto': TypeInfo(TypeOf.Class, create:() => ChannelSubscriptionStateDto()),
     'UserDto': TypeInfo(TypeOf.Class, create:() => UserDto()),
     'List<AuthDto>': TypeInfo(TypeOf.Class, create:() => <AuthDto>[]),
@@ -62872,7 +63359,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'CreateAiCreditPackCheckoutResponse': TypeInfo(TypeOf.Class, create:() => CreateAiCreditPackCheckoutResponse()),
     'GetProjectAiPlansResponse': TypeInfo(TypeOf.Class, create:() => GetProjectAiPlansResponse()),
     'UpdateProjectAiPlansResponse': TypeInfo(TypeOf.Class, create:() => UpdateProjectAiPlansResponse()),
-    'GetProjectAiUserPlansResponse': TypeInfo(TypeOf.Class, create:() => GetProjectAiUserPlansResponse()),
     'GetProjectAiSettingsResponse': TypeInfo(TypeOf.Class, create:() => GetProjectAiSettingsResponse()),
     'GetProjectAiUsageResponse': TypeInfo(TypeOf.Class, create:() => GetProjectAiUsageResponse()),
     'CheckProjectLanguagesResponse': TypeInfo(TypeOf.Class, create:() => CheckProjectLanguagesResponse()),
@@ -62886,6 +63372,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<AccountTeamTwoFactorMemberDto>': TypeInfo(TypeOf.Class, create:() => <AccountTeamTwoFactorMemberDto>[]),
     'GetAccountCollaboratorsResponse': TypeInfo(TypeOf.Class, create:() => GetAccountCollaboratorsResponse()),
     'PaginatedResponse<AuthDto>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<AuthDto>()),
+    'GetTeamMemberResponse': TypeInfo(TypeOf.Class, create:() => GetTeamMemberResponse()),
     'GetAccountPasswordPolicyResponse': TypeInfo(TypeOf.Class, create:() => GetAccountPasswordPolicyResponse()),
     'GetAccountTeamPoliciesResponse': TypeInfo(TypeOf.Class, create:() => GetAccountTeamPoliciesResponse()),
     'GetAccountTeamRolesResponse': TypeInfo(TypeOf.Class, create:() => GetAccountTeamRolesResponse()),
@@ -62900,6 +63387,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'AccountPasskeyListResponse': TypeInfo(TypeOf.Class, create:() => AccountPasskeyListResponse()),
     'List<AccountPasskeyListItemDto>': TypeInfo(TypeOf.Class, create:() => <AccountPasskeyListItemDto>[]),
     'AccountPasskeyEnrollmentResponse': TypeInfo(TypeOf.Class, create:() => AccountPasskeyEnrollmentResponse()),
+    'OnboardingEmailsResponse': TypeInfo(TypeOf.Class, create:() => OnboardingEmailsResponse()),
     'GetMyAccountUserProfileResponse': TypeInfo(TypeOf.Class, create:() => GetMyAccountUserProfileResponse()),
     'CreateAiServiceUserResponse': TypeInfo(TypeOf.Class, create:() => CreateAiServiceUserResponse()),
     'ListAiServiceUsersResponse': TypeInfo(TypeOf.Class, create:() => ListAiServiceUsersResponse()),
@@ -63163,6 +63651,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetLlmIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetLlmIntegrationResponse()),
     'GetLlmIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetLlmIntegrationsResponse()),
     'PaginatedResponse<LlmIntegrationListProjection>': TypeInfo(TypeOf.Class, create:() => PaginatedResponse<LlmIntegrationListProjection>()),
+    'GetLlmModelSuggestionsResponse': TypeInfo(TypeOf.Class, create:() => GetLlmModelSuggestionsResponse()),
+    'List<LlmModelSuggestionDto>': TypeInfo(TypeOf.Class, create:() => <LlmModelSuggestionDto>[]),
     'TestLlmIntegrationResponse': TypeInfo(TypeOf.Class, create:() => TestLlmIntegrationResponse()),
     'GetMcpIntegrationResponse': TypeInfo(TypeOf.Class, create:() => GetMcpIntegrationResponse()),
     'GetMcpIntegrationsResponse': TypeInfo(TypeOf.Class, create:() => GetMcpIntegrationsResponse()),
@@ -63187,6 +63677,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'List<SchedulerTaskRunDto>': TypeInfo(TypeOf.Class, create:() => <SchedulerTaskRunDto>[]),
     'ResolveResourcesResponse': TypeInfo(TypeOf.Class, create:() => ResolveResourcesResponse()),
     'IReadOnlyList<ResolvedResourceEntry>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<ResolvedResourceEntry>()),
+    'GetUserAiPlanResponse': TypeInfo(TypeOf.Class, create:() => GetUserAiPlanResponse()),
     'GetContactResponse': TypeInfo(TypeOf.Class, create:() => GetContactResponse()),
     'GetAllContactsResponse': TypeInfo(TypeOf.Class, create:() => GetAllContactsResponse()),
     'IReadOnlyList<UserDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<UserDto>()),
@@ -63353,7 +63844,6 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'GetProjectAiPlans': TypeInfo(TypeOf.Class, create:() => GetProjectAiPlans()),
     'UpdateProjectAiPlans': TypeInfo(TypeOf.Class, create:() => UpdateProjectAiPlans()),
     'UpdateProjectAiPlanAssignments': TypeInfo(TypeOf.Class, create:() => UpdateProjectAiPlanAssignments()),
-    'GetProjectAiUserPlans': TypeInfo(TypeOf.Class, create:() => GetProjectAiUserPlans()),
     'GetProjectAiSettings': TypeInfo(TypeOf.Class, create:() => GetProjectAiSettings()),
     'UpdateProjectAiSettings': TypeInfo(TypeOf.Class, create:() => UpdateProjectAiSettings()),
     'UpdateProjectAiKnowledge': TypeInfo(TypeOf.Class, create:() => UpdateProjectAiKnowledge()),
@@ -63393,6 +63883,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'DeleteAccountPolicy': TypeInfo(TypeOf.Class, create:() => DeleteAccountPolicy()),
     'DeleteAccountRole': TypeInfo(TypeOf.Class, create:() => DeleteAccountRole()),
     'GetAccountCollaborators': TypeInfo(TypeOf.Class, create:() => GetAccountCollaborators()),
+    'GetTeamMember': TypeInfo(TypeOf.Class, create:() => GetTeamMember()),
     'GetAccountPasswordPolicy': TypeInfo(TypeOf.Class, create:() => GetAccountPasswordPolicy()),
     'GetAccountTeamPolicies': TypeInfo(TypeOf.Class, create:() => GetAccountTeamPolicies()),
     'RemoveTeamMember': TypeInfo(TypeOf.Class, create:() => RemoveTeamMember()),
@@ -63421,6 +63912,8 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'RevokeAccountPasskeyRequest': TypeInfo(TypeOf.Class, create:() => RevokeAccountPasskeyRequest()),
     'AccountPasskeyEnrollmentOptionsRequest': TypeInfo(TypeOf.Class, create:() => AccountPasskeyEnrollmentOptionsRequest()),
     'AccountVerifyPasskeyEnrollmentRequest': TypeInfo(TypeOf.Class, create:() => AccountVerifyPasskeyEnrollmentRequest()),
+    'OpenOnboardingEmailsLink': TypeInfo(TypeOf.Class, create:() => OpenOnboardingEmailsLink()),
+    'UseOnboardingEmailsLink': TypeInfo(TypeOf.Class, create:() => UseOnboardingEmailsLink()),
     'GetMyAccountUserProfile': TypeInfo(TypeOf.Class, create:() => GetMyAccountUserProfile()),
     'UpdateMyAccountUserPhone': TypeInfo(TypeOf.Class, create:() => UpdateMyAccountUserPhone()),
     'CreateAiServiceUserRequest': TypeInfo(TypeOf.Class, create:() => CreateAiServiceUserRequest()),
@@ -63777,6 +64270,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'EnableLlmIntegrationRequest': TypeInfo(TypeOf.Class, create:() => EnableLlmIntegrationRequest()),
     'GetLlmIntegration': TypeInfo(TypeOf.Class, create:() => GetLlmIntegration()),
     'GetLlmIntegrations': TypeInfo(TypeOf.Class, create:() => GetLlmIntegrations()),
+    'GetLlmModelSuggestions': TypeInfo(TypeOf.Class, create:() => GetLlmModelSuggestions()),
     'SaveLlmIntegration': TypeInfo(TypeOf.Class, create:() => SaveLlmIntegration()),
     'SetLlmIntegrationAsDefaultRequest': TypeInfo(TypeOf.Class, create:() => SetLlmIntegrationAsDefaultRequest()),
     'TestLlmIntegration': TypeInfo(TypeOf.Class, create:() => TestLlmIntegration()),
@@ -63807,7 +64301,7 @@ TypeContext _ctx = TypeContext(library: 'localhost', types: <String, TypeInfo> {
     'SaveSchedulerTaskRequest': TypeInfo(TypeOf.Class, create:() => SaveSchedulerTaskRequest()),
     'ResolveResources': TypeInfo(TypeOf.Class, create:() => ResolveResources()),
     'IReadOnlyList<ResourceRefDto>': TypeInfo(TypeOf.Class, create:() => IReadOnlyList<ResourceRefDto>()),
-    'SetUserAiPlan': TypeInfo(TypeOf.Class, create:() => SetUserAiPlan()),
+    'GetUserAiPlan': TypeInfo(TypeOf.Class, create:() => GetUserAiPlan()),
     'ClearContactBounceRequest': TypeInfo(TypeOf.Class, create:() => ClearContactBounceRequest()),
     'CreateContactRequest': TypeInfo(TypeOf.Class, create:() => CreateContactRequest()),
     'DeleteContact': TypeInfo(TypeOf.Class, create:() => DeleteContact()),
