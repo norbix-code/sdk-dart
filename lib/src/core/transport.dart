@@ -5,6 +5,9 @@ import 'config.dart';
 import 'errors.dart';
 import 'http_driver.dart';
 
+/// The response header that carries a renewed bearer token (sessions).
+const String kNorbixSessionTokenHeader = 'norbix-session-token';
+
 /// Internal HTTP transport used by every resource. You should not construct
 /// this directly — the per-host clients (`NorbixApi`, `NorbixHub`) own one.
 class Transport {
@@ -195,6 +198,40 @@ class Transport {
     // makes a write safe to repeat.
     final retries = _isIdempotent(method) ? config.maxRetries : 0;
 
+    // The token this request carries, to tell later whether it was the
+    // stored bearer token (the only one a renewal may replace).
+    final storedToken = config.bearerToken;
+    final sentToken = storedToken != null &&
+            storedToken.isNotEmpty &&
+            _headerValue(allHeaders, 'authorization') == 'Bearer $storedToken'
+        ? storedToken
+        : null;
+
+    final response = await _sendWithRetries(request, retries);
+    // Outside the retry loop: a callback that throws must reach the caller
+    // as it is, not as a transport failure that is sent again.
+    _takeSessionToken(response, sentToken);
+    return response;
+  }
+
+  /// Sessions: an answer to a request that carried the stored bearer token
+  /// may bring a renewed one in `norbix-session-token`. Swap it in and tell
+  /// the app. Never for an API key, a token in per-call headers, a call with
+  /// no credentials, an empty value, or a token replaced while the request
+  /// was in flight.
+  void _takeSessionToken(HttpDriverResponse response, String? sentToken) {
+    if (sentToken == null || config.bearerToken != sentToken) return;
+    final renewed =
+        _headerValue(response.headers, kNorbixSessionTokenHeader)?.trim();
+    if (renewed == null || renewed.isEmpty || renewed == sentToken) return;
+    config = config.copyWith(bearerToken: renewed);
+    config.onSessionToken?.call(renewed);
+  }
+
+  Future<HttpDriverResponse> _sendWithRetries(
+    HttpDriverRequest request,
+    int retries,
+  ) async {
     Object? lastError;
     for (var attempt = 0; attempt <= retries; attempt++) {
       try {

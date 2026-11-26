@@ -287,6 +287,35 @@ await hub.projects.updateProjectRegions(
 `additionalRegions` keys in its `body` to place a new project in
 specific regions at creation time.
 
+## Sessions
+
+A project user signs in with a password through `api.auth.signIn`:
+
+```dart
+final api = NorbixApi(
+  projectId: 'pr_…',
+  config: NorbixConfig(
+    baseUrl: kNorbixApiDefaultBaseUrl,
+    // Save the renewed token, e.g. in secure storage.
+    onSessionToken: (token) => storage.write('norbix_token', token),
+  ),
+);
+await api.auth.signIn(userName: email, password: password, rememberMe: true);
+```
+
+- A session lives a sliding 12 hours; with `rememberMe: true` a sliding 30
+  days. It never lasts more than 90 days from sign-in. `rememberMe` is false
+  when left out.
+- `signIn` sends no key and no token, and stores the `bearerToken` of the
+  answer as the client's token.
+- While the token is used, an answer may carry a fresh one in the
+  `norbix-session-token` header. The client then uses it for every later call
+  and calls `onSessionToken(token)` so the app can save it.
+- This happens only for the client's own stored token (`bearerToken`,
+  `setBearerToken`, `signIn`) — never for an API key, a token you pass in
+  per-call `headers`, or a call with no credentials. An empty value is
+  ignored.
+
 ## Social sign-in and link identity
 
 Project users can sign in with Google, Apple, Microsoft, GitHub, Facebook, X or
@@ -304,7 +333,8 @@ final start = api.users.socialSignInUrl('google',
     codeChallenge: pkce.codeChallenge);
 
 // 2. The return page gets ?code=…&provider=google (or ?error=…).
-//    Trade the code within 2 minutes for the project JWT (14 days, no refresh token):
+//    Trade the code within 2 minutes for the project JWT (a sliding 30 days,
+//    never past 90, renewed through onSessionToken; no refresh token):
 final token = await api.users.exchangeSocialSignInCode(
     provider: 'google',
     body: {'code': code, 'codeVerifier': pkce.codeVerifier}) as Map<String, Object?>;
@@ -1346,6 +1376,17 @@ final me = await hub.accounts.getMyAccountUserProfile();
 await hub.accounts.updateMyAccountUserPhone(body: {'phone': '+37060000000'});
 ```
 
+To read another member, use `hub.accounts.getTeamMember(memberId: 'usr_…')`
+(`GET /{version}/account/team/member/{MemberId}`): names, e-mail, phone,
+account roles and push devices.
+
+### One user's AI plan
+
+AI plans are given by role in the project's AI plans. To see which plan one
+user gets and why, call `getUserAiPlan(userId: 'ct_…')` — on the Hub
+(`hub.membership`) or the API (`api.users`):
+`GET /{version}/membership/users/{userId}/ai-plan` → `UserAiPlanDto`.
+
 ### Bundles and Flex clusters
 
 A Managed Service subscription is one of three bundles (`Starter`, `Growth`,
@@ -1641,7 +1682,7 @@ The shapes (`WorkflowDefinitionDto`, `WorkflowRunDto`, …) are in
 
 | Method | Route |
 |--------|-------|
-| `getCodeWorkflows(query:)` | `GET /{version}/code/workflows` — `isEnabled?` + paging |
+| `getCodeWorkflows(query:)` | `GET /{version}/code/workflows` — newest first; `isEnabled?`, `search?` (part of the name) + paging |
 | `saveCodeWorkflow(body:)` | `PUT /{version}/code/workflows` — `definition` |
 | `getCodeWorkflow(id:, query:)` | `GET /{version}/code/workflows/{Id}` — `pinnedVersion?` |
 | `deleteCodeWorkflow(id:)` | `DELETE /{version}/code/workflows/{Id}` |
@@ -1656,7 +1697,7 @@ The shapes (`WorkflowDefinitionDto`, `WorkflowRunDto`, …) are in
 | `getCodeWorkflowVersionDiff(id:, query:)` | `GET /{version}/code/workflows/{Id}/versions/diff` — `fromVersion`, `toVersion` |
 | `invokeCodeWorkflow(id:, body:)` | `POST /{version}/code/workflows/{Id}/invoke` — `payload?`, `waitSeconds?` (0–30), `runVersion?` |
 | `testCodeWorkflow(id:, body:)` | `POST /{version}/code/workflows/{Id}/test` — `source` (`database` / `membership` / `manual`), `event?`, `collection?`, `recordId?`, `userId?`, `edits?`, `payload?`; a real run |
-| `getCodeWorkflowRuns(id:, query:)` | `GET /{version}/code/workflows/{Id}/runs` — `status?`, `from?`, `to?` + paging |
+| `getCodeWorkflowRuns(id:, query:)` | `GET /{version}/code/workflows/{Id}/runs` — `status?`, `workflowVersion?`, `from?`, `to?` + paging |
 | `resumeCodeWorkflowRunByKey(id:, body:)` | `POST /{version}/code/workflows/{Id}/resume` — `key`, `stepId?`, `decision?`, `payload?` |
 | `validateCodeWorkflow(body:)` | `POST /{version}/code/workflows/validate` — `definition` |
 | `getCodeWorkflowSchema()` | `GET /{version}/code/workflows/schema` |
