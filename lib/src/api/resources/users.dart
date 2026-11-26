@@ -456,4 +456,23 @@ class UsersResource extends Resource {
       },
     );
   }
+
+  /// `GET /{version}/membership/users/{userId}/ai-plan`
+  ///
+  /// Which end-user AI plan one user gets and why. Plans are given by role in
+  /// the project's AI plans; this reads the result for one user (`ct_…`).
+  /// Optional `query: {'databaseIntegrationId': …}`. Answers
+  /// `GetUserAiPlanResponse` (`result`: `UserAiPlanDto`).
+  Future<Object?> getUserAiPlan(
+      {required Object userId,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/membership/users/{userId}/ai-plan',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'userId': userId},
+    );
+  }
 }

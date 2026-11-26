@@ -789,8 +789,9 @@ class CodeResource extends Resource {
 
   /// Beta: `GET /{version}/code/workflows`
   ///
-  /// The project's workflows. Query: `isEnabled?` and paging (`pageSize`,
-  /// `startingAfter`, `endingBefore`). Answers `WorkflowsResponse`.
+  /// The project's workflows, newest first. Query: `isEnabled?`, `search?`
+  /// (part of the name) and paging (`pageSize`, `startingAfter`,
+  /// `endingBefore`). Answers `WorkflowsResponse`.
   Future<Object?> getCodeWorkflows(
       {Map<String, Object?>? query,
       Object? body,
@@ -1067,8 +1068,9 @@ class CodeResource extends Resource {
 
   /// Beta: `GET /{version}/code/workflows/{Id}/runs`
   ///
-  /// The runs of one workflow. Query: `status?`, `from?`, `to?` and paging.
-  /// Answers `WorkflowRunsResponse`.
+  /// The runs of one workflow. Query: `status?`, `workflowVersion?` (runs of
+  /// one published version), `from?`, `to?` and paging. Answers
+  /// `WorkflowRunsResponse`.
   Future<Object?> getCodeWorkflowRuns(
       {required Object id,
       Map<String, Object?>? query,
@@ -1162,7 +1164,8 @@ class CodeResource extends Resource {
   /// Refused since 2026-11-17 (`CM-ERRORS-WORKFLOWS-045`): workflows are part
   /// of every project and cannot be switched off. Kept so existing code still
   /// compiles; use `disableCodeWorkflow` to stop one workflow.
-  @Deprecated('Refused by the gateway since 2026-11-17 (CM-ERRORS-WORKFLOWS-045).')
+  @Deprecated(
+      'Refused by the gateway since 2026-11-17 (CM-ERRORS-WORKFLOWS-045).')
   Future<Object?> disableCodeWorkflows(
       {Map<String, Object?>? query,
       Object? body,

@@ -247,6 +247,24 @@ class AccountsResource extends Resource {
     );
   }
 
+  /// `GET /{version}/account/team/member/{MemberId}`
+  ///
+  /// One team member (`usr_…`): names, e-mail, phone, account roles and push
+  /// devices. Answers `GetTeamMemberResponse` (`result`:
+  /// `TeamMemberDetailsDto`).
+  Future<Object?> getTeamMember(
+      {required Object memberId,
+      Map<String, Object?>? query,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/account/team/member/{MemberId}',
+      method: 'GET',
+      query: query,
+      headers: headers,
+      pathParams: <String, Object?>{'MemberId': memberId},
+    );
+  }
+
   /// `GET /{version}/account/collaborators`
   Future<Object?> getAccountCollaborators(
       {Map<String, Object?>? query, Map<String, String>? headers}) {
