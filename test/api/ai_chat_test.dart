@@ -125,6 +125,18 @@ void main() {
       expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
     });
     test(
+        'decideEndUserChatAction sends POST /{version}/ai/chat/sessions/{SessionId}/actions/{EntryId}',
+        () async {
+      final driver = FakeHttpDriver();
+      await _client(driver).aiChat.decideEndUserChatAction(
+          sessionId: 'aics_1', entryId: 'ent_7', body: {'decision': 'apply'});
+      expect(driver.lastRequest!.method, equals('POST'));
+      expect(driver.lastRequest!.url.toString(),
+          endsWith('/v3/ai/chat/sessions/aics_1/actions/ent_7'));
+      expect(driver.lastRequest!.body, contains('"decision":"apply"'));
+      expect(driver.lastRequest!.headers['x-api-key'], equals('k'));
+    });
+    test(
         'listEndUserChatAttachments sends GET /{version}/ai/chat/sessions/{SessionId}/attachments',
         () async {
       final driver = FakeHttpDriver();

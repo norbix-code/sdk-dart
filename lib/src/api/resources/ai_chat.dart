@@ -167,6 +167,30 @@ class AiChatResource extends Resource {
     );
   }
 
+  /// `POST /{version}/ai/chat/sessions/{SessionId}/actions/{EntryId}`
+  ///
+  /// The signed-in user's own decision on an action the chat held: a tool that
+  /// changes something (sends, pays, creates, deletes) is not run by the
+  /// assistant but lands in the chat as an `action.pending` entry. Send
+  /// `{'decision': 'apply'}` to run it once, as the user, or
+  /// `{'decision': 'dismiss'}` to run nothing. The answer's `status` is
+  /// `applied`, `failed` or `skipped`; a second decision is refused with 409.
+  Future<Object?> decideEndUserChatAction(
+      {required Object sessionId,
+      required Object entryId,
+      Map<String, Object?>? query,
+      Object? body,
+      Map<String, String>? headers}) {
+    return transport.send(
+      route: '/{version}/ai/chat/sessions/{SessionId}/actions/{EntryId}',
+      method: 'POST',
+      query: query,
+      body: body,
+      headers: headers,
+      pathParams: <String, Object?>{'SessionId': sessionId, 'EntryId': entryId},
+    );
+  }
+
   /// `GET /{version}/ai/chat/sessions/{SessionId}/attachments`
   Future<Object?> listEndUserChatAttachments(
       {required Object sessionId,

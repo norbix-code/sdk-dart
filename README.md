@@ -1824,6 +1824,19 @@ final turn = await api.aiChat.startEndUserChatTurn(
 );
 ```
 
+**Held actions.** A tool that changes something (sends, pays, creates,
+deletes) is not run by the assistant: it lands in the chat as an
+`action.pending` entry with the tool and its exact arguments, and runs only on
+the signed-in user's own decision — never on the model's word.
+`decideEndUserChatAction` with `{'decision': 'apply'}` runs it once, as the
+user; `{'decision': 'dismiss'}` runs nothing. The answer's `status` is
+`applied`, `failed` or `skipped`; a second decision is refused with 409.
+
+```dart
+await api.aiChat.decideEndUserChatAction(
+  sessionId: sessionId, entryId: entryId, body: {'decision': 'apply'});
+```
+
 Project owners configure the assistant on the Hub: `hub.projects`
 (`getProjectAiSettings`, `updateProjectAiSettings`, `createProjectAiAssistant`,
 `updateProjectAiAssistant`, `deleteProjectAiAssistant`, `getProjectAiUsage`)
